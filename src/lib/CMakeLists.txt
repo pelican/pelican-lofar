@@ -8,7 +8,6 @@ add_library(pelicanLofar ${lib_src} )
 set(SUBPACKAGE_LIBRARIES
     pelicanLofar
 )
-
 target_link_libraries(pelicanLofar ${PROJECT_LIBRARIES} )
 install(TARGETS pelicanLofar DESTINATION ${LIBRARY_INSTALL_DIR} )
 
