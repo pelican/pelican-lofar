@@ -41,17 +41,13 @@ endif (NOT DOC_INSTALL_DIR)
 # === Dependencies
 find_package(Pelican REQUIRED)
 find_package(CppUnit)
-set(PROJECT_LIBRARIES pelican 
+set(PROJECT_LIBRARIES 
     ${PELICAN_LIBRARIES}
     )
 INCLUDE_DIRECTORIES(${PELICAN_INCLUDES})
+LINK_DIRECTORIES(${PELICAN_LIBRARIES})
 
-# === Library
-set( lofarStationSrc
-     LofarStreamDataClient.cpp
-   )
-#add_library(pelican-lofar ${lofarStationSrc} )
-#target_link_library(pelican-lofar ${PROJECT_LIBRARIES})
+include (modules.cmake)
 
 # === Binaries
 #set( serverBinSrc

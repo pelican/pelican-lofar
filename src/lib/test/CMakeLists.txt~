@@ -1,0 +1,8 @@
+SUBPACKAGE(libTest lib)
+set(
+   libTest_src
+src/libTest.cpp
+)
+add_executable(libTest ${libTest_src} )
+target_link_libraries(libTest ${SUBPACKAGE_LIBRARIES} ${CPPUNIT_LIBRARIES} memoryTracer )
+add_test(libTest libTest )
