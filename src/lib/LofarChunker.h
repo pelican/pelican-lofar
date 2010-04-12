@@ -2,9 +2,9 @@
 #define LOFARCHUNKER_H
 #include <QString>
 #include <QObject>
-#include "server/LofarTypes.h"
+#include "LofarTypes.h"
 #include "LofarUdpHeader.h"
-#include "server/AbstractChunker.h"
+#include "pelican/server/AbstractChunker.h"
 
 /**
  * @file LofarChunker.h
