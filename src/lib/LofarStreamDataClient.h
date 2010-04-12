@@ -2,11 +2,13 @@
 #define LOFARSTREAMDATACLIENT_H
 
 
-#include "AbstractStreamDataClient.h"
+#include "pelican/DirectStreamDataClient.h"
 
 /**
  * @file LofarStreamDataClient.h
  */
+
+using namespace pelican;
 
 namespace pelicanLofar {
 
@@ -19,7 +21,7 @@ namespace pelicanLofar {
  * 
  */
 
-class LofarStreamDataClient : public AbstractStreamDataClient
+class LofarStreamDataClient : public DirectStreamDataClient
 {
     public:
         LofarStreamDataClient(  );
