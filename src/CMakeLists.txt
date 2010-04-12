@@ -41,13 +41,13 @@ endif (NOT DOC_INSTALL_DIR)
 # === Dependencies
 find_package(Pelican REQUIRED)
 find_package(CppUnit)
-set(PROJECT_LIBRARIES 
+set(PROJECT_LIBRARIES
     ${PELICAN_LIBRARIES}
-    )
-INCLUDE_DIRECTORIES(${PELICAN_INCLUDES})
-LINK_DIRECTORIES(${PELICAN_LIBRARIES})
+)
+include_directories(${PELICAN_INCLUDES})
+link_directories(${PELICAN_LIBRARIES})
 
-include (modules.cmake)
+include(modules.cmake)
 
 # === Binaries
 #set( serverBinSrc
