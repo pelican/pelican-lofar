@@ -1,4 +1,4 @@
-#include "LofarChunkerTest.h"
+#include "test/LofarChunkerTest.h"
 #include "LofarChunker.h"
 
 #include "utility/memCheck.h"

@@ -1,8 +1,7 @@
 #ifndef LOFARSTREAMDATACLIENT_H
 #define LOFARSTREAMDATACLIENT_H
 
-
-#include "pelican/DirectStreamDataClient.h"
+#include "core/DirectStreamDataClient.h"
 
 /**
  * @file LofarStreamDataClient.h
@@ -14,21 +13,21 @@ namespace pelicanLofar {
 
 /**
  * @class LofarStreamDataClient
- *  
+ *
  * @brief
- * 
+ *
  * @details
- * 
+ *
  */
 
 class LofarStreamDataClient : public DirectStreamDataClient
 {
     public:
-        LofarStreamDataClient(  );
+        LofarStreamDataClient();
         ~LofarStreamDataClient();
 
     private:
 };
 
 } // namespace pelicanLofar
-#endif // LOFARSTREAMDATACLIENT_H 
+#endif // LOFARSTREAMDATACLIENT_H

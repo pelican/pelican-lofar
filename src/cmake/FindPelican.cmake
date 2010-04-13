@@ -13,9 +13,15 @@
 
 
 # QT4 Core and XML components are required by pelican.
-find_package(Qt4 COMPONENTS QtCore QtXml REQUIRED)
+find_package(Qt4 COMPONENTS QtCore QtXml QtNetwork REQUIRED)
 
 FIND_PATH(PELICAN_INCLUDE_DIR pelican PATHS /usr/include/ /usr/local/include )
+
+## =============================================================================
+## =============================================================================
+list(APPEND PELICAN_INCLUDE_DIR ${PELICAN_INCLUDE_DIR}/pelican) # TODO REMOVE
+## =============================================================================
+## =============================================================================
 
 SET(PELICAN_NAMES pelican)
 
@@ -31,11 +37,16 @@ include(FindPackageHandleCompat)
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(Pelican DEFAULT_MSG PELICAN_LIBRARIES PELICAN_INCLUDE_DIR)
 
 # Append Qt stuff (pelican depends on these)
-list(APPEND PELICAN_LIBRARIES ${QT_QTCORE_LIBRARY} ${QT_QTXML_LIBRARY})
+list(APPEND PELICAN_LIBRARIES
+    ${QT_QTCORE_LIBRARY}
+    ${QT_QTXML_LIBRARY}
+    ${QT_QTNETWORK_LIBRARY}
+)
 list(APPEND PELICAN_INCLUDE_DIR
     ${QT_INCLUDE_DIR}
     ${QT_QTCORE_INCLUDE_DIR}
     ${QT_QTXML_INCLUDE_DIR}
+    ${QT_QTNETWORK_INCLUDE_DIR}
 )
 
 if (NOT PELICAN_FOUND)
