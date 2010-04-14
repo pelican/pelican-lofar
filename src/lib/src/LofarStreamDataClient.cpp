@@ -1,26 +1,26 @@
 #include "LofarStreamDataClient.h"
 #include "LofarChunker.h"
 
-#include "utility/memCheck.h"
+#include "pelican/utility/memCheck.h"
 
 namespace pelicanLofar {
 
 //PELICAN_DECLARE_CHUNKER(LofarChunker);
 
-///**
-// *@details LofarStreamDataClient
-// */
-//LofarStreamDataClient::LofarStreamDataClient()
-//    : DirectStreamDataClient()
-//{
-//    setChunker( "LofarChunker" );
-//}
-//
-///**
-// *@details
-// */
-//LofarStreamDataClient::~LofarStreamDataClient()
-//{
-//}
+/**
+ *@details LofarStreamDataClient
+ */
+LofarStreamDataClient::LofarStreamDataClient(ConfigNode& config, const DataTypes& types)
+    : DirectStreamDataClient(config, types)
+{
+    //setChunker( "LofarChunker" );
+}
+
+/**
+ *@details
+ */
+LofarStreamDataClient::~LofarStreamDataClient()
+{
+}
 
 } // namespace pelicanLofar
