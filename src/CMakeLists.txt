@@ -50,6 +50,9 @@ set(PROJECT_LIBRARIES
 )
 
 link_directories(${PELICAN_LIBRARIES})
+list(INSERT PROJECT_LIBRARIES 0 
+    pelicanLofar
+    )
 
 include(modules.cmake)
 
@@ -58,9 +61,11 @@ include(modules.cmake)
 #     src/serverBin.cpp
 #   )
 
-#set( clientBinSrc
-#     src/clientBin.cpp
-#   )
+set( streamClientBinSrc
+     lofarClient.cpp
+   )
 
-#add_executable( lofarClient ${clientBinSrc} ${PROJECT_LIBRARIES} )
-#add_executable( lofarServer ${serverBinSrc} ${PROJECT_LIBRARIES} )
+add_executable( lofarClient ${streamClientBinSrc} )
+target_link_libraries( lofarClient ${PROJECT_LIBRARIES} )
+#add_executable( lofarServerClient ${serverClientBinSrc} )
+#add_executable( lofarServer ${serverBinSrc} )

@@ -5,9 +5,11 @@
 
 #include <iostream>
 
-#include "utility/memCheck.h"
+#include "pelican/utility/memCheck.h"
 
 namespace pelican {
+
+PELICAN_DECLARE_CHUNKER(LofarChunker)
 
 /**
  * @details

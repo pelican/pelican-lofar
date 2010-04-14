@@ -25,7 +25,6 @@ class DataManager;
  */
 class LofarChunker : public AbstractChunker
 {
-        friend class LofarChunkerTest;
 
     public:
         /// Constructs a new LofarChunker.
@@ -54,6 +53,8 @@ class LofarChunker : public AbstractChunker
         unsigned _packetsAccepted;
         unsigned _samplesPerPacket;
         TYPES::TimeStamp _startTime;
+
+        friend class LofarChunkerTest;
 };
 
 } // namespace pelican

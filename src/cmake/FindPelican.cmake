@@ -14,6 +14,7 @@
 
 # QT4 Core and XML components are required by pelican.
 find_package(Qt4 COMPONENTS QtCore QtXml QtNetwork REQUIRED)
+find_package(Boost COMPONENTS program_options REQUIRED)
 
 FIND_PATH(PELICAN_INCLUDE_DIR pelican PATHS /usr/include/ /usr/local/include )
 
@@ -38,6 +39,10 @@ FIND_PACKAGE_HANDLE_STANDARD_ARGS(Pelican DEFAULT_MSG PELICAN_LIBRARIES PELICAN_
 
 # Append Qt stuff (pelican depends on these)
 list(APPEND PELICAN_LIBRARIES
+    ${Boost_PROGRAM_OPTIONS_LIBRARY}
+    ${PELICAN_CBLAS_LIBS}
+    ${PELICAN_LAPACK_LIBS}
+    ${CFITSIO_LIBRARIES}
     ${QT_QTCORE_LIBRARY}
     ${QT_QTXML_LIBRARY}
     ${QT_QTNETWORK_LIBRARY}
