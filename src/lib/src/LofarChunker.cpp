@@ -9,7 +9,7 @@
 
 namespace pelican {
 
-PELICAN_DECLARE_CHUNKER(LofarChunker)
+//PELICAN_DECLARE_CHUNKER(LofarChunker)
 
 /**
  * @details

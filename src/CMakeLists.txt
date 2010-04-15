@@ -1,18 +1,12 @@
 cmake_minimum_required(VERSION 2.4)
 
-# === Set the compiler
-if (INTEL)
-  set(CMAKE_CXX_COMPILER icpc)
-  set(CMAKE_C_COMPILER icc)
-endif (INTEL)
-
 # === CMake Build File
 project(pelican-lofar CXX C)
 
 # === Project version
-set( ${PROJECT_NAME}_MAJOR_VERSION 0 )
-set( ${PROJECT_NAME}_MINOR_VERSION 0 )
-set( ${PROJECT_NAME}_PATCH_LEVEL 0 )
+set(${PROJECT_NAME}_MAJOR_VERSION 0)
+set(${PROJECT_NAME}_MINOR_VERSION 0)
+set(${PROJECT_NAME}_PATCH_LEVEL 0)
 
 list(INSERT CMAKE_MODULE_PATH 0 ${CMAKE_SOURCE_DIR}/cmake)
 enable_testing()
@@ -38,34 +32,40 @@ if (NOT DOC_INSTALL_DIR)
     set(DOC_INSTALL_DIR ${PELICAN_INSTALL_DIR}/doc)
 endif (NOT DOC_INSTALL_DIR)
 
-# === Dependencies
+# === Find Dependencies
 find_package(Pelican REQUIRED)
-find_package(CppUnit)
+find_package(CppUnit REQUIRED)
+
+# === Add directories to the include path (i.e. -I<directory> ...)
 include_directories(
     ${PELICAN_INCLUDE_DIR}
+    ${PELICAN_INCLUDES}
 )
 
 set(PROJECT_LIBRARIES
     ${PELICAN_LIBRARIES}
 )
-
 link_directories(${PELICAN_LIBRARIES})
-list(INSERT PROJECT_LIBRARIES 0 
+list(INSERT PROJECT_LIBRARIES 0
     pelicanLofar
-    )
+)
 
+# == Recurse into sub-directories defined in modules.cmake.
 include(modules.cmake)
 
-# === Binaries
+
+# === Create the stream client binary.
+add_executable(lofarClient
+    lofarClient.cpp
+    # pipeline.cpp
+)
+target_link_libraries(lofarClient ${PROJECT_LIBRARIES})
+
+
+# === Create the server binary.
 #set( serverBinSrc
 #     src/serverBin.cpp
-#   )
+#)
 
-set( streamClientBinSrc
-     lofarClient.cpp
-   )
-
-add_executable( lofarClient ${streamClientBinSrc} )
-target_link_libraries( lofarClient ${PROJECT_LIBRARIES} )
 #add_executable( lofarServerClient ${serverClientBinSrc} )
 #add_executable( lofarServer ${serverBinSrc} )

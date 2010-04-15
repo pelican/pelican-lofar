@@ -1,3 +1,7 @@
+#
+# Wrapper to FindPackageHandleStandardArgs required for message printing
+# in find_package macros to fix compatibility with cmake before 2.5
+#
 IF("${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION}" GREATER 2.5 )
     INCLUDE(FindPackageHandleStandardArgs)
 ELSE("${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION}" GREATER 2.5)

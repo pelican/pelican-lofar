@@ -1,61 +1,57 @@
-# - Find pelican
-# Find the native PELICAN includes and library
+# FindPelicanInstall.cmake
 #
-#  PELICAN_FOUND         = True if cfitsio found
-#  PELICAN_LIBRARIES     = Set of libraries required for linking
-#  PELICAN_INCLUDE_DIR   = Directory where to find fitsio.h
-#  PELICAN_LIBRARY_pelican  = the pelican library file
+# Finds installed PELICAN includes, library and associated dependencies.
+#
+# Defines the following variables:
+#   PELICAN_FOUND            = True if PELICAN found
+#   PELICAN_INCLUDE_DIR      = Top level pelican include directory.
+#   PELICAN_INCLUDES         = Set of include directories needed by PELICAN.
+#   PELICAN_LIBRARY          = The PELICAN library
+#   PELICAN_LIBRARIES        = Set of libraries required for linking.
+#
 
-# Already in cache, be silent
-#IF (PELICAN_INCLUDE_DIR)
-#    SET(PELICAN_FIND_QUIETLY TRUE)
-#ENDIF (PELICAN_INCLUDE_DIR)
+# Find the pelican cmake modules directory.
+find_path(PELICAN_CMAKE_MODULE_DIR FindPelicanInstall.cmake
+    PATHS
+    /usr/
+    /usr/share
+    /usr/share/pelican
+    /usr/share/pelican/cmake
+    /usr/local/
+    /usr/local/share
+    /usr/local/share/pelican
+    /usr/local/share/pelican/cmake
+    PATH_SUFFIXES
+    share
+    cmake
+    pelican
+    DOC
+    "Location of Pelican cmake modules."
+)
 
+# Handle the QUIETLY and REQUIRED arguments.
+include(FindPackageHandleStandardArgs)
+FIND_PACKAGE_HANDLE_STANDARD_ARGS(PelicanInstall
+    "ERROR: Could not find Required Pelican cmake module path"
+    PELICAN_CMAKE_MODULE_DIR
+)
 
-# QT4 Core and XML components are required by pelican.
-find_package(Qt4 COMPONENTS QtCore QtXml QtNetwork REQUIRED)
-find_package(Boost COMPONENTS program_options REQUIRED)
+# Add the module directory to the module path.
+list(INSERT CMAKE_MODULE_PATH 0 "${PELICAN_CMAKE_MODULE_DIR}")
+list(INSERT CMAKE_INCLUDE_PATH 0 "${PELICAN_CMAKE_MODULE_DIR}")
 
-FIND_PATH(PELICAN_INCLUDE_DIR pelican PATHS /usr/include/ /usr/local/include )
+# Find the pelican library setting the pelican libraries and includes.
+find_package(PelicanInstall REQUIRED)
 
-## =============================================================================
-## =============================================================================
-list(APPEND PELICAN_INCLUDE_DIR ${PELICAN_INCLUDE_DIR}/pelican) # TODO REMOVE
-## =============================================================================
-## =============================================================================
-
-SET(PELICAN_NAMES pelican)
-
-FOREACH(lib ${PELICAN_NAMES} )
-    FIND_LIBRARY(PELICAN_LIBRARY_${lib} NAMES ${lib})
-    LIST(APPEND PELICAN_LIBRARIES ${PELICAN_LIBRARY_${lib}})
-ENDFOREACH(lib)
-
-# handle the QUIETLY and REQUIRED arguments and set PELICAN_FOUND to TRUE if.
-# all listed variables are TRUE
+# handle the QUIETLY and REQUIRED arguments.
+# ==============================================================================
 include(FindPackageHandleCompat)
-#include(FindPackageHandleStandardArgs) ??! maybe ??!
-FIND_PACKAGE_HANDLE_STANDARD_ARGS(Pelican DEFAULT_MSG PELICAN_LIBRARIES PELICAN_INCLUDE_DIR)
+FIND_PACKAGE_HANDLE_STANDARD_ARGS(PelicanInstall
+        DEFAULT_MSG PELICAN_LIBRARIES PELICAN_INCLUDE_DIR)
 
-# Append Qt stuff (pelican depends on these)
-list(APPEND PELICAN_LIBRARIES
-    ${Boost_PROGRAM_OPTIONS_LIBRARY}
-    ${PELICAN_CBLAS_LIBS}
-    ${PELICAN_LAPACK_LIBS}
-    ${CFITSIO_LIBRARIES}
-    ${QT_QTCORE_LIBRARY}
-    ${QT_QTXML_LIBRARY}
-    ${QT_QTNETWORK_LIBRARY}
-)
-list(APPEND PELICAN_INCLUDE_DIR
-    ${QT_INCLUDE_DIR}
-    ${QT_QTCORE_INCLUDE_DIR}
-    ${QT_QTXML_INCLUDE_DIR}
-    ${QT_QTNETWORK_INCLUDE_DIR}
-)
+# Hide in the cache.
+# ==============================================================================
+#mark_as_advanced()
 
-if (NOT PELICAN_FOUND)
-    set(PELICAN_LIBRARIES)
-endif (NOT PELICAN_FOUND)
 
-MARK_AS_ADVANCED(PELICAN_LIBRARIES PELICAN_INCLUDE_DIR)
+
