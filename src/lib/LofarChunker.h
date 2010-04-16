@@ -18,10 +18,10 @@ class DataManager;
  * @class LofarChunker
  *
  * @brief
- * Implemnetation of an AbstractChunker to monitor calling.
+ * Implementation of an AbstractChunker to monitor calling.
  *
  * @details
- * 
+ *
  */
 class LofarChunker : public AbstractChunker
 {
