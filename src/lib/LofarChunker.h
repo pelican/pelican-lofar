@@ -28,8 +28,7 @@ class LofarChunker : public AbstractChunker
 
     public:
         /// Constructs a new LofarChunker.
-        LofarChunker(const QString& type = "ChunkType",
-                QString host = "", quint16 port = 0);
+        LofarChunker(const ConfigNode&);
 
         /// Destroys the LofarChunker.
         ~LofarChunker() {}

@@ -15,8 +15,8 @@ PELICAN_DECLARE_CHUNKER(LofarChunker)
  * @details
  * Constructs a new LofarChunker.
  */
-LofarChunker::LofarChunker(const QString& type, QString host, quint16 port)
-: AbstractChunker(type, host, port)
+LofarChunker::LofarChunker(const ConfigNode& config)
+: AbstractChunker("LofarChunker", config)
 {
     // TODO make configurable
     _nPackets = 1;
