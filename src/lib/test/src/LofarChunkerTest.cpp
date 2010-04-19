@@ -1,7 +1,8 @@
 #include "test/LofarChunkerTest.h"
 #include "LofarChunker.h"
 
-#include "utility/memCheck.h"
+#include "pelican/server/DataManager.h"
+#include "pelican/utility/memCheck.h"
 
 namespace pelican {
 
