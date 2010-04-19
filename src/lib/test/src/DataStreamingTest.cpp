@@ -12,6 +12,15 @@ CPPUNIT_TEST_SUITE_REGISTRATION( DataStreamingTest );
 DataStreamingTest::DataStreamingTest()
     : CppUnit::TestFixture()
 {
+    //NOTE: Make this configurable??
+    subbandsPerPacket = 32;
+    samplesPerPacket = 2;
+    nrPolarisations = 2;  
+    port = 8080;
+    numPackets = 1000;
+    usecDelay = 100000; 
+    sprintf(hostname, "%s", "127.0.0.1");
+
 }
 
 /**
@@ -23,8 +32,15 @@ DataStreamingTest::~DataStreamingTest()
 
 void DataStreamingTest::setUp()
 {
-    // TODO
-    // a) set up the lofar data emulator in a seperate thread
+    // Setup LOFAR data emulator
+    try {
+        LofarDataGenerator<TYPES::i8complex> generator;
+        generator.setDataParameters(subbandsPerPacket, samplesPerPacket, nrPolarisations);
+        generator.connectBind(hostname, port);
+        dataGenerator = (void *) &generator;
+    } catch(char * str) {
+        fprintf(stderr, "Could not set up DataStreamingTest: %s\n", str);
+    }
 }
 
 void DataStreamingTest::tearDown()
@@ -32,7 +48,7 @@ void DataStreamingTest::tearDown()
 }
 
 /*
- * Run the data streaming tests with the direct streaing client
+ * Run the data streaming tests with the direct streaming client
  */
 void DataStreamingTest::test_streamingClient()
 {

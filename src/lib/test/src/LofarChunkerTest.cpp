@@ -4,7 +4,9 @@
 #include "pelican/server/DataManager.h"
 #include "pelican/utility/memCheck.h"
 
-namespace pelican {
+using namespace pelican;
+
+namespace pelicanLofar {
 
 CPPUNIT_TEST_SUITE_REGISTRATION( LofarChunkerTest );
 // class LofarChunkerTest

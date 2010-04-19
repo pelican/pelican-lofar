@@ -7,7 +7,9 @@
 
 #include "pelican/utility/memCheck.h"
 
-namespace pelican {
+using namespace pelican;
+
+namespace pelicanLofar {
 
 //PELICAN_DECLARE_CHUNKER(LofarChunker)
 

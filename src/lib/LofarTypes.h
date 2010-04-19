@@ -6,7 +6,7 @@
 #include <cstdio>
 #include <boost/cstdint.hpp>
 
-namespace pelican {
+namespace pelicanLofar {
 
 namespace TYPES {
 

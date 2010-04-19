@@ -2,6 +2,7 @@
 #define DATASTREAMINGTEST_H
 
 #include <cppunit/extensions/HelperMacros.h>
+#include "LofarDataGenerator.h"
 
 /**
  * @file DataStreamingTest.h
@@ -44,6 +45,13 @@ class DataStreamingTest : public CppUnit::TestFixture
 
     private:
         void _testLofarDataClient(pelican::AbstractDataClient* client);
+
+    private:
+        // Test parameters
+        void*  dataGenerator;
+        int    subbandsPerPacket, samplesPerPacket, nrPolarisations;  
+        int    port, numPackets, usecDelay; 
+        char   hostname[20];
 };
 
 } // namespace pelicanLofar

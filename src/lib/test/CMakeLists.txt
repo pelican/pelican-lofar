@@ -2,6 +2,7 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR} ..)
 set(lofarTest_src
     src/libTest.cpp
     #    src/LofarChunkerTest.cpp
+    src/LofarDataGenerator.cpp
     src/DataStreamingTest.cpp
 )
 

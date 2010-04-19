@@ -3,7 +3,7 @@
 
 #include <boost/cstdint.hpp>
 
-namespace pelican {
+namespace pelicanLofar {
 
 /**
  * @struct UDPPacket

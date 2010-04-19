@@ -10,7 +10,9 @@
  * @file LofarChunker.h
  */
 
-namespace pelican {
+using namespace pelican;
+
+namespace pelicanLofar {
 
 class DataManager;
 
