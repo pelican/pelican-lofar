@@ -15,7 +15,7 @@ namespace pelicanLofar {
  * @class LofarStreamDataClient
  *
  * @brief
- *    Lofar Data Client to Connecdt directly to the LOFAR station
+ *    Lofar Data Client to Connect directly to the LOFAR station
  *    output stream
  * @details
  *

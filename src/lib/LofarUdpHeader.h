@@ -6,10 +6,10 @@
 namespace pelicanLofar {
 
 /**
- * @struct UDPPacket
+ * @struct UDPPacket.
  *
  * @details
- * LOFAR UDP packet data structure
+ * LOFAR UDP packet data structure.
  *
  * @note
  * All data is in Little Endian format!

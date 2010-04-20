@@ -18,11 +18,11 @@ namespace pelicanLofar {
 
 /**
  * @class DataStreamingTest
- *  
+ *
  * @brief
  *   class to test th DataClients data streaming
  * @details
- * 
+ *
  */
 
 class DataStreamingTest : public CppUnit::TestFixture
@@ -38,11 +38,12 @@ class DataStreamingTest : public CppUnit::TestFixture
         void tearDown();
 
         // Test Methods
+        void test_setupGenerator();
         void test_streamingClient();
         void test_serverClient();
 
     public:
-        DataStreamingTest(  );
+        DataStreamingTest();
         ~DataStreamingTest();
 
     private:
@@ -50,14 +51,14 @@ class DataStreamingTest : public CppUnit::TestFixture
 
     private:
         // Test parameters
-        void*  dataGenerator;
-        int    subbandsPerPacket, samplesPerPacket, nrPolarisations;  
-        int    port, numPackets, usecDelay; 
-        char   hostname[20];
+        void* dataGenerator;
+        int subbandsPerPacket, samplesPerPacket, nrPolarisations;
+        int port, numPackets, usecDelay;
+        char hostname[20];
         QString adapterXML;
         pelican::DataTypes dataTypes;
 
 };
 
 } // namespace pelicanLofar
-#endif // DATASTREAMINGTEST_H 
+#endif // DATASTREAMINGTEST_H

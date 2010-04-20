@@ -1,30 +1,37 @@
 #include "DataStreamingTest.h"
+
 #include "LofarStreamDataClient.h"
 #include "LofarServerClient.h"
+
 #include "pelican/core/AbstractDataClient.h"
 #include "pelican/utility/Config.h"
 #include "pelican/utility/ConfigNode.h"
+
+#include <QString>
+
 #include "pelican/utility/memCheck.h"
+
 
 namespace pelicanLofar {
 
 CPPUNIT_TEST_SUITE_REGISTRATION( DataStreamingTest );
+
 /**
- *@details DataStreamingTest 
+ *@details DataStreamingTest
  */
 DataStreamingTest::DataStreamingTest()
     : CppUnit::TestFixture()
 {
-    //NOTE: Make this configurable??
+    // NOTE: Make this configurable??
     subbandsPerPacket = 32;
     samplesPerPacket = 2;
-    nrPolarisations = 2;  
+    nrPolarisations = 2;
     port = 8080;
     numPackets = 1000;
-    usecDelay = 100000; 
+    usecDelay = 100000;
     sprintf(hostname, "%s", "127.0.0.1");
-
 }
+
 
 /**
  *@details
@@ -33,20 +40,10 @@ DataStreamingTest::~DataStreamingTest()
 {
 }
 
+
 void DataStreamingTest::setUp()
 {
-    // Setup LOFAR data emulator
-    try {
-        LofarDataGenerator<TYPES::i8complex> generator;
-        generator.setDataParameters(subbandsPerPacket, samplesPerPacket, nrPolarisations);
-        generator.connectBind(hostname, port);
-        dataGenerator = (void *) &generator;
-    } catch(char * str) {
-        fprintf(stderr, "Could not set up DataStreamingTest: %s\n", str);
-        throw str; 
-    }
-
-    // define common configurations
+    // Define common configurations
     adapterXML =
         "<adapters>"
         "   <adapter name=\"test\">"
@@ -58,9 +55,32 @@ void DataStreamingTest::setUp()
     // TODO
 }
 
+
 void DataStreamingTest::tearDown()
 {
 }
+
+
+/**
+ * @details
+ * Tests setting up the lofar data generator.
+ */
+void DataStreamingTest::test_setupGenerator()
+{
+    // Use case: Setup LOFAR data emulator
+    // Expect: Not to throw.
+    try {
+        LofarDataGenerator<TYPES::i8complex> generator;
+        generator.setDataParameters(subbandsPerPacket, samplesPerPacket, nrPolarisations);
+        generator.connectBind(hostname, port);
+        dataGenerator = (void *)&generator;
+    }
+    catch(char* str) {
+        QString error = QString("Could not set up DataStreamingTest: %1").arg(str);
+        CPPUNIT_FAIL(error.toStdString());
+    }
+}
+
 
 /*
  * Run the data streaming tests with the direct streaming client
@@ -77,6 +97,7 @@ void DataStreamingTest::test_streamingClient()
 //    _testLofarDataClient(client);
 //    delete client;
 }
+
 
 /*
  * Run the data streaming tests with the server client

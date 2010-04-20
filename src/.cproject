@@ -12,16 +12,17 @@
 <extension id="org.eclipse.cdt.core.GCCErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
 <extension id="org.eclipse.cdt.core.GASErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
 <extension id="org.eclipse.cdt.core.GLDErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+<extension id="org.eclipse.cdt.core.ICCErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
 </extensions>
 </storageModule>
 <storageModule moduleId="cdtBuildSystem" version="4.0.0">
-<configuration artifactName="pelican-lofar" buildProperties="" description="" id="cdt.managedbuild.toolchain.gnu.base.2117271544" name="Default" parent="org.eclipse.cdt.build.core.emptycfg">
+<configuration artifactName="pelican-lofar" buildProperties="" description="" errorParsers="org.eclipse.cdt.core.MakeErrorParser;org.eclipse.cdt.core.GCCErrorParser;org.eclipse.cdt.core.GASErrorParser;org.eclipse.cdt.core.GLDErrorParser;org.eclipse.cdt.core.ICCErrorParser" id="cdt.managedbuild.toolchain.gnu.base.2117271544" name="Default" parent="org.eclipse.cdt.build.core.emptycfg">
 <folderInfo id="cdt.managedbuild.toolchain.gnu.base.2117271544.1497367702" name="/" resourcePath="">
-<toolChain id="cdt.managedbuild.toolchain.gnu.base.1670827293" name="cdt.managedbuild.toolchain.gnu.base" superClass="cdt.managedbuild.toolchain.gnu.base">
+<toolChain errorParsers="" id="cdt.managedbuild.toolchain.gnu.base.1670827293" name="cdt.managedbuild.toolchain.gnu.base" superClass="cdt.managedbuild.toolchain.gnu.base">
 <targetPlatform archList="all" binaryParser="org.eclipse.cdt.core.ELF" id="cdt.managedbuild.target.gnu.platform.base.1309439953" name="Debug Platform" osList="linux,hpux,aix,qnx" superClass="cdt.managedbuild.target.gnu.platform.base"/>
-<builder buildPath="${workspace_loc:/pelican-lofar/debug}" enabledIncrementalBuild="true" id="cdt.managedbuild.target.gnu.builder.base.1831517825" incrementalBuildTarget="all" keepEnvironmentInBuildfile="false" managedBuildOn="false" name="Gnu Make Builder" parallelBuildOn="true" parallelizationNumber="2" superClass="cdt.managedbuild.target.gnu.builder.base"/>
+<builder buildPath="${workspace_loc:/pelican-lofar/debug}" enabledIncrementalBuild="true" errorParsers="org.eclipse.cdt.core.MakeErrorParser" id="cdt.managedbuild.target.gnu.builder.base.1831517825" incrementalBuildTarget="all" keepEnvironmentInBuildfile="false" managedBuildOn="false" name="Gnu Make Builder" parallelBuildOn="true" parallelizationNumber="2" superClass="cdt.managedbuild.target.gnu.builder.base"/>
 <tool id="cdt.managedbuild.tool.gnu.archiver.base.1353654170" name="GCC Archiver" superClass="cdt.managedbuild.tool.gnu.archiver.base"/>
-<tool id="cdt.managedbuild.tool.gnu.cpp.compiler.base.209185580" name="GCC C++ Compiler" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.base">
+<tool errorParsers="org.eclipse.cdt.core.GCCErrorParser" id="cdt.managedbuild.tool.gnu.cpp.compiler.base.209185580" name="GCC C++ Compiler" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.base">
 <option id="gnu.cpp.compiler.option.include.paths.1872318607" name="Include paths (-I)" superClass="gnu.cpp.compiler.option.include.paths" valueType="includePath">
 <listOptionValue builtIn="false" value="/usr/include/pelican"/>
 <listOptionValue builtIn="false" value="/usr/include/qt4/QtCore"/>
@@ -33,17 +34,17 @@
 </option>
 <inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.948994440" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
 </tool>
-<tool id="cdt.managedbuild.tool.gnu.c.compiler.base.640841016" name="GCC C Compiler" superClass="cdt.managedbuild.tool.gnu.c.compiler.base">
+<tool errorParsers="org.eclipse.cdt.core.GCCErrorParser" id="cdt.managedbuild.tool.gnu.c.compiler.base.640841016" name="GCC C Compiler" superClass="cdt.managedbuild.tool.gnu.c.compiler.base">
 <inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.103155905" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
 </tool>
 <tool id="cdt.managedbuild.tool.gnu.c.linker.base.1659272440" name="GCC C Linker" superClass="cdt.managedbuild.tool.gnu.c.linker.base"/>
-<tool id="cdt.managedbuild.tool.gnu.cpp.linker.base.1420306161" name="GCC C++ Linker" superClass="cdt.managedbuild.tool.gnu.cpp.linker.base">
+<tool errorParsers="org.eclipse.cdt.core.GLDErrorParser" id="cdt.managedbuild.tool.gnu.cpp.linker.base.1420306161" name="GCC C++ Linker" superClass="cdt.managedbuild.tool.gnu.cpp.linker.base">
 <inputType id="cdt.managedbuild.tool.gnu.cpp.linker.input.1335780289" superClass="cdt.managedbuild.tool.gnu.cpp.linker.input">
 <additionalInput kind="additionalinputdependency" paths="$(USER_OBJS)"/>
 <additionalInput kind="additionalinput" paths="$(LIBS)"/>
 </inputType>
 </tool>
-<tool id="cdt.managedbuild.tool.gnu.assembler.base.2008459732" name="GCC Assembler" superClass="cdt.managedbuild.tool.gnu.assembler.base">
+<tool errorParsers="org.eclipse.cdt.core.GASErrorParser" id="cdt.managedbuild.tool.gnu.assembler.base.2008459732" name="GCC Assembler" superClass="cdt.managedbuild.tool.gnu.assembler.base">
 <inputType id="cdt.managedbuild.tool.gnu.assembler.input.1856359916" superClass="cdt.managedbuild.tool.gnu.assembler.input"/>
 </tool>
 </toolChain>
