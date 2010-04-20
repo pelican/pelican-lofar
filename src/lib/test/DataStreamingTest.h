@@ -1,8 +1,10 @@
 #ifndef DATASTREAMINGTEST_H
 #define DATASTREAMINGTEST_H
 
+#include <QString>
 #include <cppunit/extensions/HelperMacros.h>
 #include "LofarDataGenerator.h"
+#include "pelican/core/DataTypes.h"
 
 /**
  * @file DataStreamingTest.h
@@ -52,6 +54,9 @@ class DataStreamingTest : public CppUnit::TestFixture
         int    subbandsPerPacket, samplesPerPacket, nrPolarisations;  
         int    port, numPackets, usecDelay; 
         char   hostname[20];
+        QString adapterXML;
+        pelican::DataTypes dataTypes;
+
 };
 
 } // namespace pelicanLofar

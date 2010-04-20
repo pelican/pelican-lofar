@@ -1,6 +1,9 @@
 #include "DataStreamingTest.h"
 #include "LofarStreamDataClient.h"
+#include "LofarServerClient.h"
 #include "pelican/core/AbstractDataClient.h"
+#include "pelican/utility/Config.h"
+#include "pelican/utility/ConfigNode.h"
 #include "pelican/utility/memCheck.h"
 
 namespace pelicanLofar {
@@ -40,7 +43,19 @@ void DataStreamingTest::setUp()
         dataGenerator = (void *) &generator;
     } catch(char * str) {
         fprintf(stderr, "Could not set up DataStreamingTest: %s\n", str);
+        throw str; 
     }
+
+    // define common configurations
+    adapterXML =
+        "<adapters>"
+        "   <adapter name=\"test\">"
+        "       <param value=\"2.0\"/>"
+        "   </adapter>"
+        "</adapters>";
+
+    // set up dataTypes object
+    // TODO
 }
 
 void DataStreamingTest::tearDown()
@@ -52,9 +67,15 @@ void DataStreamingTest::tearDown()
  */
 void DataStreamingTest::test_streamingClient()
 {
-    //LofarStreamDataClient* client = new LofarStreamDataClient();
-    //_testLofarDataClient(client);
-    //delete client;
+    Config config;
+    config.setFromString(adapterXML);
+    Config::TreeAddress address;
+    address << Config::NodeId("adapters", "");
+    address << Config::NodeId("adapter", "test");
+    ConfigNode configNode = config.get(address);
+//    LofarStreamDataClient* client = new LofarStreamDataClient(configNode, dataTypes);
+//    _testLofarDataClient(client);
+//    delete client;
 }
 
 /*
@@ -62,10 +83,20 @@ void DataStreamingTest::test_streamingClient()
  */
 void DataStreamingTest::test_serverClient()
 {
-    //LofarServerClient* client = new LofarServerClient();
     // Set up a server to listen to the data
-    //_testLofarDataClient(client);
-    //delete client;
+    // TODO
+    // Configure the dataClient
+    Config config;
+    config.setFromString(adapterXML);
+    Config::TreeAddress address;
+    address << Config::NodeId("adapters", "");
+    address << Config::NodeId("adapter", "test");
+    ConfigNode configNode = config.get(address);
+//    LofarServerClient* client = new LofarServerClient(configNode, dataTypes);
+
+    // run the tests
+//    _testLofarDataClient(client);
+//    delete client;
 }
 
 void _testLofarDataClient(pelican::AbstractDataClient* client)
