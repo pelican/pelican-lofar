@@ -11,8 +11,8 @@
 
 #include "pelican/utility/memCheck.h"
 
-
-namespace pelicanLofar {
+namespace pelican {
+namespace lofar {
 
 CPPUNIT_TEST_SUITE_REGISTRATION( DataStreamingTest );
 
@@ -120,10 +120,11 @@ void DataStreamingTest::test_serverClient()
 //    delete client;
 }
 
-void _testLofarDataClient(pelican::AbstractDataClient* client)
+void _testLofarDataClient(AbstractDataClient* client)
 {
     // TODO : write tests to ensure data is being received OK
     // client->getData();
 }
 
-} // namespace pelicanLofar
+} // namespace lofar
+} // namespace pelican

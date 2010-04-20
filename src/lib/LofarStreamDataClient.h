@@ -7,16 +7,16 @@
  * @file LofarStreamDataClient.h
  */
 
-using namespace pelican;
-
-namespace pelicanLofar {
+namespace pelican {
+namespace lofar {
 
 /**
  * @class LofarStreamDataClient
  *
  * @brief
  *    Lofar Data Client to Connect directly to the LOFAR station
- *    output stream
+ *    output stream.
+ *
  * @details
  *
  */
@@ -24,11 +24,13 @@ namespace pelicanLofar {
 class LofarStreamDataClient : public DirectStreamDataClient
 {
     public:
-        LofarStreamDataClient( ConfigNode&, const pelican::DataTypes& );
+        LofarStreamDataClient(ConfigNode&, const DataTypes&);
         ~LofarStreamDataClient();
 
     private:
 };
 
-} // namespace pelicanLofar
+} // namespace lofar
+} // namespace pelican
+
 #endif // LOFARSTREAMDATACLIENT_H

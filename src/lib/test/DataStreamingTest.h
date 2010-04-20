@@ -11,10 +11,10 @@
  */
 
 namespace pelican {
-    class AbstractDataClient;
-}
 
-namespace pelicanLofar {
+class AbstractDataClient;
+
+namespace lofar {
 
 /**
  * @class DataStreamingTest
@@ -60,5 +60,7 @@ class DataStreamingTest : public CppUnit::TestFixture
 
 };
 
-} // namespace pelicanLofar
+} // namespace lofar
+} // namespace pelican
+
 #endif // DATASTREAMINGTEST_H

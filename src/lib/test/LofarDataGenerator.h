@@ -8,7 +8,8 @@
  * @file LofarDataGenerator.h
  */
 
-namespace pelicanLofar {
+namespace pelican {
+namespace lofar {
 
 /**
  * @class LofarDataGenerator
@@ -58,4 +59,5 @@ template<typename SAMPLE_TYPE> class LofarDataGenerator
         }
 };
 
-} //namespace pelicanLofar
+} // namespace lofar
+} // namespace pelican

@@ -8,27 +8,29 @@
  * @file LofarServerClient.h
  */
 
-using namespace pelican;
-
-namespace pelicanLofar {
+namespace pelican {
+namespace lofar {
 
 /**
  * @class LofarServerClient
- *  
+ *
  * @brief
  *    Data Client that connects to a Lofar Enabled Pelican Server
+ *
  * @details
- * 
+ *
  */
 
 class LofarServerClient : public PelicanServerClient
 {
     public:
-        LofarServerClient( const ConfigNode& config, const DataTypes& types );
+        LofarServerClient(const ConfigNode& config, const DataTypes& types);
         ~LofarServerClient();
 
     private:
 };
 
-} // namespace pelicanLofar
-#endif // LOFARSERVERCLIENT_H 
+} // namespace lofar
+} // namespace pelican
+
+#endif // LOFARSERVERCLIENT_H

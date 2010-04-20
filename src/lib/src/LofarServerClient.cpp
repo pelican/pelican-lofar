@@ -1,11 +1,12 @@
 #include "LofarServerClient.h"
 
-namespace pelicanLofar {
+namespace pelican {
+namespace lofar {
 
 /**
- *@details LofarServerClient 
+ *@details LofarServerClient
  */
-LofarServerClient::LofarServerClient( const ConfigNode& config, const DataTypes& types )
+LofarServerClient::LofarServerClient(const ConfigNode& config, const DataTypes& types)
     : PelicanServerClient(config, types)
 {
 }
@@ -17,4 +18,5 @@ LofarServerClient::~LofarServerClient()
 {
 }
 
-} // namespace pelicanLofar
+} // namespace lofar
+} // namespace pelican

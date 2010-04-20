@@ -10,9 +10,8 @@
  * @file LofarChunker.h
  */
 
-using namespace pelican;
-
-namespace pelicanLofar {
+namespace pelican {
+namespace lofar {
 
 class DataManager;
 
@@ -58,6 +57,7 @@ class LofarChunker : public AbstractChunker
         friend class LofarChunkerTest;
 };
 
+} // namespace lofar
 } // namespace pelican
 
 #endif // LOFARCHUNKER_H

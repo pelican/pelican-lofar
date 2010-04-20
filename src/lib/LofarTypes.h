@@ -6,7 +6,8 @@
 #include <cstdio>
 #include <boost/cstdint.hpp>
 
-namespace pelicanLofar {
+namespace pelican {
+namespace lofar {
 
 namespace TYPES {
 
@@ -276,6 +277,7 @@ inline bool TimeStamp::operator != (const TimeStamp &other) const
 
 } // namespace types
 
+} // namespace lofar
 } // namespace pelican
 
 #endif /* LOFARTYPES_H_ */

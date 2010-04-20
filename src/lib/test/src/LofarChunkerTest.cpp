@@ -4,9 +4,8 @@
 #include "pelican/server/DataManager.h"
 #include "pelican/utility/memCheck.h"
 
-using namespace pelican;
-
-namespace pelicanLofar {
+namespace pelican {
+namespace lofar {
 
 CPPUNIT_TEST_SUITE_REGISTRATION( LofarChunkerTest );
 // class LofarChunkerTest
@@ -40,9 +39,11 @@ void LofarChunkerTest::test_method()
         chunker.setDataManager(&dataManager);
         chunker.next(NULL);
         std::cout << "Finished LofarChunker test" << std::endl;
-    } catch (QString e) {
+    }
+    catch (QString e) {
         CPPUNIT_FAIL("Unexpected exception: " + e.toStdString());
     }
 }
 
+} // namespace lofar
 } // namespace pelican

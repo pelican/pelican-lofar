@@ -3,7 +3,8 @@
 
 #include <boost/cstdint.hpp>
 
-namespace pelicanLofar {
+namespace pelican {
+namespace lofar {
 
 /**
  * @struct UDPPacket.
@@ -30,6 +31,7 @@ struct UDPPacket {
     char data[8130];
 };
 
+} // namespace lofar
 } // namespace pelican
 
 #endif // LOFARUDPHEADER_H_

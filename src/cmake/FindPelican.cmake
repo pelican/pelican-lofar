@@ -29,8 +29,6 @@ find_path(PELICAN_CMAKE_MODULE_DIR FindPelicanInstall.cmake
     "Location of Pelican cmake modules."
 )
 
-message(STATUS "========== ${PELICAN_CMAKE_MODULE_DIR}")
-
 # Handle the QUIETLY and REQUIRED arguments.
 include(FindPackageHandleStandardArgs)
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(PelicanInstall

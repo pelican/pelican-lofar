@@ -13,8 +13,8 @@
 #include <string.h>
 #include <cstdio>
 
-
-namespace pelicanLofar {
+namespace pelican {
+namespace lofar {
 
 /**
 * @details
@@ -225,4 +225,5 @@ template class LofarDataGenerator<TYPES::i4complex>;
 template class LofarDataGenerator<TYPES::i8complex>;
 template class LofarDataGenerator<TYPES::i16complex>;
 
-} // namepsace pelicanLofar
+} // namepsace lofar
+} // namepsace pelican

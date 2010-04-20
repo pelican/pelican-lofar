@@ -3,7 +3,8 @@
 
 #include "pelican/utility/memCheck.h"
 
-namespace pelicanLofar {
+namespace pelican {
+namespace lofar {
 
 //PELICAN_DECLARE_CHUNKER(LofarChunker);
 
@@ -23,4 +24,5 @@ LofarStreamDataClient::~LofarStreamDataClient()
 {
 }
 
-} // namespace pelicanLofar
+} // namespace lofar
+} // namespace pelican

@@ -8,14 +8,15 @@
  */
 
 namespace pelican {
+namespace lofar {
 
 /**
  * @class LofarChunkerTest
- *  
+ *
  * @brief
  *   Unit test for the LofarChunker class
  * @details
- * 
+ *
  */
 
 class LofarChunkerTest : public CppUnit::TestFixture
@@ -39,5 +40,6 @@ class LofarChunkerTest : public CppUnit::TestFixture
     private:
 };
 
+} // namespace lofar
 } // namespace pelican
 #endif // LOFARCHUNKERTEST_H

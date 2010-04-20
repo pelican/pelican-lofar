@@ -7,9 +7,8 @@
 
 #include "pelican/utility/memCheck.h"
 
-using namespace pelican;
-
-namespace pelicanLofar {
+namespace pelican {
+namespace lofar {
 
 //PELICAN_DECLARE_CHUNKER(LofarChunker)
 
@@ -130,4 +129,5 @@ void LofarChunker::generateEmptyPacket(UDPPacket& packet)
     packet.header.blockSequenceNumber = 0;
 }
 
+} // namespace lofar
 } // namespace pelican
