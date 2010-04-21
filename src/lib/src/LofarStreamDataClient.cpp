@@ -4,15 +4,16 @@
 #include "pelican/utility/memCheck.h"
 
 namespace pelican {
+
 namespace lofar {
 
-//PELICAN_DECLARE_CHUNKER(LofarChunker);
+PELICAN_DECLARE_CLIENT(LofarStreamDataClient)
 
 /**
  *@details LofarStreamDataClient
  */
-LofarStreamDataClient::LofarStreamDataClient(ConfigNode& config, const DataTypes& types)
-    : DirectStreamDataClient(config, types)
+LofarStreamDataClient::LofarStreamDataClient(const ConfigNode& config)
+    : DirectStreamDataClient(config)
 {
     //setChunker( "LofarChunker" );
 }

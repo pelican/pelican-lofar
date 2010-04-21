@@ -24,7 +24,7 @@ namespace lofar {
 class LofarServerClient : public PelicanServerClient
 {
     public:
-        LofarServerClient(const ConfigNode& config, const DataTypes& types);
+        LofarServerClient(const ConfigNode& config);
         ~LofarServerClient();
 
     private:

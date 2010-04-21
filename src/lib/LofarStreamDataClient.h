@@ -24,7 +24,7 @@ namespace lofar {
 class LofarStreamDataClient : public DirectStreamDataClient
 {
     public:
-        LofarStreamDataClient(ConfigNode&, const DataTypes&);
+        LofarStreamDataClient(const ConfigNode&);
         ~LofarStreamDataClient();
 
     private:

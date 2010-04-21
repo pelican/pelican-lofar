@@ -6,8 +6,8 @@ namespace lofar {
 /**
  *@details LofarServerClient
  */
-LofarServerClient::LofarServerClient(const ConfigNode& config, const DataTypes& types)
-    : PelicanServerClient(config, types)
+LofarServerClient::LofarServerClient(const ConfigNode& config)
+    : PelicanServerClient(config)
 {
 }
 
