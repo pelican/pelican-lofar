@@ -16,8 +16,7 @@ namespace lofar {
  * @details
  * Constructs a new LofarChunker.
  */
-LofarChunker::LofarChunker(const ConfigNode& config)
-: AbstractChunker("LofarChunker", config)
+LofarChunker::LofarChunker(const ConfigNode& config) : AbstractChunker(config)
 {
     // TODO make configurable
     _nPackets = 1;
@@ -34,7 +33,6 @@ LofarChunker::LofarChunker(const ConfigNode& config)
 QIODevice* LofarChunker::newDevice()
 {
     QUdpSocket* socket = new QUdpSocket;
-    _device = socket;
     QHostAddress hostAddress(host());
     socket->bind( hostAddress, port() );
     return socket;
@@ -44,9 +42,9 @@ QIODevice* LofarChunker::newDevice()
  * @details
  * Gets the next chunk of data from the UDP socket (if it exists).
  */
-void LofarChunker::next(QIODevice*)
+void LofarChunker::next(QIODevice* device)
 {
-    QUdpSocket *socket = static_cast<QUdpSocket*>(_device);
+    QUdpSocket *socket = static_cast<QUdpSocket*>(device);
 
     int packetSize = sizeof(UDPPacket);
     size_t offset = 0;
