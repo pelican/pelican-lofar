@@ -2,6 +2,7 @@
 #define LOFARCHUNKERTEST_H
 
 #include <cppunit/extensions/HelperMacros.h>
+#include "pelican/utility/Config.h"
 
 /**
  * @file LofarChunkerTest.h
@@ -38,8 +39,9 @@ class LofarChunkerTest : public CppUnit::TestFixture
         ~LofarChunkerTest();
 
     private:
+        Config config;
 };
 
 } // namespace lofar
 } // namespace pelican
-#endif // LOFARCHUNKERTEST_H
+#endif 

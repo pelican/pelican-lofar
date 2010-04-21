@@ -59,14 +59,14 @@ void LofarChunker::next(QIODevice* device)
     if (! writableData.isValid())
         throw QString("LofarChunker::next(): Writable data not valid.");
 
-    std::cout << "LofarChunker::next()" << std::endl;
-
     // Loop over UDP packets.
     for (int i = 0; i < _nPackets; i++) {
 
         qint64 sizeDatagram;
         // Interruptible read, to allow stopping this thread even if the station does not send data
+        std::cout << "LofarChunker::next(): Waiting for ready read." << std::endl;
         socket->waitForReadyRead();
+        std::cout << "LofarChunker::next(): Waiting for ready read done." << std::endl;
         if ( ( sizeDatagram = socket->read(reinterpret_cast<char*>(&currPacket), packetSize) ) <= 0 ) {
             printf("LofarChunker::next(): Error while receiving UDP Packet\n");
             continue;
