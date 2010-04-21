@@ -51,7 +51,7 @@ class DataStreamingTest : public CppUnit::TestFixture
 
     private:
         // Test parameters
-        void* dataGenerator;
+        LofarDataGenerator dataGenerator;
         int subbandsPerPacket, samplesPerPacket, nrPolarisations;
         int port, numPackets, usecDelay;
         char hostname[20];

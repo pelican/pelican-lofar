@@ -2,6 +2,7 @@
 #include "LofarUdpHeader.h"
 #include "LofarTypes.h"
 #include <QUdpSocket>
+#include <stdio.h>
 
 #include <iostream>
 
@@ -63,12 +64,12 @@ void LofarChunker::next(QIODevice* device)
     for (int i = 0; i < _nPackets; i++) {
 
         qint64 sizeDatagram;
+        
         // Interruptible read, to allow stopping this thread even if the station does not send data
         std::cout << "LofarChunker::next(): Waiting for ready read." << std::endl;
-        socket->waitForReadyRead();
-        std::cout << "LofarChunker::next(): Waiting for ready read done." << std::endl;
-        if ( ( sizeDatagram = socket->read(reinterpret_cast<char*>(&currPacket), packetSize) ) <= 0 ) {
-            printf("LofarChunker::next(): Error while receiving UDP Packet\n");
+        socket -> waitForReadyRead();
+        if ( ( sizeDatagram = socket->readDatagram(reinterpret_cast<char*>(&currPacket), packetSize) ) <= 0 ) {
+            printf("LofarChunker::next(): Error while receiving UDP Packet: %d\n", (int) sizeDatagram);
             continue;
         }
 
@@ -87,7 +88,6 @@ void LofarChunker::next(QIODevice* device)
 
         // Check that the packets are contiguous
         if (previousSeqid + 1 != seqid) {
-            std::cout << "Here 1  seqid " << seqid << std::endl;
             unsigned lostPackets = seqid - previousSeqid;
 
             // Generate lostPackets empty packets
@@ -106,9 +106,9 @@ void LofarChunker::next(QIODevice* device)
         if (i == 0)
             actualStamp.setStamp(seqid, blockid);
 
-        std::cout << "Here 2" << std::endl;
         // Write the data.
         writableData.write(reinterpret_cast<void*>(&currPacket), packetSize, offset);
+
         offset += packetSize;
     }
 

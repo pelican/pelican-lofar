@@ -21,19 +21,15 @@ namespace lofar {
 /**
 * @details
 */
-template <typename SAMPLE_TYPE>
-LofarDataGenerator<SAMPLE_TYPE>::LofarDataGenerator()
+LofarDataGenerator::LofarDataGenerator()
         : _subbandsPerPacket(1), _samplesPerPacket(1), _nrPolarisations(2),
           _fileDesc(-1), _packetHeader(NULL)
-{
-}
-
+{ }
 
 /**
 * @details
 */
-template <typename SAMPLE_TYPE>
-LofarDataGenerator<SAMPLE_TYPE>::~LofarDataGenerator()
+LofarDataGenerator::~LofarDataGenerator()
 {
     // Close socket if open
     if (_fileDesc >= 0) {
@@ -49,12 +45,12 @@ LofarDataGenerator<SAMPLE_TYPE>::~LofarDataGenerator()
 * @param hostname
 * @param port
 */
-template <typename SAMPLE_TYPE>
-void LofarDataGenerator<SAMPLE_TYPE>::connectBind(const char *hostname,
+void LofarDataGenerator::connectBind(const char *hostname,
         short port)
 {
     int retval;
-    struct addrinfo *hints, *addrInfo;
+    struct addrinfo *addrInfo = (struct addrinfo *) malloc(sizeof(struct addrinfo)); 
+    struct addrinfo *hints = (struct addrinfo *) malloc(sizeof(struct addrinfo));
 
     // use getaddrinfo, because gethostbyname is not thread safe.
     memset(hints, 0, sizeof(struct addrinfo));
@@ -78,6 +74,7 @@ void LofarDataGenerator<SAMPLE_TYPE>::connectBind(const char *hostname,
         exit(-1);
     }
 
+    // Bind socket
     if (bind(_fileDesc, (struct sockaddr *) addrInfo -> ai_addr, sizeof(struct sockaddr)) == -1) {
         fprintf(stderr, "Error binding socket\n");
         exit(-1);
@@ -89,8 +86,8 @@ void LofarDataGenerator<SAMPLE_TYPE>::connectBind(const char *hostname,
     if (inet_aton("127.0.0.1", &_receiver.sin_addr) == 0) {
         fprintf(stderr, "inet_aton() failed\n");
     }
-}
 
+}
 
 /**
 * @details
@@ -98,8 +95,7 @@ void LofarDataGenerator<SAMPLE_TYPE>::connectBind(const char *hostname,
 *
 * @param udpPacketHeader
 */
-template <typename SAMPLE_TYPE>
-void LofarDataGenerator<SAMPLE_TYPE>::setUdpPacketHeader(UDPPacket::Header* udpPacketHeader)
+void LofarDataGenerator::setUdpPacketHeader(UDPPacket::Header* udpPacketHeader)
 {
     _packetHeader = udpPacketHeader;
 }
@@ -113,8 +109,7 @@ void LofarDataGenerator<SAMPLE_TYPE>::setUdpPacketHeader(UDPPacket::Header* udpP
 * @param samples
 * @param polarisations
 */
-template <typename SAMPLE_TYPE>
-void LofarDataGenerator<SAMPLE_TYPE>::setDataParameters(int subbands,
+void LofarDataGenerator::setDataParameters(int subbands,
         int samples, int polarisations)
 {
     _subbandsPerPacket = subbands;
@@ -122,58 +117,44 @@ void LofarDataGenerator<SAMPLE_TYPE>::setDataParameters(int subbands,
     _nrPolarisations = polarisations;
 }
 
-
-
 /**
-* @Details
-* Send one packet
+* @details
+* Set test parameters
+*
+* @param numPackets
+* @param usec
+* @param startDelay
+* @param sampleType
 */
-template <typename SAMPLE_TYPE>
-void LofarDataGenerator<SAMPLE_TYPE>::sendPacket()
+void LofarDataGenerator::setTestParams(int numPackets,
+        unsigned long usec, unsigned long startDelay, SampleType sampleType)
 {
-    int packetSize = sizeof(struct UDPPacket::Header) + _subbandsPerPacket *
-            _samplesPerPacket * _nrPolarisations * sizeof(SAMPLE_TYPE);
-    socklen_t fromLen = sizeof(struct sockaddr_in);
-
-    // Create test packet.
-    UDPPacket* packet = (UDPPacket *) malloc(packetSize);
-
-    // Create packet header.
-    if (_packetHeader == NULL) {
-        packet -> header.version    = 1;
-        packet -> header.nrBeamlets = 1;
-        packet -> header.nrBlocks   = 1;
-        packet -> header.station    = 1;
-        packet -> header.sourceInfo = 1;
-    }
-    else {
-        // Copy header to packet.
-        memcpy(&(packet -> header), _packetHeader, sizeof(UDPPacket::Header));
-    }
-
-    // Send test packet.
-    if (sendto(_fileDesc, reinterpret_cast<char *> (packet), packetSize, 0, (struct sockaddr *) &_receiver, fromLen) < 0) {
-        perror("Error sending packet");
-        throw "Error sending packet";
-    }
+     _numPackets = numPackets;
+     _usec       = usec;
+     _startDelay = startDelay;
+     _sampleType = sampleType;
 }
 
-
 /**
-* Send multiple packets
+* Send LOFAR-style UDP packets
 *
 * @param numPackets
 * @param usec
 */
-template <typename SAMPLE_TYPE>
-void LofarDataGenerator<SAMPLE_TYPE>::sendPackets(int numPackets,
-        unsigned long usec)
+void LofarDataGenerator::sendPackets(int numPackets,
+        unsigned long usec, unsigned long startDelay, SampleType sampleType)
 {
     int packetSize = sizeof(struct UDPPacket::Header) + _subbandsPerPacket *
-            _samplesPerPacket * _nrPolarisations * sizeof(SAMPLE_TYPE);
+            _samplesPerPacket * _nrPolarisations;
     socklen_t fromLen = sizeof(struct sockaddr_in);
 
-    int packetCounter = 1;
+    switch (sampleType) {
+        case i4complex: packetSize += sizeof(TYPES::i4complex); break;
+        case i8complex: packetSize += sizeof(TYPES::i8complex); break;
+        case i16complex: packetSize += sizeof(TYPES::i16complex); break;
+    }
+
+    int packetCounter = 0;
 
     unsigned i, j;
 
@@ -194,15 +175,44 @@ void LofarDataGenerator<SAMPLE_TYPE>::sendPackets(int numPackets,
     }
 
     // Create test data in packet.
-    SAMPLE_TYPE *s = reinterpret_cast<SAMPLE_TYPE *>(packet -> data);
-    for (i = 0; i < _samplesPerPacket; i++) {
-        for (j = 0; j < _subbandsPerPacket; j++) {
-            s[i * _subbandsPerPacket * _nrPolarisations +
-              j * _nrPolarisations] = SAMPLE_TYPE(j,j);
-            s[i * _subbandsPerPacket * _nrPolarisations +
-              j * _nrPolarisations + 1] = SAMPLE_TYPE(j,j);
-        }
+    switch (sampleType) {
+        case i4complex:  {
+            TYPES::i4complex *s = reinterpret_cast<TYPES::i4complex *>(packet -> data);
+            for (i = 0; i < _samplesPerPacket; i++) {
+                for (j = 0; j < _subbandsPerPacket; j++) {
+                   s[i * _subbandsPerPacket * _nrPolarisations +
+                     j * _nrPolarisations] = TYPES::i4complex(j,j);
+                   s[i * _subbandsPerPacket * _nrPolarisations +
+                     j * _nrPolarisations + 1] = TYPES::i4complex(j,j);
+                 }
+             }
+         }          
+         case i8complex:  {
+             TYPES::i8complex *s = reinterpret_cast<TYPES::i8complex *>(packet -> data);
+             for (i = 0; i < _samplesPerPacket; i++) {
+                 for (j = 0; j < _subbandsPerPacket; j++) {
+                     s[i * _subbandsPerPacket * _nrPolarisations +
+                       j * _nrPolarisations] = TYPES::i8complex(j,j);
+                     s[i * _subbandsPerPacket * _nrPolarisations +
+                       j * _nrPolarisations + 1] = TYPES::i8complex(j,j);
+                  }
+              }
+         } 
+         case i16complex:  {
+             TYPES::i16complex *s = reinterpret_cast<TYPES::i16complex *>(packet -> data);
+             for (i = 0; i < _samplesPerPacket; i++) {
+                 for (j = 0; j < _subbandsPerPacket; j++) {
+                     s[i * _subbandsPerPacket * _nrPolarisations +
+                         j * _nrPolarisations] = TYPES::i16complex(j,j);
+                     s[i * _subbandsPerPacket * _nrPolarisations +
+                         j * _nrPolarisations + 1] = TYPES::i16complex(j,j);
+                  }
+              }
+         } 
     }
+
+    // Start delay before sending any packets
+    sleep(startDelay);
 
     while(packetCounter < numPackets) {
         // Update packet timestamp.
@@ -220,9 +230,10 @@ void LofarDataGenerator<SAMPLE_TYPE>::sendPackets(int numPackets,
     }
 }
 
-template class LofarDataGenerator<TYPES::i4complex>;
-template class LofarDataGenerator<TYPES::i8complex>;
-template class LofarDataGenerator<TYPES::i16complex>;
+void LofarDataGenerator::run()
+{
+    sendPackets(_numPackets, _usec, _startDelay, _sampleType);
+}
 
 } // namepsace lofar
 } // namepsace pelican

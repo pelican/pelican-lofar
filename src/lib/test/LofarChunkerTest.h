@@ -2,6 +2,7 @@
 #define LOFARCHUNKERTEST_H
 
 #include <cppunit/extensions/HelperMacros.h>
+#include "LofarDataGenerator.h"
 #include "pelican/utility/Config.h"
 
 /**
@@ -39,6 +40,7 @@ class LofarChunkerTest : public CppUnit::TestFixture
         ~LofarChunkerTest();
 
     private:
+        LofarDataGenerator dataGenerator;
         Config config;
 };
 

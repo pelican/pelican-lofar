@@ -70,10 +70,8 @@ void DataStreamingTest::test_setupGenerator()
     // Use case: Setup LOFAR data emulator
     // Expect: Not to throw.
     try {
-        LofarDataGenerator<TYPES::i8complex> generator;
-        generator.setDataParameters(subbandsPerPacket, samplesPerPacket, nrPolarisations);
-        generator.connectBind(hostname, port);
-        dataGenerator = (void *)&generator;
+        dataGenerator.setDataParameters(subbandsPerPacket, samplesPerPacket, nrPolarisations);
+        dataGenerator.connectBind(hostname, port);
     }
     catch(char* str) {
         QString error = QString("Could not set up DataStreamingTest: %1").arg(str);
