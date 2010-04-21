@@ -29,8 +29,8 @@ class DataStreamingTest : public CppUnit::TestFixture
 {
     public:
         CPPUNIT_TEST_SUITE( DataStreamingTest );
-        CPPUNIT_TEST( test_streamingClient );
-        CPPUNIT_TEST( test_serverClient );
+//        CPPUNIT_TEST( test_streamingClient );
+//        CPPUNIT_TEST( test_serverClient );
         CPPUNIT_TEST_SUITE_END();
 
     public:
