@@ -4,7 +4,9 @@
 #include "LofarTypes.h"
 
 #include <sys/socket.h>
+#include <netinet/in.h>
 #include <sys/types.h>
+#include <arpa/inet.h>
 #include <unistd.h>
 #include <stdlib.h>
 #include <signal.h>
@@ -52,43 +54,40 @@ void LofarDataGenerator<SAMPLE_TYPE>::connectBind(const char *hostname,
         short port)
 {
     int retval;
-    struct addrinfo hints;
+    struct addrinfo *hints, *addrInfo;
 
     // use getaddrinfo, because gethostbyname is not thread safe.
-    memset(&hints, 0, sizeof(struct addrinfo));
-    hints.ai_family = AF_INET;       // IPv4
-    hints.ai_flags = AI_NUMERICSERV; // use only numeric port numbers
-    hints.ai_socktype = SOCK_DGRAM;
-    hints.ai_protocol = IPPROTO_UDP;
+    memset(hints, 0, sizeof(struct addrinfo));
+    hints -> ai_family = AF_INET;       // IPv4
+    hints -> ai_flags = AI_NUMERICSERV; // use only numeric port numbers
+    hints -> ai_socktype = SOCK_DGRAM;
+    hints -> ai_protocol = IPPROTO_UDP;
 
     char portStr[16];
-    sprintf(portStr, "%hd", port );
+    sprintf(portStr, "%hd", port + 1000 );
 
     // Get address info
-    if ((retval = getaddrinfo(hostname, portStr, &hints, &_addrInfo)) != 0 ) {
+    if ((retval = getaddrinfo(hostname, portStr, hints, &addrInfo)) != 0 ) {
         fprintf(stderr, "getaddrinfo failed\n");
-        throw "GetAddrInfo failed";
+        exit(-1);
     }
 
-    // result is a linked list of resolved addresses, we only use the first.
-    if ((_fileDesc = socket(_addrInfo -> ai_family, _addrInfo -> ai_socktype, _addrInfo -> ai_protocol)) < 0) {
+    // result is a linked list of resolved addresses, we only use the first
+    if ((_fileDesc = socket(addrInfo -> ai_family, addrInfo -> ai_socktype, addrInfo -> ai_protocol)) < 0) {
         fprintf(stderr, "Error creating socket\n");
-        throw "Error creating socket";
+        exit(-1);
     }
 
-    // Connect to server.
-    while (connect(_fileDesc, _addrInfo->ai_addr, _addrInfo->ai_addrlen) < 0) {
-        if (errno == ECONNREFUSED) {
-            if (sleep(1) > 0)
-                // interrupted by a signal handler -- abort to allow this thread to
-                // be forced to continue after receiving a SIGINT, as with any other
-                // system call in this constructor
-                fprintf(stderr, "Interrupted during sleep\n");
-        }
-        else {
-            fprintf(stderr, "Error while trying to connect to server\n");
-            throw "Error creating socket";
-        }
+    if (bind(_fileDesc, (struct sockaddr *) addrInfo -> ai_addr, sizeof(struct sockaddr)) == -1) {
+        fprintf(stderr, "Error binding socket\n");
+        exit(-1);
+    }
+
+    // Create receiver object
+    memset((char *) &_receiver, 0, sizeof(struct sockaddr_in));
+    _receiver.sin_port = htons(8090);
+    if (inet_aton("127.0.0.1", &_receiver.sin_addr) == 0) {
+        fprintf(stderr, "inet_aton() failed\n");
     }
 }
 
@@ -153,7 +152,7 @@ void LofarDataGenerator<SAMPLE_TYPE>::sendPacket()
     }
 
     // Send test packet.
-    if (sendto(_fileDesc, reinterpret_cast<char *> (packet), packetSize, 0, _addrInfo -> ai_addr, fromLen) < 0) {
+    if (sendto(_fileDesc, reinterpret_cast<char *> (packet), packetSize, 0, (struct sockaddr *) &_receiver, fromLen) < 0) {
         perror("Error sending packet");
         throw "Error sending packet";
     }
@@ -211,7 +210,7 @@ void LofarDataGenerator<SAMPLE_TYPE>::sendPackets(int numPackets,
         packet -> header.blockSequenceNumber = packetCounter;
 
         int retval;
-        if( (retval = sendto(_fileDesc, reinterpret_cast<char *> (packet), packetSize, 0, _addrInfo -> ai_addr, fromLen) < 0)) {
+        if( (retval = sendto(_fileDesc, reinterpret_cast<char *> (packet), packetSize, 0,(struct sockaddr *) &_receiver, fromLen) < 0)) {
             perror("Error sending packet");
             throw "Error sending packet";
         }

@@ -42,7 +42,7 @@ template<typename SAMPLE_TYPE> class LofarDataGenerator
         void sendPackets(int numPackets, unsigned long usec);
 
     private:
-        struct addrinfo* _addrInfo;
+        struct sockaddr_in _receiver;
         UDPPacket::Header* _packetHeader;
         int _fileDesc;
         int _subbandsPerPacket;
