@@ -19,12 +19,31 @@ namespace lofar {
  */
 LofarChunker::LofarChunker(const ConfigNode& config) : AbstractChunker(config)
 {
-    // TODO make configurable
-    _nPackets = 1;
+    if (config.type() != "LofarChunker")
+        throw QString("LofarChunker::LofarChunker(): Invalid configuration");
+
+    // Get configuration options
+    int _sampleType = config.getOption("samples", "type").toInt();
+    _samplesPerPacket = config.getOption("params","samplesPerPacket").toInt();
+    _subbandsPerPacket = config.getOption("params","subbandsPerPacket").toInt();
+    _nrPolarisations = config.getOption("params","nrPolarisation").toInt();
+    _nPackets = config.getOption("params","nPackets").toInt();
     _packetsAccepted = 0;
     _packetsRejected = 0;
-    _samplesPerPacket = 0;
-    _startTime;
+    _startTime = 0;
+
+    // Some sanity checking.
+    if (type().isEmpty())
+        throw QString("TestUdpChunker::TestUdpChunker(): Data type unspecified.");
+
+    _packetSize = sizeof(struct UDPPacket::Header) + _subbandsPerPacket *
+                  _samplesPerPacket * _nrPolarisations;
+
+    switch (_sampleType) {
+        case 4:  _packetSize *= sizeof(TYPES::i4complex); break;
+        case 8: _packetSize *= sizeof(TYPES::i8complex); break;
+        case 16: _packetSize *= sizeof(TYPES::i16complex); break;
+    }
 }
 
 /**
@@ -35,7 +54,7 @@ QIODevice* LofarChunker::newDevice()
 {
     QUdpSocket* socket = new QUdpSocket;
     QHostAddress hostAddress(host());
-    socket->bind( hostAddress, port() );
+    socket -> bind( hostAddress, port() );
     return socket;
 }
 
@@ -47,29 +66,27 @@ void LofarChunker::next(QIODevice* device)
 {
     QUdpSocket *socket = static_cast<QUdpSocket*>(device);
 
-    int packetSize = sizeof(UDPPacket);
-    size_t offset = 0;
-    UDPPacket currPacket;
-    UDPPacket emptyPacket;
-    generateEmptyPacket(emptyPacket);
-    unsigned    previousSeqid       = 0;
-    TYPES::TimeStamp   actualStamp  = _samplesPerPacket;
+    size_t           offset                    = 0;
+    unsigned         previousSeqid             = _startTime;
+    UDPPacket        currPacket, emptyPacket;
+    qint64           sizeDatagram;
 
-    std::cout << "packetSize: " << packetSize << ", nPackets: " << _nPackets << std::endl;
-    WritableData writableData = getDataStorage(_nPackets * packetSize);
+    generateEmptyPacket(emptyPacket);
+
+    std::cout << "packetSize: " << _packetSize << ", nPackets: " << _nPackets << std::endl;
+    WritableData writableData = getDataStorage(_nPackets * _packetSize);
+
     if (! writableData.isValid())
         throw QString("LofarChunker::next(): Writable data not valid.");
 
     // Loop over UDP packets.
     for (int i = 0; i < _nPackets; i++) {
-
-        qint64 sizeDatagram;
-        
+       
         // Interruptible read, to allow stopping this thread even if the station does not send data
-        std::cout << "LofarChunker::next(): Waiting for ready read." << std::endl;
         socket -> waitForReadyRead();
-        if ( ( sizeDatagram = socket->readDatagram(reinterpret_cast<char*>(&currPacket), packetSize) ) <= 0 ) {
-            printf("LofarChunker::next(): Error while receiving UDP Packet: %d\n", (int) sizeDatagram);
+        if ( ( sizeDatagram = socket->readDatagram(reinterpret_cast<char*>(&currPacket), _packetSize) ) <= 0 ) {
+            std::cout << "LofarChunker::next(): Error while receiving UDP Packet: " << sizeDatagram << std::endl;
+            i--;
             continue;
         }
 
@@ -78,11 +95,15 @@ void LofarChunker::next(QIODevice* device)
         unsigned seqid   = currPacket.header.timestamp;
         unsigned blockid = currPacket.header.blockSequenceNumber;
 
+        // First time next has been run, initialise startTime
+        if (i == 0 && _startTime == 0)
+            _startTime = previousSeqid = seqid;
+
         // If the seconds counter is 0xFFFFFFFF, the data cannot be trusted
         if (seqid == ~0U) {
             ++_packetsRejected;
-            writableData.write(reinterpret_cast<void*>(&emptyPacket), packetSize, offset);
-            offset += packetSize;
+            writableData.write(reinterpret_cast<void*>(&emptyPacket), _packetSize, offset);
+            offset += _packetSize;
             continue;
         }
 
@@ -92,8 +113,8 @@ void LofarChunker::next(QIODevice* device)
 
             // Generate lostPackets empty packets
             for (unsigned packetCounter = 0; packetCounter < lostPackets; packetCounter++) {
-                writableData.write(reinterpret_cast<void*>(&emptyPacket), packetSize, offset);
-                offset += packetSize;
+                writableData.write(reinterpret_cast<void*>(&emptyPacket), _packetSize, offset);
+                offset += _packetSize;
             }
 
             i += lostPackets;
@@ -101,16 +122,16 @@ void LofarChunker::next(QIODevice* device)
             continue;
         }
 
-
         previousSeqid = seqid;
-        if (i == 0)
-            actualStamp.setStamp(seqid, blockid);
 
         // Write the data.
-        writableData.write(reinterpret_cast<void*>(&currPacket), packetSize, offset);
+        writableData.write(reinterpret_cast<void*>(&currPacket), _packetSize, offset);
 
-        offset += packetSize;
+        offset += _packetSize;
     }
+ 
+    // Update _startTime
+    _startTime = previousSeqid;
 
 }
 

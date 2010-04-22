@@ -52,7 +52,10 @@ class LofarChunker : public AbstractChunker
         unsigned _packetsRejected;
         unsigned _packetsAccepted;
         unsigned _samplesPerPacket;
-        TYPES::TimeStamp _startTime;
+        unsigned _subbandsPerPacket;
+        unsigned _nrPolarisations;
+        unsigned _startTime;
+        unsigned _packetSize;
 
         friend class LofarChunkerTest;
 };

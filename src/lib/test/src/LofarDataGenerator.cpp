@@ -22,7 +22,7 @@ namespace lofar {
 * @details
 */
 LofarDataGenerator::LofarDataGenerator()
-        : _subbandsPerPacket(1), _samplesPerPacket(1), _nrPolarisations(2),
+        : QThread(), _subbandsPerPacket(1), _samplesPerPacket(1), _nrPolarisations(2),
           _fileDesc(-1), _packetHeader(NULL)
 { }
 
@@ -146,16 +146,16 @@ void LofarDataGenerator::sendPackets(int numPackets,
 {
     int packetSize = sizeof(struct UDPPacket::Header) + _subbandsPerPacket *
             _samplesPerPacket * _nrPolarisations;
+
     socklen_t fromLen = sizeof(struct sockaddr_in);
 
     switch (sampleType) {
-        case i4complex: packetSize += sizeof(TYPES::i4complex); break;
-        case i8complex: packetSize += sizeof(TYPES::i8complex); break;
-        case i16complex: packetSize += sizeof(TYPES::i16complex); break;
+        case i4complex: packetSize *= sizeof(TYPES::i4complex); break;
+        case i8complex: packetSize *= sizeof(TYPES::i8complex); break;
+        case i16complex: packetSize *= sizeof(TYPES::i16complex); break;
     }
 
     int packetCounter = 0;
-
     unsigned i, j;
 
     // Create test packet.
@@ -179,6 +179,7 @@ void LofarDataGenerator::sendPackets(int numPackets,
         case i4complex:  {
             TYPES::i4complex *s = reinterpret_cast<TYPES::i4complex *>(packet -> data);
             for (i = 0; i < _samplesPerPacket; i++) {
+
                 for (j = 0; j < _subbandsPerPacket; j++) {
                    s[i * _subbandsPerPacket * _nrPolarisations +
                      j * _nrPolarisations] = TYPES::i4complex(j,j);
@@ -186,6 +187,7 @@ void LofarDataGenerator::sendPackets(int numPackets,
                      j * _nrPolarisations + 1] = TYPES::i4complex(j,j);
                  }
              }
+             break;
          }          
          case i8complex:  {
              TYPES::i8complex *s = reinterpret_cast<TYPES::i8complex *>(packet -> data);
@@ -197,6 +199,7 @@ void LofarDataGenerator::sendPackets(int numPackets,
                        j * _nrPolarisations + 1] = TYPES::i8complex(j,j);
                   }
               }
+              break;
          } 
          case i16complex:  {
              TYPES::i16complex *s = reinterpret_cast<TYPES::i16complex *>(packet -> data);
@@ -208,6 +211,7 @@ void LofarDataGenerator::sendPackets(int numPackets,
                          j * _nrPolarisations + 1] = TYPES::i16complex(j,j);
                   }
               }
+              break;
          } 
     }
 

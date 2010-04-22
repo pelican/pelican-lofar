@@ -12,8 +12,7 @@ CPPUNIT_TEST_SUITE_REGISTRATION( LofarChunkerTest );
 // class LofarChunkerTest
 LofarChunkerTest::LofarChunkerTest()
     : CppUnit::TestFixture()
-{
-}
+{ }
 
 LofarChunkerTest::~LofarChunkerTest()
 {
@@ -32,7 +31,8 @@ void LofarChunkerTest::setUp()
     "   <LofarChunker>"
     "       <data type=\"LofarData\"/>"
     "       <connection host=\"127.0.0.1\" port=\"8090\"/>"
-    "       <params samplesPerPacket=\"64\" nrPolarisation=\"2\" subbandsPerPacket=\"4\"/>"
+    "       <params samplesPerPacket=\"64\" nrPolarisation=\"2\" subbandsPerPacket=\"4\" nPackets=\"1\"/>"
+    "       <samples type=\"8\" />"
     "   </LofarChunker>"
     "</chunkers>";
 
@@ -40,13 +40,14 @@ void LofarChunkerTest::setUp()
 
     // Setup LOFAR data emulator
     try {
-        dataGenerator.setDataParameters(32, 64, 2);
+        dataGenerator.setDataParameters(4, 64, 2);
         dataGenerator.connectBind("127.0.0.1", 8090);
     }
     catch(char* str) {
         QString error = QString("Could not set up LofarChunkerTest: %1").arg(str);
         CPPUNIT_FAIL(error.toStdString());
     }
+
 }
 
 void LofarChunkerTest::tearDown()
@@ -69,7 +70,6 @@ void LofarChunkerTest::test_method()
 
         // Create and setup chunker
         LofarChunker chunker(configNode);
-        chunker._nPackets = 10;
         QIODevice* device = chunker.newDevice();
         chunker.setDevice(device);
 
@@ -79,7 +79,7 @@ void LofarChunkerTest::test_method()
         chunker.setDataManager(&dataManager);
 
         // Start Lofar Data Generator
-        dataGenerator.setTestParams(10, 100000, 1, i8complex);
+        dataGenerator.setTestParams(1, 100000, 1, i8complex);
         dataGenerator.start();
 
         // Acquire data through chunker
