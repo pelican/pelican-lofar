@@ -32,6 +32,8 @@ enum SampleType { i4complex = 4, i8complex = 8, i16complex = 16 };
 class LofarDataGenerator: public QThread
 {
 
+    Q_OBJECT
+
     public:
         /// Constructs the lofar data generator.
         LofarDataGenerator();
