@@ -35,6 +35,9 @@ LofarDataGenerator::~LofarDataGenerator()
     if (_fileDesc >= 0) {
         close(_fileDesc);
     }
+
+    // Wait for the thread to finish.
+    if (isRunning()) wait();
 }
 
 
