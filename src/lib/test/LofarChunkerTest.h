@@ -46,4 +46,4 @@ class LofarChunkerTest : public CppUnit::TestFixture
 
 } // namespace lofar
 } // namespace pelican
-#endif 
+#endif // LOFARCHUNKERTEST_H
