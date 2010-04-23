@@ -23,7 +23,7 @@ namespace lofar {
 */
 LofarDataGenerator::LofarDataGenerator()
         : QThread(), _subbandsPerPacket(1), _samplesPerPacket(1), _nrPolarisations(2),
-          _fileDesc(-1), _packetHeader(NULL)
+          _fileDesc(-1), _packetHeader(NULL), _seqNumbers(NULL)
 { }
 
 /**
@@ -129,30 +129,27 @@ void LofarDataGenerator::setDataParameters(int subbands,
 * @param startDelay
 * @param sampleType
 */
-void LofarDataGenerator::setTestParams(int numPackets,
-        unsigned long usec, unsigned long startDelay, SampleType sampleType)
+void LofarDataGenerator::setTestParams(int numPackets, unsigned long usec, 
+    unsigned long startDelay, SampleType sampleType, unsigned int *seqNumbers)
 {
      _numPackets = numPackets;
      _usec       = usec;
      _startDelay = startDelay;
      _sampleType = sampleType;
+     _seqNumbers = seqNumbers;
 }
 
 /**
 * Send LOFAR-style UDP packets
-*
-* @param numPackets
-* @param usec
 */
-void LofarDataGenerator::sendPackets(int numPackets,
-        unsigned long usec, unsigned long startDelay, SampleType sampleType)
+void LofarDataGenerator::run()
 {
     int packetSize = sizeof(struct UDPPacket::Header) + _subbandsPerPacket *
             _samplesPerPacket * _nrPolarisations;
 
     socklen_t fromLen = sizeof(struct sockaddr_in);
 
-    switch (sampleType) {
+    switch (_sampleType) {
         case i4complex: packetSize *= sizeof(TYPES::i4complex); break;
         case i8complex: packetSize *= sizeof(TYPES::i8complex); break;
         case i16complex: packetSize *= sizeof(TYPES::i16complex); break;
@@ -178,16 +175,16 @@ void LofarDataGenerator::sendPackets(int numPackets,
     }
 
     // Create test data in packet.
-    switch (sampleType) {
+    switch (_sampleType) {
         case i4complex:  {
             TYPES::i4complex *s = reinterpret_cast<TYPES::i4complex *>(packet -> data);
             for (i = 0; i < _samplesPerPacket; i++) {
 
                 for (j = 0; j < _subbandsPerPacket; j++) {
                    s[i * _subbandsPerPacket * _nrPolarisations +
-                     j * _nrPolarisations] = TYPES::i4complex(j,j);
+                     j * _nrPolarisations] = TYPES::i4complex(i + j, i);
                    s[i * _subbandsPerPacket * _nrPolarisations +
-                     j * _nrPolarisations + 1] = TYPES::i4complex(j,j);
+                     j * _nrPolarisations + 1] = TYPES::i4complex(i + j, i);
                  }
              }
              break;
@@ -197,9 +194,9 @@ void LofarDataGenerator::sendPackets(int numPackets,
              for (i = 0; i < _samplesPerPacket; i++) {
                  for (j = 0; j < _subbandsPerPacket; j++) {
                      s[i * _subbandsPerPacket * _nrPolarisations +
-                       j * _nrPolarisations] = TYPES::i8complex(j,j);
+                       j * _nrPolarisations] = TYPES::i8complex(i + j, i);
                      s[i * _subbandsPerPacket * _nrPolarisations +
-                       j * _nrPolarisations + 1] = TYPES::i8complex(j,j);
+                       j * _nrPolarisations + 1] = TYPES::i8complex(i + j, i);
                   }
               }
               break;
@@ -209,9 +206,9 @@ void LofarDataGenerator::sendPackets(int numPackets,
              for (i = 0; i < _samplesPerPacket; i++) {
                  for (j = 0; j < _subbandsPerPacket; j++) {
                      s[i * _subbandsPerPacket * _nrPolarisations +
-                         j * _nrPolarisations] = TYPES::i16complex(j,j);
+                         j * _nrPolarisations] = TYPES::i16complex(i + j, i);
                      s[i * _subbandsPerPacket * _nrPolarisations +
-                         j * _nrPolarisations + 1] = TYPES::i16complex(j,j);
+                         j * _nrPolarisations + 1] = TYPES::i16complex(i + j, i);
                   }
               }
               break;
@@ -219,27 +216,27 @@ void LofarDataGenerator::sendPackets(int numPackets,
     }
 
     // Start delay before sending any packets
-    sleep(startDelay);
+    sleep(_startDelay);
 
-    while(packetCounter < numPackets) {
+    while(packetCounter < _numPackets) {
+
         // Update packet timestamp.
-        packet -> header.timestamp = packetCounter;
-        packet -> header.blockSequenceNumber = packetCounter;
-
-        int retval;
-        if( (retval = sendto(_fileDesc, reinterpret_cast<char *> (packet), packetSize, 0,(struct sockaddr *) &_receiver, fromLen) < 0)) {
-            perror("Error sending packet");
-            throw "Error sending packet";
+        if (_seqNumbers == NULL) {
+            packet -> header.timestamp = packetCounter;
+            packet -> header.blockSequenceNumber = packetCounter;
+        } else {
+            packet -> header.timestamp = _seqNumbers[packetCounter];
+            packet -> header.blockSequenceNumber = _seqNumbers[packetCounter];
         }
 
-        ++packetCounter;
-        usleep(usec);
-    }
-}
+        int retval;
+        if( (retval = sendto(_fileDesc, reinterpret_cast<char *> (packet), 
+                             packetSize, 0,(struct sockaddr *) &_receiver, fromLen) < 0))
+            throw "LofarDataGenerator: Error sending packet";
 
-void LofarDataGenerator::run()
-{
-    sendPackets(_numPackets, _usec, _startDelay, _sampleType);
+        ++packetCounter;
+        usleep(_usec);
+    }
 }
 
 } // namepsace lofar

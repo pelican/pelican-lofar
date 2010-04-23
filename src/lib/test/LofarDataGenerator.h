@@ -47,10 +47,10 @@ class LofarDataGenerator: public QThread
         void setUdpPacketHeader(UDPPacket::Header* packetHeader);
         /// Set data parameter.
         void setDataParameters(int subbands, int samples, int polarisations);
-        /// Send a number of data packets.
-        void sendPackets(int numPackets, unsigned long usec, unsigned long startDelay, SampleType sampleType);
         /// Set parameters for next test
-        void setTestParams(int numPackets, unsigned long usec, unsigned long startDelay, SampleType sampleType);
+        void setTestParams(int numPackets, unsigned long usec, unsigned long startDelay, 
+                           SampleType sampleType, unsigned int *seqNumbers);
+        // Starts the thread, sending packets
         virtual void run();
     protected:
         /// Threaded method
@@ -71,6 +71,7 @@ class LofarDataGenerator: public QThread
         int           _numPackets;
         unsigned long _usec;
         unsigned long _startDelay;
+        unsigned int  *_seqNumbers;
 };
 
 

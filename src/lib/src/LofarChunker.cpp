@@ -85,7 +85,7 @@ void LofarChunker::next(QIODevice* device)
         // Interruptible read, to allow stopping this thread even if the station does not send data
         socket -> waitForReadyRead();
         if ( ( sizeDatagram = socket->readDatagram(reinterpret_cast<char*>(&currPacket), _packetSize) ) <= 0 ) {
-            std::cout << "LofarChunker::next(): Error while receiving UDP Packet: " << sizeDatagram << std::endl;
+            std::cout << "LofarChunker::next(): Error while receiving UDP Packet!" << std::endl;
             i--;
             continue;
         }
@@ -112,6 +112,7 @@ void LofarChunker::next(QIODevice* device)
             unsigned lostPackets = seqid - previousSeqid;
 
             // Generate lostPackets empty packets
+            // TODO Must not generate more than _nPackets
             for (unsigned packetCounter = 0; packetCounter < lostPackets; packetCounter++) {
                 writableData.write(reinterpret_cast<void*>(&emptyPacket), _packetSize, offset);
                 offset += _packetSize;
@@ -122,17 +123,15 @@ void LofarChunker::next(QIODevice* device)
             continue;
         }
 
-        previousSeqid = seqid;
-
         // Write the data.
-        writableData.write(reinterpret_cast<void*>(&currPacket), _packetSize, offset);
+        writableData.write(reinterpret_cast<char*>(&currPacket), _packetSize, offset);
 
+        previousSeqid = seqid;
         offset += _packetSize;
     }
  
     // Update _startTime
     _startTime = previousSeqid;
-
 }
 
 /**

@@ -42,8 +42,14 @@ class LofarChunkerTest : public CppUnit::TestFixture
     private:
         LofarDataGenerator dataGenerator;
         Config config;
+        
+        // Data Params
+        int _subbandsPerPacket;
+        int _samplesPerPacket;
+        int _nrPolarisations;
+        int _numPackets;
 };
 
 } // namespace lofar
 } // namespace pelican
-#endif // LOFARCHUNKERTEST_H
+#endif 
