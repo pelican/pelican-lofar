@@ -2,6 +2,7 @@
 #include "LofarDataGenerator.h"
 #include "LofarChunker.h"
 #include "LofarUdpHeader.h"
+#include "LofarTypes.h"
 
 #include "pelican/server/DataManager.h"
 #include "pelican/utility/memCheck.h"
@@ -107,7 +108,7 @@ void LofarChunkerTest::test_method()
 
         unsigned packetSize = sizeof(struct UDPPacket::Header) + _subbandsPerPacket *
                               _samplesPerPacket * _nrPolarisations * sizeof(TYPES::i8complex);
-   
+
         for (counter = 0; counter < _numPackets; counter++) {
 
             packet = (UDPPacket *) (dataPtr + packetSize * counter);
@@ -115,9 +116,8 @@ void LofarChunkerTest::test_method()
 
             for (k = 0; k < _samplesPerPacket; k++)
                      for (j = 0; j < _subbandsPerPacket; j++)
-                        // printf("%d, %d, %d\n", counter, k + j, s[k * _subbandsPerPacket * _nrPolarisations +
-                        //   j * _nrPolarisations].real());
-                        ;
+                         CPPUNIT_ASSERT(k + j ==  s[k * _subbandsPerPacket * _nrPolarisations +
+                           j * _nrPolarisations].real());
         }
 
         std::cout << "Finished LofarChunker test" << std::endl;

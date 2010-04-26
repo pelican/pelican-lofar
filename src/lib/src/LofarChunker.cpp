@@ -30,19 +30,18 @@ LofarChunker::LofarChunker(const ConfigNode& config) : AbstractChunker(config)
     _nPackets = config.getOption("params","nPackets").toInt();
     _packetsAccepted = 0;
     _packetsRejected = 0;
-    _startTime = 0;
+    _startTime = -1;
 
     // Some sanity checking.
     if (type().isEmpty())
         throw QString("TestUdpChunker::TestUdpChunker(): Data type unspecified.");
 
-    _packetSize = sizeof(struct UDPPacket::Header) + _subbandsPerPacket *
-                  _samplesPerPacket * _nrPolarisations;
+    _packetSize = _subbandsPerPacket * _samplesPerPacket * _nrPolarisations;
 
     switch (_sampleType) {
-        case 4:  _packetSize *= sizeof(TYPES::i4complex); break;
-        case 8: _packetSize *= sizeof(TYPES::i8complex); break;
-        case 16: _packetSize *= sizeof(TYPES::i16complex); break;
+        case 4:  { _packetSize = _packetSize * sizeof(TYPES::i4complex)  + sizeof(struct UDPPacket::Header);  break; }
+        case 8:  { _packetSize = _packetSize * sizeof(TYPES::i8complex)  + sizeof(struct UDPPacket::Header);  break; }
+        case 16: { _packetSize = _packetSize * sizeof(TYPES::i16complex) + sizeof(struct UDPPacket::Header);  break; }
     }
 }
 
@@ -66,7 +65,7 @@ void LofarChunker::next(QIODevice* device)
 {
     QUdpSocket *socket = static_cast<QUdpSocket*>(device);
 
-    size_t           offset                    = 0;
+    unsigned         offset                    = 0;
     unsigned         previousSeqid             = _startTime;
     UDPPacket        currPacket, emptyPacket;
     qint64           sizeDatagram;
@@ -101,6 +100,7 @@ void LofarChunker::next(QIODevice* device)
 
         // If the seconds counter is 0xFFFFFFFF, the data cannot be trusted
         if (seqid == ~0U) {
+            printf("Data cannot be trusted... seqid 0\n");
             ++_packetsRejected;
             writableData.write(reinterpret_cast<void*>(&emptyPacket), _packetSize, offset);
             offset += _packetSize;
@@ -113,6 +113,7 @@ void LofarChunker::next(QIODevice* device)
 
             // Generate lostPackets empty packets
             // TODO Must not generate more than _nPackets
+            printf("Lost packets.. expected %d got %d\n", previousSeqid + 1, seqid);
             for (unsigned packetCounter = 0; packetCounter < lostPackets; packetCounter++) {
                 writableData.write(reinterpret_cast<void*>(&emptyPacket), _packetSize, offset);
                 offset += _packetSize;
