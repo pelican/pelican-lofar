@@ -24,14 +24,14 @@
 <tool id="cdt.managedbuild.tool.gnu.archiver.base.1353654170" name="GCC Archiver" superClass="cdt.managedbuild.tool.gnu.archiver.base"/>
 <tool errorParsers="org.eclipse.cdt.core.GCCErrorParser" id="cdt.managedbuild.tool.gnu.cpp.compiler.base.209185580" name="GCC C++ Compiler" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.base">
 <option id="gnu.cpp.compiler.option.include.paths.1872318607" name="Include paths (-I)" superClass="gnu.cpp.compiler.option.include.paths" valueType="includePath">
-<listOptionValue builtIn="false" value="/usr/include/pelican"/>
-<listOptionValue builtIn="false" value="/usr/local/include/pelican"/>
 <listOptionValue builtIn="false" value="/usr/include/qt4/QtCore"/>
 <listOptionValue builtIn="false" value="/usr/include/qt4/QtNetwork"/>
 <listOptionValue builtIn="false" value="/usr/include/qt4/QtXml"/>
 <listOptionValue builtIn="false" value="/opt/intel/Compiler/11.1/064/mkl/include"/>
 <listOptionValue builtIn="false" value="/opt/intel/Compiler/11.1/064/tbb/include"/>
 <listOptionValue builtIn="false" value="/opt/intel/mkl/10.2.4.032/include"/>
+<listOptionValue builtIn="false" value="/usr/local/include"/>
+<listOptionValue builtIn="false" value="/usr/include"/>
 </option>
 <inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.948994440" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
 </tool>

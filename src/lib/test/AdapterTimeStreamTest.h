@@ -30,6 +30,7 @@ class AdapterTimeStreamTest : public CppUnit::TestFixture
         CPPUNIT_TEST_SUITE(AdapterTimeStreamTest);
         CPPUNIT_TEST(test_configuration);
         CPPUNIT_TEST(test_checkData);
+        CPPUNIT_TEST(test_deserialise);
         CPPUNIT_TEST_SUITE_END();
 
     public:
@@ -40,6 +41,8 @@ class AdapterTimeStreamTest : public CppUnit::TestFixture
         void test_configuration();
         /// Method to check data validation performed by the adapter.
         void test_checkData();
+        /// Method to check deserialising a chunk of UDP packets.
+        void test_deserialise();
 };
 
 

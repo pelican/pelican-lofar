@@ -3,7 +3,7 @@ set( lib_src
     src/LofarChunker.cpp
     src/LofarStreamDataClient.cpp
     src/LofarServerClient.cpp
-#    src/AdapterTimeStream.cpp
+#   src/AdapterTimeStream.cpp
 )
 add_library(pelicanLofar ${lib_src} )
 
