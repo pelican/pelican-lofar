@@ -47,6 +47,9 @@ class LofarChunker : public AbstractChunker
         /// Generates an empty UDP packet.
         void generateEmptyPacket(UDPPacket& packet);
 
+        /// Write UDPPacket to writeableData object
+        unsigned writePacket(WritableData *writer, UDPPacket& packet, unsigned offset);
+
     private:
         int _nPackets;
         unsigned _packetsRejected;

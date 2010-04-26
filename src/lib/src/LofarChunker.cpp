@@ -100,10 +100,8 @@ void LofarChunker::next(QIODevice* device)
 
         // If the seconds counter is 0xFFFFFFFF, the data cannot be trusted
         if (seqid == ~0U) {
-            printf("Data cannot be trusted... seqid 0\n");
             ++_packetsRejected;
-            writableData.write(reinterpret_cast<void*>(&emptyPacket), _packetSize, offset);
-            offset += _packetSize;
+            offset = writePacket(&writableData, emptyPacket, offset);
             continue;
         }
 
@@ -114,10 +112,8 @@ void LofarChunker::next(QIODevice* device)
             // Generate lostPackets empty packets
             // TODO Must not generate more than _nPackets
             printf("Lost packets.. expected %d got %d\n", previousSeqid + 1, seqid);
-            for (unsigned packetCounter = 0; packetCounter < lostPackets; packetCounter++) {
-                writableData.write(reinterpret_cast<void*>(&emptyPacket), _packetSize, offset);
-                offset += _packetSize;
-            }
+            for (unsigned packetCounter = 0; packetCounter < lostPackets; packetCounter++)
+                offset = writePacket(&writableData, emptyPacket, offset);
 
             i += lostPackets;
             previousSeqid = seqid + lostPackets;
@@ -125,10 +121,8 @@ void LofarChunker::next(QIODevice* device)
         }
 
         // Write the data.
-        writableData.write(reinterpret_cast<char*>(&currPacket), _packetSize, offset);
-
+        offset = writePacket(&writableData, currPacket, offset);
         previousSeqid = seqid;
-        offset += _packetSize;
     }
  
     // Update _startTime
@@ -146,6 +140,21 @@ void LofarChunker::generateEmptyPacket(UDPPacket& packet)
     packet.header.nrBlocks = 0;
     packet.header.timestamp = 0;
     packet.header.blockSequenceNumber = 0;
+}
+
+/**
+ * @details
+ * Generates an empty UDP packet with no time stamp.
+ */
+unsigned LofarChunker::writePacket(WritableData *writer, UDPPacket& packet, unsigned offset)
+{
+    if (writer -> isValid()) {
+        writer -> write(reinterpret_cast<void*>(&packet), _packetSize, offset);
+        return offset + _packetSize;
+    } else {
+        printf("WriteableData is not valid!\n");
+        return -1;
+    }
 }
 
 } // namespace lofar
