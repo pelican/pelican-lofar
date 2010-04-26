@@ -25,7 +25,8 @@ class LofarChunkerTest : public CppUnit::TestFixture
 {
     public:
         CPPUNIT_TEST_SUITE( LofarChunkerTest );
-        CPPUNIT_TEST( test_method );
+        CPPUNIT_TEST( test_normalPackets );
+        CPPUNIT_TEST( test_lostPackets );
         CPPUNIT_TEST_SUITE_END();
 
     public:
@@ -33,11 +34,14 @@ class LofarChunkerTest : public CppUnit::TestFixture
         void tearDown();
 
         // Test Methods
-        void test_method();
+        void test_normalPackets();
+        void test_lostPackets();
 
     public:
         LofarChunkerTest(  );
         ~LofarChunkerTest();
+
+    private:
 
     private:
         LofarDataGenerator dataGenerator;

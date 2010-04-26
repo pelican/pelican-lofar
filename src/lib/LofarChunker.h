@@ -32,7 +32,7 @@ class LofarChunker : public AbstractChunker
         LofarChunker(const ConfigNode&);
 
         /// Destroys the LofarChunker.
-        ~LofarChunker() {}
+        ~LofarChunker() { } 
 
         /// Creates the socket to use for the incoming data stream.
         virtual QIODevice* newDevice();

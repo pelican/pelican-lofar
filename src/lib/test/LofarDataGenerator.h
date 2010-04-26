@@ -43,6 +43,8 @@ class LofarDataGenerator: public QThread
     public:
         /// Bind to the socket.
         void connectBind(const char* hostname, short port);
+        /// Release socket connection
+        void releaseConnection();
         /// Set the UDP Packet header that will be used.
         void setUdpPacketHeader(UDPPacket::Header* packetHeader);
         /// Set data parameter.

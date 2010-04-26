@@ -70,10 +70,8 @@ void LofarChunker::next(QIODevice* device)
     UDPPacket        currPacket, emptyPacket;
     qint64           sizeDatagram;
 
-    generateEmptyPacket(emptyPacket);
-
-    std::cout << "packetSize: " << _packetSize << ", nPackets: " << _nPackets << std::endl;
     WritableData writableData = getDataStorage(_nPackets * _packetSize);
+    generateEmptyPacket(emptyPacket);
 
     if (! writableData.isValid())
         throw QString("LofarChunker::next(): Writable data not valid.");
@@ -105,18 +103,27 @@ void LofarChunker::next(QIODevice* device)
             continue;
         }
 
+        // Check if packet seqid is smaller than expected (due to duplicates
+        // or out-of-order packet arrivals. If so ignore
+        if (previousSeqid + 1 > seqid) {
+            i -= 1;
+            continue;
+        }
+
         // Check that the packets are contiguous
         if (previousSeqid + 1 != seqid) {
-            unsigned lostPackets = seqid - previousSeqid;
+            unsigned lostPackets = seqid - previousSeqid - 1;
 
             // Generate lostPackets empty packets
-            // TODO Must not generate more than _nPackets
-            printf("Lost packets.. expected %d got %d\n", previousSeqid + 1, seqid);
-            for (unsigned packetCounter = 0; packetCounter < lostPackets; packetCounter++)
+            for (unsigned packetCounter = 0; packetCounter < lostPackets && 
+                                             i + packetCounter < _nPackets; packetCounter++) {
                 offset = writePacket(&writableData, emptyPacket, offset);
+                i += 1;
+            }
 
-            i += lostPackets;
-            previousSeqid = seqid + lostPackets;
+            // Write received packet
+            offset = writePacket(&writableData, currPacket, offset);
+            previousSeqid = seqid;
             continue;
         }
 

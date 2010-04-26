@@ -31,12 +31,8 @@ LofarDataGenerator::LofarDataGenerator()
 */
 LofarDataGenerator::~LofarDataGenerator()
 {
-    // Close socket if open
-    if (_fileDesc >= 0) {
-        close(_fileDesc);
-    }
-
     // Wait for the thread to finish.
+    releaseConnection();
     if (isRunning()) wait();
 }
 
@@ -66,22 +62,16 @@ void LofarDataGenerator::connectBind(const char *hostname,
     sprintf(portStr, "%hd", port + 1000 );
 
     // Get address info
-    if ((retval = getaddrinfo(hostname, portStr, hints, &addrInfo)) != 0 ) {
-        fprintf(stderr, "getaddrinfo failed\n");
-        exit(-1);
-    }
+    if ((retval = getaddrinfo(hostname, portStr, hints, &addrInfo)) != 0 )
+        throw "getaddrinfo failed\n";
 
     // result is a linked list of resolved addresses, we only use the first
-    if ((_fileDesc = socket(addrInfo -> ai_family, addrInfo -> ai_socktype, addrInfo -> ai_protocol)) < 0) {
-        fprintf(stderr, "Error creating socket\n");
-        exit(-1);
-    }
+    if ((_fileDesc = socket(addrInfo -> ai_family, addrInfo -> ai_socktype, addrInfo -> ai_protocol)) < 0)
+        throw "Error creating socket\n";
 
     // Bind socket
-    if (bind(_fileDesc, (struct sockaddr *) addrInfo -> ai_addr, sizeof(struct sockaddr)) == -1) {
-        fprintf(stderr, "Error binding socket\n");
-        exit(-1);
-    }
+    if (bind(_fileDesc, (struct sockaddr *) addrInfo -> ai_addr, sizeof(struct sockaddr)) == -1)
+        throw "Error binding socket\n";
 
     // Create receiver object
     memset((char *) &_receiver, 0, sizeof(struct sockaddr_in));
@@ -90,6 +80,18 @@ void LofarDataGenerator::connectBind(const char *hostname,
         fprintf(stderr, "inet_aton() failed\n");
     }
 
+}
+
+/**
+* @details
+* Release generator socket
+*/
+void LofarDataGenerator::releaseConnection()
+{
+    // Close socket if open
+    if (_fileDesc >= 0) {
+        close(_fileDesc);
+    }
 }
 
 /**
@@ -169,10 +171,10 @@ void LofarDataGenerator::run()
         packet -> header.station    = 1;
         packet -> header.sourceInfo = 1;
     }
-    else {
+    else
         // Copy header to packet.
         memcpy(&(packet -> header), _packetHeader, sizeof(UDPPacket::Header));
-    }
+
 
     // Create test data in packet.
     switch (_sampleType) {
