@@ -150,7 +150,7 @@ class T_TimeStreamData : public DataBlob
                             &_data[index] : NULL;
         }
 
-    private:
+    protected:
         std::vector<T> _data;
         unsigned _nSubbands;
         unsigned _nPolarisations;
