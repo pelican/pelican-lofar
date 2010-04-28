@@ -4,9 +4,9 @@ set(lofarTest_src
     src/libTest.cpp
     src/LofarChunkerTest.cpp
     src/DataStreamingTest.cpp
-    src/TimeStreamDataTest.cpp
+    #src/TimeStreamDataTest.cpp
     #src/ChannelisedStreamDataTest.cpp
-    src/AdapterTimeStreamTest.cpp
+    #src/AdapterTimeStreamTest.cpp
     #src/ChanneliserPolyphaseTest.cpp
 )
 
