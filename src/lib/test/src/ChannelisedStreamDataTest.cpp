@@ -140,6 +140,60 @@ void ChannelisedStreamDataTest::test_accessorMethods()
  */
 void ChannelisedStreamDataTest::test_serialise_deserialise()
 {
+    // Error tolerance use for double comparisons.
+     double err = 1.0e-5;
+
+     // Construct a blob and fill in some data.
+     unsigned nSubbands = 3;
+     unsigned nPolarisations = 2;
+     unsigned nChannels = 10;
+     ChannelisedStreamData spectrum1(nSubbands, nPolarisations, nChannels);
+     std::complex<double>* in = spectrum1.data();
+     for (unsigned i = 0, sb = 0; sb < nSubbands; ++sb) {
+         for (unsigned p = 0; p < nPolarisations; ++p) {
+             for (unsigned c = 0; c < nChannels; ++c) {
+                 double re = double(i);
+                 double im = double(sb + p + c);
+                 in[i] = std::complex<double>(re, im);
+                 i++;
+             }
+         }
+     }
+     double startFreq = 1.01020304e6;
+     double freqDelta = 3.456789e2;
+     spectrum1.setStartFrequency(startFreq);
+     spectrum1.setChannelfrequencyDelta(freqDelta);
+
+     // Serialise to a byte array.
+     QByteArray serialData = spectrum1.serialise();
+
+     // check the return byte array is the expected size.
+     int expectedSize = 3 * sizeof(unsigned) + 2 * sizeof(double)
+             + spectrum1.size() * sizeof(std::complex<double>);
+     CPPUNIT_ASSERT_EQUAL(expectedSize, serialData.size());
+
+     // Construct a new data blob to fill via the deserialise.
+     ChannelisedStreamData spectrum2(serialData);
+
+     // Check the header deserialised correctly.
+     CPPUNIT_ASSERT_EQUAL(nSubbands, spectrum2.nSubbands());
+     CPPUNIT_ASSERT_EQUAL(nPolarisations, spectrum2.nPolarisations());
+     CPPUNIT_ASSERT_EQUAL(nChannels, spectrum2.nChannels());
+     CPPUNIT_ASSERT_DOUBLES_EQUAL(startFreq, spectrum2.startFrequency(), err);
+     CPPUNIT_ASSERT_DOUBLES_EQUAL(freqDelta, spectrum2.channelFrequencyDelta(), err);
+
+     const std::complex<double>* out = spectrum2.data();
+     for (unsigned i = 0, sb = 0; sb < nSubbands; ++sb) {
+         for (unsigned p = 0; p < nPolarisations; ++p) {
+             for (unsigned c = 0; c < nChannels; ++c) {
+                 double re = double(i);
+                 double im = double(sb + p + c);
+                 CPPUNIT_ASSERT_DOUBLES_EQUAL(re, out[i].real(), err);
+                 CPPUNIT_ASSERT_DOUBLES_EQUAL(im, out[i].imag(), err);
+                 i++;
+             }
+         }
+     }
 
 }
 
