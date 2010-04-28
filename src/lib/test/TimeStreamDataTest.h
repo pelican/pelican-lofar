@@ -24,15 +24,15 @@ namespace lofar {
 class TimeStreamDataTest : public CppUnit::TestFixture
 {
     public:
-        CPPUNIT_TEST_SUITE( TimeStreamDataTest );
-        CPPUNIT_TEST( test_accessorMethods );
+        CPPUNIT_TEST_SUITE(TimeStreamDataTest);
+        CPPUNIT_TEST(test_accessorMethods);
         CPPUNIT_TEST_SUITE_END();
 
     public:
         void setUp();
         void tearDown();
 
-        ///Test accessor methods for visibility positions class
+        /// Test accessor methods.
         void test_accessorMethods();
 
     public:

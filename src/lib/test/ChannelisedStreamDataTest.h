@@ -26,14 +26,18 @@ class ChannelisedStreamDataTest : public CppUnit::TestFixture
     public:
         CPPUNIT_TEST_SUITE( ChannelisedStreamDataTest );
         CPPUNIT_TEST( test_accessorMethods );
+        CPPUNIT_TEST( test_serialise_deserialise );
         CPPUNIT_TEST_SUITE_END();
 
     public:
         void setUp();
         void tearDown();
 
-        ///Test accessor methods for visibility positions class
+        /// Test accessor methods.
         void test_accessorMethods();
+
+        /// Test serialise and deserialise methods.
+        void test_serialise_deserialise();
 
     public:
         ChannelisedStreamDataTest();

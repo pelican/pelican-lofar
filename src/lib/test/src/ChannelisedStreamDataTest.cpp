@@ -133,5 +133,16 @@ void ChannelisedStreamDataTest::test_accessorMethods()
     }
 }
 
+
+/**
+ * @details
+ * Tests of the serialise and deserialise methods.
+ */
+void ChannelisedStreamDataTest::test_serialise_deserialise()
+{
+
+}
+
+
 } // namespace lofar
 } // namespace pelican
