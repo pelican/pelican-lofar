@@ -1,14 +1,15 @@
 #include "AdapterTimeStream.h"
 
-#include "pelican/data/TimeStreamData.h"
-#include "pelican/utility/ConfigNode.h"
 #include "LofarTypes.h"
-#include <cmath>
+#include "TimeStreamData.h"
+
+#include "pelican/utility/ConfigNode.h"
+
 #include <boost/cstdint.hpp>
+#include <cmath>
 #include <QString>
 
 namespace pelican {
-
 namespace lofar {
 
 PELICAN_DECLARE_ADAPTER(AdapterTimeStream)
@@ -119,7 +120,7 @@ void AdapterTimeStream::_checkData()
     // Check that the adapter dimensions agree with what could come from
     // packets.
     unsigned packetBits = _nSubbands * _nPolarisations * _nSamples * _sampleBits;
-    unsigned udpDataBits = 8130 * 8;
+    unsigned udpDataBits = 8130 * 8; // TODO fix this for other than 8 bit data
     if (packetBits > udpDataBits) {
         throw QString("AdapterTimeStream: Adapter dimensions specify more data "
                       "than fits into a UDP packet! (%1 > %2)")
@@ -150,7 +151,7 @@ void AdapterTimeStream::_readHeader(UDPPacket::Header& header, char* buffer)
     header.nrBlocks = *reinterpret_cast<uint8_t*>(&buffer[7]);
     header.timestamp = *reinterpret_cast<uint32_t*>(&buffer[8]);
     header.blockSequenceNumber = *reinterpret_cast<uint32_t*>(&buffer[12]);
-//    _printHeader(header);
+    _printHeader(header);
 }
 
 
@@ -197,7 +198,7 @@ void AdapterTimeStream::_readData(std::complex<double>* data, char* buffer)
                             " per sample (%1) unsupported").arg(_sampleBits);
                 }
 
-//                std::cout << data[blobIndex] << std::endl;
+                std::cout << data[blobIndex] << std::endl;
             }
         }
     }

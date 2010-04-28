@@ -124,7 +124,7 @@ void AdapterTimeStreamTest::test_deserialise()
     unsigned nSubbands = 2;
     unsigned nPolarisations = 2;
     unsigned nSamples = 10;
-    unsigned sampleBits = 8; // (4 = 16 values, 8 = 256 values, 16 = 65536 values.)
+    unsigned sampleBits = 4; // (4 = 16 values, 8 = 256 values, 16 = 65536 values.)
 
     // Make very sure only a supported sample size is used.
     if (sampleBits != 4 && sampleBits != 8 && sampleBits != 16) {

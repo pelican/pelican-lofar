@@ -4,7 +4,9 @@ set(lofarTest_src
     src/libTest.cpp
     src/LofarChunkerTest.cpp
     src/DataStreamingTest.cpp
-    #src/AdapterTimeStreamTest.cpp
+    src/TimeStreamDataTest.cpp
+    src/ChannelisedStreamDataTest.cpp
+#    src/AdapterTimeStreamTest.cpp
 )
 
 set(lofarTest_moc_headers LofarDataGenerator.h)
