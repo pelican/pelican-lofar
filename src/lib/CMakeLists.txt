@@ -4,9 +4,9 @@ set( lib_src
     src/LofarStreamDataClient.cpp
     src/LofarServerClient.cpp
     src/TimeStreamData.cpp
-    src/ChannelisedStreamData.cpp
+    #src/ChannelisedStreamData.cpp
     src/AdapterTimeStream.cpp
-    src/ChanneliserPolyphase.cpp
+    #src/ChanneliserPolyphase.cpp
 )
 add_library(pelicanLofar ${lib_src} )
 
