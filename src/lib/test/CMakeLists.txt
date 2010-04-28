@@ -6,7 +6,7 @@ set(lofarTest_src
     src/DataStreamingTest.cpp
     src/TimeStreamDataTest.cpp
     src/ChannelisedStreamDataTest.cpp
-#    src/AdapterTimeStreamTest.cpp
+    src/AdapterTimeStreamTest.cpp
 )
 
 set(lofarTest_moc_headers LofarDataGenerator.h)

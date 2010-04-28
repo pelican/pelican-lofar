@@ -2,7 +2,7 @@
 
 #include "AdapterTimeStream.h"
 #include "pelican/utility/ConfigNode.h"
-#include "pelican/data/TimeStreamData.h"
+#include "TimeStreamData.h"
 #include "LofarUdpHeader.h"
 #include "LofarTypes.h"
 
@@ -124,7 +124,7 @@ void AdapterTimeStreamTest::test_deserialise()
     unsigned nSubbands = 2;
     unsigned nPolarisations = 2;
     unsigned nSamples = 10;
-    unsigned sampleBits = 4; // (4 = 16 values, 8 = 256 values, 16 = 65536 values.)
+    unsigned sampleBits = 8; // (4 = 16 values, 8 = 256 values, 16 = 65536 values.)
 
     // Make very sure only a supported sample size is used.
     if (sampleBits != 4 && sampleBits != 8 && sampleBits != 16) {
@@ -212,7 +212,6 @@ void AdapterTimeStreamTest::test_deserialise()
     catch (QString err) {
         CPPUNIT_FAIL(err.toStdString().data());
     }
-
 }
 
 

@@ -12,10 +12,10 @@
 namespace pelican {
 
 class ConfigNode;
-class TimeStreamData;
 
 namespace lofar {
 
+class TimeStreamData;
 
 /**
  * @class AdapterTimeStream
@@ -46,6 +46,8 @@ namespace lofar {
  * - samples: Number of (time) samples per packet.
  * - sampleSize: Number of bits per sample. (Samples are assumed to be complex
  *               pairs of the number of bits specified).
+ *
+ * @note
  *
  */
 

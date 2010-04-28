@@ -68,6 +68,8 @@ void AdapterTimeStream::deserialise(QIODevice* in)
     UDPPacket::Header header;
 
     // Loop over UDP packets
+    // FIXME: Find out if lofar UDP packets sent from the station are fixed sized
+    // as indicated in the packet header (lofarUdpHeader.h).
     for (unsigned p = 0; p < _nUDPPackets; ++p) {
 
         // Read the header from the IO device.
@@ -89,8 +91,10 @@ void AdapterTimeStream::deserialise(QIODevice* in)
  */
 void AdapterTimeStream::_checkData()
 {
-    // TODO: throw on unsupported sample bits.
-    //
+    if (_sampleBits != 4 && _sampleBits != 8  && _sampleBits != 16) {
+        throw QString("AdapterTimeStream: Specified number of sample bits not "
+                      "supported.");
+    }
 
     // Check that there is something of to adapt.
     if (_chunkSize == 0) {
@@ -120,7 +124,7 @@ void AdapterTimeStream::_checkData()
     // Check that the adapter dimensions agree with what could come from
     // packets.
     unsigned packetBits = _nSubbands * _nPolarisations * _nSamples * _sampleBits;
-    unsigned udpDataBits = 8130 * 8; // TODO fix this for other than 8 bit data
+    unsigned udpDataBits = 8130 * sizeof(char) * 8;
     if (packetBits > udpDataBits) {
         throw QString("AdapterTimeStream: Adapter dimensions specify more data "
                       "than fits into a UDP packet! (%1 > %2)")
@@ -143,15 +147,8 @@ void AdapterTimeStream::_checkData()
  */
 void AdapterTimeStream::_readHeader(UDPPacket::Header& header, char* buffer)
 {
-    header.version = *reinterpret_cast<uint8_t*>(&buffer[0]);
-    header.sourceInfo = *reinterpret_cast<uint8_t*>(&buffer[1]);
-    header.configuration = *reinterpret_cast<uint16_t*>(&buffer[2]);
-    header.station = *reinterpret_cast<uint16_t*>(&buffer[4]);
-    header.nrBeamlets = *reinterpret_cast<uint8_t*>(&buffer[6]);
-    header.nrBlocks = *reinterpret_cast<uint8_t*>(&buffer[7]);
-    header.timestamp = *reinterpret_cast<uint32_t*>(&buffer[8]);
-    header.blockSequenceNumber = *reinterpret_cast<uint32_t*>(&buffer[12]);
-    _printHeader(header);
+    header = *reinterpret_cast<UDPPacket::Header*>(buffer);
+//    _printHeader(header);
 }
 
 
@@ -164,11 +161,7 @@ void AdapterTimeStream::_readHeader(UDPPacket::Header& header, char* buffer)
  */
 void AdapterTimeStream::_readData(std::complex<double>* data, char* buffer)
 {
-    // Types (TODO use the ones defined elsewhere...)
-    typedef std::complex<double> fComplex64;
-    typedef TYPES::i4complex iComplex8;
-    typedef TYPES::i8complex iComplex16;
-    typedef TYPES::i16complex iComplex32;
+    typedef std::complex<double> dComplex;
 
     // Loop over dimensions in the packet and write into the data blob.
     for (unsigned iPtr = 0, t = 0; t < _nSamples; ++t) {
@@ -179,26 +172,26 @@ void AdapterTimeStream::_readData(std::complex<double>* data, char* buffer)
                 unsigned blobIndex = _nSamples * (c * _nPolarisations + p) + t;
 
                 if (_sampleBits == 4) {
-                    iComplex8 value = *reinterpret_cast<iComplex8*>(&buffer[iPtr]);
-                    data[blobIndex] = fComplex64(double(value.real()), double(value.imag()));
-                    iPtr += sizeof(iComplex8);
+                    TYPES::i4complex value = *reinterpret_cast<TYPES::i4complex*>(&buffer[iPtr]);
+                    data[blobIndex] = dComplex(double(value.real()), double(value.imag()));
+                    iPtr += sizeof(TYPES::i4complex);
                 }
                 else if (_sampleBits == 8) {
-                    iComplex16 i8c = *reinterpret_cast<iComplex16*>(&buffer[iPtr]);
-                    data[blobIndex] = fComplex64(double(i8c.real()), double(i8c.imag()));
-                    iPtr += sizeof(iComplex16);
+                    TYPES::i8complex i8c = *reinterpret_cast<TYPES::i8complex*>(&buffer[iPtr]);
+                    data[blobIndex] = dComplex(double(i8c.real()), double(i8c.imag()));
+                    iPtr += sizeof(TYPES::i8complex);
                 }
                 else if (_sampleBits ==16) {
-                    iComplex32 i16c = *reinterpret_cast<iComplex32*>(&buffer[iPtr]);
-                    data[blobIndex] = fComplex64(double(i16c.real()), double(i16c.imag()));
-                    iPtr += sizeof(iComplex32);
+                    TYPES::i16complex i16c = *reinterpret_cast<TYPES::i16complex*>(&buffer[iPtr]);
+                    data[blobIndex] = dComplex(double(i16c.real()), double(i16c.imag()));
+                    iPtr += sizeof(TYPES::i16complex);
                 }
                 else {
                     throw QString("AdapterTimeStream: Specified number of bits "
                             " per sample (%1) unsupported").arg(_sampleBits);
                 }
 
-                std::cout << data[blobIndex] << std::endl;
+//                std::cout << data[blobIndex] << std::endl;
             }
         }
     }
