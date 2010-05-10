@@ -205,6 +205,7 @@ void AdapterTimeStreamTest::test_deserialise()
     QBuffer buffer;
     buffer.setData(reinterpret_cast<char*>(&packets[0]), chunkSize);
     buffer.open(QBuffer::ReadOnly);
+    //std::cout << "buffer size = " << buffer.size() << std::endl;
 
     try {
         adapter.deserialise(&buffer);

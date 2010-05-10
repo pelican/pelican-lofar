@@ -8,7 +8,7 @@
 #include "pelican/data/DataBlob.h"
 #include <vector>
 #include <complex>
-#include <QByteArray>
+#include <QIODevice>
 
 namespace pelican {
 namespace lofar {
@@ -179,21 +179,21 @@ class ChannelisedStreamData : public T_ChannelisedSteamData<std::complex<double>
                     nChannels) {}
 
         /// Constructs a data blob from a serial copy of the blob.
-        ChannelisedStreamData(const QByteArray& blob)
+        ChannelisedStreamData(QIODevice& serialBlob)
         : T_ChannelisedSteamData<std::complex<double> >()
         {
-            deserialise(blob);
+            deserialise(serialBlob);
         }
 
         /// Destroys the time stream data blob.
         ~ChannelisedStreamData() {}
 
     public:
-        /// Serialises the data blob to a byte array.
-        QByteArray serialise() const;
+        /// Serialises the data blob.
+        void serialise(QIODevice&) const;
 
-        /// Deserialises the data blob from the byte array created with serialise.
-        void deserialise(const QByteArray& blob);
+        /// Deserialises the data blob.
+        void deserialise(QIODevice&);
 };
 
 }// namespace lofar

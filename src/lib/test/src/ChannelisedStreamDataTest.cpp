@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include <complex>
+#include <QBuffer>
 
 namespace pelican {
 namespace lofar {
@@ -165,15 +166,22 @@ void ChannelisedStreamDataTest::test_serialise_deserialise()
      spectrum1.setChannelfrequencyDelta(freqDelta);
 
      // Serialise to a byte array.
-     QByteArray serialData = spectrum1.serialise();
+     QBuffer serialBlob;
+     serialBlob.open(QBuffer::WriteOnly);
+     spectrum1.serialise(serialBlob);
+     serialBlob.close();
 
      // check the return byte array is the expected size.
-     int expectedSize = 3 * sizeof(unsigned) + 2 * sizeof(double)
+     qint64 expectedSize = 3 * sizeof(unsigned) + 2 * sizeof(double)
              + spectrum1.size() * sizeof(std::complex<double>);
-     CPPUNIT_ASSERT_EQUAL(expectedSize, serialData.size());
+     CPPUNIT_ASSERT_EQUAL(expectedSize, serialBlob.size());
+
+     serialBlob.open(QBuffer::ReadOnly);
 
      // Construct a new data blob to fill via the deserialise.
-     ChannelisedStreamData spectrum2(serialData);
+     ChannelisedStreamData spectrum2(serialBlob);
+
+     serialBlob.close();
 
      // Check the header deserialised correctly.
      CPPUNIT_ASSERT_EQUAL(nSubbands, spectrum2.nSubbands());
