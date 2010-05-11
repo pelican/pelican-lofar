@@ -37,6 +37,7 @@ class TimeStreamData;
  *			<polarisations number=""/>
  *			<samples number=""/>
  *			<sampleSize bits=""/>
+ *			<fixedSizePackets value="true|false"/<
  *		<\AdapterTimeStream>
  * \verbatim
  *
@@ -85,6 +86,7 @@ class AdapterTimeStream : public AbstractStreamAdapter
 
     private:
         TimeStreamData* _timeData;
+        bool _fixedPacketSize;
         unsigned _nUDPPackets;
         unsigned _nSubbands;
         unsigned _nPolarisations;
