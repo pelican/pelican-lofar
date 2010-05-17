@@ -31,6 +31,8 @@ AdapterTimeStream::AdapterTimeStream(const ConfigNode& config)
     _nPolarisations = config.getOption("polarisations", "number", "0").toUInt();
     _nSamples = config.getOption("samples", "number", "0").toUInt();
     _sampleBits = config.getOption("sampleSize", "bits", "0").toUInt();
+    _fixedPacketSize = config.getOption("fixedSizePackets", "value", "true").
+    		toLower().startsWith("true") ? true : false;
 }
 
 
@@ -54,7 +56,8 @@ void AdapterTimeStream::deserialise(QIODevice* in)
     // Packet size variables.
     size_t packetSize = sizeof(UDPPacket);
     size_t headerSize = sizeof(UDPPacket::Header);
-    size_t dataSize = 8130;
+    size_t dataSize = _fixedPacketSize ?
+    		8130 : _nSubbands * _nPolarisations * _nSamples * _sampleBits;
     size_t paddingSize = packetSize - headerSize - dataSize;
 
     // Temporary arrays for buffering data from the IO Device.
@@ -92,7 +95,8 @@ void AdapterTimeStream::deserialise(QIODevice* in)
  */
 void AdapterTimeStream::_checkData()
 {
-    if (_sampleBits != 4 && _sampleBits != 8  && _sampleBits != 16) {
+    // Check for supported sample bits.
+	if (_sampleBits != 4 && _sampleBits != 8  && _sampleBits != 16) {
         throw QString("AdapterTimeStream: Specified number of sample bits not "
                       "supported.");
     }
@@ -102,7 +106,9 @@ void AdapterTimeStream::_checkData()
         throw QString("AdapterTimeStream: Chunk size Zero.");
     }
 
-    unsigned packetSize = sizeof(UDPPacket);
+    unsigned packetBits = _nSubbands * _nPolarisations * _nSamples * _sampleBits * 2;
+    unsigned packetSize = _fixedPacketSize ?
+    		sizeof(UDPPacket) : sizeof(UDPPacket::Header) + packetBits / 8;
 
     // Check the chunk size matches the expected number of UDPPackets
     if (_chunkSize != packetSize * _nUDPPackets) {
@@ -112,7 +118,7 @@ void AdapterTimeStream::_checkData()
     }
 
     // Check the data blob passed to the adapter is allocated.
-    if (_data == NULL) {
+    if (!_data) {
         throw QString("AdapterTimeStream: Cannot deserialise into an "
                       "unallocated blob!.");
     }
@@ -123,9 +129,8 @@ void AdapterTimeStream::_checkData()
     }
 
     // Check that the adapter dimensions agree with what could come from
-    // packets.
-    unsigned packetBits = _nSubbands * _nPolarisations * _nSamples * _sampleBits;
-    unsigned udpDataBits = 8130 * sizeof(char) * 8;
+    // packets. TODO test this...
+    unsigned udpDataBits = _fixedPacketSize ? 8130 * sizeof(char) * 8 : packetBits;
     if (packetBits > udpDataBits) {
         throw QString("AdapterTimeStream: Adapter dimensions specify more data "
                       "than fits into a UDP packet! (%1 > %2)")

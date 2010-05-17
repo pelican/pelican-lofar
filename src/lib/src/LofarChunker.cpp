@@ -16,6 +16,8 @@ namespace lofar {
 /**
  * @details
  * Constructs a new LofarChunker.
+ *
+ * TODO: this assumes variable packet size. make this a configuration option.
  */
 LofarChunker::LofarChunker(const ConfigNode& config) : AbstractChunker(config)
 {
@@ -60,6 +62,10 @@ QIODevice* LofarChunker::newDevice()
 /**
  * @details
  * Gets the next chunk of data from the UDP socket (if it exists).
+ *
+ * TODO: this may not work if next is triggered from udp data being available
+ * as it expects to add a number of packets to a chunk... needs testing.
+ *
  */
 void LofarChunker::next(QIODevice* device)
 {
@@ -78,7 +84,7 @@ void LofarChunker::next(QIODevice* device)
 
     // Loop over UDP packets.
     for (int i = 0; i < _nPackets; i++) {
-       
+
         // Interruptible read, to allow stopping this thread even if the station does not send data
         socket -> waitForReadyRead();
         if ( ( sizeDatagram = socket->readDatagram(reinterpret_cast<char*>(&currPacket), _packetSize) ) <= 0 ) {
@@ -87,7 +93,7 @@ void LofarChunker::next(QIODevice* device)
             continue;
         }
 
-        // TODO Check for endianness
+        // TODO Check for endianness. <-- this is defined in the udp packet doc?
         ++_packetsAccepted;
         unsigned seqid   = currPacket.header.timestamp;
         unsigned blockid = currPacket.header.blockSequenceNumber;
@@ -115,7 +121,7 @@ void LofarChunker::next(QIODevice* device)
             unsigned lostPackets = seqid - previousSeqid - 1;
 
             // Generate lostPackets empty packets
-            for (unsigned packetCounter = 0; packetCounter < lostPackets && 
+            for (unsigned packetCounter = 0; packetCounter < lostPackets &&
                                              i + packetCounter < _nPackets; packetCounter++) {
                 offset = writePacket(&writableData, emptyPacket, offset);
                 i += 1;
@@ -131,7 +137,7 @@ void LofarChunker::next(QIODevice* device)
         offset = writePacket(&writableData, currPacket, offset);
         previousSeqid = seqid;
     }
- 
+
     // Update _startTime
     _startTime = previousSeqid;
 }
