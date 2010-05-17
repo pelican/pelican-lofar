@@ -1,14 +1,15 @@
 #include "AdapterTimeStream.h"
 
-#include "pelican/data/TimeStreamData.h"
-#include "pelican/utility/ConfigNode.h"
 #include "LofarTypes.h"
-#include <cmath>
+#include "TimeStreamData.h"
+
+#include "pelican/utility/ConfigNode.h"
+
 #include <boost/cstdint.hpp>
+#include <cmath>
 #include <QString>
 
 namespace pelican {
-
 namespace lofar {
 
 PELICAN_DECLARE_ADAPTER(AdapterTimeStream)
@@ -29,6 +30,8 @@ AdapterTimeStream::AdapterTimeStream(const ConfigNode& config)
     _nPolarisations = config.getOption("polarisations", "number", "0").toUInt();
     _nSamples = config.getOption("samples", "number", "0").toUInt();
     _sampleBits = config.getOption("sampleSize", "bits", "0").toUInt();
+    _fixedPacketSize = config.getOption("fixedSizePackets", "value", "true").
+    		toLower().startsWith("true") ? true : false;
 }
 
 
@@ -52,7 +55,8 @@ void AdapterTimeStream::deserialise(QIODevice* in)
     // Packet size variables.
     size_t packetSize = sizeof(UDPPacket);
     size_t headerSize = sizeof(UDPPacket::Header);
-    size_t dataSize = 8130;
+    size_t dataSize = _fixedPacketSize ?
+    		8130 : _nSubbands * _nPolarisations * _nSamples * _sampleBits;
     size_t paddingSize = packetSize - headerSize - dataSize;
 
     // Temporary arrays for buffering data from the IO Device.
@@ -67,6 +71,8 @@ void AdapterTimeStream::deserialise(QIODevice* in)
     UDPPacket::Header header;
 
     // Loop over UDP packets
+    // FIXME: Find out if lofar UDP packets sent from the station are fixed sized
+    // as indicated in the packet header (lofarUdpHeader.h).
     for (unsigned p = 0; p < _nUDPPackets; ++p) {
 
         // Read the header from the IO device.
@@ -88,15 +94,20 @@ void AdapterTimeStream::deserialise(QIODevice* in)
  */
 void AdapterTimeStream::_checkData()
 {
-    // TODO: throw on unsupported sample bits.
-    //
+    // Check for supported sample bits.
+	if (_sampleBits != 4 && _sampleBits != 8  && _sampleBits != 16) {
+        throw QString("AdapterTimeStream: Specified number of sample bits not "
+                      "supported.");
+    }
 
     // Check that there is something of to adapt.
     if (_chunkSize == 0) {
         throw QString("AdapterTimeStream: Chunk size Zero.");
     }
 
-    unsigned packetSize = sizeof(UDPPacket);
+    unsigned packetBits = _nSubbands * _nPolarisations * _nSamples * _sampleBits * 2;
+    unsigned packetSize = _fixedPacketSize ?
+    		sizeof(UDPPacket) : sizeof(UDPPacket::Header) + packetBits / 8;
 
     // Check the chunk size matches the expected number of UDPPackets
     if (_chunkSize != packetSize * _nUDPPackets) {
@@ -106,7 +117,7 @@ void AdapterTimeStream::_checkData()
     }
 
     // Check the data blob passed to the adapter is allocated.
-    if (_data == NULL) {
+    if (!_data) {
         throw QString("AdapterTimeStream: Cannot deserialise into an "
                       "unallocated blob!.");
     }
@@ -117,9 +128,8 @@ void AdapterTimeStream::_checkData()
     }
 
     // Check that the adapter dimensions agree with what could come from
-    // packets.
-    unsigned packetBits = _nSubbands * _nPolarisations * _nSamples * _sampleBits;
-    unsigned udpDataBits = 8130 * 8;
+    // packets. TODO test this...
+    unsigned udpDataBits = _fixedPacketSize ? 8130 * sizeof(char) * 8 : packetBits;
     if (packetBits > udpDataBits) {
         throw QString("AdapterTimeStream: Adapter dimensions specify more data "
                       "than fits into a UDP packet! (%1 > %2)")
@@ -142,14 +152,7 @@ void AdapterTimeStream::_checkData()
  */
 void AdapterTimeStream::_readHeader(UDPPacket::Header& header, char* buffer)
 {
-    header.version = *reinterpret_cast<uint8_t*>(&buffer[0]);
-    header.sourceInfo = *reinterpret_cast<uint8_t*>(&buffer[1]);
-    header.configuration = *reinterpret_cast<uint16_t*>(&buffer[2]);
-    header.station = *reinterpret_cast<uint16_t*>(&buffer[4]);
-    header.nrBeamlets = *reinterpret_cast<uint8_t*>(&buffer[6]);
-    header.nrBlocks = *reinterpret_cast<uint8_t*>(&buffer[7]);
-    header.timestamp = *reinterpret_cast<uint32_t*>(&buffer[8]);
-    header.blockSequenceNumber = *reinterpret_cast<uint32_t*>(&buffer[12]);
+    header = *reinterpret_cast<UDPPacket::Header*>(buffer);
 //    _printHeader(header);
 }
 
@@ -163,11 +166,7 @@ void AdapterTimeStream::_readHeader(UDPPacket::Header& header, char* buffer)
  */
 void AdapterTimeStream::_readData(std::complex<double>* data, char* buffer)
 {
-    // Types (TODO use the ones defined elsewhere...)
-    typedef std::complex<double> fComplex64;
-    typedef TYPES::i4complex iComplex8;
-    typedef TYPES::i8complex iComplex16;
-    typedef TYPES::i16complex iComplex32;
+    typedef std::complex<double> dComplex;
 
     // Loop over dimensions in the packet and write into the data blob.
     for (unsigned iPtr = 0, t = 0; t < _nSamples; ++t) {
@@ -178,19 +177,19 @@ void AdapterTimeStream::_readData(std::complex<double>* data, char* buffer)
                 unsigned blobIndex = _nSamples * (c * _nPolarisations + p) + t;
 
                 if (_sampleBits == 4) {
-                    iComplex8 value = *reinterpret_cast<iComplex8*>(&buffer[iPtr]);
-                    data[blobIndex] = fComplex64(double(value.real()), double(value.imag()));
-                    iPtr += sizeof(iComplex8);
+                    TYPES::i4complex value = *reinterpret_cast<TYPES::i4complex*>(&buffer[iPtr]);
+                    data[blobIndex] = dComplex(double(value.real()), double(value.imag()));
+                    iPtr += sizeof(TYPES::i4complex);
                 }
                 else if (_sampleBits == 8) {
-                    iComplex16 i8c = *reinterpret_cast<iComplex16*>(&buffer[iPtr]);
-                    data[blobIndex] = fComplex64(double(i8c.real()), double(i8c.imag()));
-                    iPtr += sizeof(iComplex16);
+                    TYPES::i8complex i8c = *reinterpret_cast<TYPES::i8complex*>(&buffer[iPtr]);
+                    data[blobIndex] = dComplex(double(i8c.real()), double(i8c.imag()));
+                    iPtr += sizeof(TYPES::i8complex);
                 }
                 else if (_sampleBits ==16) {
-                    iComplex32 i16c = *reinterpret_cast<iComplex32*>(&buffer[iPtr]);
-                    data[blobIndex] = fComplex64(double(i16c.real()), double(i16c.imag()));
-                    iPtr += sizeof(iComplex32);
+                    TYPES::i16complex i16c = *reinterpret_cast<TYPES::i16complex*>(&buffer[iPtr]);
+                    data[blobIndex] = dComplex(double(i16c.real()), double(i16c.imag()));
+                    iPtr += sizeof(TYPES::i16complex);
                 }
                 else {
                     throw QString("AdapterTimeStream: Specified number of bits "

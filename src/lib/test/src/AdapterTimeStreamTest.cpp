@@ -2,7 +2,7 @@
 
 #include "AdapterTimeStream.h"
 #include "pelican/utility/ConfigNode.h"
-#include "pelican/data/TimeStreamData.h"
+#include "TimeStreamData.h"
 #include "LofarUdpHeader.h"
 #include "LofarTypes.h"
 
@@ -67,7 +67,7 @@ void AdapterTimeStreamTest::test_configuration()
  * @details
  * Method to test the _checkData() method of the adapter.
  */
-void AdapterTimeStreamTest::test_checkData()
+void AdapterTimeStreamTest::test_checkDataFixedPacket()
 {
     // Create configuration node.
     unsigned nPackets = 2;
@@ -75,6 +75,7 @@ void AdapterTimeStreamTest::test_checkData()
     unsigned nPolarisations = 2;
     unsigned nSamples = 10;
     unsigned sampleBits = 8;
+    QString fixedPackets = "true";
     QString xml = ""
             "<AdapterTimeStream name=\"test\">"
             "	<packetsPerChunk number=\"" + QString::number(nPackets) + "\"/>"
@@ -82,6 +83,7 @@ void AdapterTimeStreamTest::test_checkData()
             "	<polarisations number=\"" + QString::number(nPolarisations) + "\"/>"
             "	<samples number=\"" + QString::number(nSamples) + "\"/>"
             "	<sampleSize bits=\"" + QString::number(sampleBits) + "\"/>"
+            "   <fixedSizePackets value=\"" + fixedPackets + "\"/>"
             "</AdapterTimeStream>";
     ConfigNode configNode(xml);
 
@@ -93,9 +95,60 @@ void AdapterTimeStreamTest::test_checkData()
 
     // Set the data blob to be adapted, the input chuck size and associated
     // service data.
-    // size_t chunkSize = nTimes * dataBytes * 2;
     unsigned packetSize = sizeof(UDPPacket);
-    size_t chunkSize = packetSize * 2;
+    size_t chunkSize = packetSize * nPackets;
+    adapter.config(&data, chunkSize, QHash<QString, DataBlob*>());
+
+    // Check the adapter.config() method behaved as expected.
+    CPPUNIT_ASSERT_EQUAL(chunkSize, adapter._chunkSize);
+    CPPUNIT_ASSERT_EQUAL(0, adapter._serviceData.size());
+    CPPUNIT_ASSERT_EQUAL(nSamples * nPolarisations * nSubbands,
+            static_cast<TimeStreamData*>(adapter._data)->size());
+
+    try {
+       adapter._checkData();
+    }
+    catch (QString err) {
+        CPPUNIT_FAIL(err.toStdString().data());
+    }
+}
+
+
+/**
+ * @details
+ * Method to test the _checkData() method of the adapter.
+ */
+void AdapterTimeStreamTest::test_checkDataVariablePacket()
+{
+    // Create configuration node.
+    unsigned nPackets = 2;
+    unsigned nSubbands = 4;
+    unsigned nPolarisations = 2;
+    unsigned nSamples = 10;
+    unsigned sampleBits = 8;
+    QString fixedPackets = "false";
+    QString xml = ""
+            "<AdapterTimeStream name=\"test\">"
+            "	<packetsPerChunk number=\"" + QString::number(nPackets) + "\"/>"
+            "   <subbands number=\"" + QString::number(nSubbands) + "\"/>"
+            "	<polarisations number=\"" + QString::number(nPolarisations) + "\"/>"
+            "	<samples number=\"" + QString::number(nSamples) + "\"/>"
+            "	<sampleSize bits=\"" + QString::number(sampleBits) + "\"/>"
+            "   <fixedSizePackets value=\"" + fixedPackets + "\"/>"
+            "</AdapterTimeStream>";
+    ConfigNode configNode(xml);
+
+    // Construct the adapter.
+    AdapterTimeStream adapter(configNode);
+
+    // Construct a data blob to adapt into.
+    TimeStreamData data(nSubbands, nPolarisations, nSamples);
+
+    // Set the data blob to be adapted, the input chuck size and associated
+    // service data.
+    size_t packetSize = sizeof(UDPPacket::Header) +
+    		(nSubbands * nPolarisations * nSamples * sampleBits * 2) / 8;
+    size_t chunkSize = packetSize * nPackets;
     adapter.config(&data, chunkSize, QHash<QString, DataBlob*>());
 
     // Check the adapter.config() method behaved as expected.
@@ -205,6 +258,7 @@ void AdapterTimeStreamTest::test_deserialise()
     QBuffer buffer;
     buffer.setData(reinterpret_cast<char*>(&packets[0]), chunkSize);
     buffer.open(QBuffer::ReadOnly);
+    //std::cout << "buffer size = " << buffer.size() << std::endl;
 
     try {
         adapter.deserialise(&buffer);
@@ -212,7 +266,6 @@ void AdapterTimeStreamTest::test_deserialise()
     catch (QString err) {
         CPPUNIT_FAIL(err.toStdString().data());
     }
-
 }
 
 

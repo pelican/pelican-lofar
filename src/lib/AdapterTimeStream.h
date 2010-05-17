@@ -12,10 +12,10 @@
 namespace pelican {
 
 class ConfigNode;
-class TimeStreamData;
 
 namespace lofar {
 
+class TimeStreamData;
 
 /**
  * @class AdapterTimeStream
@@ -37,6 +37,7 @@ namespace lofar {
  *			<polarisations number=""/>
  *			<samples number=""/>
  *			<sampleSize bits=""/>
+ *			<fixedSizePackets value="true|false"/<
  *		<\AdapterTimeStream>
  * \verbatim
  *
@@ -46,6 +47,8 @@ namespace lofar {
  * - samples: Number of (time) samples per packet.
  * - sampleSize: Number of bits per sample. (Samples are assumed to be complex
  *               pairs of the number of bits specified).
+ *
+ * @note
  *
  */
 
@@ -83,6 +86,7 @@ class AdapterTimeStream : public AbstractStreamAdapter
 
     private:
         TimeStreamData* _timeData;
+        bool _fixedPacketSize;
         unsigned _nUDPPackets;
         unsigned _nSubbands;
         unsigned _nPolarisations;
