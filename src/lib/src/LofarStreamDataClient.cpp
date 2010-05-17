@@ -12,8 +12,9 @@ PELICAN_DECLARE_CLIENT(LofarStreamDataClient)
 /**
  *@details LofarStreamDataClient
  */
-LofarStreamDataClient::LofarStreamDataClient(const ConfigNode& config)
-    : DirectStreamDataClient(config)
+LofarStreamDataClient::LofarStreamDataClient(const ConfigNode& configNode,
+        const DataTypes& types, const Config* config)
+: DirectStreamDataClient(configNode, types, config)
 {
     //setChunker( "LofarChunker" );
 }

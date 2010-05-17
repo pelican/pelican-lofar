@@ -91,8 +91,7 @@ void DataStreamingTest::test_streamingClient()
     address << Config::NodeId("adapters", "");
     address << Config::NodeId("adapter", "test");
     ConfigNode configNode = config.get(address);
-    LofarStreamDataClient* client = new LofarStreamDataClient(configNode);
-    client->setDataRequirements(dataTypes);
+    LofarStreamDataClient* client = new LofarStreamDataClient(configNode, dataTypes, &config);
     _testLofarDataClient(client);
     delete client;
 }
@@ -112,8 +111,7 @@ void DataStreamingTest::test_serverClient()
     address << Config::NodeId("adapters", "");
     address << Config::NodeId("adapter", "test");
     ConfigNode configNode = config.get(address);
-    LofarServerClient* client = new LofarServerClient(configNode);
-    client->setDataRequirements(dataTypes);
+    LofarServerClient* client = new LofarServerClient(configNode, dataTypes, &config);
 
     // run the tests
     _testLofarDataClient(client);
