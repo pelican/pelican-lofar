@@ -4,16 +4,17 @@
 #include "TimeStreamData.h"
 
 #include "pelican/utility/ConfigNode.h"
+#include "pelican/adapters/AbstractStreamAdapter.h"
+
+#include <QtCore/QString>
 
 #include <boost/cstdint.hpp>
 #include <cmath>
-#include <QString>
 
 namespace pelican {
 namespace lofar {
 
 PELICAN_DECLARE_ADAPTER(AdapterTimeStream)
-
 
 /**
  * @details
