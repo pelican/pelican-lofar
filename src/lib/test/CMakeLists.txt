@@ -10,9 +10,9 @@ set(lofarTest_src
     src/ChanneliserPolyphaseTest.cpp
 )
 
-set(lofarTest_moc_headers LofarDataGenerator.h)
+set(lofarTest_moc_headers )
 
-set(lofarTestLib_src src/LofarDataGenerator.cpp src/LofarUdpEmulator.cpp)
+set(lofarTestLib_src src/LofarUdpEmulator.cpp)
 
 QT4_WRAP_CPP(lofarTest_moc_sources ${lofarTest_moc_headers})
 
