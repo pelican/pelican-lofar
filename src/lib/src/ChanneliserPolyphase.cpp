@@ -41,6 +41,10 @@ ChanneliserPolyphase::ChanneliserPolyphase(const ConfigNode& config)
 			FFTW_FORWARD, FFTW_MEASURE);
 
 	_spectrum->resize(_nSubbands, 1, _nChannels);
+
+	/// TODO
+//	_filterCoeff.load("coeffs.dat");
+	_filterCoeff.resize(_nFilterTaps, _nChannels);
 }
 
 
@@ -80,7 +84,7 @@ void ChanneliserPolyphase::run(const TimeStreamData* timeData,
 	for (unsigned s = 0; s < _nSubbands; ++s) {
 		complex<double>* sampleBuffer = &(_subbandBuffer[s])[0];
 		complex<double>* filteredBuffer = &(_filteredBuffer[s])[0];
-		const complex<double>* coeff = &_filterCoeff[0]; // different per channel?
+		const complex<double>* coeff = _filterCoeff.coefficients();
 		const complex<double>* newSamples = timeData->data(s);
 
 		_updateBuffer(newSamples, _nChannels, sampleBuffer, bufferSize);
@@ -90,8 +94,6 @@ void ChanneliserPolyphase::run(const TimeStreamData* timeData,
 		complex<double>* spectrum = _spectrum->data(s);
 		_fft(filteredBuffer, _nChannels, spectrum);
 	}
-
-
 }
 
 /**
@@ -126,7 +128,8 @@ void ChanneliserPolyphase::_filter(const complex<double>* sampleBuffer,
 	for (unsigned c = 0; nChannels; ++c) {
 		for (unsigned t = 0; t < nTaps; ++t) {
 			unsigned iBuffer = (nTaps - t) * nChannels + c;
-			filteredSamples[c] += coefficients[t] * sampleBuffer[iBuffer];
+			unsigned iCoeff = nTaps * c + t;
+			filteredSamples[c] += coefficients[iCoeff] * sampleBuffer[iBuffer];
 		}
 	}
 }

@@ -1,5 +1,5 @@
 #include "ChannelisedStreamData.h"
-#include <QIODevice>
+#include <QtCore/QIODevice>
 
 #include <iostream>
 

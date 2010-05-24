@@ -8,7 +8,7 @@
 #include "pelican/data/DataBlob.h"
 #include <vector>
 #include <complex>
-#include <QIODevice>
+#include <QtCore/QIODevice>
 
 namespace pelican {
 namespace lofar {
@@ -76,9 +76,9 @@ class T_ChannelisedSteamData : public DataBlob
             return _nChannels * ( subband * _nPolarisations + polarisation) + channel;
         }
 
-    public: // accessor methods
+    public: // Accessor methods.
         /// Returns the number of entries in the data blob.
-        unsigned size() { return _data.size(); }
+        unsigned size() const { return _data.size(); }
 
         /// Returns the number of sub-bands in the data.
         unsigned nSubbands() const { return _nSubbands; }

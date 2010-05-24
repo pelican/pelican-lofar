@@ -6,6 +6,7 @@
  */
 
 #include "pelican/modules/AbstractModule.h"
+#include "PolyphaseCoefficients.h"
 #include <complex>
 #include <vector>
 #include <fftw3.h>
@@ -67,7 +68,7 @@ class ChanneliserPolyphase : public AbstractModule
         unsigned _nFilterTaps;
         unsigned _nSubbands;
         ChannelisedStreamData* _spectrum;
-        std::vector<std::complex<double> > _filterCoeff;
+        PolyphaseCoefficients _filterCoeff;
         std::vector<std::vector<complex<double> > > _subbandBuffer;
         std::vector<std::vector<std::complex<double> > > _filteredBuffer;
 
