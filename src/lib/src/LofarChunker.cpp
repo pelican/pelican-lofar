@@ -1,7 +1,7 @@
 #include "LofarChunker.h"
 #include "LofarUdpHeader.h"
 #include "LofarTypes.h"
-#include <QUdpSocket>
+#include <QtNetwork/QUdpSocket>
 #include <stdio.h>
 
 #include <iostream>
