@@ -3,8 +3,8 @@
 
 #include <QString>
 #include <cppunit/extensions/HelperMacros.h>
-#include "LofarDataGenerator.h"
 #include "pelican/core/DataTypes.h"
+#include "pelican/utility/ConfigNode.h"
 
 /**
  * @file DataStreamingTest.h
@@ -51,13 +51,12 @@ class DataStreamingTest : public CppUnit::TestFixture
 
     private:
         // Test parameters
-        LofarDataGenerator dataGenerator;
-        int subbandsPerPacket, samplesPerPacket, nrPolarisations;
-        int port, numPackets, usecDelay;
-        char hostname[20];
-        QString adapterXML;
-        pelican::DataTypes dataTypes;
-
+        ConfigNode _emulatorNode;
+        int _subbandsPerPacket, _samplesPerPacket, _nrPolarisations;
+        int _port, _numPackets, _interval;
+        QString _hostname;
+        QString _adapterXML;
+        pelican::DataTypes _dataTypes;
 };
 
 } // namespace lofar

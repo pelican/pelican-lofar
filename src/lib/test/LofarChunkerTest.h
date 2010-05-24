@@ -2,8 +2,8 @@
 #define LOFARCHUNKERTEST_H
 
 #include <cppunit/extensions/HelperMacros.h>
-#include "LofarDataGenerator.h"
 #include "pelican/utility/Config.h"
+#include "pelican/utility/ConfigNode.h"
 
 /**
  * @file LofarChunkerTest.h
@@ -16,11 +16,11 @@ namespace lofar {
  * @class LofarChunkerTest
  *
  * @brief
- *   Unit test for the LofarChunker class
+ * Unit test for the LofarChunker class
+ *
  * @details
  *
  */
-
 class LofarChunkerTest : public CppUnit::TestFixture
 {
     public:
@@ -44,8 +44,8 @@ class LofarChunkerTest : public CppUnit::TestFixture
     private:
 
     private:
-        LofarDataGenerator dataGenerator;
         Config config;
+        ConfigNode _emulatorNode;
         
         // Data Params
         int _subbandsPerPacket;
@@ -56,4 +56,5 @@ class LofarChunkerTest : public CppUnit::TestFixture
 
 } // namespace lofar
 } // namespace pelican
+
 #endif 

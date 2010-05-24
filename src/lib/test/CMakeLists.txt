@@ -12,7 +12,7 @@ set(lofarTest_src
 
 set(lofarTest_moc_headers LofarDataGenerator.h)
 
-set(lofarTestLib_src src/LofarDataGenerator.cpp)
+set(lofarTestLib_src src/LofarDataGenerator.cpp src/LofarUdpEmulator.cpp)
 
 QT4_WRAP_CPP(lofarTest_moc_sources ${lofarTest_moc_headers})
 

@@ -14,6 +14,7 @@
 #include <netdb.h>
 #include <string.h>
 #include <cstdio>
+#include <iostream>
 
 namespace pelican {
 namespace lofar {
@@ -162,6 +163,7 @@ void LofarDataGenerator::run()
 
     // Create test packet.
     UDPPacket* packet = (UDPPacket *) malloc(packetSize);
+    std::cout << "LofarDataGenerator packet size: " <<  packetSize << std::endl;
 
     // Create packet header.
     if (_packetHeader == NULL) {
