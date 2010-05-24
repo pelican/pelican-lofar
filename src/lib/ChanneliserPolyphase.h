@@ -34,6 +34,9 @@ class ChannelisedStreamData;
 
 class ChanneliserPolyphase : public AbstractModule
 {
+	private:
+		friend class ChanneliserPolyphaseTest;
+
 	public:
         /// Constructs the channeliser module.
         ChanneliserPolyphase(const ConfigNode& config);
@@ -67,7 +70,6 @@ class ChanneliserPolyphase : public AbstractModule
         unsigned _nChannels;
         unsigned _nFilterTaps;
         unsigned _nSubbands;
-        ChannelisedStreamData* _spectrum;
         PolyphaseCoefficients _filterCoeff;
         std::vector<std::vector<complex<double> > > _subbandBuffer;
         std::vector<std::vector<std::complex<double> > > _filteredBuffer;

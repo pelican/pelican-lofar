@@ -27,3 +27,5 @@ target_link_libraries(lofarTest
 )
 
 add_test(lofarTest lofarTest)
+
+

@@ -1,13 +1,15 @@
 #include "ChanneliserPolyphase.h"
 
+#include "pelican/utility/ConfigNode.h"
 #include "TimeStreamData.h"
 #include "ChannelisedStreamData.h"
 #include <QtCore/QString>
 #include <cstring>
+#include <complex>
+#include <iostream>
 
-#include "pelican/utility/ConfigNode.h"
 
-
+using std::complex;
 
 namespace pelican {
 namespace lofar {
@@ -27,24 +29,25 @@ ChanneliserPolyphase::ChanneliserPolyphase(const ConfigNode& config)
 {
     // Get options from the config.
 	_nChannels = config.getOption("channels", "number", "512").toUInt();
-	_nFilterTaps = config.getOption("filter", "nTaps", "8").toUInt();
+	_nFilterTaps = config.getOption("filterTaps", "nTaps", "8").toUInt();
 	_nSubbands = config.getOption("subbands", "number", "62").toUInt();
+	QString coeffFile = config.getOption("coefficients", "fileName");
 
 	unsigned bufferSize = _nChannels * _nFilterTaps;
+	_subbandBuffer.resize(_nSubbands);
+	_filteredBuffer.resize(_nSubbands);
 	for (unsigned s = 0; s < _nSubbands; ++s) {
 		_subbandBuffer[s].resize(bufferSize, complex<double>(0.0, 0.0));
 		_filteredBuffer[s].resize(_nChannels, complex<double>(0.0, 0.0));
 	}
 
+	/// TODO
+//	_filterCoeff.load(coeffFile);
+	_filterCoeff.resize(_nFilterTaps, _nChannels);
+
 	// Create the fft plan
 	_fftPlan = fftw_plan_dft_1d(_nChannels, _fftwIn, _fftwOut,
-			FFTW_FORWARD, FFTW_MEASURE);
-
-	_spectrum->resize(_nSubbands, 1, _nChannels);
-
-	/// TODO
-//	_filterCoeff.load("coeffs.dat");
-	_filterCoeff.resize(_nFilterTaps, _nChannels);
+			FFTW_FORWARD, FFTW_ESTIMATE);
 }
 
 
@@ -78,7 +81,9 @@ void ChanneliserPolyphase::run(const TimeStreamData* timeData,
 	// Add polarisations together? (maybe do this in the adapter)
 	unsigned nSubbands = timeData->nSubbands();
 	unsigned nPoarisations = timeData->nPolarisations();
-	unsigned bufferSize = _subbandBuffer.size();
+	unsigned bufferSize = _subbandBuffer[0].size();
+
+	spectrum->resize(_nSubbands, 1, _nChannels);
 
 	// TODO: Channelise one subband at a time.
 	for (unsigned s = 0; s < _nSubbands; ++s) {
@@ -91,8 +96,8 @@ void ChanneliserPolyphase::run(const TimeStreamData* timeData,
 		_filter(sampleBuffer, _nFilterTaps, _nChannels, coeff, filteredBuffer);
 
 		// get the vector to FFT here.
-		complex<double>* spectrum = _spectrum->data(s);
-		_fft(filteredBuffer, _nChannels, spectrum);
+		complex<double>* subbandSpectrum = spectrum->data(s);
+		_fft(filteredBuffer, _nChannels, subbandSpectrum);
 	}
 }
 
