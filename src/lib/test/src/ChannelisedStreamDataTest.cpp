@@ -3,7 +3,7 @@
 
 #include <iostream>
 #include <complex>
-#include <QBuffer>
+#include <QtCore/QBuffer>
 
 namespace pelican {
 namespace lofar {

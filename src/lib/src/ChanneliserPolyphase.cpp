@@ -45,6 +45,9 @@ ChanneliserPolyphase::ChanneliserPolyphase(const ConfigNode& config)
 //	_filterCoeff.load(coeffFile);
     _filterCoeff.resize(_nFilterTaps, _nChannels);
 
+    _fftwIn = NULL;
+    _fftwOut = NULL;
+
     // Create the fft plan
     _fftPlan = fftw_plan_dft_1d(_nChannels, _fftwIn, _fftwOut,
             FFTW_FORWARD, FFTW_ESTIMATE);
@@ -130,15 +133,10 @@ void ChanneliserPolyphase::_filter(const complex<double>* sampleBuffer,
         const unsigned nTaps, const unsigned nChannels,
         const complex<double>* coefficients, complex<double>* filteredSamples)
 {
-//    std::cout << "nTaps = " << nTaps << std::endl;
-//    std::cout << "nChannels = " << nChannels << std::endl;
     for (unsigned c = 0; c < nChannels; ++c) {
         for (unsigned t = 0; t < nTaps; ++t) {
-
             unsigned iBuffer = (nTaps - t - 1) * nChannels + c;
             unsigned iCoeff = nTaps * c + t;
-//            std::cout << "c = " << c << " t = " << t << " iBuffer = " << iBuffer << std::endl;
-//            std::cout << "c = " << c << " t = " << t << " iCoeff = " << iCoeff << std::endl;
             filteredSamples[c] += coefficients[iCoeff] * sampleBuffer[iBuffer];
         }
     }
@@ -157,9 +155,15 @@ void ChanneliserPolyphase::_filter(const complex<double>* sampleBuffer,
 void ChanneliserPolyphase::_fft(const complex<double>* samples,
         const unsigned nSamples, complex<double>* spectrum)
 {
-    _fftwIn = (fftw_complex*)samples;
+//    std::cout << "before = " << _fftwIn << " " << samples << std::endl;
+//    std::cout << "before = " << _fftwOut << " " << spectrum << std::endl;
+
+	_fftwIn = (fftw_complex*)samples;
     _fftwOut = (fftw_complex*)spectrum;
-    fftw_execute(_fftPlan);
+//    std::cout << "after = " << _fftwOut << " " << spectrum << std::endl;
+//    std::cout << "after = " << _fftwIn << " " << samples << std::endl;
+//    fftw_execute(_fftPlan);
+    fftw_execute_dft(_fftPlan, _fftwIn, _fftwOut);
 }
 
 

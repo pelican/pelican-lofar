@@ -1,7 +1,6 @@
 #include "test/ChanneliserPolyphaseTest.h"
 
 #include "ChanneliserPolyphase.h"
-
 #include "TimeStreamData.h"
 #include "ChannelisedStreamData.h"
 #include "pelican/utility/ConfigNode.h"
@@ -119,7 +118,31 @@ void ChanneliserPolyphaseTest::test_filter()
  */
 void ChanneliserPolyphaseTest::test_fft()
 {
+    unsigned nChannels = 512;
+    unsigned nSubbands = 62;
+    unsigned nPolarisations = 1;
+    unsigned nTaps = 8;
+    ConfigNode config;
+    _setupConfig(config, nChannels, nTaps, 62, "coeffs.dat");
 
+    ChanneliserPolyphase channeliser(config);
+    ChannelisedStreamData spectrum(nSubbands, nPolarisations, nChannels);
+    std::complex<double>* subbandSpectrum;
+
+    QTime timer;
+    timer.start();
+    unsigned nIter = 1000;
+    for (unsigned i = 0; i < nIter; ++i) {
+        for (unsigned s = 0; s < nSubbands; ++s) {
+        	std::vector<std::complex<double> > filteredBuffer(nChannels, std::complex<double>(0.0, 0.0));
+        	subbandSpectrum = spectrum.data(s);
+            channeliser._fft(&filteredBuffer[0], nChannels, subbandSpectrum);
+        }
+    }
+    int elapsed = timer.elapsed();
+    std::cout << "Elapsed time = " << elapsed / 1.0e3 << " s.\n";
+    std::cout << "Time per fft = "
+              << double(elapsed)/(double(nIter) * double(nSubbands)) << " ms.\n";
 }
 
 
