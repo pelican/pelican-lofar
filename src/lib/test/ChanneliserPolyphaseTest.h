@@ -33,6 +33,7 @@ class ChanneliserPolyphaseTest : public CppUnit::TestFixture
         CPPUNIT_TEST(test_updateBuffer);
         CPPUNIT_TEST(test_filter);
         CPPUNIT_TEST(test_fft);
+        CPPUNIT_TEST(test_run);
         CPPUNIT_TEST_SUITE_END();
 
     public:
@@ -44,11 +45,10 @@ class ChanneliserPolyphaseTest : public CppUnit::TestFixture
         void test_updateBuffer();
         void test_filter();
         void test_fft();
+        void test_run();
 
     private:
-        void _setupConfig(ConfigNode& config, const unsigned nChannels,
-        		const unsigned nTaps, const unsigned nSubbands,
-        		const QString coeffFile);
+        QString _configXml(const unsigned nChannels);
 
 };
 

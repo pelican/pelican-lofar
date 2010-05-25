@@ -42,14 +42,22 @@ class ChanneliserPolyphase : public AbstractModule
         ChanneliserPolyphase(const ConfigNode& config);
 
         /// Destroys the channeliser module.
-        ~ChanneliserPolyphase() {
-            fftw_destroy_plan(_fftPlan);
-        }
+        ~ChanneliserPolyphase();
 
         /// Method converting the time stream to a spectrum.
-        void run(const TimeStreamData* timeData, ChannelisedStreamData* spectrum);
+        void run(const TimeStreamData* timeData,
+        		const PolyphaseCoefficients* filterCoeff,
+        		ChannelisedStreamData* spectra);
 
     private:
+        /// Sainity checking.
+        void _checkData(const TimeStreamData* timeData,
+        		const PolyphaseCoefficients* filterCoeff);
+
+        /// Setup processing buffers.
+        unsigned _setupBuffers(const unsigned nSubbands, const unsigned nChannels,
+        		const unsigned nFilterTaps);
+
         /// Update the sample buffer.
         void _updateBuffer(const complex<double>* samples,
         		const unsigned nSamples, complex<double>* buffer,
@@ -67,16 +75,12 @@ class ChanneliserPolyphase : public AbstractModule
         		complex<double>* spectrum);
 
     private:
-        unsigned _nChannels;
-        unsigned _nFilterTaps;
-        unsigned _nSubbands;
-        PolyphaseCoefficients _filterCoeff;
+        unsigned _nChannels;	///< Number of channels to produce per subband.
+
+        // TODO the following should probably be matrixes
         std::vector<std::vector<complex<double> > > _subbandBuffer;
-        std::vector<std::vector<std::complex<double> > > _filteredBuffer;
 
         fftw_plan _fftPlan;
-        fftw_complex* _fftwIn;
-        fftw_complex* _fftwOut;
 };
 
 

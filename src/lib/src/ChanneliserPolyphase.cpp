@@ -7,6 +7,7 @@
 #include <cstring>
 #include <complex>
 #include <iostream>
+#include <fftw3.h>
 
 
 using std::complex;
@@ -29,29 +30,26 @@ ChanneliserPolyphase::ChanneliserPolyphase(const ConfigNode& config)
 {
     // Get options from the config.
     _nChannels = config.getOption("channels", "number", "512").toUInt();
-    _nFilterTaps = config.getOption("filterTaps", "nTaps", "8").toUInt();
-    _nSubbands = config.getOption("subbands", "number", "62").toUInt();
-    QString coeffFile = config.getOption("coefficients", "fileName");
 
-    unsigned bufferSize = _nChannels * _nFilterTaps;
-    _subbandBuffer.resize(_nSubbands);
-    _filteredBuffer.resize(_nSubbands);
-    for (unsigned s = 0; s < _nSubbands; ++s) {
-        _subbandBuffer[s].resize(bufferSize, complex<double>(0.0, 0.0));
-        _filteredBuffer[s].resize(_nChannels, complex<double>(0.0, 0.0));
-    }
-
-    /// TODO
-//	_filterCoeff.load(coeffFile);
-    _filterCoeff.resize(_nFilterTaps, _nChannels);
-
-    _fftwIn = NULL;
-    _fftwOut = NULL;
-
-    // Create the fft plan
-    _fftPlan = fftw_plan_dft_1d(_nChannels, _fftwIn, _fftwOut,
-            FFTW_FORWARD, FFTW_ESTIMATE);
+    // Create the fft plan.
+    size_t fftSize = _nChannels * sizeof(fftw_complex);
+    fftw_complex* in = (fftw_complex*) fftw_malloc(fftSize);
+    fftw_complex* out = (fftw_complex*) fftw_malloc(fftSize);
+    _fftPlan = fftw_plan_dft_1d(_nChannels, in, out, FFTW_FORWARD, FFTW_MEASURE);
+    fftw_free(in);
+    fftw_free(out);
 }
+
+
+/**
+ * @details
+ * Destroys the channeliser module.
+ */
+ChanneliserPolyphase::~ChanneliserPolyphase()
+{
+    fftw_destroy_plan(_fftPlan);
+}
+
 
 
 /**
@@ -62,49 +60,93 @@ ChanneliserPolyphase::ChanneliserPolyphase(const ConfigNode& config)
  * @param[out] spectrum Channels produced.
  */
 void ChanneliserPolyphase::run(const TimeStreamData* timeData,
-        ChannelisedStreamData* spectrum)
+		const PolyphaseCoefficients* filterCoeff,
+		ChannelisedStreamData* spectra)
 {
-    if (!timeData)
-        throw QString("ChanneliserPolyphase: Time stream data blob missing.");
+	_checkData(timeData, filterCoeff);
 
-    if (!spectrum)
-        throw QString("ChanneliserPolyphase: Spectrum data blob missing.");
+	// TODO: Combine polarisations ...? (maybe do this in the adapter)
+    unsigned nPolarisations = timeData->nPolarisations();
+	const unsigned nSubbands = timeData->nSubbands();
+    const unsigned nFilterTaps = filterCoeff->nTaps();
 
-    if (timeData->nSubbands() == 0)
-        throw QString("ChanneliserPolyphase: Empty time data blob");
+    unsigned bufferSize = _setupBuffers(nSubbands, _nChannels, nFilterTaps);
 
-    if (timeData->nSamples() == 0)
-            throw QString("ChanneliserPolyphase: Empty time data blob");
+    // Resize the output spectra data blob.
+	nPolarisations = 1;
+    spectra->resize(nSubbands, nPolarisations, _nChannels);
 
-    if (timeData->nSamples() == _nChannels)
-        throw QString("ChanneliserPolyphase: Dimension mismatch: "
-                "Number of samples %1 != number of channels %2.")
-                .arg(timeData->nSamples()).arg(_nChannels);
+    // Pointers to processing buffers.
+    complex<double>* subbandBuffer;
+    std::vector<complex<double> > filteredData(_nChannels);
+    const complex<double>* coeff = filterCoeff->coefficients();
 
-    // Add polarisations together? (maybe do this in the adapter)
-    unsigned nSubbands = timeData->nSubbands();
-    unsigned nPoarisations = timeData->nPolarisations();
-    unsigned bufferSize = _subbandBuffer[0].size();
+    for (unsigned s = 0; s < nSubbands; ++s) {
 
-    spectrum->resize(_nSubbands, 1, _nChannels);
+    	subbandBuffer = &(_subbandBuffer[s])[0];
 
-    // TODO: Channelise one subband at a time.
-    for (unsigned s = 0; s < _nSubbands; ++s) {
-        complex<double>* sampleBuffer = &(_subbandBuffer[s])[0];
-        complex<double>* filteredBuffer = &(_filteredBuffer[s])[0];
-        const complex<double>* coeff = _filterCoeff.coefficients();
-        const complex<double>* newSamples = timeData->data(s);
+    	// Update buffered (lagged) data for the subband.
+        _updateBuffer(timeData->data(s), _nChannels, subbandBuffer, bufferSize);
 
-        _updateBuffer(newSamples, _nChannels, sampleBuffer, bufferSize);
-        _filter(sampleBuffer, _nFilterTaps, _nChannels, coeff, filteredBuffer);
+        // Apply the PPF.
+        _filter(subbandBuffer, nFilterTaps, _nChannels, coeff, &filteredData[0]);
 
-        // get the vector to FFT here.
-        complex<double>* subbandSpectrum = spectrum->data(s);
-        _fft(filteredBuffer, _nChannels, subbandSpectrum);
+        // FFT the filtered subband data to form a new spectrum.
+        _fft(&filteredData[0], _nChannels, spectra->data(s));
     }
 }
 
+
 /**
+ * @details
+ */
+void ChanneliserPolyphase::_checkData(const TimeStreamData* timeData,
+		const PolyphaseCoefficients* filterCoeff)
+{
+	if (!timeData)
+		throw QString("ChanneliserPolyphase: Time stream data blob missing.");
+
+	if (!filterCoeff)
+		throw QString("ChanneliserPolyphase: filter coefficients data blob missing.");
+
+	if (timeData->nSubbands() == 0)
+		throw QString("ChanneliserPolyphase: Empty time data blob");
+
+	if (timeData->nSamples() == 0)
+		throw QString("ChanneliserPolyphase: Empty time data blob");
+
+	if (timeData->nSamples() == _nChannels)
+		throw QString("ChanneliserPolyphase: Dimension mismatch: "
+				"Number of samples %1 != number of output channels %2.")
+				.arg(timeData->nSamples()).arg(_nChannels);
+
+	if (filterCoeff->nChannels() != _nChannels)
+		throw QString("ChanneliserPolyphase: Dimension mismatch: "
+				"Number of filter channels %1 != number of output channels %2.")
+				.arg(timeData->nSamples()).arg(_nChannels);
+}
+
+
+/**
+ * @details
+ * Sets up processing buffers
+ *
+ * @param nChannels
+ * @param nFilterTaps
+ */
+unsigned ChanneliserPolyphase::_setupBuffers(const unsigned nSubbands,
+		const unsigned nChannels, const unsigned nFilterTaps)
+{
+    _subbandBuffer.resize(nSubbands);
+    unsigned bufferSize = nChannels * nFilterTaps;
+    for (unsigned s = 0; s < nSubbands; ++s) {
+        _subbandBuffer[s].resize(bufferSize, complex<double>(0.0, 0.0));
+    }
+    return bufferSize;
+}
+
+/**
+ * @details
  * Prepend nSamples complex data into the start of the buffer moving along
  * other data.
  *
@@ -122,6 +164,7 @@ void ChanneliserPolyphase::_updateBuffer(const complex<double>* samples,
 
 
 /**
+ * @details
  * Filter a buffer of time samples.
  *
  * @param samples
@@ -135,9 +178,10 @@ void ChanneliserPolyphase::_filter(const complex<double>* sampleBuffer,
 {
     for (unsigned c = 0; c < nChannels; ++c) {
         for (unsigned t = 0; t < nTaps; ++t) {
-            unsigned iBuffer = (nTaps - t - 1) * nChannels + c;
+//            unsigned iBuffer = (nTaps - t - 1) * nChannels + c;
             unsigned iCoeff = nTaps * c + t;
-            filteredSamples[c] += coefficients[iCoeff] * sampleBuffer[iBuffer];
+//            filteredSamples[c] += coefficients[iCoeff] * sampleBuffer[iBuffer];
+            filteredSamples[c] += coefficients[iCoeff] * sampleBuffer[iCoeff];
         }
     }
 }
@@ -146,6 +190,7 @@ void ChanneliserPolyphase::_filter(const complex<double>* sampleBuffer,
 
 
 /**
+ * @details
  * FFT a vector of nSamples time data samples to produce a spectrum.
  *
  * @param samples
@@ -155,15 +200,7 @@ void ChanneliserPolyphase::_filter(const complex<double>* sampleBuffer,
 void ChanneliserPolyphase::_fft(const complex<double>* samples,
         const unsigned nSamples, complex<double>* spectrum)
 {
-//    std::cout << "before = " << _fftwIn << " " << samples << std::endl;
-//    std::cout << "before = " << _fftwOut << " " << spectrum << std::endl;
-
-	_fftwIn = (fftw_complex*)samples;
-    _fftwOut = (fftw_complex*)spectrum;
-//    std::cout << "after = " << _fftwOut << " " << spectrum << std::endl;
-//    std::cout << "after = " << _fftwIn << " " << samples << std::endl;
-//    fftw_execute(_fftPlan);
-    fftw_execute_dft(_fftPlan, _fftwIn, _fftwOut);
+    fftw_execute_dft(_fftPlan, (fftw_complex*)samples, (fftw_complex*)spectrum);
 }
 
 
