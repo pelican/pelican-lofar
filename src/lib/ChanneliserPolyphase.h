@@ -49,14 +49,15 @@ class ChanneliserPolyphase : public AbstractModule
         		const PolyphaseCoefficients* filterCoeff,
         		ChannelisedStreamData* spectra);
 
-    private:
+        /// Setup processing buffers.
+        unsigned setupBuffers(const unsigned nSubbands, const unsigned nChannels,
+        		const unsigned nFilterTaps);
+
+	private:
         /// Sainity checking.
         void _checkData(const TimeStreamData* timeData,
         		const PolyphaseCoefficients* filterCoeff);
 
-        /// Setup processing buffers.
-        unsigned _setupBuffers(const unsigned nSubbands, const unsigned nChannels,
-        		const unsigned nFilterTaps);
 
         /// Update the sample buffer.
         void _updateBuffer(const complex<double>* samples,
@@ -77,8 +78,11 @@ class ChanneliserPolyphase : public AbstractModule
     private:
         unsigned _nChannels;	///< Number of channels to produce per subband.
 
-        // TODO the following should probably be matrixes
+        // TODO: The following should probably be matrixes
         std::vector<std::vector<complex<double> > > _subbandBuffer;
+        std::vector<std::vector<complex<double> > > _filteredData;
+
+        unsigned _nThreads;
 
         fftw_plan _fftPlan;
 };

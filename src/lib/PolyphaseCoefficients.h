@@ -45,7 +45,7 @@ class T_PolyphaseCoefficients : public DataBlob
 			_nTaps = 0; _nChannels = 0;
 		}
 
-		/// Resizes the coefficient vetor for nTaps and nChannels.
+		/// Resizes the coefficient vector for nTaps and nChannels.
 		void resize(const unsigned nTaps, const unsigned nChannels) {
 			_nTaps = nTaps; _nChannels = nChannels;
 			_coeff.resize(_nTaps * _nChannels);
@@ -69,7 +69,7 @@ class T_PolyphaseCoefficients : public DataBlob
 			return _coeff.size() > 0 ? &_coeff[0] : NULL;
 		}
 
-	private:
+	protected:
 		std::vector<T> _coeff;
 		unsigned _nTaps;
 		unsigned _nChannels;
@@ -96,9 +96,20 @@ class PolyphaseCoefficients : public T_PolyphaseCoefficients<std::complex<double
 		PolyphaseCoefficients(const unsigned nTaps, const unsigned nChannels) :
 			T_PolyphaseCoefficients<std::complex<double> >(nTaps, nChannels) {}
 
+		/// Constructs a polyphase filter coefficient data blob loading values
+		/// the specified file.
+		PolyphaseCoefficients(const QString& fileName, const unsigned nTaps,
+				const unsigned nChannels) :
+			T_PolyphaseCoefficients<std::complex<double> >()
+		{
+			load(fileName, nTaps, nChannels);
+		}
+
+
 	public:
-		/// Loads polyphase coefficients from the specified file name.
-		void load(const QString& fileName);
+		/// Load coefficients from matlab coefficient dump.
+		void load(const QString& fileName, const unsigned nFilterTaps,
+				const unsigned nChannels);
 };
 
 

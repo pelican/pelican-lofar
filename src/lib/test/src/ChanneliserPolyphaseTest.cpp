@@ -57,7 +57,7 @@ void ChanneliserPolyphaseTest::test_updateBuffer()
     ChanneliserPolyphase channeliser(config);
 
     unsigned bufferSize = nChan * nTaps;
-    channeliser._setupBuffers(nSubbands, nChan, nTaps);
+    channeliser.setupBuffers(nSubbands, nChan, nTaps);
 
     std::vector<std::complex<double> > sampleBuffer(nChan * nSubbands * nIter);
 
@@ -93,7 +93,7 @@ void ChanneliserPolyphaseTest::test_filter()
     const complex<double>* coeff = filterCoeff.coefficients();
 
     unsigned bufferSize = nChan * nTaps;
-    channeliser._setupBuffers(nSubbands, nChan, nTaps);
+    channeliser.setupBuffers(nSubbands, nChan, nTaps);
 
     std::vector<complex<double> > filteredData(nChan);
     std::complex<double>* subbandBuffer;
@@ -147,6 +147,27 @@ void ChanneliserPolyphaseTest::test_fft()
 void ChanneliserPolyphaseTest::test_run()
 {
 
+    unsigned nChannels = 512;
+    unsigned nSubbands = 62;
+    unsigned nPolarisations = 1;
+    unsigned nTaps = 8;
+    ConfigNode config(_configXml(nChannels));
+    ChanneliserPolyphase channeliser(config);
+    ChannelisedStreamData spectra(nSubbands, nPolarisations, nChannels);
+    PolyphaseCoefficients filterCoeff(nTaps, nChannels);
+    TimeStreamData data(nSubbands, nPolarisations, nChannels);
+    channeliser.setupBuffers(nSubbands, nChannels, nTaps);
+
+    unsigned nIter = 4000;
+    QTime timer;
+    timer.start();
+    for (unsigned i = 0; i < nIter; ++i) {
+    	channeliser.run(&data, &filterCoeff, &spectra);
+    }
+
+    int elapsed = timer.elapsed();
+    std::cout << "Time for run "
+              << double(elapsed)/double(nIter) << " ms. " << elapsed << "\n";
 }
 
 
