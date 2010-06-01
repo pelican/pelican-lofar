@@ -33,6 +33,8 @@ AdapterTimeStream::AdapterTimeStream(const ConfigNode& config)
     _sampleBits = config.getOption("sampleSize", "bits", "0").toUInt();
     _fixedPacketSize = config.getOption("fixedSizePackets", "value", "true").
     		toLower().startsWith("true") ? true : false;
+    _combinePols = config.getOption("combinePolarisations", "value", "false").
+        		toLower().startsWith("true") ? true : false;
 }
 
 
@@ -148,8 +150,8 @@ void AdapterTimeStream::_checkData()
  * @details
  * Reads the UDP packet header from the IO device.
  *
- * @param header UDP packet header to be filled.
- * @param buffer Char* buffer read from the IO device
+ * @param[out] header	UDP packet header to be filled.
+ * @param[in]  buffer	Char* buffer read from the IO device
  */
 void AdapterTimeStream::_readHeader(UDPPacket::Header& header, char* buffer)
 {
@@ -162,8 +164,8 @@ void AdapterTimeStream::_readHeader(UDPPacket::Header& header, char* buffer)
  * @details
  * Reads the udp data data section into the data blob data array.
  *
- * @param data time stream data data array (assumes double float format).
- * @param buffer Char* buffer read from the IO device.
+ * @param[out] data		time stream data data array (assumes double precision).
+ * @param[in]  buffer 	Char* buffer read from the IO device.
  */
 void AdapterTimeStream::_readData(std::complex<double>* data, char* buffer)
 {
@@ -239,6 +241,31 @@ void AdapterTimeStream::_printHeader(const UDPPacket::Header& header)
     std::cout << "* blockSequenceNumber = " << unsigned(header.blockSequenceNumber) << std::endl;
     std::cout << QString(80, '-').toStdString() << std::endl;
     std::cout << std::endl;
+}
+
+
+/**
+ * @details
+ * Combine polarisations.
+ *
+ * @param in
+ * @param nSubbands
+ * @param nPolarisations
+ * @param nSamples
+ * @param out
+ */
+void AdapterTimeStream::_combinePolarisations(std::complex<double>* in,
+		const unsigned nSubbands, const unsigned nPolarisations,
+		const unsigned nSamples, std::complex<double>* out)
+{
+	for (unsigned index = 0, c = 0; c < nSubbands; ++c) {
+		for (unsigned t = 0; t < nSamples; ++t) {
+			unsigned iPol1 =  nSamples * (c * nPolarisations + 0) + t;
+			unsigned iPol2 =  nSamples * (c * nPolarisations + 1) + t;
+			out[index] = in[iPol1] + in[iPol2]; // TODO: combine properly.
+			index++;
+		}
+	}
 }
 
 

@@ -37,7 +37,8 @@ class TimeStreamData;
  *			<polarisations number=""/>
  *			<samples number=""/>
  *			<sampleSize bits=""/>
- *			<fixedSizePackets value="true|false"/<
+ *			<fixedSizePackets value="true|false"/>
+ *			<combinePolarisations value="true|false" />
  *		<\AdapterTimeStream>
  * \verbatim
  *
@@ -47,9 +48,7 @@ class TimeStreamData;
  * - samples: Number of (time) samples per packet.
  * - sampleSize: Number of bits per sample. (Samples are assumed to be complex
  *               pairs of the number of bits specified).
- *
- * @note
- *
+ * - combinePolarisations: Combine the the polarisations.
  */
 
 class AdapterTimeStream : public AbstractStreamAdapter
@@ -78,15 +77,21 @@ class AdapterTimeStream : public AbstractStreamAdapter
         /// Reads the udp data data section into the data blob data array.
         void _readData(std::complex<double>* data, char* buffer);
 
-        /// Updates dimensions of the time stream data being deserialised.
+        /// Updates dimensions of t	he time stream data being deserialised.
         void _updateDimensions();
 
         /// Prints the header to standard out (for debugging).
         void _printHeader(const UDPPacket::Header& header);
 
+        /// Combines polarisations.
+        void _combinePolarisations(std::complex<double>* in,
+        		const unsigned nSubbands, const unsigned nPolarisations,
+        		const unsigned nSamples, std::complex<double>* out);
+
     private:
         TimeStreamData* _timeData;
         bool _fixedPacketSize;
+        bool _combinePols;
         unsigned _nUDPPackets;
         unsigned _nSubbands;
         unsigned _nPolarisations;
