@@ -30,6 +30,19 @@ class ChannelisedStreamData;
  *
  * @details
  * Channelises time stream data using a polyphase channelising filter.
+ *
+ * \section Configuration:
+ *
+ * Example configuration node.
+ *
+ * \verbatim
+ * 		<ChanneliserPolyphase name="">
+ * 			<channels number="512"/>
+ * 		</ChanneliserPolyphase>
+ * \verbatim
+ *
+ * - channels: Number of channels to produce.
+ *
  */
 
 class ChanneliserPolyphase : public AbstractModule
