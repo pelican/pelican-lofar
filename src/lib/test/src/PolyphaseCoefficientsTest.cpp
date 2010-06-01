@@ -88,7 +88,7 @@ void PolyphaseCoefficientsTest::test_loadCoeffFile()
 			out << QString::number(c + t, 'f', 8);
 			if (t < nTaps - 1) out << " ";
 		}
-		out << "\n";
+		out << endl;
 	}
 	file.close();
 

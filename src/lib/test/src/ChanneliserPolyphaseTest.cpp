@@ -158,7 +158,7 @@ void ChanneliserPolyphaseTest::test_run()
     TimeStreamData data(nSubbands, nPolarisations, nChannels);
     channeliser.setupBuffers(nSubbands, nChannels, nTaps);
 
-    unsigned nIter = 4000;
+    unsigned nIter = 1000;
     QTime timer;
     timer.start();
     for (unsigned i = 0; i < nIter; ++i) {
@@ -166,8 +166,8 @@ void ChanneliserPolyphaseTest::test_run()
     }
 
     int elapsed = timer.elapsed();
-    std::cout << "Time for run "
-              << double(elapsed)/double(nIter) << " ms. " << elapsed << "\n";
+    std::cout << "Time for ppf run method on 62 subbands using 2 threads = "
+              << double(elapsed)/double(nIter) << " ms.\n";
 }
 
 

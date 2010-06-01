@@ -2,13 +2,13 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR} ..)
 
 set(lofarTest_src
     src/libTest.cpp
-    #src/LofarChunkerTest.cpp
-    #src/DataStreamingTest.cpp
-    #src/TimeStreamDataTest.cpp
-    #src/ChannelisedStreamDataTest.cpp
-    #src/AdapterTimeStreamTest.cpp
+    src/LofarChunkerTest.cpp
+    src/DataStreamingTest.cpp
+    src/TimeStreamDataTest.cpp
+    src/ChannelisedStreamDataTest.cpp
+    src/AdapterTimeStreamTest.cpp
     src/PolyphaseCoefficientsTest.cpp
-    #src/ChanneliserPolyphaseTest.cpp
+    src/ChanneliserPolyphaseTest.cpp
 )
 
 set(lofarTest_moc_headers )

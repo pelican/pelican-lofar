@@ -10,6 +10,7 @@
 namespace pelican {
 namespace lofar {
 
+
 /**
  * @class T_PolyphaseCoefficients
  *
@@ -111,8 +112,6 @@ class PolyphaseCoefficients : public T_PolyphaseCoefficients<std::complex<double
 		void load(const QString& fileName, const unsigned nFilterTaps,
 				const unsigned nChannels);
 };
-
-
 
 
 }// namespace lofar

@@ -22,13 +22,13 @@ namespace lofar {
 PELICAN_DECLARE_MODULE(ChanneliserPolyphase)
 
 
-		/**
-		 * @details
-		 * Constructor.
-		 *
-		 * @param[in] config XML configuration node.
-		 */
-		ChanneliserPolyphase::ChanneliserPolyphase(const ConfigNode& config)
+/**
+ * @details
+ * Constructor.
+ *
+ * @param[in] config XML configuration node.
+ */
+ChanneliserPolyphase::ChanneliserPolyphase(const ConfigNode& config)
 : AbstractModule(config)
 {
 	// Get options from the config.
