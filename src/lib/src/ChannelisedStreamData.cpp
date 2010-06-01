@@ -1,5 +1,8 @@
 #include "ChannelisedStreamData.h"
 #include <QtCore/QIODevice>
+#include <QtCore/QTextStream>
+#include <QtCore/QFile>
+#include <QtCore/QString>
 
 #include <iostream>
 
@@ -7,6 +10,37 @@ namespace pelican {
 namespace lofar {
 
 PELICAN_DECLARE_DATABLOB(ChannelisedStreamData)
+
+
+/**
+ * @details
+ * Writes the contents of the channelised data blob to a ASCII file.
+ *
+ * @param fileName The name of the file to write to.
+ */
+void ChannelisedStreamData::write(const QString& fileName) const
+{
+    QFile file(fileName);
+	if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
+		return;
+	}
+	QTextStream out(&file);
+	for (unsigned index = 0, s = 0; s < _nSubbands; ++s) {
+		for (unsigned p = 0; p < _nPolarisations; ++p) {
+			for (unsigned c = 0; c < _nChannels; ++c) {
+				double re = _data[index].real();
+				double im = _data[index].imag();
+				out << QString::number(re, 'g', 16) << " ";
+				out << QString::number(im, 'g', 16) << " ";
+				index++;
+			}
+			out << endl;
+		}
+		out << endl;
+	}
+	file.close();
+}
+
 
 /**
  * @details

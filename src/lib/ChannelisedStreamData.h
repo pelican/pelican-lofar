@@ -189,6 +189,9 @@ class ChannelisedStreamData : public T_ChannelisedSteamData<std::complex<double>
         ~ChannelisedStreamData() {}
 
     public:
+        /// Write the spectrum to file.
+        void write(const QString& fileName) const;
+
         /// Serialises the data blob.
         void serialise(QIODevice&) const;
 
