@@ -40,8 +40,8 @@ class ChanneliserPolyphaseTest : public CppUnit::TestFixture
         CPPUNIT_TEST(test_filter);
         CPPUNIT_TEST(test_fft);
         CPPUNIT_TEST(test_run);
-        CPPUNIT_TEST(test_makeSpectrum);
-        CPPUNIT_TEST(test_channelProfile);
+//        CPPUNIT_TEST(test_makeSpectrum);
+//        CPPUNIT_TEST(test_channelProfile);
         CPPUNIT_TEST_SUITE_END();
 
     public:
