@@ -87,21 +87,21 @@ class T_PolyphaseCoefficients : public DataBlob
  * Template specialisation for complex double type.
  */
 
-class PolyphaseCoefficients : public T_PolyphaseCoefficients<std::complex<double> >
+class PolyphaseCoefficients : public T_PolyphaseCoefficients<double>
 {
 	public:
 		/// Constructs an empty polyphase filter coefficient data blob.
-		PolyphaseCoefficients() : T_PolyphaseCoefficients<std::complex<double> >() {}
+		PolyphaseCoefficients() : T_PolyphaseCoefficients<double>() {}
 
 		/// Constructs a polyphase filter coefficient data blob.
 		PolyphaseCoefficients(const unsigned nTaps, const unsigned nChannels) :
-			T_PolyphaseCoefficients<std::complex<double> >(nTaps, nChannels) {}
+			T_PolyphaseCoefficients<double>(nTaps, nChannels) {}
 
 		/// Constructs a polyphase filter coefficient data blob loading values
 		/// the specified file.
 		PolyphaseCoefficients(const QString& fileName, const unsigned nTaps,
 				const unsigned nChannels) :
-			T_PolyphaseCoefficients<std::complex<double> >()
+			T_PolyphaseCoefficients<double>()
 		{
 			load(fileName, nTaps, nChannels);
 		}

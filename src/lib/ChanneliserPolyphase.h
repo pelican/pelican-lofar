@@ -38,6 +38,7 @@ class ChannelisedStreamData;
  * \verbatim
  * 		<ChanneliserPolyphase name="">
  * 			<channels number="512"/>
+ * 			<processingThreads number="2"/>
  * 		</ChanneliserPolyphase>
  * \verbatim
  *
@@ -63,8 +64,8 @@ class ChanneliserPolyphase : public AbstractModule
         		ChannelisedStreamData* spectra);
 
         /// Setup processing buffers.
-        unsigned setupBuffers(const unsigned nSubbands, const unsigned nChannels,
-        		const unsigned nFilterTaps);
+        unsigned setupBuffers( unsigned nSubbands, unsigned nChannels,
+        		unsigned nFilterTaps);
 
 	private:
         /// Sainity checking.
@@ -74,24 +75,30 @@ class ChanneliserPolyphase : public AbstractModule
 
         /// Update the sample buffer.
         void _updateBuffer(const complex<double>* samples,
-        		const unsigned nSamples, complex<double>* buffer,
-        		const unsigned bufferSize);
+        		unsigned nSamples, complex<double>* buffer,
+        		unsigned bufferSize);
 
         /// Filter the matrix of samples (dimensions nTaps by nChannels)
         /// to create a vector of samples for the FFT.
         void _filter(const complex<double>* sampleBuffer,
-        		const unsigned nTaps, const unsigned nChannels,
-        		const complex<double>* coefficients,
-        		complex<double>* filteredSamples);
+        		unsigned nTaps,  unsigned nChannels,
+        		const double* coefficients, complex<double>* filteredSamples);
 
         /// FFT filtered samples to form a spectrum.
-        void _fft(const complex<double>* samples, const unsigned nSamples,
+        void _fft(const complex<double>* samples, unsigned nSamples,
         		complex<double>* spectrum);
+
+        /// Shift the zero frequency component to the centre of the spectrum.
+        void _fftShift(complex<double>* spectrum, unsigned nChannels);
+
+        /// Returns the sub-band ID range to be processed.
+        void _threadSubbandRange(unsigned& start, unsigned& end,
+        		unsigned nSubbands, unsigned nThreads, unsigned threadId);
 
     private:
         unsigned _nChannels;	///< Number of channels to produce per subband.
 
-        // TODO: The following should probably be matrixes
+        // TODO: The following should probably be matrixes...
         std::vector<std::vector<complex<double> > > _subbandBuffer;
         std::vector<std::vector<complex<double> > > _filteredData;
 

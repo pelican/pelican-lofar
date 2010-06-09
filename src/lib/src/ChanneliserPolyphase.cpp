@@ -33,9 +33,9 @@ ChanneliserPolyphase::ChanneliserPolyphase(const ConfigNode& config)
 {
 	// Get options from the config.
 	_nChannels = config.getOption("channels", "number", "512").toUInt();
+	_nThreads = config.getOption("processingThreads", "number", "2").toUInt();
 
 	// Resize the buffer used for filtered data.
-	_nThreads = 2;
 	_filteredData.resize(_nThreads);
 	for (unsigned i = 0; i < _nThreads; ++i) {
 		_filteredData[i].resize(_nChannels);
@@ -73,33 +73,31 @@ void ChanneliserPolyphase::run(const TimeStreamData* timeData,
 		const PolyphaseCoefficients* filterCoeff,
 		ChannelisedStreamData* spectra)
 {
+	// TODO: re-enable some of this.
+	// ==================================
 //	_checkData(timeData, filterCoeff);
-
-	// TODO: Combine polarisations ...? (maybe do this in the adapter)
+// TODO: Combine polarisations ...? (maybe do this in the adapter)
 //	unsigned nPolarisations = timeData->nPolarisations();
-
-
 //	unsigned bufferSize = _setupBuffers(nSubbands, _nChannels, nFilterTaps);
-
 //	 Resize the output spectra data blob.
 //	nPolarisations = 1;
 //	spectra->resize(nSubbands, nPolarisations, _nChannels);
+	// ==================================
 
 	// Pointers to processing buffers.
-
-
 	omp_set_num_threads(_nThreads);
+
 #pragma omp parallel
 	{
-		const complex<double>* coeff = filterCoeff->coefficients();
+		const double* coeff = filterCoeff->coefficients();
 		const unsigned nSubbands = timeData->nSubbands();
 		const unsigned nFilterTaps = filterCoeff->nTaps();
 		const unsigned bufferSize = _subbandBuffer[0].size();
+
 		unsigned threadId = omp_get_thread_num();
-		unsigned nThreads = omp_get_num_threads();
-		unsigned nSubbandsPerThread = nSubbands / nThreads;
-		unsigned start = threadId * nSubbandsPerThread;
-		unsigned end = start + nSubbandsPerThread;
+
+		unsigned start = 0, end = 0;
+		_threadSubbandRange(start, end, nSubbands, _nThreads, threadId);
 
 		complex<double>* subbandBuffer;
 		complex<double>* filteredSamples = &(_filteredData[threadId])[0];
@@ -160,8 +158,8 @@ void ChanneliserPolyphase::_checkData(const TimeStreamData* timeData,
 * @param nChannels
 * @param nFilterTaps
 */
-unsigned ChanneliserPolyphase::setupBuffers(const unsigned nSubbands,
-		const unsigned nChannels, const unsigned nFilterTaps)
+unsigned ChanneliserPolyphase::setupBuffers(unsigned nSubbands,
+		unsigned nChannels, unsigned nFilterTaps)
 {
 	_subbandBuffer.resize(nSubbands);
 	unsigned bufferSize = nChannels * nFilterTaps;
@@ -170,6 +168,7 @@ unsigned ChanneliserPolyphase::setupBuffers(const unsigned nSubbands,
 	}
 	return bufferSize;
 }
+
 
 /**
 * @details
@@ -180,7 +179,7 @@ unsigned ChanneliserPolyphase::setupBuffers(const unsigned nSubbands,
 * @param nSamples
 */
 void ChanneliserPolyphase::_updateBuffer(const complex<double>* samples,
-		const unsigned nSamples, complex<double>* buffer, const unsigned bufferSize)
+		unsigned nSamples, complex<double>* buffer, const unsigned bufferSize)
 {
 	complex<double>* dest = &buffer[nSamples];
 	size_t size = (bufferSize - nSamples) * sizeof(complex<double>);
@@ -199,9 +198,13 @@ void ChanneliserPolyphase::_updateBuffer(const complex<double>* samples,
 * @param filteredSamples
 */
 void ChanneliserPolyphase::_filter(const complex<double>* sampleBuffer,
-		const unsigned nTaps, const unsigned nChannels,
-		const complex<double>* coefficients, complex<double>* filteredSamples)
+		unsigned nTaps, unsigned nChannels,
+		const double* coefficients, complex<double>* filteredSamples)
 {
+	for (unsigned i = 0; i < nChannels; ++i) {
+		filteredSamples[i] = std::complex<double>(0.0, 0.0);
+	}
+
 	for (unsigned c = 0; c < nChannels; ++c) {
 		for (unsigned t = 0; t < nTaps; ++t) {
 			unsigned iBuffer = (nTaps - t - 1) * nChannels + c;
@@ -210,8 +213,6 @@ void ChanneliserPolyphase::_filter(const complex<double>* sampleBuffer,
 		}
 	}
 }
-
-
 
 
 /**
@@ -223,9 +224,71 @@ void ChanneliserPolyphase::_filter(const complex<double>* sampleBuffer,
 * @param spectrum
 */
 void ChanneliserPolyphase::_fft(const complex<double>* samples,
-		const unsigned nSamples, complex<double>* spectrum)
+		unsigned nSamples, complex<double>* spectrum)
 {
+//	for (unsigned i = 0; i < nSamples; ++i) {
+//		spectrum[i] = std::complex<double>(0.0, 0.0);
+//	}
 	fftw_execute_dft(_fftPlan, (fftw_complex*)samples, (fftw_complex*)spectrum);
+	_fftShift(spectrum, nSamples);
+//	for (unsigned c = 0; c < nSamples; ++c) {
+//		spectrum[c] /= nSamples;
+//	}
+}
+
+
+/**
+ * @details
+ * Shift the zero frequency component to the centre of the spectrum.
+ *
+ * @param spectrum
+ * @param nChannels
+ */
+void ChanneliserPolyphase::_fftShift(complex<double>* spectrum,
+		unsigned nChannels)
+{
+	std::vector<std::complex<double> > temp(nChannels,
+			std::complex<double>(0.0, 0.0));
+	unsigned iZero = nChannels / 2; // TODO: only works for even nChannels!
+	size_t size = nChannels / 2 * sizeof(complex<double>);
+	memcpy(&temp[iZero], spectrum,  size);
+	memcpy(&temp[0], &spectrum[iZero],  size);
+	memcpy(spectrum, &temp[0], nChannels * sizeof(complex<double>));
+}
+
+
+/**
+ * @details
+ * Returns the subband range to process for a given number of subbands,
+ * number of threads and thread Id.
+ *
+ * @param start
+ * @param end
+ * @param threadId
+ * @param nTreads
+ */
+void ChanneliserPolyphase::_threadSubbandRange(unsigned& start,
+		unsigned& end, unsigned nSubbands, unsigned nThreads,
+		unsigned threadId)
+{
+	if (threadId >= nThreads) {
+		throw QString("ChanneliserPolyphase::_threadSubbandRange(): "
+				"threadId out of range.");
+	}
+
+	if (threadId >= nSubbands) {
+		start = end = 0;
+		return;
+	}
+
+	unsigned number = nSubbands / nThreads;
+	unsigned remainder = nSubbands % nThreads;
+	if (threadId < remainder)
+		number++;
+
+	start = threadId * number;
+	if (threadId >= remainder) start += remainder;
+	end = start + number;
 }
 
 

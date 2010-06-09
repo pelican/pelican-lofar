@@ -5,7 +5,6 @@
 #include <QtCore/QFile>
 #include <iostream>
 #include <iomanip>
-#include <complex>
 
 namespace pelican {
 namespace lofar {
@@ -66,7 +65,7 @@ void PolyphaseCoefficientsTest::test_loadCoeffFile()
     unsigned nTaps = 8;
     unsigned nChannels = 512;
 
-    QString fileName = "missingFile.dat";
+    QString fileName = "thisFileDoesntExist.dat";
     PolyphaseCoefficients coeff;
     try {
     	coeff.load(fileName, nTaps, nChannels);
@@ -76,7 +75,7 @@ void PolyphaseCoefficientsTest::test_loadCoeffFile()
     }
 
     // Write a dummy test coeff file of the expected format.
-    fileName = "coeffs.dat";
+    fileName = "testCoeffs.dat";
     QFile file(fileName);
 	if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
 		return;
@@ -100,15 +99,15 @@ void PolyphaseCoefficientsTest::test_loadCoeffFile()
     catch (QString err) {
     	CPPUNIT_FAIL(err.toLatin1().data());
     }
-    const std::complex<double>* coeffs = coeff.coefficients();
+    double* coeffs = coeff.coefficients();
 
     // Check some values.
     unsigned chan = 16; unsigned tap = 4;
     CPPUNIT_ASSERT_DOUBLES_EQUAL(double(chan + tap),
-    		coeffs[chan * nTaps + tap].real(), 1.0e-5);
+    		coeffs[chan * nTaps + tap], 1.0e-5);
     chan = 423; tap = 7;
     CPPUNIT_ASSERT_DOUBLES_EQUAL(double(chan + tap),
-    		coeffs[chan * nTaps + tap].real(), 1.0e-5);
+    		coeffs[chan * nTaps + tap], 1.0e-5);
 
     // Clean up.
     if (QFile::exists(fileName)) {

@@ -2,11 +2,11 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR} ..)
 
 set(lofarTest_src
     src/libTest.cpp
-    src/LofarChunkerTest.cpp
-    src/DataStreamingTest.cpp
-    src/TimeStreamDataTest.cpp
-    src/ChannelisedStreamDataTest.cpp
-    src/AdapterTimeStreamTest.cpp
+    #src/LofarChunkerTest.cpp
+    #src/DataStreamingTest.cpp
+    #src/TimeStreamDataTest.cpp
+    #src/ChannelisedStreamDataTest.cpp
+    #src/AdapterTimeStreamTest.cpp
     src/PolyphaseCoefficientsTest.cpp
     src/ChanneliserPolyphaseTest.cpp
 )
@@ -28,5 +28,8 @@ target_link_libraries(lofarTest
 )
 
 add_test(lofarTest lofarTest)
+
+include(CopyFiles)
+copy_files(${CMAKE_CURRENT_SOURCE_DIR}/data/*.* . testLibFiles)
 
 

@@ -36,6 +36,8 @@ endif (NOT DOC_INSTALL_DIR)
 find_package(Pelican REQUIRED)
 find_package(CppUnit REQUIRED)
 
+#list(APPEND CMAKE_CXX_FLAGS "-pg")
+
 # === Add directories to the include path (i.e. -I<directory> ...)
 include_directories(
     ${PELICAN_INCLUDE_DIR}

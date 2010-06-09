@@ -28,27 +28,49 @@ class ChanneliserPolyphaseTest : public CppUnit::TestFixture
         ~ChanneliserPolyphaseTest() {}
 
     public:
+        void setUp() {}
+        void tearDown() {}
+
+    public:
+        /// Register test methods.
         CPPUNIT_TEST_SUITE(ChanneliserPolyphaseTest);
         CPPUNIT_TEST(test_configuration);
+        CPPUNIT_TEST(test_threadAssign);
         CPPUNIT_TEST(test_updateBuffer);
         CPPUNIT_TEST(test_filter);
         CPPUNIT_TEST(test_fft);
         CPPUNIT_TEST(test_run);
+        CPPUNIT_TEST(test_makeSpectrum);
+        CPPUNIT_TEST(test_channelProfile);
         CPPUNIT_TEST_SUITE_END();
 
     public:
-        void setUp();
-        void tearDown();
-
         /// Test module configuration.
         void test_configuration();
+
+        void test_threadAssign();
+
+        /// Test updating the delay buffer.
         void test_updateBuffer();
+
+        /// Test the FIR filter stage.
         void test_filter();
+
+        /// Test the FFT stage.
         void test_fft();
+
+        /// Test the modules public run method.
         void test_run();
 
+        /// Test the constructing a spectrum given a set of weights.
+        void test_makeSpectrum();
+
+        /// Test the channel profile for a given set of weights.
+        void test_channelProfile();
+
     private:
-        QString _configXml(const unsigned nChannels);
+        /// Generate configuration XML.
+        QString _configXml(unsigned nChannels, unsigned nThreads = 2);
 
 };
 
