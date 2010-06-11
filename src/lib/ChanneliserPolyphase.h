@@ -72,7 +72,6 @@ class ChanneliserPolyphase : public AbstractModule
         void _checkData(const TimeStreamData* timeData,
         		const PolyphaseCoefficients* filterCoeff);
 
-
         /// Update the sample buffer.
         void _updateBuffer(const complex<double>* samples,
         		unsigned nSamples, complex<double>* buffer,

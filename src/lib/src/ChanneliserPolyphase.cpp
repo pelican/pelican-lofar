@@ -35,13 +35,18 @@ ChanneliserPolyphase::ChanneliserPolyphase(const ConfigNode& config)
 	_nChannels = config.getOption("channels", "number", "512").toUInt();
 	_nThreads = config.getOption("processingThreads", "number", "2").toUInt();
 
-	// Resize the buffer used for filtered data.
+	if (_nChannels % 2 != 0) {
+		throw QString("ChanneliserPolyphase: "
+				" Please choose an even number of channels.");
+	}
+
+	// Allocate buffers used for holding the output of the FIR stage.
 	_filteredData.resize(_nThreads);
 	for (unsigned i = 0; i < _nThreads; ++i) {
 		_filteredData[i].resize(_nChannels);
 	}
 
-	// Create the fft plan.
+	// Create the FFTW plan.
 	size_t fftSize = _nChannels * sizeof(fftw_complex);
 	fftw_complex* in = (fftw_complex*) fftw_malloc(fftSize);
 	fftw_complex* out = (fftw_complex*) fftw_malloc(fftSize);
@@ -73,29 +78,26 @@ void ChanneliserPolyphase::run(const TimeStreamData* timeData,
 		const PolyphaseCoefficients* filterCoeff,
 		ChannelisedStreamData* spectra)
 {
-	// TODO: re-enable some of this.
-	// ==================================
-//	_checkData(timeData, filterCoeff);
-// TODO: Combine polarisations ...? (maybe do this in the adapter)
+	_checkData(timeData, filterCoeff);
+
+//  TODO: Combine polarisations ...? (maybe do this in the adapter)
 //	unsigned nPolarisations = timeData->nPolarisations();
 //	unsigned bufferSize = _setupBuffers(nSubbands, _nChannels, nFilterTaps);
-//	 Resize the output spectra data blob.
-//	nPolarisations = 1;
-//	spectra->resize(nSubbands, nPolarisations, _nChannels);
-	// ==================================
+
+	// Resize the output spectra data blob.
+	const unsigned nSubbands = timeData->nSubbands();
+	const unsigned nPolarisations = 1;
+	spectra->resize(nSubbands, nPolarisations, _nChannels);
 
 	// Pointers to processing buffers.
 	omp_set_num_threads(_nThreads);
+	const unsigned nFilterTaps = filterCoeff->nTaps();
+	const unsigned bufferSize = _subbandBuffer[0].size();
+	const double* coeff = filterCoeff->coefficients();
 
 #pragma omp parallel
 	{
-		const double* coeff = filterCoeff->coefficients();
-		const unsigned nSubbands = timeData->nSubbands();
-		const unsigned nFilterTaps = filterCoeff->nTaps();
-		const unsigned bufferSize = _subbandBuffer[0].size();
-
 		unsigned threadId = omp_get_thread_num();
-
 		unsigned start = 0, end = 0;
 		_threadSubbandRange(start, end, nSubbands, _nThreads, threadId);
 
@@ -104,9 +106,10 @@ void ChanneliserPolyphase::run(const TimeStreamData* timeData,
 
 		for (unsigned s = start; s < end; ++s) {
 
+			// Get a pointer to the work buffer for the sub-band being processed.
 			subbandBuffer = &(_subbandBuffer[s])[0];
 
-			// Update buffered (lagged) data for the subband.
+			// Update buffered (lagged) data for the sub-band.
 			_updateBuffer(timeData->data(s), _nChannels, subbandBuffer, bufferSize);
 
 			// Apply the PPF.
@@ -117,7 +120,6 @@ void ChanneliserPolyphase::run(const TimeStreamData* timeData,
 		}
 
 	} // end of parallel region
-
 }
 
 
@@ -229,8 +231,11 @@ void ChanneliserPolyphase::_fft(const complex<double>* samples,
 //	for (unsigned i = 0; i < nSamples; ++i) {
 //		spectrum[i] = std::complex<double>(0.0, 0.0);
 //	}
+
 	fftw_execute_dft(_fftPlan, (fftw_complex*)samples, (fftw_complex*)spectrum);
 	_fftShift(spectrum, nSamples);
+
+	// Normalise
 //	for (unsigned c = 0; c < nSamples; ++c) {
 //		spectrum[c] /= nSamples;
 //	}
@@ -249,7 +254,7 @@ void ChanneliserPolyphase::_fftShift(complex<double>* spectrum,
 {
 	std::vector<std::complex<double> > temp(nChannels,
 			std::complex<double>(0.0, 0.0));
-	unsigned iZero = nChannels / 2; // TODO: only works for even nChannels!
+	unsigned iZero = nChannels / 2; // FIXME? only works for even nChannels!
 	size_t size = nChannels / 2 * sizeof(complex<double>);
 	memcpy(&temp[iZero], spectrum,  size);
 	memcpy(&temp[0], &spectrum[iZero],  size);
@@ -273,7 +278,8 @@ void ChanneliserPolyphase::_threadSubbandRange(unsigned& start,
 {
 	if (threadId >= nThreads) {
 		throw QString("ChanneliserPolyphase::_threadSubbandRange(): "
-				"threadId out of range.");
+				"threadId '%1' out of range for nThreads = %2.").arg(threadId).
+				arg(nThreads);
 	}
 
 	if (threadId >= nSubbands) {

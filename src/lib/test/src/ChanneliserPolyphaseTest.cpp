@@ -48,68 +48,74 @@ void ChanneliserPolyphaseTest::test_threadAssign()
 	unsigned nSubbands = 62;
 	unsigned start = 0, end = 0;
 
-	ConfigNode config(_configXml(1));
+	ConfigNode config(_configXml(nSubbands));
 	ChanneliserPolyphase channeliser(config);
 
-	unsigned threadId = 0;
-	channeliser._threadSubbandRange(start, end, nSubbands, nThreads, threadId);
-	CPPUNIT_ASSERT_EQUAL(unsigned(0), start);
-	CPPUNIT_ASSERT_EQUAL(unsigned(31), end);
+	try {
+		unsigned threadId = 0;
+		channeliser._threadSubbandRange(start, end, nSubbands, nThreads, threadId);
+		CPPUNIT_ASSERT_EQUAL(unsigned(0), start);
+		CPPUNIT_ASSERT_EQUAL(unsigned(31), end);
 
-	threadId = 1;
-	channeliser._threadSubbandRange(start, end, nSubbands, nThreads, threadId);
-	CPPUNIT_ASSERT_EQUAL(unsigned(31), start);
-	CPPUNIT_ASSERT_EQUAL(unsigned(62), end);
+		threadId = 1;
+		channeliser._threadSubbandRange(start, end, nSubbands, nThreads, threadId);
+		CPPUNIT_ASSERT_EQUAL(unsigned(31), start);
+		CPPUNIT_ASSERT_EQUAL(unsigned(62), end);
 
-	nSubbands = 1;
-	threadId = 0;
-	channeliser._threadSubbandRange(start, end, nSubbands, nThreads, threadId);
-	CPPUNIT_ASSERT_EQUAL(unsigned(0), start);
-	CPPUNIT_ASSERT_EQUAL(unsigned(1), end);
+		nSubbands = 1;
+		threadId = 0;
+		channeliser._threadSubbandRange(start, end, nSubbands, nThreads, threadId);
+		CPPUNIT_ASSERT_EQUAL(unsigned(0), start);
+		CPPUNIT_ASSERT_EQUAL(unsigned(1), end);
 
-	threadId = 1;
-	channeliser._threadSubbandRange(start, end, nSubbands, nThreads, threadId);
-	CPPUNIT_ASSERT_EQUAL(unsigned(0), start);
-	CPPUNIT_ASSERT_EQUAL(unsigned(0), end);
+		threadId = 1;
+		channeliser._threadSubbandRange(start, end, nSubbands, nThreads, threadId);
+		CPPUNIT_ASSERT_EQUAL(unsigned(0), start);
+		CPPUNIT_ASSERT_EQUAL(unsigned(0), end);
 
-	nSubbands = 3;
-	threadId = 0;
-	channeliser._threadSubbandRange(start, end, nSubbands, nThreads, threadId);
-	CPPUNIT_ASSERT_EQUAL(unsigned(0), start);
-	CPPUNIT_ASSERT_EQUAL(unsigned(2), end);
+		nSubbands = 3;
+		threadId = 0;
+		channeliser._threadSubbandRange(start, end, nSubbands, nThreads, threadId);
+		CPPUNIT_ASSERT_EQUAL(unsigned(0), start);
+		CPPUNIT_ASSERT_EQUAL(unsigned(2), end);
 
-	threadId = 1;
-	channeliser._threadSubbandRange(start, end, nSubbands, nThreads, threadId);
-	CPPUNIT_ASSERT_EQUAL(unsigned(2), start);
-	CPPUNIT_ASSERT_EQUAL(unsigned(3), end);
+		threadId = 1;
+		channeliser._threadSubbandRange(start, end, nSubbands, nThreads, threadId);
+		CPPUNIT_ASSERT_EQUAL(unsigned(2), start);
+		CPPUNIT_ASSERT_EQUAL(unsigned(3), end);
 
-	nSubbands = 4;
-	threadId = 0;
-	channeliser._threadSubbandRange(start, end, nSubbands, nThreads, threadId);
-	CPPUNIT_ASSERT_EQUAL(unsigned(0), start);
-	CPPUNIT_ASSERT_EQUAL(unsigned(2), end);
+		nSubbands = 4;
+		threadId = 0;
+		channeliser._threadSubbandRange(start, end, nSubbands, nThreads, threadId);
+		CPPUNIT_ASSERT_EQUAL(unsigned(0), start);
+		CPPUNIT_ASSERT_EQUAL(unsigned(2), end);
 
-	threadId = 1;
-	channeliser._threadSubbandRange(start, end, nSubbands, nThreads, threadId);
-	CPPUNIT_ASSERT_EQUAL(unsigned(2), start);
-	CPPUNIT_ASSERT_EQUAL(unsigned(4), end);
+		threadId = 1;
+		channeliser._threadSubbandRange(start, end, nSubbands, nThreads, threadId);
+		CPPUNIT_ASSERT_EQUAL(unsigned(2), start);
+		CPPUNIT_ASSERT_EQUAL(unsigned(4), end);
 
-	nSubbands = 4;
-	nThreads = 3;
-	threadId = 0;
-	channeliser._threadSubbandRange(start, end, nSubbands, nThreads, threadId);
-	CPPUNIT_ASSERT_EQUAL(unsigned(0), start);
-	CPPUNIT_ASSERT_EQUAL(unsigned(2), end);
+		nSubbands = 4;
+		nThreads = 3;
+		threadId = 0;
+		channeliser._threadSubbandRange(start, end, nSubbands, nThreads, threadId);
+		CPPUNIT_ASSERT_EQUAL(unsigned(0), start);
+		CPPUNIT_ASSERT_EQUAL(unsigned(2), end);
 
-	threadId = 1;
-	channeliser._threadSubbandRange(start, end, nSubbands, nThreads, threadId);
-	CPPUNIT_ASSERT_EQUAL(unsigned(2), start);
-	CPPUNIT_ASSERT_EQUAL(unsigned(3), end);
+		threadId = 1;
+		channeliser._threadSubbandRange(start, end, nSubbands, nThreads, threadId);
+		CPPUNIT_ASSERT_EQUAL(unsigned(2), start);
+		CPPUNIT_ASSERT_EQUAL(unsigned(3), end);
 
-	threadId = 2;
-	channeliser._threadSubbandRange(start, end, nSubbands, nThreads, threadId);
-	CPPUNIT_ASSERT_EQUAL(unsigned(3), start);
-	CPPUNIT_ASSERT_EQUAL(unsigned(4), end);
+		threadId = 2;
+		channeliser._threadSubbandRange(start, end, nSubbands, nThreads, threadId);
+		CPPUNIT_ASSERT_EQUAL(unsigned(3), start);
+		CPPUNIT_ASSERT_EQUAL(unsigned(4), end);
+	}
+	catch (QString err) {
+		CPPUNIT_FAIL(err.toLatin1().data());
+	}
+
 }
 
 
