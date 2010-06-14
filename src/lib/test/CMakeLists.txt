@@ -1,4 +1,4 @@
-include_directories(${CMAKE_CURRENT_SOURCE_DIR} ..)
+lsinclude_directories(${CMAKE_CURRENT_SOURCE_DIR} ..)
 
 set(lofarTest_src
     src/libTest.cpp
@@ -25,6 +25,7 @@ target_link_libraries(lofarTest
     lofarTestLib
     ${SUBPACKAGE_LIBRARIES}
     ${CPPUNIT_LIBRARIES}
+    ${FFTW3_LIBRARIES}
 )
 
 add_test(lofarTest lofarTest)

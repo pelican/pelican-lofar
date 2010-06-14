@@ -66,6 +66,7 @@ add_executable(lofarClient
     lofarClient.cpp
     # pipeline.cpp
 )
+
 target_link_libraries(lofarClient
     ${PROJECT_LIBRARIES}
     ${FFTW3_LIBRARIES}
