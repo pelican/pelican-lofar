@@ -1,4 +1,4 @@
-lsinclude_directories(${CMAKE_CURRENT_SOURCE_DIR} ..)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR} ..)
 
 set(lofarTest_src
     src/libTest.cpp
