@@ -55,7 +55,7 @@ list(INSERT PROJECT_LIBRARIES 0
 )
 
 
-find_package(FFTW3 required)
+find_package(FFTW3 REQUIRED)
 
 # == Recurse into sub-directories defined in modules.cmake.
 include(modules.cmake)
