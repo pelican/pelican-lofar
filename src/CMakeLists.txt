@@ -54,6 +54,9 @@ list(INSERT PROJECT_LIBRARIES 0
     pelicanLofar
 )
 
+
+find_package(FFTW3 required)
+
 # == Recurse into sub-directories defined in modules.cmake.
 include(modules.cmake)
 
@@ -63,7 +66,10 @@ add_executable(lofarClient
     lofarClient.cpp
     # pipeline.cpp
 )
-target_link_libraries(lofarClient ${PROJECT_LIBRARIES})
+target_link_libraries(lofarClient
+    ${PROJECT_LIBRARIES}
+    ${FFTW3_LIBRARIES}
+)
 
 
 # === Create the server binary.
