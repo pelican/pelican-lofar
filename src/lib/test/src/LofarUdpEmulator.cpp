@@ -22,6 +22,7 @@ LofarUdpEmulator::LofarUdpEmulator(const ConfigNode& configNode)
     _subbandsPerPacket = configNode.getOption("packet", "subbands", "1").toInt();
     _samplesPerPacket = configNode.getOption("packet", "samples", "1").toInt();
     _nrPolarisations = configNode.getOption("packet", "polarisations", "2").toInt();
+    _clock = configNode.getOption("params", "clock").toInt();
 
     // Set test parameters.
     int sampleSize = configNode.getOption("packet", "sampleSize", "8").toInt();
@@ -30,7 +31,8 @@ LofarUdpEmulator::LofarUdpEmulator(const ConfigNode& configNode)
     else _sampleType = i8complex;
     _nPackets = configNode.getOption("packet", "nPackets", "-1").toInt();
     _startDelay = configNode.getOption("packet", "startDelay", "0").toInt();
-    _seqNumbers = 0;
+    _timestamp = 1;
+    _blockid = _samplesPerPacket; // blockid offset
 
     // Fill the packet.
     setPacketHeader(NULL);
@@ -43,6 +45,9 @@ LofarUdpEmulator::LofarUdpEmulator(const ConfigNode& configNode)
  */
 void LofarUdpEmulator::fillPacket()
 {
+    // Packet data is generated once and all packets will contain the same data records
+    // Each block consists of a time slice (one sample) for each beamlet in beamlet order
+
     // Calculate the actual required packet size.
     _packetSize = _subbandsPerPacket * _samplesPerPacket * _nrPolarisations;
     switch (_sampleType) {
@@ -107,18 +112,29 @@ void LofarUdpEmulator::fillPacket()
  */
 void LofarUdpEmulator::getPacketData(char*& ptr, unsigned long& size)
 {
+    /* An interval consists of 1 second of data. The timestamp represents the integer
+       value for the integer. Each interval consists of a number of blocks no_blocks,
+       which is defined in the header. The total number of blocks is clockspeed/no_blocks.
+    */
+
     // Set the return variables.
     size = _packetSize;
     ptr = (char*)(&_packet);
 
-    // Update packet timestamp.
-    if (_seqNumbers == NULL) {
-        _packet.header.timestamp = _packetCounter;
-        _packet.header.blockSequenceNumber = _packetCounter;
-    } else {
-        _packet.header.timestamp = _seqNumbers[_packetCounter];
-        _packet.header.blockSequenceNumber = _seqNumbers[_packetCounter];
-    }
+    // Calculate seqid and blockid from packet counter and clock
+    if (!_looseEvenPackets || (_looseEvenPackets && _packetCounter % 2 == 1)) {
+        _packet.header.timestamp = 1 + (_blockid + _samplesPerPacket) / (_clock == 160 ? 156250 : (_timestamp % 2 == 0 ? 195213 : 195212));
+        _packet.header.blockSequenceNumber = (_blockid + _samplesPerPacket) % 
+                                       (_clock == 160 ? 156250 : (_timestamp % 2 == 0 ? 195213 : 195212));
+        _timestamp = _packet.header.timestamp;
+        _blockid = _packet.header.blockSequenceNumber;
+   } else {
+        _packet.header.timestamp = _timestamp;
+        _packet.header.blockSequenceNumber = _blockid;
+        _timestamp = 1 + (_blockid + _samplesPerPacket) / (_clock == 160 ? 156250 : (_timestamp % 2 == 0 ? 195213 : 195212));
+        _blockid = (_blockid + _samplesPerPacket) % 
+                                       (_clock == 160 ? 156250 : (_timestamp % 2 == 0 ? 195213 : 195212));        
+   }
 
     // Increment packet counter.
     _packetCounter++;
@@ -134,11 +150,11 @@ void LofarUdpEmulator::setPacketHeader(UDPPacket::Header* packetHeader)
 {
     // Create packet header.
     if (packetHeader == NULL) {
-        _packet.header.version    = 1;
-        _packet.header.nrBeamlets = 1;
-        _packet.header.nrBlocks   = 1;
-        _packet.header.station    = 1;
-        _packet.header.sourceInfo = 1;
+        _packet.header.version    = (uint8_t) 0xAAAB; // Hardcoded in RSP firmware
+        _packet.header.nrBeamlets = _subbandsPerPacket;
+        _packet.header.nrBlocks   = _samplesPerPacket;
+        _packet.header.station    = (uint16_t) 0x00EA; // Pelican
+        _packet.header.sourceInfo = (uint8_t) 1010;   // LofarUdpEmulator!
     }
     else {
         // Copy header to packet.
@@ -150,9 +166,9 @@ void LofarUdpEmulator::setPacketHeader(UDPPacket::Header* packetHeader)
  * @details
  * Sets the sequence numbers.
  */
-void LofarUdpEmulator::setSeqNumbers(unsigned int *seqNumbers)
+void LofarUdpEmulator::looseEvenPackets(bool loose)
 {
-    _seqNumbers = seqNumbers;
+    _looseEvenPackets = loose;
 }
 
 } // namespace lofar

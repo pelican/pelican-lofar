@@ -73,9 +73,10 @@ void AdapterTimeStream::deserialise(QIODevice* in)
     // UDP packet header.
     UDPPacket::Header header;
 
+    //TODO: Add time information to timedata object (obtainable from seqid and blockid
+    //      using the TimeStamp code in IONproc
+
     // Loop over UDP packets
-    // FIXME: Find out if lofar UDP packets sent from the station are fixed sized
-    // as indicated in the packet header (lofarUdpHeader.h).
     for (unsigned p = 0; p < _nUDPPackets; ++p) {
 
         // Read the header from the IO device.
@@ -172,6 +173,7 @@ void AdapterTimeStream::_readData(std::complex<double>* data, char* buffer)
     typedef std::complex<double> dComplex;
 
     // Loop over dimensions in the packet and write into the data blob.
+    // TODO: Check endiannes
     for (unsigned iPtr = 0, t = 0; t < _nSamples; ++t) {
         for (unsigned c = 0; c < _nSubbands; ++c) {
             for (unsigned p = 0; p < _nPolarisations; ++p) {
@@ -198,8 +200,6 @@ void AdapterTimeStream::_readData(std::complex<double>* data, char* buffer)
                     throw QString("AdapterTimeStream: Specified number of bits "
                             " per sample (%1) unsupported").arg(_sampleBits);
                 }
-
-//                std::cout << data[blobIndex] << std::endl;
             }
         }
     }
