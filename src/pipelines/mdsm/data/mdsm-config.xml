@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE pelican>
+
+<configuration version="1.0">
+    <pipeline>
+
+        <buffers>
+           <LofarData>
+               <buffer maxSize="100000000" maxChunkSize="100000000"/>
+           </LofarData>
+        </buffers>
+
+        <chunkers>
+           <LofarChunker>
+               <data type="LofarData"/>
+               <connection host="127.0.0.1" port="8090"/>
+               <params samplesPerPacket="32"
+                       nrPolarisation="2"
+                       subbandsPerPacket="64"
+                       packets="4"
+                       clock="200"/>
+               <samples type="8" />
+           </LofarChunker>
+        </chunkers>
+
+        <clients>
+            <LofarStreamDataClient />
+        </clients>
+
+        <adapters>
+            <AdapterTimeStream name="AdapterTimeStream">
+                <packetsPerChunk number="4"/>
+                <subbands number="64" />
+                <polarisations number="2" />
+                <samples number="32" />
+                <sampleSize bits="8" />
+            </AdapterTimeStream>
+        </adapters>
+
+        <modules>
+            <ChanneliserPolyphase>
+                <channels number="512" />
+                <processingThreads number="2" />
+            </ChanneliserPolyphase>
+        </modules>
+
+    </pipeline>
+</configuration>
+
+
