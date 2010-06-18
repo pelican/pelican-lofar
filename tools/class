@@ -33,7 +33,7 @@ sub usage {
 }
 
 # parse options
-my $namespace="pelicanLofar";
+my @namespaces=qw(pelican lofar);
 my $baseclass="";
 my $headtext="";
 my $cpptext="";
@@ -162,8 +162,10 @@ if ( ! -f $src_file ) {
     my $fh=FileHandle->new(">".$src_file);
     print $fh "#include \"", $short_header_file, "\"\n\n";
     print $fh $cppincludes, "\n";
-    print $fh "namespace $namespace {\n\n", if ( defined $namespace );
-    print $fh $cppincludesNamespace, "\n", if ( defined $namespace );
+    foreach my $namespace ( @namespaces ) {
+        print $fh "namespace $namespace {\n\n", if ( defined $namespace );
+    }
+    print $fh $cppincludesNamespace, "\n", if ( $#namespaces > 0 );
     print $fh "/**\n";
     print $fh " *\@details $classname \n";
     print $fh " */\n";
@@ -177,7 +179,9 @@ if ( ! -f $src_file ) {
               $classname, "::~", $classname, "()\n{\n",
               "}\n\n",
               $cpptext;
-    print $fh "} // namespace $namespace\n", if ( defined $namespace );
+    foreach my $namespace (reverse @namespaces) {
+        print $fh "} // namespace $namespace\n", if ( defined $namespace );
+    }
 }
 # ------ write out the header file
 if ( ! -f $header_file ) {
@@ -202,7 +206,9 @@ if ( ! -f $header_file ) {
     print $fh "/**\n",
               " * \@file $short_header_file\n",
               " */\n\n";
-    print $fh "namespace $namespace {\n\n", if ( defined $namespace );
+    foreach my $namespace ( @namespaces ) {
+        print $fh "namespace $namespace {\n\n", if ( defined $namespace );
+    }
     print $fh "/**\n",
               " * \@class $classname\n",
               " *  \n",
@@ -220,7 +226,9 @@ if ( ! -f $header_file ) {
                "\n",
                $i,"private:\n",
               "};\n\n";
-    print $fh "} // namespace $namespace\n", if ( defined $namespace );
+    foreach my $namespace ( reverse @namespaces ) {
+        print $fh "} // namespace $namespace\n", if ( defined $namespace );
+    }
     print $fh "#endif // $defname \n";
 }
 if ( ! $verbose ) {
