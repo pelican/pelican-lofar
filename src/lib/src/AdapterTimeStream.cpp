@@ -4,16 +4,17 @@
 #include "TimeStreamData.h"
 
 #include "pelican/utility/ConfigNode.h"
+#include "pelican/adapters/AbstractStreamAdapter.h"
+
+#include <QtCore/QString>
 
 #include <boost/cstdint.hpp>
 #include <cmath>
-#include <QString>
 
 namespace pelican {
 namespace lofar {
 
 PELICAN_DECLARE_ADAPTER(AdapterTimeStream)
-
 
 /**
  * @details
@@ -32,6 +33,8 @@ AdapterTimeStream::AdapterTimeStream(const ConfigNode& config)
     _sampleBits = config.getOption("sampleSize", "bits", "0").toUInt();
     _fixedPacketSize = config.getOption("fixedSizePackets", "value", "true").
     		toLower().startsWith("true") ? true : false;
+    _combinePols = config.getOption("combinePolarisations", "value", "false").
+        		toLower().startsWith("true") ? true : false;
 }
 
 
@@ -70,9 +73,10 @@ void AdapterTimeStream::deserialise(QIODevice* in)
     // UDP packet header.
     UDPPacket::Header header;
 
+    //TODO: Add time information to timedata object (obtainable from seqid and blockid
+    //      using the TimeStamp code in IONproc
+
     // Loop over UDP packets
-    // FIXME: Find out if lofar UDP packets sent from the station are fixed sized
-    // as indicated in the packet header (lofarUdpHeader.h).
     for (unsigned p = 0; p < _nUDPPackets; ++p) {
 
         // Read the header from the IO device.
@@ -147,8 +151,8 @@ void AdapterTimeStream::_checkData()
  * @details
  * Reads the UDP packet header from the IO device.
  *
- * @param header UDP packet header to be filled.
- * @param buffer Char* buffer read from the IO device
+ * @param[out] header	UDP packet header to be filled.
+ * @param[in]  buffer	Char* buffer read from the IO device
  */
 void AdapterTimeStream::_readHeader(UDPPacket::Header& header, char* buffer)
 {
@@ -161,14 +165,15 @@ void AdapterTimeStream::_readHeader(UDPPacket::Header& header, char* buffer)
  * @details
  * Reads the udp data data section into the data blob data array.
  *
- * @param data time stream data data array (assumes double float format).
- * @param buffer Char* buffer read from the IO device.
+ * @param[out] data		time stream data data array (assumes double precision).
+ * @param[in]  buffer 	Char* buffer read from the IO device.
  */
 void AdapterTimeStream::_readData(std::complex<double>* data, char* buffer)
 {
     typedef std::complex<double> dComplex;
 
     // Loop over dimensions in the packet and write into the data blob.
+    // TODO: Check endiannes
     for (unsigned iPtr = 0, t = 0; t < _nSamples; ++t) {
         for (unsigned c = 0; c < _nSubbands; ++c) {
             for (unsigned p = 0; p < _nPolarisations; ++p) {
@@ -195,8 +200,6 @@ void AdapterTimeStream::_readData(std::complex<double>* data, char* buffer)
                     throw QString("AdapterTimeStream: Specified number of bits "
                             " per sample (%1) unsupported").arg(_sampleBits);
                 }
-
-//                std::cout << data[blobIndex] << std::endl;
             }
         }
     }
@@ -238,6 +241,31 @@ void AdapterTimeStream::_printHeader(const UDPPacket::Header& header)
     std::cout << "* blockSequenceNumber = " << unsigned(header.blockSequenceNumber) << std::endl;
     std::cout << QString(80, '-').toStdString() << std::endl;
     std::cout << std::endl;
+}
+
+
+/**
+ * @details
+ * Combine polarisations.
+ *
+ * @param in
+ * @param nSubbands
+ * @param nPolarisations
+ * @param nSamples
+ * @param out
+ */
+void AdapterTimeStream::_combinePolarisations(std::complex<double>* in,
+		const unsigned nSubbands, const unsigned nPolarisations,
+		const unsigned nSamples, std::complex<double>* out)
+{
+	for (unsigned index = 0, c = 0; c < nSubbands; ++c) {
+		for (unsigned t = 0; t < nSamples; ++t) {
+			unsigned iPol1 =  nSamples * (c * nPolarisations + 0) + t;
+			unsigned iPol2 =  nSamples * (c * nPolarisations + 1) + t;
+			out[index] = in[iPol1] + in[iPol2]; // TODO: combine properly.
+			index++;
+		}
+	}
 }
 
 

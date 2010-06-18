@@ -3,7 +3,7 @@
 
 #include <iostream>
 #include <complex>
-#include <QBuffer>
+#include <QtCore/QBuffer>
 
 namespace pelican {
 namespace lofar {
@@ -95,8 +95,8 @@ void ChannelisedStreamDataTest::test_accessorMethods()
         for (unsigned i = 0, sb = 0; sb < nSubbands; ++sb) {
             for (unsigned p = 0; p < nPolarisations; ++p) {
                 for (unsigned c = 0; c < nChannels; ++c) {
-                    double re = double(sb + p + c);
-                    double im = double(c - p - sb);
+                    double re = double(sb) + double(p) + double(c);
+                    double im = double(c) - double(p) - double(sb);
                     in[i] = std::complex<double>(re, im);
                     i++;
                 }
@@ -112,25 +112,27 @@ void ChannelisedStreamDataTest::test_accessorMethods()
         unsigned index =  sb * nPolarisations * nChannels + p * nChannels + c;
         CPPUNIT_ASSERT_EQUAL(index, spectrum.index(sb, p, c));
         CPPUNIT_ASSERT(index < spectrum.size());
-        CPPUNIT_ASSERT_DOUBLES_EQUAL(double(sb + p + c), out[index].real(), err);
-        CPPUNIT_ASSERT_DOUBLES_EQUAL(double(c - p - sb), out[index].imag(), err);
+        CPPUNIT_ASSERT_DOUBLES_EQUAL(double(sb) + double(p) + double(c), out[index].real(), err);
+        CPPUNIT_ASSERT_DOUBLES_EQUAL(double(c) - double(p) - double(sb), out[index].imag(), err);
 
         sb = 1; p = 0; c = 0;
         // Check pointer to sub-band
         const std::complex<double>* sb1 = spectrum.data(sb);
         CPPUNIT_ASSERT(sb1 == &out[spectrum.index(sb, p, c)]);
-        CPPUNIT_ASSERT_DOUBLES_EQUAL(double(sb + p + c), sb1[0].real(), err);
-        CPPUNIT_ASSERT_DOUBLES_EQUAL(double(c - p - sb), sb1[0].imag(), err);
+        CPPUNIT_ASSERT_DOUBLES_EQUAL(double(sb) + double(p) + double(c), sb1[0].real(), err);
+        CPPUNIT_ASSERT_DOUBLES_EQUAL(double(c) - double(p) - double(sb), sb1[0].imag(), err);
 
         sb = 2; p = 1; c = 0;
         const std::complex<double>* sb2p1 = spectrum.data(sb, p);
         CPPUNIT_ASSERT(sb2p1 == &out[spectrum.index(sb, p, c)]);
-        CPPUNIT_ASSERT_DOUBLES_EQUAL(double(sb + p + c), sb2p1[0].real(), err);
-        CPPUNIT_ASSERT_DOUBLES_EQUAL(double(c - p - sb), sb2p1[0].imag(), err);
+        CPPUNIT_ASSERT_DOUBLES_EQUAL(double(sb) + double(p) + double(c), sb2p1[0].real(), err);
+        CPPUNIT_ASSERT_DOUBLES_EQUAL(double(c) - double(p) - double(sb), sb2p1[0].imag(), err);
 
         c = 3;
-        CPPUNIT_ASSERT_DOUBLES_EQUAL(double(sb + p + c), sb2p1[c].real(), err);
-        CPPUNIT_ASSERT_DOUBLES_EQUAL(double(c - p - sb), sb2p1[c].imag(), err);
+        CPPUNIT_ASSERT_DOUBLES_EQUAL(double(sb) + double(p) + double(c), sb2p1[c].real(), err);
+        CPPUNIT_ASSERT_DOUBLES_EQUAL(double(c) - double(p) - double(sb), sb2p1[c].imag(), err);
+
+//        spectrum.write("spectrum.txt");
     }
 }
 
