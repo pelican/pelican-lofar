@@ -46,7 +46,7 @@ void AdapterTimeStreamTest::test_configuration()
             "	<packetsPerChunk number=\"" + QString::number(nPackets) + "\"/>"
             "   <subbands number=\"" + QString::number(nSubbands) + "\"/>"
             "	<polarisations number=\"" + QString::number(nPolarisations) + "\"/>"
-            "	<samples number=\"" + QString::number(nSamples) + "\"/>"
+            "	<samplesPerPacket number=\"" + QString::number(nSamples) + "\"/>"
             "	<sampleSize bits=\"" + QString::number(sampleBits) + "\"/>"
             "</AdapterTimeStream>";
     ConfigNode configNode(xml);
@@ -81,7 +81,7 @@ void AdapterTimeStreamTest::test_checkDataFixedPacket()
             "	<packetsPerChunk number=\"" + QString::number(nPackets) + "\"/>"
             "   <subbands number=\"" + QString::number(nSubbands) + "\"/>"
             "	<polarisations number=\"" + QString::number(nPolarisations) + "\"/>"
-            "	<samples number=\"" + QString::number(nSamples) + "\"/>"
+            "	<samplesPerPacket number=\"" + QString::number(nSamples) + "\"/>"
             "	<sampleSize bits=\"" + QString::number(sampleBits) + "\"/>"
             "   <fixedSizePackets value=\"" + fixedPackets + "\"/>"
             "</AdapterTimeStream>";
@@ -132,7 +132,7 @@ void AdapterTimeStreamTest::test_checkDataVariablePacket()
             "	<packetsPerChunk number=\"" + QString::number(nPackets) + "\"/>"
             "   <subbands number=\"" + QString::number(nSubbands) + "\"/>"
             "	<polarisations number=\"" + QString::number(nPolarisations) + "\"/>"
-            "	<samples number=\"" + QString::number(nSamples) + "\"/>"
+            "	<samplesPerPacket number=\"" + QString::number(nSamples) + "\"/>"
             "	<sampleSize bits=\"" + QString::number(sampleBits) + "\"/>"
             "   <fixedSizePackets value=\"" + fixedPackets + "\"/>"
             "</AdapterTimeStream>";
@@ -193,7 +193,7 @@ void AdapterTimeStreamTest::test_deserialise()
             "	<packetsPerChunk number=\"" + QString::number(nPackets) + "\"/>"
             "   <subbands number=\"" + QString::number(nSubbands) + "\"/>"
             "	<polarisations number=\"" + QString::number(nPolarisations) + "\"/>"
-            "	<samples number=\"" + QString::number(nSamples) + "\"/>"
+            "	<samplesPerPacket number=\"" + QString::number(nSamples) + "\"/>"
             "	<sampleSize bits=\"" + QString::number(sampleBits) + "\"/>"
             "</AdapterTimeStream>";
     ConfigNode configNode(xml);

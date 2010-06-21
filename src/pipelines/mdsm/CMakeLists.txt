@@ -17,3 +17,6 @@ target_link_libraries(mdsmPipeline pelicanMdsm pelicanLofar ${FFTW3_LIBRARIES})
 install(TARGETS mdsmPipeline DESTINATION ${BINARY_INSTALL_DIR})
 
 #add_subdirectory(test)
+
+include(CopyFiles)
+copy_files(${CMAKE_CURRENT_SOURCE_DIR}/data/*.xml . mdsmXmlFiles)

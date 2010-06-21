@@ -22,7 +22,6 @@ LofarChunker::LofarChunker(const ConfigNode& config) : AbstractChunker(config)
 
     // Get configuration options
     int _sampleType = config.getOption("samples", "type").toInt();
-    int _nSamples =  config.getOption("params","nSamples").toInt();
     _samplesPerPacket = config.getOption("params","samplesPerPacket").toInt();
     _subbandsPerPacket = config.getOption("params","subbandsPerPacket").toInt();
     _nrPolarisations = config.getOption("params","nrPolarisation").toInt();
@@ -32,7 +31,7 @@ LofarChunker::LofarChunker(const ConfigNode& config) : AbstractChunker(config)
     _packetsRejected = 0;
 
     // Calculate the number of ethernet frames that will go into a chunk
-    _nPackets = (int) ceil(_nSamples / (float) _samplesPerPacket);
+    _nPackets = config.getOption("params","packets").toInt();
 
     // Some sanity checking.
     if (type().isEmpty())
@@ -74,6 +73,7 @@ void LofarChunker::next(QIODevice* device)
     qint64           sizeDatagram;
 
     WritableData writableData = getDataStorage( _nPackets * _packetSize);
+    std::cout << "Chunker total size: " << _packetSize * _nPackets << std::endl;
 
     if (writableData.isValid()) {
 
@@ -161,13 +161,15 @@ void LofarChunker::next(QIODevice* device)
             }
         }
     } 
-    else
+    else {
         // Must discard the datagram if there is no available space.
         socket->readDatagram(0, 0);
+        std::cout << "Data not valid.\n";
+    }
 
     // Update _startTime
     _startTime = prevSeqid;
-    printf("Finished receiving\n");
+    //printf("Finished receiving\n");
 }
 
 /**

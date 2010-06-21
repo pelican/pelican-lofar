@@ -5,35 +5,38 @@
     <pipeline>
 
         <buffers>
-           <LofarData>
+           <TimeStreamData>
                <buffer maxSize="100000000" maxChunkSize="100000000"/>
-           </LofarData>
+           </TimeStreamData>
         </buffers>
 
         <chunkers>
            <LofarChunker>
-               <data type="LofarData"/>
+               <data type="TimeStreamData"/>
                <connection host="127.0.0.1" port="8090"/>
-               <params samplesPerPacket="32"
+               <params samplesPerPacket="16"
                        nrPolarisation="2"
                        subbandsPerPacket="64"
-                       packets="4"
+                       packets="32"
                        clock="200"/>
                <samples type="8" />
            </LofarChunker>
         </chunkers>
 
         <clients>
-            <LofarStreamDataClient />
+            <LofarStreamDataClient>
+                <data type="TimeStreamData" adapter="AdapterTimeStream" />
+            </LofarStreamDataClient>
         </clients>
 
         <adapters>
-            <AdapterTimeStream name="AdapterTimeStream">
-                <packetsPerChunk number="4"/>
+            <AdapterTimeStream>
+                <packetsPerChunk number="32"/>
                 <subbands number="64" />
                 <polarisations number="2" />
-                <samples number="32" />
+                <samplesPerPacket number="16" />
                 <sampleSize bits="8" />
+                <fixedSizePackets value="false" />
             </AdapterTimeStream>
         </adapters>
 

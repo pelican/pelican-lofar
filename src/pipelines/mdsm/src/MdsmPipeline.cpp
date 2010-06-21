@@ -1,5 +1,5 @@
 #include "MdsmPipeline.h"
-
+#include <iostream>
 
 namespace pelican {
 namespace lofar {
@@ -33,9 +33,9 @@ void MdsmPipeline::init()
     polyphaseCoeff = (PolyphaseCoefficients*) createBlob("PolyphaseCoefficients");
 
     // Hard-code filename, taps and channels.
-    QString coeffFileName = "../../../pipelines/mdsm/data/coeffs_64_1.dat";
+    QString coeffFileName = "../../../pipelines/mdsm/data/coeffs_512_1.dat";
     int nTaps = 8;
-    int nChannels = 64;
+    int nChannels = 512;
     polyphaseCoeff->load(coeffFileName, nTaps, nChannels);
 
     // Request remote data
@@ -53,6 +53,7 @@ void MdsmPipeline::run(QHash<QString, DataBlob*>& remoteData)
 
     // Run the polyphase channeliser and output module
     channeliser -> run(timeData, polyphaseCoeff, channelisedData);
+    std::cout << "Finished the pipeline\n";
 
 }
 

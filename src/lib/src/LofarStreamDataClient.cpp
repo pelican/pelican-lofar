@@ -14,7 +14,7 @@ LofarStreamDataClient::LofarStreamDataClient(const ConfigNode& configNode,
         const DataTypes& types, const Config* config)
 : DirectStreamDataClient(configNode, types, config)
 {
-    //setChunker( "LofarChunker" );
+    addChunker( "TimeStreamData", "LofarChunker" );
 }
 
 /**

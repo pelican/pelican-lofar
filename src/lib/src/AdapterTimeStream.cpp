@@ -10,6 +10,7 @@
 
 #include <boost/cstdint.hpp>
 #include <cmath>
+#include <iostream>
 
 namespace pelican {
 namespace lofar {
@@ -27,7 +28,7 @@ AdapterTimeStream::AdapterTimeStream(const ConfigNode& config)
     _nUDPPackets = config.getOption("packetsPerChunk", "number", "0").toUInt();
     _nSubbands = config.getOption("subbands", "number", "0").toUInt();
     _nPolarisations = config.getOption("polarisations", "number", "0").toUInt();
-    _nSamples = config.getOption("samples", "number", "0").toUInt();
+    _nSamples = config.getOption("samplesPerPacket", "number", "0").toUInt();
     _sampleBits = config.getOption("sampleSize", "bits", "0").toUInt();
     _fixedPacketSize = config.getOption("fixedSizePackets", "value", "true").
     		toLower().startsWith("true") ? true : false;
@@ -56,11 +57,15 @@ void AdapterTimeStream::deserialise(QIODevice* in)
     // Packet size variables.
     size_t packetSize = sizeof(UDPPacket);
     size_t headerSize = sizeof(UDPPacket::Header);
+    // FIXME Check the divide-by-4 is OK.
     size_t dataSize = _fixedPacketSize ?
-    		8130 : _nSubbands * _nPolarisations * _nSamples * _sampleBits;
+    		8130 : _nSubbands * _nPolarisations * _nSamples * _sampleBits / 4;
     size_t paddingSize = packetSize - headerSize - dataSize;
 
     // Temporary arrays for buffering data from the IO Device.
+    std::cout << "Header size " << headerSize << std::endl;
+    std::cout << "Data size " << dataSize << std::endl;
+    std::cout << "Padding size " << paddingSize << std::endl;
     std::vector<char> headerTemp(headerSize);
     std::vector<char> dataTemp(dataSize);
     std::vector<char> paddingTemp(paddingSize);
@@ -73,7 +78,6 @@ void AdapterTimeStream::deserialise(QIODevice* in)
 
     //TODO: Add time information to timedata object (obtainable from seqid and blockid
     //      using the TimeStamp code in IONproc
-
     // Loop over UDP packets
     for (unsigned p = 0; p < _nUDPPackets; ++p) {
 
@@ -85,8 +89,10 @@ void AdapterTimeStream::deserialise(QIODevice* in)
         in->read(&dataTemp[0], dataSize);
         _readData(data, &dataTemp[0]);
 
+        std::cout << p << ". Hola: " << dataSize + headerSize << std::endl;
         // Read off padding (from word alignment of the packet).
-        in->read(&paddingTemp[0], paddingSize);
+        // FIXME PROPERLY!
+        //in->read(&paddingTemp[0], paddingSize);
     }
 }
 
@@ -113,7 +119,7 @@ void AdapterTimeStream::_checkData()
 
     // Check the chunk size matches the expected number of UDPPackets
     if (_chunkSize != packetSize * _nUDPPackets) {
-        throw QString("AdapterTimeStream: Chunk size '%1' dosnt match the expected "
+        throw QString("AdapterTimeStream: Chunk size '%1' doesn't match the expected "
                       " size '%2' for %3 UDP packets.").
                       arg(_chunkSize).arg(packetSize).arg(_nUDPPackets);
     }
@@ -141,7 +147,8 @@ void AdapterTimeStream::_checkData()
     // Resize the time stream data blob being read into to match the adapter
     // dimensions.
     _timeData = static_cast<TimeStreamData*>(_data);
-    _timeData->resize(_nSubbands, _nPolarisations, _nSamples);
+    std::cout << "nSamples " << _nSamples << " nPackets " << _nUDPPackets << std::endl;
+    _timeData->resize(_nSubbands, _nPolarisations, _nSamples * _nUDPPackets);
 }
 
 

@@ -43,7 +43,7 @@ LofarChunkerTest::LofarChunkerTest()
     "       <params samplesPerPacket=\""  + QString::number(_samplesPerPacket)  + "\""
     "               nrPolarisation=\""    + QString::number(_nrPolarisations)   + "\""
     "               subbandsPerPacket=\"" + QString::number(_subbandsPerPacket) + "\""
-    "               nSamples=\""          + QString::number(_numPackets * _samplesPerPacket) + "\""
+    "               packets=\""           + QString::number(_numPackets) + "\""
     "               clock=\""             + QString::number(_clock)             + "\"/>"
     "       <samples type=\"8\" />"
     "   </LofarChunker>"

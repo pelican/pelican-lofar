@@ -8,6 +8,7 @@
 #include "pelican/data/DataBlob.h"
 #include <vector>
 #include <complex>
+#include <iostream>
 #include <QtCore/QIODevice>
 
 namespace pelican {

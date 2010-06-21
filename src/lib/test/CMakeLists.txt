@@ -22,6 +22,18 @@ add_library(lofarTestLib ${lofarTestLib_src} ${lofarTest_moc_sources})
 
 add_executable(lofarTest ${lofarTest_src})
 
+# === Create the emulator binary.
+add_executable(lofarEmulator
+    src/lofarEmulatorMain.cpp
+)
+
+target_link_libraries(lofarEmulator
+    pelicanLofar
+    lofarTestLib
+)
+
+
+
 # Link with openmp.
 set_target_properties(lofarTest PROPERTIES 
     COMPILE_FLAGS "${OpenMP_CXX_FLAGS}"
