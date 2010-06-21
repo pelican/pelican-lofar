@@ -49,28 +49,32 @@ class LofarUdpEmulator : public AbstractUdpEmulator
         /// Sets the packet header.
         void setPacketHeader(UDPPacket::Header* udpPacketHeader);
 
-        /// Sets the sequence numbers for the packet header.
-        void setSeqNumbers(unsigned int *seqNumbers);
+        /// Set the emulator to loose even packets (to test reliability of receiver)
+        void looseEvenPackets(bool loose);
 
         /// Returns the start delay in seconds.
         virtual int startDelay() {return _startDelay;}
 
     private:
         // Data Params
-        int _subbandsPerPacket;
-        int _samplesPerPacket;
+        int _subbandsPerPacket;   ///< Number of beamlets present in packet
+        int _samplesPerPacket;    ///< Number of blocks per packet
         int _nrPolarisations;
 
         // Test Params
         SampleType    _sampleType;
         int           _nPackets;
         int           _startDelay;
-        unsigned int* _seqNumbers;
+        bool          _looseEvenPackets;
 
-        unsigned long _packetCounter; ///< Packet counter.
-        unsigned long _packetSize;    ///< Actual packet size in bytes.
-        unsigned long _interval;      ///< The interval between packets in microseconds.
-        UDPPacket _packet;            ///< The packet to send.
+        unsigned long _packetCounter;   ///< Packet counter.
+        unsigned long _packetSize;      ///< Actual packet size in bytes.
+        unsigned long _interval;        ///< The interval between packets in microseconds.
+        unsigned int  _clock;           ///< Station clock speed
+        UDPPacket _packet;              ///< The packet to send.
+
+        unsigned int _timestamp;        ///< The timestamp of the preceeding packet
+        unsigned int _blockid;          ///< The blockSequenceNumber of the preceeding packet
 };
 
 } // namespace lofar

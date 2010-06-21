@@ -45,12 +45,13 @@ class LofarChunker : public AbstractChunker
 
     private:
         /// Generates an empty UDP packet.
-        void generateEmptyPacket(UDPPacket& packet);
+        void generateEmptyPacket(UDPPacket& packet, unsigned int seqid, unsigned int blockid);
 
         /// Write UDPPacket to writeableData object
         unsigned writePacket(WritableData *writer, UDPPacket& packet, unsigned offset);
 
     private:
+  
         int _nPackets;
         unsigned _packetsRejected;
         unsigned _packetsAccepted;
@@ -58,7 +59,9 @@ class LofarChunker : public AbstractChunker
         unsigned _subbandsPerPacket;
         unsigned _nrPolarisations;
         unsigned _startTime;
+        unsigned _startBlockid;
         unsigned _packetSize;
+        unsigned _clock;
 
         friend class LofarChunkerTest;
 };

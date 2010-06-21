@@ -52,6 +52,8 @@ class LofarChunkerTest : public CppUnit::TestFixture
         int _samplesPerPacket;
         int _nrPolarisations;
         int _numPackets;
+        int _nSamples;
+        int _clock;
 };
 
 } // namespace lofar
