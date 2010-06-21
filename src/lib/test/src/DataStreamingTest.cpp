@@ -5,11 +5,11 @@
 #include "LofarUdpEmulator.h"
 
 #include "pelican/core/AbstractDataClient.h"
-#include "pelican/testutils/EmulatorDriver.h"
+#include "pelican/emulator/EmulatorDriver.h"
 #include "pelican/utility/Config.h"
 #include "pelican/utility/ConfigNode.h"
 
-#include <QString>
+#include <QtCore/QString>
 
 #include "pelican/utility/memCheck.h"
 

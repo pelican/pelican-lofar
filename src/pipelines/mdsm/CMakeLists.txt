@@ -7,6 +7,12 @@ add_library(pelicanMdsm ${pipeline_lib_src} )
 
 add_executable(mdsmPipeline src/main.cpp)
 
+# Link with openmp.
+set_target_properties(mdsmPipeline PROPERTIES 
+    COMPILE_FLAGS "${OpenMP_CXX_FLAGS}"
+    LINK_FLAGS "${OpenMP_CXX_FLAGS}"
+)
+
 target_link_libraries(mdsmPipeline pelicanMdsm pelicanLofar ${FFTW3_LIBRARIES})
 install(TARGETS mdsmPipeline DESTINATION ${BINARY_INSTALL_DIR})
 

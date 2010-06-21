@@ -4,7 +4,7 @@
 #include "LofarUdpHeader.h"
 #include "LofarTypes.h"
 
-#include "pelican/testutils/EmulatorDriver.h"
+#include "pelican/emulator/EmulatorDriver.h"
 #include "pelican/server/DataManager.h"
 #include "pelican/utility/memCheck.h"
 #include "pelican/comms/Data.h"

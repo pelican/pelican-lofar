@@ -1,7 +1,7 @@
 #ifndef DATASTREAMINGTEST_H
 #define DATASTREAMINGTEST_H
 
-#include <QString>
+#include <QtCore/QString>
 #include <cppunit/extensions/HelperMacros.h>
 #include "pelican/core/DataTypes.h"
 #include "pelican/utility/ConfigNode.h"
