@@ -106,6 +106,8 @@ class ChanneliserPolyphase : public AbstractModule
         fftw_plan _fftPlan;
 };
 
+// Declare this class as a pelican module.
+PELICAN_DECLARE_MODULE(ChanneliserPolyphase)
 
 }// namespace lofar
 }// namespace pelican

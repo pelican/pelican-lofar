@@ -186,6 +186,8 @@ class TimeStreamData : public T_TimeStreamData<std::complex<double> >
         ~TimeStreamData() {}
 };
 
+PELICAN_DECLARE_DATABLOB(TimeStreamData)
+
 }// namespace lofar
 }// namespace pelican
 

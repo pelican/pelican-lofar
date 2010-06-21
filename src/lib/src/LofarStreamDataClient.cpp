@@ -7,8 +7,6 @@ namespace pelican {
 
 namespace lofar {
 
-PELICAN_DECLARE_CLIENT(LofarStreamDataClient)
-
 /**
  *@details LofarStreamDataClient
  */

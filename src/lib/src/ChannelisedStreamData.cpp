@@ -9,9 +9,6 @@
 namespace pelican {
 namespace lofar {
 
-PELICAN_DECLARE_DATABLOB(ChannelisedStreamData)
-
-
 /**
  * @details
  * Writes the contents of the channelised data blob to a ASCII file.

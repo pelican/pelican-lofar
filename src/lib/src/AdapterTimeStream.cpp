@@ -14,8 +14,6 @@
 namespace pelican {
 namespace lofar {
 
-PELICAN_DECLARE_ADAPTER(AdapterTimeStream)
-
 /**
  * @details
  * Constructs a stream adapter for time stream data from a LOFAR station.

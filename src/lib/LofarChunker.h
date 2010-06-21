@@ -66,6 +66,8 @@ class LofarChunker : public AbstractChunker
         friend class LofarChunkerTest;
 };
 
+PELICAN_DECLARE_CHUNKER(LofarChunker)
+
 } // namespace lofar
 } // namespace pelican
 

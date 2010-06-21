@@ -99,6 +99,8 @@ class AdapterTimeStream : public AbstractStreamAdapter
         unsigned _sampleBits;
 };
 
+PELICAN_DECLARE_ADAPTER(AdapterTimeStream)
+
 } // namespace lofar
 } // namespace pelican
 

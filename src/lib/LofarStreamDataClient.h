@@ -31,6 +31,8 @@ class LofarStreamDataClient : public DirectStreamDataClient
     private:
 };
 
+PELICAN_DECLARE_CLIENT(LofarStreamDataClient)
+
 } // namespace lofar
 } // namespace pelican
 

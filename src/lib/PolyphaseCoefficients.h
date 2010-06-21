@@ -113,6 +113,7 @@ class PolyphaseCoefficients : public T_PolyphaseCoefficients<double>
 				const unsigned nChannels);
 };
 
+PELICAN_DECLARE_DATABLOB(PolyphaseCoefficients)
 
 }// namespace lofar
 }// namespace pelican

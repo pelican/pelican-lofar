@@ -18,10 +18,6 @@ using std::complex;
 namespace pelican {
 namespace lofar {
 
-// Declare this class as a pelican module.
-PELICAN_DECLARE_MODULE(ChanneliserPolyphase)
-
-
 /**
  * @details
  * Constructor.

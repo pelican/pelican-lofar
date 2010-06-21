@@ -7,8 +7,6 @@
 namespace pelican {
 namespace lofar {
 
-PELICAN_DECLARE_DATABLOB(PolyphaseCoefficients)
-
 /**
  * @details
  * Loads coefficients from matlab coefficient dump file written using

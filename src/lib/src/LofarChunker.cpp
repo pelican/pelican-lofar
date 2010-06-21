@@ -9,8 +9,6 @@
 namespace pelican {
 namespace lofar {
 
-//PELICAN_DECLARE_CHUNKER(LofarChunker)
-
 /**
  * @details
  * Constructs a new LofarChunker.

@@ -199,6 +199,8 @@ class ChannelisedStreamData : public T_ChannelisedSteamData<std::complex<double>
         void deserialise(QIODevice&);
 };
 
+PELICAN_DECLARE_DATABLOB(ChannelisedStreamData)
+
 }// namespace lofar
 }// namespace pelican
 
