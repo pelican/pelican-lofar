@@ -1,7 +1,7 @@
 #ifndef LOFARUDPEMULATOR_H
 #define LOFARUDPEMULATOR_H
 
-#include "pelican/testutils/AbstractUdpEmulator.h"
+#include "pelican/emulator/AbstractUdpEmulator.h"
 #include "LofarUdpHeader.h"
 
 /**

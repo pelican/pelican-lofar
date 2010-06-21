@@ -1,7 +1,7 @@
 #ifndef ADAPTERTIMESTREAM_H
 #define ADAPTERTIMESTREAM_H
 
-#include "pelican/adapters/AbstractStreamAdapter.h"
+#include "pelican/core/AbstractStreamAdapter.h"
 #include "LofarUdpHeader.h"
 #include <complex>
 

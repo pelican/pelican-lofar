@@ -56,6 +56,7 @@ list(INSERT PROJECT_LIBRARIES 0
 
 
 find_package(FFTW3 REQUIRED)
+find_package(OpenMP REQUIRED)
 
 # == Recurse into sub-directories defined in modules.cmake.
 include(modules.cmake)

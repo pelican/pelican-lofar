@@ -4,7 +4,7 @@
 #include "TimeStreamData.h"
 
 #include "pelican/utility/ConfigNode.h"
-#include "pelican/adapters/AbstractStreamAdapter.h"
+#include "pelican/core/AbstractStreamAdapter.h"
 
 #include <QtCore/QString>
 
