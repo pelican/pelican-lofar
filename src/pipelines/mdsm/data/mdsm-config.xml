@@ -45,6 +45,10 @@
                 <channels number="512" />
                 <processingThreads number="2" />
             </ChanneliserPolyphase>
+            
+            <PelicanTCPBlobServer>
+                <connection port="0" />
+            </PelicanTCPBlobServer>
         </modules>
 
     </pipeline>
