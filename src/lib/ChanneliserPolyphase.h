@@ -63,10 +63,6 @@ class ChanneliserPolyphase : public AbstractModule
         		const PolyphaseCoefficients* filterCoeff,
         		ChannelisedStreamData* spectra);
 
-        /// Setup processing buffers.
-        unsigned setupBuffers( unsigned nSubbands, unsigned nChannels,
-        		unsigned nFilterTaps);
-
 	private:
         /// Sainity checking.
         void _checkData(const TimeStreamData* timeData,
@@ -94,8 +90,13 @@ class ChanneliserPolyphase : public AbstractModule
         void _threadSubbandRange(unsigned& start, unsigned& end,
         		unsigned nSubbands, unsigned nThreads, unsigned threadId);
 
+        /// Set up processing buffers.
+        unsigned _setupBuffers( unsigned nSubbands, unsigned nChannels,
+        		unsigned nFilterTaps);
+
     private:
-        unsigned _nChannels;	///< Number of channels to produce per subband.
+        bool _buffersInitialised; ///< Flag set if the buffers have been initialised.
+        unsigned _nChannels;	  ///< Number of channels to produce per subband.
 
         // TODO: The following should probably be matrixes...
         std::vector<std::vector<complex<double> > > _subbandBuffer;

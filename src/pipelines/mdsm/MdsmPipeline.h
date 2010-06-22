@@ -42,6 +42,8 @@ class MdsmPipeline : public AbstractPipeline
         /// Local data blob
         PolyphaseCoefficients* polyphaseCoeff;
         ChannelisedStreamData* channelisedData;
+
+        unsigned _iteration;
 };
 
 } // namespace lofar

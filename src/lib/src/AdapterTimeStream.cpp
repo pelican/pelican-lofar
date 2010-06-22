@@ -65,7 +65,7 @@ void AdapterTimeStream::deserialise(QIODevice* in)
     // Temporary arrays for buffering data from the IO Device.
     std::cout << "Header size " << headerSize << std::endl;
     std::cout << "Data size " << dataSize << std::endl;
-    std::cout << "Padding size " << paddingSize << std::endl;
+    std::cout << "FIXME! Padding size " << paddingSize << std::endl;
     std::vector<char> headerTemp(headerSize);
     std::vector<char> dataTemp(dataSize);
     std::vector<char> paddingTemp(paddingSize);
@@ -89,9 +89,8 @@ void AdapterTimeStream::deserialise(QIODevice* in)
         in->read(&dataTemp[0], dataSize);
         _readData(data, &dataTemp[0]);
 
-        std::cout << p << ". Hola: " << dataSize + headerSize << std::endl;
         // Read off padding (from word alignment of the packet).
-        // FIXME PROPERLY!
+        // FIXME Padding must be treated properly rather than commented out!
         //in->read(&paddingTemp[0], paddingSize);
     }
 }

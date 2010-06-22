@@ -11,6 +11,7 @@ namespace lofar {
 MdsmPipeline::MdsmPipeline()
     : AbstractPipeline()
 {
+    _iteration = 0;
 }
 
 /**
@@ -29,10 +30,12 @@ void MdsmPipeline::init()
     // Create modules
     channeliser = (ChanneliserPolyphase *) createModule("ChanneliserPolyphase");
 
-    // Create local datablob
+    // Create local datablobs
     polyphaseCoeff = (PolyphaseCoefficients*) createBlob("PolyphaseCoefficients");
+    channelisedData = (ChannelisedStreamData*) createBlob("ChannelisedStreamData");
 
     // Hard-code filename, taps and channels.
+    // FIXME These are quick hard-coded hacks at the moment.
     QString coeffFileName = "../../../pipelines/mdsm/data/coeffs_512_1.dat";
     int nTaps = 8;
     int nChannels = 512;
@@ -53,8 +56,8 @@ void MdsmPipeline::run(QHash<QString, DataBlob*>& remoteData)
 
     // Run the polyphase channeliser and output module
     channeliser -> run(timeData, polyphaseCoeff, channelisedData);
-    std::cout << "Finished the pipeline\n";
-
+    std::cout << "Finished the MDSM pipeline, iteration " << _iteration << std::endl;
+    _iteration++;
 }
 
 } // namespace lofar

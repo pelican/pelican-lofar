@@ -27,6 +27,8 @@ namespace lofar {
 ChanneliserPolyphase::ChanneliserPolyphase(const ConfigNode& config)
 : AbstractModule(config)
 {
+    _buffersInitialised = false;
+
 	// Get options from the config.
 	_nChannels = config.getOption("channels", "number", "512").toUInt();
 	_nThreads = config.getOption("processingThreads", "number", "2").toUInt();
@@ -85,9 +87,13 @@ void ChanneliserPolyphase::run(const TimeStreamData* timeData,
 	const unsigned nPolarisations = 1;
 	spectra->resize(nSubbands, nPolarisations, _nChannels);
 
+	// Set up the buffers if required.
+	const unsigned nFilterTaps = filterCoeff->nTaps();
+	if (!_buffersInitialised)
+	    _setupBuffers(nSubbands, _nChannels, nFilterTaps);
+
 	// Pointers to processing buffers.
 	omp_set_num_threads(_nThreads);
-	const unsigned nFilterTaps = filterCoeff->nTaps();
 	const unsigned bufferSize = _subbandBuffer[0].size();
 	const double* coeff = filterCoeff->coefficients();
 
@@ -146,25 +152,6 @@ void ChanneliserPolyphase::_checkData(const TimeStreamData* timeData,
 		throw QString("ChanneliserPolyphase: Dimension mismatch: "
 				"Number of filter channels %1 != number of output channels %2.")
 				.arg(filterCoeff->nChannels()).arg(_nChannels);
-}
-
-
-/**
-* @details
-* Sets up processing buffers
-*
-* @param nChannels
-* @param nFilterTaps
-*/
-unsigned ChanneliserPolyphase::setupBuffers(unsigned nSubbands,
-		unsigned nChannels, unsigned nFilterTaps)
-{
-	_subbandBuffer.resize(nSubbands);
-	unsigned bufferSize = nChannels * nFilterTaps;
-	for (unsigned s = 0; s < nSubbands; ++s) {
-		_subbandBuffer[s].resize(bufferSize, complex<double>(0.0, 0.0));
-	}
-	return bufferSize;
 }
 
 
@@ -293,6 +280,25 @@ void ChanneliserPolyphase::_threadSubbandRange(unsigned& start,
 	end = start + number;
 }
 
+
+/**
+* @details
+* Sets up processing buffers
+*
+* @param nChannels
+* @param nFilterTaps
+*/
+unsigned ChanneliserPolyphase::_setupBuffers(unsigned nSubbands,
+        unsigned nChannels, unsigned nFilterTaps)
+{
+    _subbandBuffer.resize(nSubbands);
+    unsigned bufferSize = nChannels * nFilterTaps;
+    for (unsigned s = 0; s < nSubbands; ++s) {
+        _subbandBuffer[s].resize(bufferSize, complex<double>(0.0, 0.0));
+    }
+    _buffersInitialised = true;
+    return bufferSize;
+}
 
 
 }// namespace lofar

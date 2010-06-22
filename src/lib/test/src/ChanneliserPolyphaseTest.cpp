@@ -134,7 +134,7 @@ void ChanneliserPolyphaseTest::test_updateBuffer()
     ChanneliserPolyphase channeliser(config);
 
     unsigned bufferSize = nChan * nTaps;
-    channeliser.setupBuffers(nSubbands, nChan, nTaps);
+    channeliser._setupBuffers(nSubbands, nChan, nTaps);
 
     std::vector<std::complex<double> > sampleBuffer(nChan * nSubbands * nIter);
 
@@ -173,7 +173,7 @@ void ChanneliserPolyphaseTest::test_filter()
     const double* coeff = filterCoeff.coefficients();
 
     unsigned bufferSize = nChan * nTaps;
-    channeliser.setupBuffers(nSubbands, nChan, nTaps);
+    channeliser._setupBuffers(nSubbands, nChan, nTaps);
 
     std::vector<complex<double> > filteredData(nChan);
     std::complex<double>* subbandBuffer;
@@ -239,7 +239,6 @@ void ChanneliserPolyphaseTest::test_run()
     ChannelisedStreamData spectra(nSubbands, nPolarisations, nChannels);
     PolyphaseCoefficients filterCoeff(nTaps, nChannels);
     TimeStreamData data(nSubbands, nPolarisations, nChannels);
-    channeliser.setupBuffers(nSubbands, nChannels, nTaps);
 
     unsigned nIter = 2000;
     QTime timer;
@@ -275,7 +274,6 @@ void ChanneliserPolyphaseTest::test_makeSpectrum()
     ChannelisedStreamData spectra(nSubbands, nPolarisations, nChannels);
     ConfigNode config(_configXml(nChannels));
     ChanneliserPolyphase channeliser(config);
-    channeliser.setupBuffers(nSubbands, nChannels, nTaps); //TODO: horrible requirement to have to call this.
     PolyphaseCoefficients filterCoeff(nTaps, nChannels);
     double* coeff = filterCoeff.coefficients();
     filterCoeff.load(coeffFileName, nTaps, nChannels);
@@ -361,7 +359,6 @@ void ChanneliserPolyphaseTest::test_channelProfile()
     	ChannelisedStreamData spectra(nSubbands, nPolarisations, nChannels);
     	ConfigNode config(_configXml(nChannels));
     	ChanneliserPolyphase channeliser(config);
-    	channeliser.setupBuffers(nSubbands, nChannels, nTaps); // TODO: This step too clunky?
     	PolyphaseCoefficients filterCoeff(nTaps, nChannels);
     	double* coeff = filterCoeff.coefficients();
     	filterCoeff.load(coeffFileName, nTaps, nChannels);
