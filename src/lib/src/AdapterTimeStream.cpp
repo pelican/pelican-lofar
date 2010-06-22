@@ -57,18 +57,17 @@ void AdapterTimeStream::deserialise(QIODevice* in)
     // Packet size variables.
     size_t packetSize = sizeof(UDPPacket);
     size_t headerSize = sizeof(UDPPacket::Header);
-    // FIXME Check the divide-by-4 is OK.
+
+    // Must divide by 4 because we're using sampleBits * 2 for
+    // each value (complex data).
     size_t dataSize = _fixedPacketSize ?
     		8130 : _nSubbands * _nPolarisations * _nSamples * _sampleBits / 4;
-    size_t paddingSize = packetSize - headerSize - dataSize;
+    size_t paddingSize = _fixedPacketSize ? packetSize - headerSize - dataSize : 0;
 
     // Temporary arrays for buffering data from the IO Device.
-    std::cout << "Header size " << headerSize << std::endl;
-    std::cout << "Data size " << dataSize << std::endl;
-    std::cout << "FIXME! Padding size " << paddingSize << std::endl;
     std::vector<char> headerTemp(headerSize);
     std::vector<char> dataTemp(dataSize);
-    std::vector<char> paddingTemp(paddingSize);
+    std::vector<char> paddingTemp(paddingSize + 1);
 
     // Data blob to read into.
     std::complex<double>* data = _timeData->data();
@@ -90,8 +89,7 @@ void AdapterTimeStream::deserialise(QIODevice* in)
         _readData(data, &dataTemp[0]);
 
         // Read off padding (from word alignment of the packet).
-        // FIXME Padding must be treated properly rather than commented out!
-        //in->read(&paddingTemp[0], paddingSize);
+        in->read(&paddingTemp[0], paddingSize);
     }
 }
 
@@ -146,7 +144,6 @@ void AdapterTimeStream::_checkData()
     // Resize the time stream data blob being read into to match the adapter
     // dimensions.
     _timeData = static_cast<TimeStreamData*>(_data);
-    std::cout << "nSamples " << _nSamples << " nPackets " << _nUDPPackets << std::endl;
     _timeData->resize(_nSubbands, _nPolarisations, _nSamples * _nUDPPackets);
 }
 

@@ -73,7 +73,6 @@ void LofarChunker::next(QIODevice* device)
     qint64           sizeDatagram;
 
     WritableData writableData = getDataStorage( _nPackets * _packetSize);
-    std::cout << "Chunker total size: " << _packetSize * _nPackets << std::endl;
 
     if (writableData.isValid()) {
 
@@ -197,7 +196,7 @@ unsigned LofarChunker::writePacket(WritableData *writer, UDPPacket& packet, unsi
         writer -> write(reinterpret_cast<void*>(&packet), _packetSize, offset);
         return offset + _packetSize;
     } else {
-        std::cerr << "WriteableData is not valid!" << std::endl;
+        std::cerr << "WritableData is not valid!" << std::endl;
         return -1;
     }
 }
