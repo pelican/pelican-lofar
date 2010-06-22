@@ -33,7 +33,7 @@ class T_TimeStreamData : public DataBlob
 {
     public:
         /// Constructs an empty time stream data blob.
-        T_TimeStreamData() : DataBlob() {
+        T_TimeStreamData(const QString& type) : DataBlob(type) {
             _nSubbands = 0;
             _nPolarisations = 0;
             _nSamples = 0;
@@ -43,7 +43,7 @@ class T_TimeStreamData : public DataBlob
 
         /// Constructs and assigns memory for a time stream buffer data blob.
         T_TimeStreamData(const unsigned nSubbands, const unsigned nPolarisations,
-                const unsigned nSamples) : DataBlob()
+                const unsigned nSamples, const QString& type) : DataBlob(type)
         {
             resize(nSubbands, nPolarisations, nSamples);
         }
@@ -174,13 +174,14 @@ class TimeStreamData : public T_TimeStreamData<std::complex<double> >
 {
     public:
         /// Constructs an empty time stream data blob.
-        TimeStreamData() : T_TimeStreamData<std::complex<double> >() {}
+        TimeStreamData() : T_TimeStreamData<std::complex<double> >
+        ("TimeStreamData") {}
 
         /// Constructs and assigns memory for a time stream buffer data blob.
         TimeStreamData(const unsigned nSubbands, const unsigned nPolarisations,
                 const unsigned nSamples)
         : T_TimeStreamData<std::complex<double> >(nSubbands, nPolarisations,
-                    nSamples) {}
+                    nSamples, "TimeStreamData") {}
 
         /// Destroys the time stream data blob.
         ~TimeStreamData() {}

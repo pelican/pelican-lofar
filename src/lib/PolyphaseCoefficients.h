@@ -25,13 +25,14 @@ class T_PolyphaseCoefficients : public DataBlob
 {
 	public:
 		/// Constructs a polyphase coefficients object.
-		T_PolyphaseCoefficients() : DataBlob() {
+		T_PolyphaseCoefficients(const QString& type) : DataBlob(type) {
 			_nTaps = 0; _nChannels = 0;
 		}
 
 		/// Constructs a polyphase coefficients object of the specfied dimensions.
-		T_PolyphaseCoefficients(const unsigned nTaps, const unsigned nChannels)
-		: DataBlob() {
+		T_PolyphaseCoefficients(const unsigned nTaps,
+		        const unsigned nChannels, const QString& type)
+		: DataBlob(type) {
 			resize(nTaps, nChannels);
 		}
 
@@ -91,17 +92,19 @@ class PolyphaseCoefficients : public T_PolyphaseCoefficients<double>
 {
 	public:
 		/// Constructs an empty polyphase filter coefficient data blob.
-		PolyphaseCoefficients() : T_PolyphaseCoefficients<double>() {}
+		PolyphaseCoefficients() : T_PolyphaseCoefficients<double>
+		("PolyphaseCoefficients") {}
 
 		/// Constructs a polyphase filter coefficient data blob.
 		PolyphaseCoefficients(const unsigned nTaps, const unsigned nChannels) :
-			T_PolyphaseCoefficients<double>(nTaps, nChannels) {}
+			T_PolyphaseCoefficients<double>(nTaps, nChannels,
+			        "PolyphaseCoefficients") {}
 
 		/// Constructs a polyphase filter coefficient data blob loading values
 		/// the specified file.
 		PolyphaseCoefficients(const QString& fileName, const unsigned nTaps,
 				const unsigned nChannels) :
-			T_PolyphaseCoefficients<double>()
+			T_PolyphaseCoefficients<double>("PolyphaseCoefficients")
 		{
 			load(fileName, nTaps, nChannels);
 		}

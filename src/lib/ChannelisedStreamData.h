@@ -29,7 +29,7 @@ class T_ChannelisedSteamData : public DataBlob
 {
     public:
         /// Constructs an empty time channelised data blob.
-        T_ChannelisedSteamData() : DataBlob() {
+        T_ChannelisedSteamData(const QString& type) : DataBlob(type) {
             _nSubbands = 0;
             _nPolarisations = 0;
             _nChannels = 0;
@@ -39,8 +39,9 @@ class T_ChannelisedSteamData : public DataBlob
 
         /// Constructs and assigns memory for a time stream buffer data blob.
         T_ChannelisedSteamData(const unsigned nSubbands,
-                const unsigned nPolarisations, const unsigned nChannels)
-        : DataBlob() {
+                const unsigned nPolarisations, const unsigned nChannels,
+                const QString& type)
+        : DataBlob(type) {
             resize(nSubbands, nPolarisations, nChannels);
         }
 
@@ -164,24 +165,24 @@ class T_ChannelisedSteamData : public DataBlob
  * @brief
  * Container class for double floating point format channelised data.
  *
- *
  * @details
  */
 class ChannelisedStreamData : public T_ChannelisedSteamData<std::complex<double> >
 {
     public:
         /// Constructs an empty time stream data blob.
-        ChannelisedStreamData() : T_ChannelisedSteamData<std::complex<double> >() {}
+        ChannelisedStreamData() : T_ChannelisedSteamData<std::complex<double> >
+        ("ChannelisedStreamData") {}
 
         /// Constructs and assigns memory for a time stream buffer data blob.
-        ChannelisedStreamData(const unsigned nSubbands, const unsigned nPolarisations,
-                const unsigned nChannels)
-        : T_ChannelisedSteamData<std::complex<double> >(nSubbands, nPolarisations,
-                    nChannels) {}
+        ChannelisedStreamData(const unsigned nSubbands,
+                const unsigned nPolarisations, const unsigned nChannels)
+        : T_ChannelisedSteamData<std::complex<double> >(nSubbands,
+                nPolarisations, nChannels, "ChannelisedStreamData") {}
 
         /// Constructs a data blob from a serial copy of the blob.
         ChannelisedStreamData(QIODevice& serialBlob)
-        : T_ChannelisedSteamData<std::complex<double> >()
+        : T_ChannelisedSteamData<std::complex<double> >("ChannelisedStreamData")
         {
             deserialise(serialBlob);
         }
