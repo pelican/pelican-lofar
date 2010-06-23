@@ -8,8 +8,12 @@ set(lib_src
     src/AdapterTimeStream.cpp
     src/ChanneliserPolyphase.cpp
     src/PolyphaseCoefficients.cpp
+    src/PelicanBlobClient.cpp
 )
 add_library(pelicanLofar ${lib_src} )
+
+add_executable(blobClient blobClientMain.cpp)
+target_link_libraries(blobClient pelicanLofar)
 
 set(SUBPACKAGE_LIBRARIES
     pelicanLofar

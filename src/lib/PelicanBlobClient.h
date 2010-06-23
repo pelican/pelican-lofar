@@ -5,8 +5,8 @@
 #include "pelican/comms/AbstractClientProtocol.h"
 
 // Qt stuff
-#include <QTcpSocket>
-#include <QString>
+#include <QtNetwork/QTcpSocket>
+#include <QtCore/QString>
 
 /**
  * @file PelicanBlobClient.h

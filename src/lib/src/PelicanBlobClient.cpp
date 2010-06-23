@@ -9,8 +9,8 @@
 #include "PelicanBlobClient.h"
 
 // QT stuff
-#include "QHostAddress"
-#include "QByteArray"
+#include "QtNetwork/QHostAddress"
+#include "QtCore/QByteArray"
 
 // Boost stuff
 #include <boost/shared_ptr.hpp>

@@ -5,7 +5,7 @@ using namespace pelican::lofar;
 
 int main()
 {
-    PelicanBlobClient client("ChannelisedStreamData", "192.168.0.10", 6969);
+    PelicanBlobClient client("ChannelisedStreamData", "127.0.0.1", 6969);
     while (1)
         client.getData();
 }
