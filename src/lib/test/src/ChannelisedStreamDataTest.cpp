@@ -183,6 +183,7 @@ void ChannelisedStreamDataTest::test_serialise_deserialise()
      // Construct a new data blob to fill via the deserialise.
      ChannelisedStreamData spectrum2(serialBlob);
 
+     CPPUNIT_ASSERT(serialBlob.bytesAvailable() == 0);
      serialBlob.close();
 
      // Check the header deserialised correctly.
@@ -204,7 +205,6 @@ void ChannelisedStreamDataTest::test_serialise_deserialise()
              }
          }
      }
-
 }
 
 

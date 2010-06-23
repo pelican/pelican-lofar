@@ -9,6 +9,7 @@ set(lofarTest_src
     src/AdapterTimeStreamTest.cpp
     src/PolyphaseCoefficientsTest.cpp
     src/ChanneliserPolyphaseTest.cpp
+    src/PelicanBlobClientTest.cpp
 )
 
 set(lofarTest_moc_headers )

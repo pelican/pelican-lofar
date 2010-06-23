@@ -65,7 +65,7 @@ void ChannelisedStreamData::serialise(QIODevice& out) const
 void ChannelisedStreamData::deserialise(QIODevice& in)
 {
     // Read the header.
-    unsigned offset = 0;
+    while (in.bytesAvailable() < 28) in.waitForReadyRead(-1);
     in.read((char*)&_nSubbands, sizeof(unsigned));
     in.read((char*)&_nPolarisations, sizeof(unsigned));
     in.read((char*)&_nChannels, sizeof(unsigned));
@@ -79,9 +79,10 @@ void ChannelisedStreamData::deserialise(QIODevice& in)
     resize(_nSubbands, _nPolarisations, _nChannels);
 
     // Read the data.
+    while (in.bytesAvailable() < dataSize) in.waitForReadyRead(-1);
     in.read((char*)&_data[0], dataSize);
 }
 
-	} // namespace lofar
+} // namespace lofar
 } // namespace pelican
 

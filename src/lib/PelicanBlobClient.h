@@ -32,7 +32,7 @@ class PelicanBlobClient
         ~PelicanBlobClient();
 
     public:
-        void getData();
+        void getData(QHash<QString, DataBlob*>& dataHash);
 
     private:
         void connectToLofarPelican();
