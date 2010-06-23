@@ -47,7 +47,7 @@
             </ChanneliserPolyphase>
             
             <PelicanTCPBlobServer>
-                <connection port="0" />
+                <connection port="6969" />
             </PelicanTCPBlobServer>
         </modules>
 
