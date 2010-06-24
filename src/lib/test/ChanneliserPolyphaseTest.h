@@ -40,6 +40,7 @@ class ChanneliserPolyphaseTest : public CppUnit::TestFixture
         CPPUNIT_TEST(test_filter);
         CPPUNIT_TEST(test_fft);
         CPPUNIT_TEST(test_run);
+        CPPUNIT_TEST(test_loadCoeffs);
 //        CPPUNIT_TEST(test_makeSpectrum);
 //        CPPUNIT_TEST(test_channelProfile);
         CPPUNIT_TEST_SUITE_END();
@@ -61,6 +62,9 @@ class ChanneliserPolyphaseTest : public CppUnit::TestFixture
 
         /// Test the modules public run method.
         void test_run();
+
+        /// Test loading a coefficients file.
+        void test_loadCoeffs();
 
         /// Test the constructing a spectrum given a set of weights.
         void test_makeSpectrum();
