@@ -10,6 +10,7 @@
 #include <complex>
 #include <iostream>
 #include <QtCore/QIODevice>
+#include <QtCore/QSysInfo>
 
 namespace pelican {
 namespace lofar {
@@ -184,7 +185,7 @@ class ChannelisedStreamData : public T_ChannelisedSteamData<std::complex<double>
         ChannelisedStreamData(QIODevice& serialBlob)
         : T_ChannelisedSteamData<std::complex<double> >("ChannelisedStreamData")
         {
-            deserialise(serialBlob);
+            deserialise(serialBlob, QSysInfo::ByteOrder);
         }
 
         /// Destroys the time stream data blob.
@@ -197,8 +198,11 @@ class ChannelisedStreamData : public T_ChannelisedSteamData<std::complex<double>
         /// Serialises the data blob.
         void serialise(QIODevice&) const;
 
+        /// Returns the number of serialised bytes.
+        quint64 serialisedBytes() const;
+
         /// Deserialises the data blob.
-        void deserialise(QIODevice&);
+        void deserialise(QIODevice&, QSysInfo::Endian);
 };
 
 PELICAN_DECLARE_DATABLOB(ChannelisedStreamData)

@@ -61,7 +61,7 @@ void PelicanBlobClient::getData(QHash<QString, DataBlob*>& dataHash)
         case ServerResponse::Blob:   // We have received a blob
             {
                 DataBlobResponse* res = static_cast<DataBlobResponse*>(r.get());
-                blob->deserialise(*_tcpSocket);
+                blob->deserialise(*_tcpSocket, res->byteOrder());
                 std::cout << res -> dataName().toStdString() << std::endl;
             }
             break;
