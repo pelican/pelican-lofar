@@ -5,7 +5,7 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR} ..)
 set(lofarTestLib_src
     src/LofarUdpEmulator.cpp
 )
-add_library(lofarTestLib ${lofarTestLib_src})
+add_library(lofarTestLib STATIC ${lofarTestLib_src})
 
 
 # Create test binary and add it to the cmake test framework.
@@ -29,7 +29,7 @@ set_target_properties(lofarTest PROPERTIES
 )
 target_link_libraries(lofarTest
     lofarTestLib
-    pelican-lofar
+    pelican-lofar_static
     ${PELICAN_LIBRARY}
     ${FFTW3_LIBRARIES}
     ${CPPUNIT_LIBRARIES}
@@ -43,7 +43,7 @@ add_executable(lofarEmulator
     src/lofarEmulatorMain.cpp
 )
 target_link_libraries(lofarEmulator
-    pelican-lofar
+    pelican-lofar_static
     ${PELICAN_LIBRARY}
     lofarTestLib
 )

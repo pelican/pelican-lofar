@@ -15,7 +15,7 @@ set_target_properties(mdsmPipeline PROPERTIES
 
 target_link_libraries(mdsmPipeline
     pelicanMdsm
-    pelican-lofar
+    pelican-lofar_static
     ${PELICAN_LIBRARY}
     ${FFTW3_LIBRARIES}
 )
