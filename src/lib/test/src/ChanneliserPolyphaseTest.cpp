@@ -255,6 +255,26 @@ void ChanneliserPolyphaseTest::test_run()
 
 /**
  * @details
+ * Load some ppf coefficients from file.
+ */
+void ChanneliserPolyphaseTest::test_loadCoeffs()
+{
+    unsigned nChannels = 50;
+    unsigned nTaps = 10;
+
+    QString coeffFileName = "data/coeffs_t10_c50.dat";
+
+    PolyphaseCoefficients filterCoeffs(nTaps, nChannels);
+    filterCoeffs.load(coeffFileName, nTaps, nChannels);
+    CPPUNIT_ASSERT_EQUAL(nChannels, filterCoeffs.nChannels());
+    CPPUNIT_ASSERT_EQUAL(nTaps, filterCoeffs.nTaps());
+}
+
+
+
+
+/**
+ * @details
  * Contruct a spectrum and save it to file.
  */
 void ChanneliserPolyphaseTest::test_makeSpectrum()
