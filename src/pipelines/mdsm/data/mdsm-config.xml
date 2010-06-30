@@ -45,11 +45,18 @@
                 <channels number="512" />
                 <processingThreads number="2" />
             </ChanneliserPolyphase>
-            
-            <PelicanTCPBlobServer>
-                <connection port="6969" />
-            </PelicanTCPBlobServer>
         </modules>
+
+        <output>
+          <streamers>
+             <PelicanTcpBlobServer active="true" >
+                 <connection port="6969" />
+             <PelicanTcpBlobServer/>
+          </streamers>
+          <dataStreams>
+             <Stream name="ChannelisedStreamData" listeners="PelicanTcpBlobServer" />
+          </dataStreams>
+        </output>
 
     </pipeline>
 </configuration>

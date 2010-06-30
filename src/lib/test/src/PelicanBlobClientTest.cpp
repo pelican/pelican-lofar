@@ -4,8 +4,6 @@
 #include "pelican/utility/ConfigNode.h"
 #include "pelican/output/PelicanTCPBlobServer.h"
 
-#include <QtCore/QCoreApplication>
-
 namespace pelican {
 
 namespace lofar {
@@ -30,12 +28,10 @@ void PelicanBlobClientTest::setUp()
 {
     int argc = 1;
     char *argv[] = {(char*)"pelican"};
-    _app = new QCoreApplication(argc,argv);
 }
 
 void PelicanBlobClientTest::tearDown()
 {
-    delete _app;
 }
 
 void PelicanBlobClientTest::test_method()
@@ -45,7 +41,7 @@ void PelicanBlobClientTest::test_method()
                   "   <connection port=\"0\"/>"  // 0 = find unused system port
                   "</PelicanTCPBlobServer>";
     ConfigNode config(xml);
-    PelicanTCPBlobServer server(config, _app);
+    PelicanTCPBlobServer server(config);
     sleep(1);
 
     // Create a blob and fill it with data.

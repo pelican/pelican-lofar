@@ -29,7 +29,7 @@ void MdsmPipeline::init()
 {
     // Create modules
     channeliser = (ChanneliserPolyphase *) createModule("ChanneliserPolyphase");
-    tcpBlobServer = (PelicanTCPBlobServer *) createModule("PelicanTCPBlobServer");
+//     tcpBlobServer = (PelicanTCPBlobServer *) createModule("PelicanTCPBlobServer");
 
     // Create local datablobs
     polyphaseCoeff = (PolyphaseCoefficients*) createBlob("PolyphaseCoefficients");
@@ -59,7 +59,10 @@ void MdsmPipeline::run(QHash<QString, DataBlob*>& remoteData)
     channeliser -> run(timeData, polyphaseCoeff, channelisedData);
 
     // Send the blob using the output module.
-    tcpBlobServer->send("ChannelisedStreamData", channelisedData);
+//    tcpBlobServer->send("ChannelisedStreamData", channelisedData);
+
+    dataOutput( channelisedData, "ChannelisedStreamData" );
+
     std::cout << "Finished the MDSM pipeline, iteration " << _iteration << std::endl;
     _iteration++;
 }
