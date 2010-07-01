@@ -49,12 +49,12 @@
 
         <output>
           <streamers>
-             <PelicanTcpBlobServer active="true" >
+             <PelicanTCPBlobServer active="true" >
                  <connection port="6969" />
-             <PelicanTcpBlobServer/>
+             </PelicanTCPBlobServer>
           </streamers>
           <dataStreams>
-             <Stream name="ChannelisedStreamData" listeners="PelicanTcpBlobServer" />
+             <stream name="ChannelisedStreamData" listeners="PelicanTCPBlobServer" />
           </dataStreams>
         </output>
 

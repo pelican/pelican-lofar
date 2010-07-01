@@ -19,7 +19,7 @@ set(lofarTest_src
     src/AdapterTimeStreamTest.cpp
     src/PolyphaseCoefficientsTest.cpp
     src/ChanneliserPolyphaseTest.cpp
-    src/PelicanBlobClientTest.cpp
+#    src/PelicanBlobClientTest.cpp
 )
 
 add_executable(lofarTest ${lofarTest_src})

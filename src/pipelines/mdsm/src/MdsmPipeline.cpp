@@ -63,7 +63,7 @@ void MdsmPipeline::run(QHash<QString, DataBlob*>& remoteData)
 
     dataOutput( channelisedData, "ChannelisedStreamData" );
 
-    std::cout << "Finished the MDSM pipeline, iteration " << _iteration << std::endl;
+    if (_iteration % 200 == 0) std::cout << "Finished the MDSM pipeline, iteration " << _iteration << std::endl;
     _iteration++;
 }
 
