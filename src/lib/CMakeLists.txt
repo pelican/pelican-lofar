@@ -9,6 +9,8 @@ set(lib_src
     src/LofarChunker.cpp
     src/LofarServerClient.cpp
     src/LofarStreamDataClient.cpp
+    src/LofarStationConfiguration.cpp
+    src/LofarStationConfigurationAdapter.cpp
     src/PelicanBlobClient.cpp
     src/PolyphaseCoefficients.cpp
 )
