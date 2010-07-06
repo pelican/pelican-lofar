@@ -1,4 +1,6 @@
 #include "OutputHDF5Lofar.h"
+#include "LofarData.h"
+#include "LofarStationConfiguration.h"
 #include "pelican/data/DataBlob.h"
 #include "pelican/utility/ConfigNode.h"
 
@@ -27,6 +29,7 @@ void OutputHDF5Lofar::send(const QString& streamName, const DataBlob* dataBlob)
 {
     if( dataBlob->type() == "LofarData" )
     {
+        const LofarStationConfiguration& config = static_cast<const LofarData*>(dataBlob)->configuration();
         // TODO
     }
 }

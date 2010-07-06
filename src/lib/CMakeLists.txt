@@ -7,6 +7,7 @@ set(lib_src
     src/ChannelisedStreamData.cpp
     src/ChanneliserPolyphase.cpp
     src/OutputHDF5Lofar.cpp
+    src/LofarData.cpp
     src/LofarChunker.cpp
     src/LofarServerClient.cpp
     src/LofarStreamDataClient.cpp
