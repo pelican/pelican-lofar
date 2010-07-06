@@ -45,7 +45,7 @@ void PelicanBlobClientTest::test_method()
                   "   <connection port=\"0\"/>"  // 0 = find unused system port
                   "</PelicanTCPBlobServer>";
     ConfigNode config(xml);
-    PelicanTCPBlobServer server(config, _app);
+    PelicanTCPBlobServer server(config);
     sleep(1);
 
     // Create a blob and fill it with data.

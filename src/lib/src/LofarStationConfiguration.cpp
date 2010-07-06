@@ -10,7 +10,7 @@ namespace lofar {
  *@details LofarStationConfiguration 
  */
 LofarStationConfiguration::LofarStationConfiguration()
-    : DataBlob()
+    : DataBlob("LofarStationConfiguration")
 {
 }
 
