@@ -35,11 +35,20 @@ if(NOT BINARY_INSTALL_DIR)
 endif(NOT BINARY_INSTALL_DIR)
 
 
+set(include_locations /data/fred/lofarsoft/release/include)
+set(lib_locations /data/fred/lofarsoft/release/lib)
+list(APPEND include_locations /data/fred/lofarsoft/release/include/dal)
+
 # === Find Dependencies.
 find_package(Pelican REQUIRED)
 find_package(CppUnit REQUIRED)
 find_package(OpenMP REQUIRED)
 find_package(FFTW3 REQUIRED)
+find_package(DAL REQUIRED)
+find_package(HDF5 REQUIRED)
+
+add_definitions(-DHAVE_HDF5)
+include_directories(${HDF5_INCLUDES})
 
 # === Add directories to the include path (i.e. -I<directory> ...)
 include_directories(${PELICAN_INCLUDES})

@@ -4,6 +4,7 @@
 #include "pelican/data/DataBlob.h"
 #include "pelican/utility/ConfigNode.h"
 
+#include <BF_Dataset.h>
 
 namespace pelican {
 

@@ -1,4 +1,6 @@
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
+include_directories(${DAL_INCLUDES})
+include_directories("${DAL_INCLUDES}/..")
 
 # Create the pelican-lofar library and set its install target.
 # ------------------------------------------------------------------------------
@@ -37,6 +39,7 @@ set_target_properties(pelican-lofar PROPERTIES
 install(TARGETS pelican-lofar DESTINATION ${LIBRARY_INSTALL_DIR})
 target_link_libraries(pelican-lofar
     ${FFTW3_LIBRARIES}
+    ${DAL_LIBRARIES}
 )
 
 
