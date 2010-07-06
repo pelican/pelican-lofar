@@ -60,12 +60,30 @@ void ChannelisedStreamData::serialise(QIODevice& out) const
 
 /**
  * @details
+ * Returns the number of serialised bytes in the data blob when using
+ * the serialise() method.
+ */
+quint64 ChannelisedStreamData::serialisedBytes() const
+{
+    long dataSize = _nSubbands * _nPolarisations * _nChannels;
+    dataSize *= sizeof(std::complex<double>);
+    return sizeof(unsigned) +  // _nSubbands
+            sizeof(unsigned) + // _nPolarisations
+            sizeof(unsigned) + // _nChannels
+            sizeof(double) +   // _startFreq
+            sizeof(double) +   // _channelFreqDelta
+            dataSize;
+}
+
+
+/**
+ * @details
  * Deserialises the data blob.
  */
-void ChannelisedStreamData::deserialise(QIODevice& in)
+void ChannelisedStreamData::deserialise(QIODevice& in, QSysInfo::Endian)
 {
     // Read the header.
-    while (in.bytesAvailable() < 28) in.waitForReadyRead(-1);
+    //while (in.bytesAvailable() < 28) in.waitForReadyRead(-1);
     in.read((char*)&_nSubbands, sizeof(unsigned));
     in.read((char*)&_nPolarisations, sizeof(unsigned));
     in.read((char*)&_nChannels, sizeof(unsigned));
@@ -79,7 +97,7 @@ void ChannelisedStreamData::deserialise(QIODevice& in)
     resize(_nSubbands, _nPolarisations, _nChannels);
 
     // Read the data.
-    while (in.bytesAvailable() < dataSize) in.waitForReadyRead(-1);
+    //while (in.bytesAvailable() < dataSize) in.waitForReadyRead(-1);
     in.read((char*)&_data[0], dataSize);
 }
 

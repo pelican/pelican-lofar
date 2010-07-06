@@ -39,7 +39,7 @@ class MdsmPipeline : public AbstractPipeline
     private:
         /// Module pointers
         ChanneliserPolyphase* channeliser;
-        PelicanTCPBlobServer* tcpBlobServer;
+//        PelicanTCPBlobServer* tcpBlobServer;
 
         /// Local data blob
         PolyphaseCoefficients* polyphaseCoeff;

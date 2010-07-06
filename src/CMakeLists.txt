@@ -53,11 +53,10 @@ add_executable(lofarClient
     # pipeline.cpp
 )
 target_link_libraries(lofarClient
-    pelican-lofar
+    pelican-lofar_static
     ${PELICAN_LIBRARY}
     ${FFTW3_LIBRARIES}
 )
-
 
 # === Create the server binary.
 #set( serverBinSrc

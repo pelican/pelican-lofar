@@ -7,8 +7,6 @@
  * @file PelicanBlobClientTest.h
  */
 
-class QCoreApplication;
-
 namespace pelican {
 
 namespace lofar {
@@ -39,9 +37,6 @@ class PelicanBlobClientTest : public CppUnit::TestFixture
     public:
         PelicanBlobClientTest(  );
         ~PelicanBlobClientTest();
-
-    private:
-        QCoreApplication* _app;
 };
 
 } // namespace lofar
