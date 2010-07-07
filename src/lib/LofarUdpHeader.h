@@ -9,6 +9,8 @@ namespace lofar {
 /**
  * @struct UDPPacket.
  *
+ * @ingroup pelican_lofar
+ *
  * @details
  * LOFAR UDP packet data structure.
  *

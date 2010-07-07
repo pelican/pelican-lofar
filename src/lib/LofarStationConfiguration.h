@@ -14,7 +14,9 @@ namespace lofar {
 
 /**
  * @class LofarStationConfiguration
- *  
+ *
+ * @ingroup pelican_lofar
+ *
  * @brief
  *   Contains inforamtion about the Lofar Station setup
  * @details

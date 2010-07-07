@@ -44,6 +44,8 @@ typedef std::complex<int16>  i16complex;
 /**
  * @class i4complex
  *
+ * @ingroup pelican_lofar
+ *
  * @brief
  * Container class for 8bit signed packed complex numbers.
  *

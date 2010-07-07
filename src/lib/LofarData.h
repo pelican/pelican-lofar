@@ -15,7 +15,9 @@ namespace lofar {
 
 /**
  * @class LofarData
- *  
+ *
+ * @ingroup pelican_lofar
+ *
  * @brief
  *   A generic Lofar Data container of lofar data and lofar station configuration
  * @details

@@ -15,6 +15,8 @@ namespace lofar {
 /**
  * @class TimeStreamData
  *
+ * @ingroup pelican_lofar
+ *
  * @brief
  * Container class to hold a buffer of time stream data.
  *
