@@ -15,6 +15,8 @@ namespace lofar {
 /**
  * @class T_PolyphaseCoefficients
  *
+ * @ingroup pelican_lofar
+ *
  * @brief
  * Container class to hold polyphase filter coefficients.
  *

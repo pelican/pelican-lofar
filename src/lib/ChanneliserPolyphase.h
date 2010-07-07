@@ -27,6 +27,8 @@ class ChannelisedStreamData;
  *
  * @note To be deprecated for PPF Channeliser.
  *
+ * @ingroup pelican_lofar
+ *
  * @brief
  * Module to channelise a time stream data blob.
  *

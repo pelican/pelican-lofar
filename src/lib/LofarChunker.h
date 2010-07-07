@@ -18,6 +18,8 @@ class DataManager;
 /**
  * @class LofarChunker
  *
+ * @ingroup pelican_lofar
+ *
  * @brief
  * Implementation of an AbstractChunker to monitor calling.
  *
