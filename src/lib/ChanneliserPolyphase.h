@@ -25,6 +25,8 @@ class ChannelisedStreamData;
 /**
  * @class ChanneliserPolyphase
  *
+ * @ingroup pelican_lofar
+ *
  * @brief
  * Module to channelise a time stream data blob.
  *

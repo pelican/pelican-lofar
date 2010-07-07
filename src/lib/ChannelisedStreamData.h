@@ -18,6 +18,8 @@ namespace lofar {
 /**
  * @class ChannelisedStreamData
  *
+ * @ingroup pelican_lofar
+ *
  * @brief
  * Container class to hold a buffer channelised (spectrum) stream data.
  *

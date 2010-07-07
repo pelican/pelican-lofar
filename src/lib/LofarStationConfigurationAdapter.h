@@ -16,7 +16,9 @@ namespace lofar {
 
 /**
  * @class LofarStationConfigurationAdapter
- *  
+ *
+ * @ingroup pelican_lofar
+ *
  * @brief
  *    translates the station configuration file into a LofarStationConfiguration object
  * @details

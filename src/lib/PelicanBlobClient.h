@@ -18,6 +18,8 @@ namespace lofar {
 /**
  * @class PelicanBlobClient
  *
+ * @ingroup pelican_lofar
+ *
  * @brief
  * Implements the data client interface for attaching to a Pelican TCP Server
  *

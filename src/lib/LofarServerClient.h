@@ -14,6 +14,8 @@ namespace lofar {
 /**
  * @class LofarServerClient
  *
+ * @ingroup pelican_lofar
+ *
  * @brief
  *    Data Client that connects to a Lofar Enabled Pelican Server
  *

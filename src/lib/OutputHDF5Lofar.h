@@ -15,7 +15,9 @@ namespace lofar {
 
 /**
  * @class OutputHDF5Lofar
- *  
+ *
+ * @ingroup pelican_lofar
+ *
  * @brief
  *   Constructs Lofar hdf5 data files from Lofar Specific
  *   DataBlobs

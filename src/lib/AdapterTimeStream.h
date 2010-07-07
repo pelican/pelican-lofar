@@ -20,6 +20,8 @@ class TimeStreamData;
 /**
  * @class AdapterTimeStream
  *
+ * @ingroup pelican_lofar
+ *
  * @brief
  * Adapter to deserialise time stream data chunks from a lofar station.
  *

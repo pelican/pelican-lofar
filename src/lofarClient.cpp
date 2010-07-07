@@ -3,6 +3,11 @@
 #include "pelican/core/PipelineApplication.h"
 #include "lib/LofarStreamDataClient.h"
 
+/*!
+  \file lofarClient.cpp
+  \ingroup pelican_lofar
+*/
+  
 int main(int argc, char** argv)
 {
     QCoreApplication app(argc, argv);

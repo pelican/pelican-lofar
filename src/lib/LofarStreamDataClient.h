@@ -13,6 +13,8 @@ namespace lofar {
 /**
  * @class LofarStreamDataClient
  *
+ * @ingroup pelican_lofar
+ *
  * @brief
  *    Lofar Data Client to Connect directly to the LOFAR station
  *    output stream.
