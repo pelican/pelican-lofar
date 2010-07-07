@@ -19,7 +19,8 @@ namespace lofar {
  * @class ChannelisedStreamData
  *
  * @brief
- * Container class to hold a buffer channelised (spectrum) stream data.
+ * Container class to hold a buffer spectra generated from a number of
+ * complex time series.
  *
  * @details
  * Populated by the channeliser module.
@@ -42,7 +43,8 @@ class T_ChannelisedSteamData : public DataBlob
         T_ChannelisedSteamData(const unsigned nSubbands,
                 const unsigned nPolarisations, const unsigned nChannels,
                 const QString& type)
-        : DataBlob(type) {
+        : DataBlob(type)
+        {
             resize(nSubbands, nPolarisations, nChannels);
         }
 
@@ -144,7 +146,7 @@ class T_ChannelisedSteamData : public DataBlob
         /// /p sub-band (const overload).
         const T* data(const unsigned subband, const unsigned polarisation) const
         {
-            unsigned index = 0;
+            unsigned index = _nChannels * (subband * _nPolarisations + polarisation);
             return (_data.size() > 0 && subband < _nSubbands
                     && polarisation < _nPolarisations && index < _data.size()) ?
                             &_data[index] : NULL;
