@@ -40,6 +40,7 @@ find_package(Pelican REQUIRED)
 find_package(CppUnit REQUIRED)
 find_package(OpenMP REQUIRED)
 find_package(FFTW3 REQUIRED)
+find_package(Boost REQUIRED)
 
 # === Add directories to the include path (i.e. -I<directory> ...)
 include_directories(${PELICAN_INCLUDES})
