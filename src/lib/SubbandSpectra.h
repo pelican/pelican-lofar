@@ -19,7 +19,7 @@ namespace pelican {
 namespace lofar {
 
 /**
- * @class T_SubbandSpectra
+ * @class SubbandSpectra
  *
  * @brief
  * Container class to hold a buffer of spectra generated from sub-bands.
@@ -120,9 +120,9 @@ class SubbandSpectra : public DataBlob
             if (b >= _nTimeBlocks || s >= _nSubbands || p >= _nPolarisations) {
                 return NULL;
             }
-            unsigned index = index(b, s, p);
-            return (_spectra.size() > 0 && index < _spectra.size()) ?
-                            &_spectra[index] : NULL;
+            unsigned idx = index(b, s, p);
+            return (_spectra.size() > 0 && idx < _spectra.size()) ?
+                            &_spectra[idx] : NULL;
         }
 
         /// Returns a pointer to the spectrum data for the specified time block
@@ -133,9 +133,9 @@ class SubbandSpectra : public DataBlob
             if (b >= _nTimeBlocks || s >= _nSubbands || p >= _nPolarisations) {
                 return NULL;
             }
-            unsigned index = index(b, s, p);
-            return (_spectra.size() > 0 && index < _spectra.size()) ?
-                    &_spectra[index] : NULL;
+            unsigned idx = index(b, s, p);
+            return (_spectra.size() > 0 && idx < _spectra.size()) ?
+                    &_spectra[idx] : NULL;
         }
 
     protected:

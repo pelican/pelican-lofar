@@ -41,6 +41,7 @@ class ChanneliserPolyphaseTest : public CppUnit::TestFixture
         CPPUNIT_TEST(test_fft);
         CPPUNIT_TEST(test_run);
         CPPUNIT_TEST(test_loadCoeffs);
+        //CPPUNIT_TEST(test_run_nSpectra);
 //        CPPUNIT_TEST(test_makeSpectrum);
 //        CPPUNIT_TEST(test_channelProfile);
         CPPUNIT_TEST_SUITE_END();
@@ -63,6 +64,10 @@ class ChanneliserPolyphaseTest : public CppUnit::TestFixture
         /// Test the modules public run method.
         void test_run();
 
+        /// Test the run method for generating multiple spectra from one
+        /// input time stream object.
+        void test_run_nSpectra();
+
         /// Test loading a coefficients file.
         void test_loadCoeffs();
 
@@ -74,7 +79,8 @@ class ChanneliserPolyphaseTest : public CppUnit::TestFixture
 
     private:
         /// Generate configuration XML.
-        QString _configXml(unsigned nChannels, unsigned nThreads = 2);
+        QString _configXml(unsigned nChannels, unsigned nThreads = 2,
+                unsigned nSpectra = 1);
 
 };
 

@@ -167,7 +167,7 @@ void ChannelisedStreamDataTest::test_serialise_deserialise()
      spectrum1.setStartFrequency(startFreq);
      spectrum1.setChannelfrequencyDelta(freqDelta);
 
-     // Serialise to a byte array.
+     // Serialise to a QBuffer (QIODevice).
      QBuffer serialBlob;
      serialBlob.open(QBuffer::WriteOnly);
      spectrum1.serialise(serialBlob);

@@ -32,6 +32,7 @@ template <class T>
 class T_TimeStreamData : public DataBlob
 {
     public:
+
         /// Constructs an empty time stream data blob.
         T_TimeStreamData(const QString& type) : DataBlob(type) {
             _nSubbands = 0;
@@ -42,8 +43,8 @@ class T_TimeStreamData : public DataBlob
         }
 
         /// Constructs and assigns memory for a time stream buffer data blob.
-        T_TimeStreamData(const unsigned nSubbands, const unsigned nPolarisations,
-                const unsigned nSamples, const QString& type) : DataBlob(type)
+        T_TimeStreamData(unsigned nSubbands, unsigned nPolarisations,
+                unsigned nSamples, const QString& type) : DataBlob(type)
         {
             resize(nSubbands, nPolarisations, nSamples);
         }
@@ -64,8 +65,8 @@ class T_TimeStreamData : public DataBlob
         }
 
         /// Assign memory for the time stream data blob.
-        void resize(const unsigned nSubbands, const unsigned nPolarisations,
-                const unsigned nSamples)
+        void resize(unsigned nSubbands, unsigned nPolarisations,
+                unsigned nSamples)
         {
             _nSubbands = nSubbands;
             _nPolarisations = nPolarisations;
@@ -75,8 +76,8 @@ class T_TimeStreamData : public DataBlob
 
         /// Returns the data index for a given sub-band, polarisation and
         /// sample.
-        unsigned index(const unsigned subband, const unsigned polarisation,
-                const unsigned sample)
+        unsigned index(unsigned subband, unsigned polarisation,
+                unsigned sample)
         {
             return _nSamples * ( subband * _nPolarisations + polarisation) + sample;
         }
@@ -98,13 +99,13 @@ class T_TimeStreamData : public DataBlob
         double startTime() const { return _startTime; }
 
         /// Sets the start time of the data.
-        void setStartTime(const double value) { _startTime = value; }
+        void setStartTime(double value) { _startTime = value; }
 
         /// Returns the sample delta.
         double sampleDelta() const { return _sampleDelta; }
 
         /// Sets the time interval between samples.
-        void setSampleDelta(const double value) { _sampleDelta = value; }
+        void setSampleDelta(double value) { _sampleDelta = value; }
 
         /// Returns a pointer to the time stream data.
         T* data() { return _data.size() > 0 ? &_data[0] : NULL; }
@@ -114,7 +115,7 @@ class T_TimeStreamData : public DataBlob
 
         /// Returns a pointer to the time stream data for the specified
         /// /p subband.
-        T* data(const unsigned subband)
+        T* data(unsigned subband)
         {
             unsigned index =  subband * _nPolarisations * _nSamples;
             return (_data.size() > 0 && subband <= _nSubbands
@@ -123,7 +124,7 @@ class T_TimeStreamData : public DataBlob
 
         /// Returns a pointer to the time stream data for the specified
         /// /p subband (const overload).
-        const T* data(const unsigned subband) const
+        const T* data(unsigned subband) const
         {
             unsigned index = subband * _nPolarisations * _nSamples;
             return (_data.size() > 0 && subband < _nSubbands
@@ -132,7 +133,7 @@ class T_TimeStreamData : public DataBlob
 
         /// Returns a pointer to the time stream data for the specified
         /// /p subband and /p polarisation.
-        T* data(const unsigned subband, const unsigned polarisation)
+        T* data(unsigned subband, unsigned polarisation)
         {
             unsigned index = _nSamples * (subband * _nPolarisations + polarisation);
             return (_data.size() > 0 && subband < _nSubbands
@@ -142,7 +143,7 @@ class T_TimeStreamData : public DataBlob
 
         /// Returns a pointer to the time stream data for the specified
         /// /p subband (const overload).
-        const T* data(const unsigned subband, const unsigned polarisation) const
+        const T* data(unsigned subband, unsigned polarisation) const
         {
             unsigned index = 0;
             return (_data.size() > 0 && subband < _nSubbands
@@ -178,8 +179,8 @@ class TimeStreamData : public T_TimeStreamData<std::complex<double> >
         ("TimeStreamData") {}
 
         /// Constructs and assigns memory for a time stream buffer data blob.
-        TimeStreamData(const unsigned nSubbands, const unsigned nPolarisations,
-                const unsigned nSamples)
+        TimeStreamData(unsigned nSubbands, unsigned nPolarisations,
+                unsigned nSamples)
         : T_TimeStreamData<std::complex<double> >(nSubbands, nPolarisations,
                     nSamples, "TimeStreamData") {}
 
