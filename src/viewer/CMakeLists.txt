@@ -4,11 +4,13 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/.. ${QT_INCLUDE_DIR})
 set( widget_lib_src 
      src/LofarDataViewer.cpp
      src/DataViewer.cpp
+     src/DataBlobWidget.cpp
    )
 
 set( widget_moc_headers
     LofarDataViewer.h
     DataViewer.h
+    DataBlobWidget.h
     )
 
 QT4_WRAP_CPP(widget_moc ${widget_moc_headers})

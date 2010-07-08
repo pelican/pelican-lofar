@@ -14,7 +14,10 @@ namespace lofar {
 LofarDataViewer::LofarDataViewer( const ConfigNode& config, QWidget* parent )
     : DataViewer(config, parent)
 {
-    _updatedStreams(streams());
+    enableStream(_dataStream);
+    QSet<QString> set;
+    set.insert(_dataStream);
+    _updatedStreams( set );
     //_client = new PelicanBlobClient( _dataStream, server(), port() );
     //run();
 }
@@ -24,13 +27,6 @@ LofarDataViewer::LofarDataViewer( const ConfigNode& config, QWidget* parent )
  */
 LofarDataViewer::~LofarDataViewer()
 {
-}
-
-QSet<QString> LofarDataViewer::streams() const
-{
-    QSet<QString> set;
-    set.insert(_dataStream);
-    return set;
 }
 
 void LofarDataViewer::run()

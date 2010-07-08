@@ -50,10 +50,7 @@ class DataViewer : public QWidget
         void disableStream( const QString& );
         // flip the tracking status of the specifed stream
         // returns true if the new status is on false if off
-        bool flipStream( const QString& );
-
-        // returns the streams available
-        virtual QSet<QString> streams() const = 0;
+        bool toggleStream( const QString& );
 
         // set internal state from the configuration file
         void setConfig( const ConfigNode& config);
@@ -67,6 +64,9 @@ class DataViewer : public QWidget
         void connectStreams( );
         void _updatedStreams( const QSet<QString>& streams );
 
+    protected slots:
+        void _streamToggled();
+
     private:
         // GUI members
         QTabWidget* _streamTabs;
@@ -75,10 +75,13 @@ class DataViewer : public QWidget
 
         DataBlobClient* _client;
 
-        QMap<QString,int> _activeStreams;
+        QMap<QString,int> _activeStreams; // currently activated streams and their tab id
+        QMap<QString,bool> _defaultsEnabled; // the required state of a stream
 
         quint16 _port;
         QString _server;
+
+        QMap<QString,QString> _streamViewerMap; // maps a stream name on to a type of viewer
 };
 
 } // namespace lofar

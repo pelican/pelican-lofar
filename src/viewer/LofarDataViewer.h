@@ -29,7 +29,6 @@ class LofarDataViewer : public DataViewer
     public:
         LofarDataViewer(  const ConfigNode& config, QWidget* parent=0 );
         ~LofarDataViewer();
-        virtual QSet<QString> streams() const;
         void run();
 
     private:
