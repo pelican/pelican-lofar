@@ -1,8 +1,8 @@
-#ifndef CHANNELISER_POLYPHASE_H_
-#define CHANNELISER_POLYPHASE_H_
+#ifndef PPF_CHANNELISER_H_
+#define PPF_CHANNELISER_H_
 
 /**
- * @file ChanneliserPolyphase.h
+ * @file PPFChanneliser.h
  */
 
 #include "pelican/modules/AbstractModule.h"
@@ -19,15 +19,12 @@ class ConfigNode;
 
 namespace lofar {
 
-class TimeStreamData;
-class ChannelisedStreamData;
+class TimeSeriesC32;
+class SubbandSpectraC32;
+
 
 /**
- * @class ChanneliserPolyphase
- *
- * @note To be deprecated for PPF Channeliser.
- *
- * @ingroup pelican_lofar
+ * @class PPFChanneliser
  *
  * @brief
  * Module to channelise a time stream data blob.
@@ -43,52 +40,54 @@ class ChannelisedStreamData;
  * 		<ChanneliserPolyphase name="">
  * 			<channels number="512"/>
  * 			<processingThreads number="2"/>
+ * 			<coefficients fileName="coeffs.dat" nTaps="8"/>
  * 		</ChanneliserPolyphase>
  * \verbatim
  *
  * - channels: Number of channels generated in the spectra.
  * - processingThreads: Number of threads to parallelise over.
+ * - coefficients:
+ * 		 fileName: file containing the PPF coefficients.
+ * 		 nTaps: Number of filter taps in the PPF coefficient data
+ *
  */
 
-class ChanneliserPolyphase : public AbstractModule
+class PPFChanneliser : public AbstractModule
 {
     private:
-        friend class ChanneliserPolyphaseTest;
+        friend class PPFChanneliserTest;
 
     public:
         /// Constructs the channeliser module.
-        ChanneliserPolyphase(const ConfigNode& config);
+        PPFChanneliser(const ConfigNode& config);
 
         /// Destroys the channeliser module.
-        ~ChanneliserPolyphase();
+        ~PPFChanneliser();
 
         /// Method converting the time stream to a spectrum.
-        void run(const TimeStreamData* timeData,
-                const PolyphaseCoefficients* filterCoeff,
-                ChannelisedStreamData* spectra);
+        void run(const TimeSeriesC32* timeSeries, SubbandSpectraC32* spectra);
 
     private:
         /// Sainity checking.
-        void _checkData(const TimeStreamData* timeData,
-                const PolyphaseCoefficients* filterCoeff);
+        void _checkData(const TimeSeriesC32* timeData);
 
         /// Update the sample buffer.
-        void _updateBuffer(const complex<double>* samples,
-                unsigned nSamples, complex<double>* buffer,
+        void _updateBuffer(const complex<float>* samples,
+                unsigned nSamples, complex<float>* buffer,
                 unsigned bufferSize);
 
         /// Filter the matrix of samples (dimensions nTaps by nChannels)
         /// to create a vector of samples for the FFT.
-        void _filter(const complex<double>* sampleBuffer,
+        void _filter(const complex<float>* sampleBuffer,
                 unsigned nTaps,  unsigned nChannels,
-                const double* coefficients, complex<double>* filteredSamples);
+                const double* coeffs, complex<float>* filteredSamples);
 
         /// FFT filtered samples to form a spectrum.
-        void _fft(const complex<double>* samples, unsigned nSamples,
-                complex<double>* spectrum);
+        void _fft(const complex<float>* samples, unsigned nSamples,
+                complex<float>* spectrum);
 
         /// Shift the zero frequency component to the centre of the spectrum.
-        void _fftShift(complex<double>* spectrum, unsigned nChannels);
+        void _fftShift(complex<float>* spectrum, unsigned nChannels);
 
         /// Returns the sub-band ID range to be processed.
         void _threadSubbandRange(unsigned& start, unsigned& end,
@@ -99,22 +98,24 @@ class ChanneliserPolyphase : public AbstractModule
                 unsigned nFilterTaps);
 
     private:
-        bool _buffersInitialised; ///< Flag set if the buffers have been initialised.
-        unsigned _nChannels;	  ///< Number of channels in which subbands are to be split.
+        bool _buffersInitialised;
+        unsigned _nChannels;
 
-        // TODO: The following might be better as matrices.
-        std::vector<std::vector<complex<double> > > _subbandBuffer;
-        std::vector<std::vector<complex<double> > > _filteredData;
+        // Work Buffers (need to have a buffer per thread).
+        std::vector<std::vector<complex<float> > > _subbandBuffer;
+        std::vector<std::vector<complex<float> > > _filteredData;
+
+        PolyphaseCoefficients _coeffs;
 
         unsigned _nThreads;
 
-        fftw_plan _fftPlan;
+        fftwf_plan _fftPlan;
 };
 
 // Declare this class as a pelican module.
-PELICAN_DECLARE_MODULE(ChanneliserPolyphase)
+PELICAN_DECLARE_MODULE(PPFChanneliser)
 
 }// namespace lofar
 }// namespace pelican
 
-#endif // CHANNELISER_POLYPHASE_H_
+#endif // PPF_CHANNELISER_H_

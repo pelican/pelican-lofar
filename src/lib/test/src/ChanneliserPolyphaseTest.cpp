@@ -278,6 +278,44 @@ void ChanneliserPolyphaseTest::test_loadCoeffs()
 }
 
 
+/**
+ *
+ */
+void ChanneliserPolyphaseTest::test_run_nSpectra()
+{
+    try {
+        // Load PPF coefficients.
+        unsigned nChannels = 512;
+        unsigned nTaps = 8;
+        QString coeffFileName = "data/coeffs_512_1.dat";
+        if (!QFile::exists(coeffFileName))
+            return;
+        PolyphaseCoefficients coeffs(nTaps, nChannels);
+        coeffs.load(coeffFileName, nTaps, nChannels);
+
+        // Create the input time stream data blob.
+        unsigned nSubbands = 62;
+        unsigned nSpectra = 50;
+        unsigned nPolarisations = 1;
+        unsigned nSamples = nChannels * nSpectra;
+        TimeStreamData data(nSubbands, nPolarisations, nSamples);
+
+        // Create the configured PPF channeliser object.
+        unsigned nThreads = 2;
+        ConfigNode config(_configXml(nChannels, nThreads, nSpectra));
+        ChanneliserPolyphase channeliser(config);
+
+        /// Create a channelised stream data output object.
+        ChannelisedStreamData spectra;
+
+        channeliser.run(&data, &coeffs, &spectra);
+    }
+    catch (QString err) {
+        CPPUNIT_FAIL(err.toLatin1().data());
+    }
+}
+
+
 
 
 /**
@@ -461,11 +499,12 @@ void ChanneliserPolyphaseTest::test_channelProfile()
  * @return
  */
 QString ChanneliserPolyphaseTest::_configXml(unsigned nChannels,
-        unsigned nThreads)
+        unsigned nThreads, unsigned nSpectra)
 {
     QString xml =
             "<ChanneliserPolyphase>"
             "	<channels number=\"" + QString::number(nChannels) + "\"/>"
+            "	<spectra number=\"" + QString::number(nSpectra) + "\"/>"
             "	<processingThreads number=\"" + QString::number(nThreads) + "\"/>"
             "</ChanneliserPolyphase>";
     return xml;

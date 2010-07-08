@@ -1,24 +1,24 @@
-#ifndef TIMESTREAMDATA_H_
-#define TIMESTREAMDATA_H_
+#ifndef TIME_SERIES_H_
+#define TIME_SERIES_H_
 
 /**
- * @file TimeStreamData.h
+ * @file TimeSeries.h
  */
 
 #include "pelican/data/DataBlob.h"
 #include <vector>
 #include <complex>
 
+using std::complex;
+
 namespace pelican {
 namespace lofar {
 
 /**
- * @class TimeStreamData
- *
- * @ingroup pelican_lofar
+ * @class TimeSeries
  *
  * @brief
- * Container class to hold a buffer of time stream data.
+ * Container class to hold a buffer of time series data.
  *
  * @details
  * Used for time domain processing application such as channeliser modules.
@@ -31,12 +31,12 @@ namespace lofar {
  */
 
 template <class T>
-class T_TimeStreamData : public DataBlob
+class TimeSeries : public DataBlob
 {
     public:
 
         /// Constructs an empty time stream data blob.
-        T_TimeStreamData(const QString& type) : DataBlob(type) {
+        TimeSeries(const QString& type) : DataBlob(type) {
             _nSubbands = 0;
             _nPolarisations = 0;
             _nSamples = 0;
@@ -44,15 +44,8 @@ class T_TimeStreamData : public DataBlob
             _sampleDelta = 0.0;
         }
 
-        /// Constructs and assigns memory for a time stream buffer data blob.
-        T_TimeStreamData(unsigned nSubbands, unsigned nPolarisations,
-                unsigned nSamples, const QString& type) : DataBlob(type)
-        {
-            resize(nSubbands, nPolarisations, nSamples);
-        }
-
         /// Destroys the time stream data blob.
-        virtual ~T_TimeStreamData() {}
+        virtual ~TimeSeries() {}
 
     public:
         /// Clears the time stream data.
@@ -78,10 +71,9 @@ class T_TimeStreamData : public DataBlob
 
         /// Returns the data index for a given sub-band, polarisation and
         /// sample.
-        unsigned index(unsigned subband, unsigned polarisation,
-                unsigned sample)
+        unsigned index(unsigned subband, unsigned pol, unsigned sample)
         {
-            return _nSamples * ( subband * _nPolarisations + polarisation) + sample;
+            return _nSamples * ( subband * _nPolarisations + pol) + sample;
         }
 
     public: // accessor methods
@@ -116,26 +108,8 @@ class T_TimeStreamData : public DataBlob
         const T* data() const  { return _data.size() > 0 ? &_data[0] : NULL; }
 
         /// Returns a pointer to the time stream data for the specified
-        /// /p subband.
-        T* data(unsigned subband)
-        {
-            unsigned index =  subband * _nPolarisations * _nSamples;
-            return (_data.size() > 0 && subband <= _nSubbands
-                    && index < _data.size()) ? &_data[index] : NULL;
-        }
-
-        /// Returns a pointer to the time stream data for the specified
-        /// /p subband (const overload).
-        const T* data(unsigned subband) const
-        {
-            unsigned index = subband * _nPolarisations * _nSamples;
-            return (_data.size() > 0 && subband < _nSubbands
-                    && index < _data.size()) ? &_data[index] : NULL;
-        }
-
-        /// Returns a pointer to the time stream data for the specified
         /// /p subband and /p polarisation.
-        T* data(unsigned subband, unsigned polarisation)
+        T* ptr(unsigned subband, unsigned polarisation = 0)
         {
             unsigned index = _nSamples * (subband * _nPolarisations + polarisation);
             return (_data.size() > 0 && subband < _nSubbands
@@ -145,7 +119,7 @@ class T_TimeStreamData : public DataBlob
 
         /// Returns a pointer to the time stream data for the specified
         /// /p subband (const overload).
-        const T* data(unsigned subband, unsigned polarisation) const
+        const T* ptr(unsigned subband, unsigned polarisation = 0) const
         {
             unsigned index = 0;
             return (_data.size() > 0 && subband < _nSubbands
@@ -173,26 +147,19 @@ class T_TimeStreamData : public DataBlob
  * @details
  */
 
-class TimeStreamData : public T_TimeStreamData<std::complex<double> >
+class TimeSeriesC32 : public TimeSeries<complex<float> >
 {
     public:
         /// Constructs an empty time stream data blob.
-        TimeStreamData() : T_TimeStreamData<std::complex<double> >
-        ("TimeStreamData") {}
-
-        /// Constructs and assigns memory for a time stream buffer data blob.
-        TimeStreamData(unsigned nSubbands, unsigned nPolarisations,
-                unsigned nSamples)
-        : T_TimeStreamData<std::complex<double> >(nSubbands, nPolarisations,
-                    nSamples, "TimeStreamData") {}
+        TimeSeriesC32() : TimeSeries<complex<float> >("TimeSeriesC32") {}
 
         /// Destroys the time stream data blob.
-        ~TimeStreamData() {}
+        ~TimeSeriesC32() {}
 };
 
-PELICAN_DECLARE_DATABLOB(TimeStreamData)
+PELICAN_DECLARE_DATABLOB(TimeSeriesC32)
 
 }// namespace lofar
 }// namespace pelican
 
-#endif // TIMESTREAMDATA_H_
+#endif // TIME_SERIES_H_
