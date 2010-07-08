@@ -14,8 +14,9 @@ namespace lofar {
 LofarDataViewer::LofarDataViewer( const ConfigNode& config, QWidget* parent )
     : DataViewer(config, parent)
 {
-    _client = new PelicanBlobClient( _dataStream, server(), port() );
-    run();
+    _updatedStreams(streams());
+    //_client = new PelicanBlobClient( _dataStream, server(), port() );
+    //run();
 }
 
 /**

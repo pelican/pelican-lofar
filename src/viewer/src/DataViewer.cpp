@@ -33,7 +33,6 @@ DataViewer::DataViewer(const ConfigNode& config, QWidget* parent)
     _streamTabs = new QTabWidget;
 
     // setup actions
-
     QMenuBar* menubar = new QMenuBar;
 
     // Main Menu
