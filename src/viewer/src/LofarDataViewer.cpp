@@ -1,3 +1,4 @@
+#include <QCoreApplication>
 #include "viewer/LofarDataViewer.h"
 #include "lib/PelicanBlobClient.h"
 #include "lib/ChannelisedStreamData.h"
@@ -14,9 +15,13 @@ namespace lofar {
 LofarDataViewer::LofarDataViewer( const ConfigNode& config, QWidget* parent )
     : DataViewer(config, parent)
 {
-    _updatedStreams(streams());
-    //_client = new PelicanBlobClient( _dataStream, server(), port() );
-    //run();
+    _dataStream = "ChannelisedStreamData";
+    enableStream(_dataStream);
+    QSet<QString> set;
+    set.insert(_dataStream);
+    _updatedStreams( set );
+    _client = new PelicanBlobClient( _dataStream, server(), port() );
+    run();
 }
 
 /**
@@ -26,13 +31,9 @@ LofarDataViewer::~LofarDataViewer()
 {
 }
 
-QSet<QString> LofarDataViewer::streams() const
-{
-    QSet<QString> set;
-    set.insert(_dataStream);
-    return set;
-}
-
+/*
+ * Ugly polling
+ */
 void LofarDataViewer::run()
 {
     ChannelisedStreamData blob;
@@ -42,6 +43,7 @@ void LofarDataViewer::run()
         dataHash.insert(_dataStream, &blob);
         _client->getData(dataHash);
         dataUpdated(_dataStream, &blob);
+        QCoreApplication::processEvents();
     }
 }
 

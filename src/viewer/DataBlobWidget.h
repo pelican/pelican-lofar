@@ -8,6 +8,7 @@
  */
 
 namespace pelican {
+    class DataBlob;
 
 class DataBlob;
 
@@ -29,7 +30,7 @@ class DataBlobWidget : public QWidget
     public:
         DataBlobWidget( QWidget* parent=0 );
         virtual ~DataBlobWidget();
-        virtual void updateData( DataBlob* data) = 0;
+        virtual void updateData( DataBlob* data);
 
     private:
 };

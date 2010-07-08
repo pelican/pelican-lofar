@@ -17,9 +17,9 @@ set(widget_lib_UI
 
 # --- widget library
 set(widget_lib_src
-    src/DataBlobWidget.cpp
     src/LofarDataViewer.cpp
     src/DataViewer.cpp
+    src/DataBlobWidget.cpp
     src/PlotWidget.cpp
     src/PlotPicker.cpp
 )
@@ -27,6 +27,7 @@ set(widget_lib_src
 set(widget_moc_headers
     LofarDataViewer.h
     DataViewer.h
+    DataBlobWidget.h
     PlotWidget.h
     DataBlobWidget.h
     SubbandSpectrumWidget.h

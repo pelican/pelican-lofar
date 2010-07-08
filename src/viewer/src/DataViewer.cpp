@@ -24,9 +24,6 @@ DataViewer::DataViewer(const ConfigNode& config, QWidget* parent)
     : QWidget(parent), _client(0)
 {
     // setup generic widgets
-    QWidget *topFiller = new QWidget;
-    topFiller->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-
     QWidget *bottomFiller = new QWidget;
     bottomFiller->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
@@ -63,7 +60,6 @@ DataViewer::DataViewer(const ConfigNode& config, QWidget* parent)
     QVBoxLayout* layout = new QVBoxLayout;
     layout->setMargin(5);
     layout->addWidget(menubar);
-    layout->addWidget(topFiller);
     layout->addWidget(_streamTabs);
     layout->addWidget(bottomFiller);
     setLayout(layout);
@@ -84,7 +80,15 @@ DataViewer::~DataViewer()
 
 DataBlobWidget* DataViewer::getWidgetViewer(const QString& stream) const
 {
-    //return new DataBlobWidget();
+    DataBlobWidget* widget = (DataBlobWidget*)0;
+    if( _streamViewerMap.contains(stream) ) {
+        // TODO -- factory to create Viewers of the appropriate type
+        //widget = _viewerfactory->create( _streamViewerMap[stream], stream );
+    }
+    else {
+        widget = new DataBlobWidget;
+    }
+    return widget;
 }
 
 void DataViewer::setConfig(const ConfigNode& config)
@@ -94,7 +98,8 @@ void DataViewer::setConfig(const ConfigNode& config)
     _server = config.getOption("connection", "host");
 
     // set stream activation defaults
-    // read in from the configuration
+    // read in from the configuration TODO
+    // _defaultsEnabled[stream] = true;
 
 }
 
@@ -118,7 +123,17 @@ void DataViewer::_updatedStreams( const QSet<QString>& streams )
         QAction* a = _streamActionGroup->addAction(stream);
         a->setCheckable(true);
         _viewMenu->addAction(a);
-        enableStream(stream);
+        connect( a, SIGNAL(triggered() ), this, SLOT(_streamToggled()) );
+        if( _defaultsEnabled.contains(stream) )
+        {
+            a->setChecked(true);
+            enableStream(stream);
+        }
+        else {
+            _defaultsEnabled[stream] = false;
+            a->setChecked(false);
+        }
+
     }
 }
 
@@ -126,12 +141,12 @@ void DataViewer::about()
 {
     QMessageBox::about(this, tr("Data Stream Viewer"),
             tr("Connects to Pelican data Streams "
-                "displays them."));
+                "and displays them."));
 }
 
 void DataViewer::connectStreams()
 {
-    // construct a request for all the listened to streams
+    // construct a request for all the streams required
     // TODO
 }
 
@@ -144,13 +159,40 @@ void DataViewer::dataUpdated(const QString& stream, DataBlob* blob)
 void DataViewer::enableStream( const QString& stream )
 {
     if( ! _activeStreams.contains(stream) )
-        _activeStreams[stream] = _streamTabs->addTab( getWidgetViewer(stream), stream ); //TODO use fancy stream widget
+    {
+        _defaultsEnabled[stream] = true;
+        _activeStreams[stream] = _streamTabs->addTab( getWidgetViewer(stream), stream );
+    }
 }
 
 void DataViewer::disableStream( const QString& stream )
 {
     if(  _activeStreams.contains(stream) )
+    {
         _streamTabs->removeTab( _activeStreams[stream] );
+        _activeStreams.remove(stream);
+        _defaultsEnabled[stream] = false;
+    }
+}
+
+bool DataViewer::toggleStream( const QString& stream )
+{
+    if( _activeStreams.contains(stream) )
+    {
+        disableStream(stream);
+        return false;
+    }
+    else {
+        enableStream(stream);
+        return true;
+    }
+}
+
+void DataViewer::_streamToggled()
+{
+    QAction* action = static_cast<QAction*>(sender());
+    if( action ) 
+        toggleStream( action->text() );
 }
 
 } // namespace lofar
