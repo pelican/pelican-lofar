@@ -19,15 +19,15 @@ namespace opts = boost::program_options;
 pelican::Config createConfig(int argc, char** argv)
 {
     // Check that argc and argv are nonzero
-    if (argc == 0 || argv == NULL)
+    if (argc == 0 || argv == NULL) {
         throw QString("No command line.");
+    }
 
     // Declare the supported options.
     opts::options_description desc("Allowed options");
     desc.add_options()
         ("help", "Produce help message.")
-        ("config,c", opts::value<std::string>(), "Set configuration file.")
-    ;
+        ("config,c", opts::value<std::string>(), "Set configuration file.");
 
     // Parse the command line arguments.
     opts::variables_map varMap;
@@ -50,16 +50,21 @@ pelican::Config createConfig(int argc, char** argv)
 }
 
 
+
 int main(int argc, char* argv[])
 {
     QApplication app(argc, argv);
 
-    pelican::Config config = createConfig(argc,argv);
+    pelican::Config config = createConfig(argc, argv);
 
-    pelican::lofar::LofarDataViewer ldv( config.get( pelican::Config::TreeAddress() 
-                                     << pelican::Config::NodeId("dataviewer", "") 
-                                   ) 
-                       );
+    pelican::Config::TreeAddress address;
+    address << pelican::Config::NodeId("dataviewer", "");
+
+    config.save("config.xml");
+    config.summary();
+
+    pelican::lofar::LofarDataViewer ldv(config.get(address));
+
     ldv.show();
     return app.exec();
 }

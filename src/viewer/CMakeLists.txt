@@ -63,3 +63,8 @@ add_executable(lofarDataViewer main.cpp)
 target_link_libraries(lofarDataViewer lofarWidgets ${externals})
 
 add_subdirectory(test)
+
+
+include(CopyFiles)
+copy_files(${CMAKE_CURRENT_SOURCE_DIR}/data/*.* . viewerDataFiles)
+
