@@ -9,11 +9,9 @@
 #include "viewer/DataBlobWidget.h"
 #include "pelican/utility/ConfigNode.h"
 
-
 namespace pelican {
 
 namespace lofar {
-
 
 /**
  *@details DataViewer 

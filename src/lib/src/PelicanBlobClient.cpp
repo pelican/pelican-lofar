@@ -27,7 +27,6 @@ PelicanBlobClient::PelicanBlobClient(QString blobType, QString server, quint16 p
 {
     _protocol = new PelicanClientProtocol;
     _tcpSocket = new QTcpSocket;
-    connectToLofarPelican();
 }
 
 // Destructor

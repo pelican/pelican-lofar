@@ -17,6 +17,7 @@ set(widget_lib_src
      src/DataBlobWidget.cpp
      src/PlotWidget.cpp
      src/PlotPicker.cpp
+     src/ThreadedBlobClient.cpp
 )
 
 set(widget_moc_headers
@@ -24,6 +25,7 @@ set(widget_moc_headers
     DataViewer.h
     DataBlobWidget.h
     PlotWidget.h
+    ThreadedBlobClient.h
 )
 
 QT4_WRAP_CPP(widget_moc ${widget_moc_headers})
