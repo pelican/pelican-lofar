@@ -6,7 +6,7 @@
 #include <qwt-qt4/qwt_symbol.h>
 #include <qwt-qt4/qwt_plot_panner.h>
 #include <qwt-qt4/qwt_plot_layout.h>
-
+#include <qwt-qt4/qwt_plot_curve.h>
 
 #include <QtGui/QColor>
 #include <QtGui/QFileDialog>
@@ -45,19 +45,21 @@ PlotWidget::PlotWidget(QWidget* parent) : QwtPlot(parent)
     _zoomer->setMousePattern(QwtEventPattern::MouseSelect2, Qt::RightButton);
 
     // Set the curve style.
-    QwtSymbol symbol;
-    symbol.setStyle(QwtSymbol::Cross);
-    symbol.setPen(QPen(QColor(Qt::black)));
-    symbol.setBrush(QBrush(QColor(Qt::black)));
-    symbol.setSize(5);
-    _curve.setSymbol(symbol);
-    _curve.setStyle(QwtPlotCurve::NoCurve);
-
+    //QwtSymbol symbol;
+    //symbol.setStyle(QwtSymbol::Cross);
+    //symbol.setPen(QPen(QColor(Qt::black)));
+    //symbol.setBrush(QBrush(QColor(Qt::black)));
+    //symbol.setSize(5);
+    //_curve.setSymbol(symbol);
+//    _curve.setStyle(QwtPlotCurve::NoCurve);
+    _curve.setStyle(QwtPlotCurve::Lines);
 
     _connectSignalsAndSlots();
 
     // Clear the plot widget setting title and axis defaults.
     clear();
+
+    _curve.attach(this);
 }
 
 
@@ -90,15 +92,33 @@ void PlotWidget::plotCurve(unsigned nPoints, const double* xData,
 
     _curve.setData(xData, yData, nPoints);
 
-    setAxisAutoScale(QwtPlot::yLeft);
-    setAxisAutoScale(QwtPlot::xBottom);
-    _updateZoomBase();
+    //setAxisAutoScale(QwtPlot::yLeft);
+    //setAxisAutoScale(QwtPlot::xBottom);
+    double xMax = _curve.maxXValue();
+    double xMin = _curve.minXValue();
+    double yMax = _curve.maxYValue();
+    double yMin = _curve.minYValue();
 
-    //_curve.attach(this);
+    setAxisScale(QwtPlot::xBottom, xMin, xMax);
+    setAxisScale(QwtPlot::yLeft, yMin, yMax);
+
+    updateZoomBase();
+
+    _curve.attach(this);
     replot();
 
     emit(plotComplete());
 }
+
+
+/**
+ * @details
+ */
+void PlotWidget::updateZoomBase()
+{
+    _zoomer->setZoomBase(true);
+}
+
 
 
 /**
@@ -116,7 +136,7 @@ void PlotWidget::clear()
     enableAxis(QwtPlot::yRight, false);
     plotLayout()->setAlignCanvasToScales(true);
 
-    //_curve.detach();
+    _curve.detach();
 
     replot();
 }
@@ -254,16 +274,6 @@ void PlotWidget::savePDF(QString fileName, unsigned sizeX, unsigned sizeY)
     printer.setPaperSize(QSizeF(sizeX, sizeY), QPrinter::Point);
     print(printer);
 
-}
-
-
-
-/**
- * @details
- */
-void PlotWidget::_updateZoomBase()
-{
-    _zoomer->setZoomBase(true);
 }
 
 

@@ -40,8 +40,9 @@ PelicanBlobClient::~PelicanBlobClient()
 void PelicanBlobClient::getData(QHash<QString, DataBlob*>& dataHash)
 {
     // Check that we are still connected to server, if not reconnect
-    if (_tcpSocket -> state() == QAbstractSocket::UnconnectedState) {
-        std::cout << "Disconnected from Lofar, reconnecting" << std::endl;
+    if (_tcpSocket->state() == QAbstractSocket::UnconnectedState) {
+        std::cout << "PelicanBlobClient: Disconnected from server, reconnecting."
+                  << std::endl;
         connectToLofarPelican();
     }
 
@@ -59,7 +60,7 @@ void PelicanBlobClient::getData(QHash<QString, DataBlob*>& dataHash)
             break;
         case ServerResponse::Blob:   // We have received a blob
             {
-                DataBlobResponse* res = static_cast<DataBlobResponse*>(r.get()); 
+                DataBlobResponse* res = static_cast<DataBlobResponse*>(r.get());
                 while (_tcpSocket->bytesAvailable() < (qint64)res->dataSize())
                    _tcpSocket -> waitForReadyRead(-1);
 
@@ -82,11 +83,17 @@ void PelicanBlobClient::getData(QHash<QString, DataBlob*>& dataHash)
 void PelicanBlobClient::connectToLofarPelican()
 {
     while (_tcpSocket -> state() == QAbstractSocket::UnconnectedState) {
-        _tcpSocket -> connectToHost( _server, _port );
-        if (!_tcpSocket -> waitForConnected(5000) || _tcpSocket -> state() == QAbstractSocket::UnconnectedState) {
-           std::cerr << "Client could not connect to server" << std::endl;
-           sleep(2);
-           continue;
+
+        _tcpSocket->connectToHost(_server, _port);
+
+        if (!_tcpSocket -> waitForConnected(5000) ||
+                _tcpSocket -> state() == QAbstractSocket::UnconnectedState)
+        {
+            std::cerr << "PelicanBlobClient: Unable to connect to server ("
+                      << _server.toStdString() << ":" << _port << ")"
+                      << std::endl;
+            sleep(2);
+            continue;
         }
 
         // Define the data type which the client will except and send request

@@ -39,6 +39,9 @@ class PlotWidget : public  QwtPlot
         void plotCurve(unsigned nPoints, const double* xData,
                 const double* yData);
 
+        /// Update the base zoom level.
+        void updateZoomBase();
+
     public slots:
         /// Clear the plot canvas.
         void clear();
@@ -67,8 +70,6 @@ class PlotWidget : public  QwtPlot
                 unsigned sizeY = 500);
 
     private:
-        /// Update the base zoom level.
-        void _updateZoomBase();
 
         /// Set the plot grid object.
         void _setGrid();

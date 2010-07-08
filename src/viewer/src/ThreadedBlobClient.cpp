@@ -11,14 +11,16 @@ namespace lofar {
 
 
 /**
- *@details ThreadedBlobClient 
+ *@details ThreadedBlobClient
  */
-ThreadedBlobClient::ThreadedBlobClient( const QString& host, quint16 port, const QString& stream, QObject* parent )
-    : QThread(parent), _host(host), _port(port), _dataStream(stream)
+ThreadedBlobClient::ThreadedBlobClient(const QString& host, quint16 port,
+        const QString& stream, QObject* parent)
+: QThread(parent), _host(host), _port(port), _dataStream(stream)
 {
     _isRunning = false;
     start();
 }
+
 
 /**
  *@details
@@ -29,10 +31,11 @@ ThreadedBlobClient::~ThreadedBlobClient()
     wait();
 }
 
+
 void ThreadedBlobClient::run()
 {
     _isRunning = true;
-    _client = new PelicanBlobClient( _dataStream, _host, _port );
+    _client = new PelicanBlobClient(_dataStream, _host, _port);
     ChannelisedStreamData blob;
     ChannelisedStreamData lastBlob;
     QHash<QString, DataBlob*> dataHash;
