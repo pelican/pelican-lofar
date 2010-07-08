@@ -64,7 +64,8 @@ class DataViewer : public QWidget
 
     protected:
         virtual DataBlobWidget* getWidgetViewer(const QString& stream) const;
-        void connectStreams();
+        void connectStreams( );
+        void _updatedStreams( const QSet<QString>& streams );
 
     private:
         // GUI members
@@ -75,7 +76,6 @@ class DataViewer : public QWidget
         DataBlobClient* _client;
 
         QMap<QString,int> _activeStreams;
-
 
         quint16 _port;
         QString _server;
