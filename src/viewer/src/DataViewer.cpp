@@ -24,9 +24,6 @@ DataViewer::DataViewer(const ConfigNode& config, QWidget* parent)
     : QWidget(parent), _client(0)
 {
     // setup generic widgets
-    QWidget *topFiller = new QWidget;
-    topFiller->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-
     QWidget *bottomFiller = new QWidget;
     bottomFiller->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
@@ -63,7 +60,6 @@ DataViewer::DataViewer(const ConfigNode& config, QWidget* parent)
     QVBoxLayout* layout = new QVBoxLayout;
     layout->setMargin(5);
     layout->addWidget(menubar);
-    layout->addWidget(topFiller);
     layout->addWidget(_streamTabs);
     layout->addWidget(bottomFiller);
     setLayout(layout);
