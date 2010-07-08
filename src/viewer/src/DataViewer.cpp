@@ -47,10 +47,11 @@ DataViewer::DataViewer(const ConfigNode& config, QWidget* parent)
 
     // View Menu
     _viewMenu = new QMenu(tr("View"));
+    _viewMenu->setTearOffEnabled(true);
     menubar->addMenu(_viewMenu);
     _streamActionGroup = new QActionGroup(this);
     _streamActionGroup->setExclusive(false);
-    _viewMenu->addActions( _streamActionGroup->actions() );
+    _viewMenu->addSeparator();
 
     // Help Menu
     QMenu* helpMenu = new QMenu(tr("Help"));
@@ -93,14 +94,33 @@ void DataViewer::setConfig(const ConfigNode& config)
     _port = config.getOption("connection", "port").toInt();
     _server = config.getOption("connection", "host");
 
-    // set stream menu
-    foreach(const QString& stream, streams() )
+    // set stream activation defaults
+    // read in from the configuration
+
+}
+
+/*
+ * @details
+ * updates the Gui to reflect the specified streams
+ */
+void DataViewer::_updatedStreams( const QSet<QString>& streams )
+{
+    // clean up the previous state
+    foreach(QAction* action, _streamActionGroup->actions() ) 
+    {
+        _streamActionGroup->removeAction(action);
+        _viewMenu->removeAction(action);
+        delete action;
+    }
+
+    // set up the new streams
+    foreach(const QString& stream, streams )
     {
         QAction* a = _streamActionGroup->addAction(stream);
         a->setCheckable(true);
+        _viewMenu->addAction(a);
         enableStream(stream);
     }
-
 }
 
 void DataViewer::about()
