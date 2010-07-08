@@ -9,15 +9,17 @@
 
 namespace pelican {
 
+class DataBlob;
+
 namespace lofar {
 
 /**
  * @class DataBlobWidget
- *  
+ *
  * @brief
  *   Base class for DataBase Widget viewers
  * @details
- * 
+ *
  */
 
 class DataBlobWidget : public QWidget
@@ -34,4 +36,4 @@ class DataBlobWidget : public QWidget
 
 } // namespace lofar
 } // namespace pelican
-#endif // DATABLOBWIDGET_H 
+#endif // DATABLOBWIDGET_H

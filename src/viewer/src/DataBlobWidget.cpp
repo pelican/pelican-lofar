@@ -1,4 +1,4 @@
-#include "DataBlobWidget.h"
+#include "viewer/DataBlobWidget.h"
 
 
 namespace pelican {
@@ -7,7 +7,7 @@ namespace lofar {
 
 
 /**
- *@details DataBlobWidget 
+ *@details DataBlobWidget
  */
 DataBlobWidget::DataBlobWidget(QWidget* parent)
     : QWidget()

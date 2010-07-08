@@ -1,30 +1,40 @@
 # CMAKE for Viewer module.
 
-
 find_package(Qwt5 REQUIRED)
 
 include_directories(
     ${CMAKE_CURRENT_SOURCE_DIR}/..
+    ${CMAKE_CURRENT_BINARY_DIR}
     ${QT_INCLUDE_DIR}
     ${QT_QTGUI_INCLUDE_DIR}
     ${Qwt5_INCLUDE_DIR}
 )
 
+set(widget_lib_UI
+    forms/SubbandSpectraViewer.ui
+)
+
+
 # --- widget library
 set(widget_lib_src
-     src/LofarDataViewer.cpp
-     src/DataViewer.cpp
-     src/PlotWidget.cpp
-     src/PlotPicker.cpp
+    src/DataBlobWidget.cpp
+    src/LofarDataViewer.cpp
+    src/DataViewer.cpp
+    src/PlotWidget.cpp
+    src/PlotPicker.cpp
 )
 
 set(widget_moc_headers
     LofarDataViewer.h
     DataViewer.h
     PlotWidget.h
+    DataBlobWidget.h
+    SubbandSpectrumWidget.h
 )
 
 QT4_WRAP_CPP(widget_moc ${widget_moc_headers})
+qt4_wrap_ui(widget_lib_UI_H ${widget_lib_UI})
+
 
 set(externals
     ${PELICAN_LIBRARY}
@@ -36,7 +46,11 @@ set(externals
     ${Boost_PROGRAM_OPTIONS_LIBRARY}
 )
 
-add_library(lofarWidgets ${widget_lib_src} ${widget_moc})
+add_library(lofarWidgets
+    ${widget_lib_src}
+    ${widget_lib_UI_H}
+    ${widget_moc}
+)
 
 target_link_libraries(lofarWidgets
     ${externals}

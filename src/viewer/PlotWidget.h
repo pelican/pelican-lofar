@@ -23,14 +23,13 @@ class PlotPicker;
  * @details
  */
 
-
 class PlotWidget : public  QwtPlot
 {
     Q_OBJECT
 
     public:
         /// Constructor.
-        PlotWidget(QWidget* parent = NULL);
+        PlotWidget(QWidget* parent = 0);
 
         /// Destructor.
         virtual ~PlotWidget();
