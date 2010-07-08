@@ -10,11 +10,9 @@
 #include "viewer/SubbandSpectrumWidget.h"
 #include "pelican/utility/ConfigNode.h"
 
-
 namespace pelican {
 
 namespace lofar {
-
 
 /**
  *@details DataViewer

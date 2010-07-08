@@ -21,6 +21,7 @@ set(widget_lib_src
     src/DataBlobWidget.cpp
     src/PlotWidget.cpp
     src/PlotPicker.cpp
+    src/ThreadedBlobClient.cpp
     src/SubbandSpectrumWidget.cpp
 )
 
@@ -29,8 +30,8 @@ set(widget_moc_headers
     DataViewer.h
     DataBlobWidget.h
     PlotWidget.h
-    DataBlobWidget.h
     SubbandSpectrumWidget.h
+    ThreadedBlobClient.h
 )
 
 QT4_WRAP_CPP(widget_moc_src ${widget_moc_headers})

@@ -12,7 +12,7 @@
 namespace pelican {
 
 namespace lofar {
-        class PelicanBlobClient;
+        class ThreadedBlobClient;
 /**
  * @class LofarDataViewer
  *
@@ -29,10 +29,9 @@ class LofarDataViewer : public DataViewer
     public:
         LofarDataViewer( const ConfigNode& config, QWidget* parent=0 );
         ~LofarDataViewer();
-        void run();
 
     private:
-        PelicanBlobClient* _client;
+        ThreadedBlobClient* _client;
         QString _dataStream;
 };
 
