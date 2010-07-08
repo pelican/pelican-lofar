@@ -3,9 +3,13 @@
 
 #include <QtGui/QWidget>
 #include "pelican/data/DataBlob.h"
+
 #include "DataBlobWidget.h"
 
 #include "ui_SubbandSpectraViewer.h"
+
+#include <complex>
+#include <vector>
 
 /**
  * @file SubbandSpectrumWidget.h
@@ -27,20 +31,12 @@ class SubbandSpectrumWidget : public DataBlobWidget, public Ui::SubbandSpectraVi
     Q_OBJECT
 
     public:
-        SubbandSpectrumWidget(QWidget* parent = 0)
-        : DataBlobWidget(parent)
-        {
-            setupUi(this);
-        }
+        SubbandSpectrumWidget(QWidget* parent = 0);
+
         virtual ~SubbandSpectrumWidget() {}
 
-        void updateData(DataBlob* data) {
-            //unsigned s = spingBox_lldas=>value
-            //float* yData = data->ptr(s, p);
-            //PlotWidget_spectrumView->plotCurve(xData, yData, nPoints);
-        }
+        void updateData(DataBlob* data);
 
-    private:
 };
 
 } // namespace lofar

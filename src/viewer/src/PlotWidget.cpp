@@ -24,6 +24,8 @@ PlotWidget::PlotWidget(QWidget* parent) : QwtPlot(parent)
 {
     // Setup the plot grid object.
     _setGrid();
+    showGrid(false);
+    showGridMinorTicks(false);
 
     // Setup the plot panner object.
     _setPanner();
@@ -82,8 +84,9 @@ PlotWidget::~PlotWidget()
 void PlotWidget::plotCurve(unsigned nPoints, const double* xData,
         const double* yData)
 {
-    if (nPoints == 0 || xData == NULL || yData == NULL)
+    if (nPoints == 0 || xData == NULL || yData == NULL) {
         throw QString("PlotWidget::plotCurve(): Input data error.");
+    }
 
     _curve.setData(xData, yData, nPoints);
 
@@ -91,7 +94,8 @@ void PlotWidget::plotCurve(unsigned nPoints, const double* xData,
     setAxisAutoScale(QwtPlot::xBottom);
     _updateZoomBase();
 
-    _curve.attach(this);
+    //_curve.attach(this);
+    replot();
 
     emit(plotComplete());
 }
@@ -103,16 +107,16 @@ void PlotWidget::plotCurve(unsigned nPoints, const double* xData,
  */
 void PlotWidget::clear()
 {
-    setPlotTitle("Title");
-    setXLabel("x axis");
-    setYLabel("y axis");
+    setPlotTitle("");
+    setXLabel("");
+    setYLabel("");
 
     setAxisScale(QwtPlot::yLeft, 0.0, 1.0);
     setAxisScale(QwtPlot::xBottom, 0.0, 1.0);
     enableAxis(QwtPlot::yRight, false);
     plotLayout()->setAlignCanvasToScales(true);
 
-    _curve.detach();
+    //_curve.detach();
 
     replot();
 }
@@ -124,7 +128,11 @@ void PlotWidget::clear()
  */
 void PlotWidget::setPlotTitle(const QString& text)
 {
-    setTitle(text);
+    QFont f;
+    f.setPointSize(12);
+    QwtText title(text);
+    title.setFont(f);
+    setTitle(title);
     emit(titleChanged(text));
 }
 
@@ -134,7 +142,11 @@ void PlotWidget::setPlotTitle(const QString& text)
  */
 void PlotWidget::setXLabel(const QString& text)
 {
-    setAxisTitle(QwtPlot::xBottom, text);
+    QFont f;
+    f.setPointSize(10);
+    QwtText label(text);
+    label.setFont(f);
+    setAxisTitle(QwtPlot::xBottom, label);
     emit(xLabelChanged(text));
 }
 
@@ -144,7 +156,11 @@ void PlotWidget::setXLabel(const QString& text)
  */
 void PlotWidget::setYLabel(const QString& text)
 {
-    setAxisTitle(QwtPlot::yLeft, text);
+    QFont f;
+    f.setPointSize(10);
+    QwtText label(text);
+    label.setFont(f);
+    setAxisTitle(QwtPlot::yLeft, label);
     emit(yLabelChanged(text));
 }
 

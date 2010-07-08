@@ -29,27 +29,27 @@ class PlotWidgetTest : public QObject
 
     private slots:
 
-//        void testPlotWidget() {
-//            _plotWidget->show();
-//            _plotWidget->resize(500, 500);
-//
-//            // Create nPoints data values
-//            unsigned nPoints = 1000;
-//            double nPeriods = 2;
-//            std::vector<float> xData(nPoints);
-//            std::vector<float> yData(nPoints);
-//
-//            for (unsigned i = 0; i < nPoints; ++i) {
-//                xData[i] = float(i);
-//                double arg = 2 * M_PI * nPeriods/float(nPoints) * xData[i];
-//                yData[i] = float(sin(arg));
-//            }
-//
-//            std::vector<double> xPlot(xData.begin(), xData.end());
-//            std::vector<double> yPlot(yData.begin(), yData.end());
-//
-//            _plotWidget->plotCurve(nPoints, &xPlot[0], &yPlot[0]);
-//        }
+        void testPlotWidget() {
+            _plotWidget->show();
+            _plotWidget->resize(500, 500);
+
+            // Create nPoints data values
+            unsigned nPoints = 1000;
+            double nPeriods = 2;
+            std::vector<float> xData(nPoints);
+            std::vector<float> yData(nPoints);
+
+            for (unsigned i = 0; i < nPoints; ++i) {
+                xData[i] = float(i);
+                double arg = 2 * M_PI * nPeriods/float(nPoints) * xData[i];
+                yData[i] = float(sin(arg));
+            }
+
+            std::vector<double> xPlot(xData.begin(), xData.end());
+            std::vector<double> yPlot(yData.begin(), yData.end());
+
+            _plotWidget->plotCurve(nPoints, &xPlot[0], &yPlot[0]);
+        }
 
         void testSubbandSpectrumWidget()
         {

@@ -7,6 +7,7 @@
 #include <QtGui/QMenuBar>
 #include <QtGui/QTabWidget>
 #include "viewer/DataBlobWidget.h"
+#include "viewer/SubbandSpectrumWidget.h"
 #include "pelican/utility/ConfigNode.h"
 
 
@@ -16,8 +17,8 @@ namespace lofar {
 
 
 /**
- *@details DataViewer 
- *    In development : ideally will use a generic Blob client and be exported to 
+ *@details DataViewer
+ *    In development : ideally will use a generic Blob client and be exported to
  *    pelican
  */
 DataViewer::DataViewer(const ConfigNode& config, QWidget* parent)
@@ -61,7 +62,7 @@ DataViewer::DataViewer(const ConfigNode& config, QWidget* parent)
     layout->setMargin(5);
     layout->addWidget(menubar);
     layout->addWidget(_streamTabs);
-    layout->addWidget(bottomFiller);
+    //layout->addWidget(bottomFiller);
     setLayout(layout);
 
     setConfig(config);
@@ -86,7 +87,8 @@ DataBlobWidget* DataViewer::getWidgetViewer(const QString& stream) const
         //widget = _viewerfactory->create( _streamViewerMap[stream], stream );
     }
     else {
-        widget = new DataBlobWidget;
+        //widget = new DataBlobWidget;
+        widget = new SubbandSpectrumWidget;
     }
     return widget;
 }
@@ -110,7 +112,7 @@ void DataViewer::setConfig(const ConfigNode& config)
 void DataViewer::_updatedStreams( const QSet<QString>& streams )
 {
     // clean up the previous state
-    foreach(QAction* action, _streamActionGroup->actions() ) 
+    foreach(QAction* action, _streamActionGroup->actions() )
     {
         _streamActionGroup->removeAction(action);
         _viewMenu->removeAction(action);
@@ -191,7 +193,7 @@ bool DataViewer::toggleStream( const QString& stream )
 void DataViewer::_streamToggled()
 {
     QAction* action = static_cast<QAction*>(sender());
-    if( action ) 
+    if( action )
         toggleStream( action->text() );
 }
 

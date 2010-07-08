@@ -8,7 +8,6 @@
  */
 
 namespace pelican {
-    class DataBlob;
 
 class DataBlob;
 

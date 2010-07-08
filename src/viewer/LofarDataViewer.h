@@ -15,11 +15,11 @@ namespace lofar {
         class PelicanBlobClient;
 /**
  * @class LofarDataViewer
- *  
+ *
  * @brief
  *    A lofar specific single stream viewer
  * @details
- * 
+ *
  */
 
 class LofarDataViewer : public DataViewer
@@ -27,7 +27,7 @@ class LofarDataViewer : public DataViewer
     Q_OBJECT
 
     public:
-        LofarDataViewer(  const ConfigNode& config, QWidget* parent=0 );
+        LofarDataViewer( const ConfigNode& config, QWidget* parent=0 );
         ~LofarDataViewer();
         void run();
 
@@ -38,4 +38,4 @@ class LofarDataViewer : public DataViewer
 
 } // namespace lofar
 } // namespace pelican
-#endif // LOFARDATAVIEWER_H 
+#endif // LOFARDATAVIEWER_H

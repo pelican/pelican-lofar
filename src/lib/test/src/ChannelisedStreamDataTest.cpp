@@ -1,6 +1,8 @@
 #include "ChannelisedStreamDataTest.h"
 #include "ChannelisedStreamData.h"
 
+#include "pelican/utility/FactoryGeneric.h"
+
 #include <iostream>
 #include <complex>
 #include <QtCore/QBuffer>
@@ -133,6 +135,14 @@ void ChannelisedStreamDataTest::test_accessorMethods()
         CPPUNIT_ASSERT_DOUBLES_EQUAL(double(c) - double(p) - double(sb), sb2p1[c].imag(), err);
 
 //        spectrum.write("spectrum.txt");
+
+    }
+
+    {
+        FactoryGeneric<DataBlob> factory;
+        DataBlob* d = factory.create("ChannelisedStreamData");
+        ChannelisedStreamData* c = (ChannelisedStreamData*)d;
+        c->resize(10, 2, 512);
     }
 }
 
