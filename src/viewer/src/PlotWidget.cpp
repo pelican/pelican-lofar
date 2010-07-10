@@ -90,7 +90,8 @@ void PlotWidget::plotCurve(unsigned nPoints, const double* xData,
         throw QString("PlotWidget::plotCurve(): Input data error.");
     }
 
-    _curve.setData(xData, yData, nPoints);
+    // TODO: Use setData to make a internal copy of the input arrays.. needed?
+    _curve.setRawData(xData, yData, nPoints);
 
     //setAxisAutoScale(QwtPlot::yLeft);
     //setAxisAutoScale(QwtPlot::xBottom);
