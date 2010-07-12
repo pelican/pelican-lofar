@@ -20,8 +20,8 @@ set(lofarTest_src
     src/PolyphaseCoefficientsTest.cpp
     src/ChanneliserPolyphaseTest.cpp
     #src/PelicanBlobClientTest.cpp
-    #src/SpectrumTest.cpp
-    #src/SubbandSpectraTest.cpp
+    src/SpectrumTest.cpp
+    src/SubbandSpectraTest.cpp
 )
 
 add_executable(lofarTest ${lofarTest_src})

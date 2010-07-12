@@ -15,6 +15,7 @@ set(lib_src
     src/LofarStationConfigurationAdapter.cpp
     src/PelicanBlobClient.cpp
     src/PolyphaseCoefficients.cpp
+    src/SubbandSpectra.cpp
 )
 
 # Create pelican-lofar library.
