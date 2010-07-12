@@ -125,7 +125,6 @@ void LofarChunker::next(QIODevice* device)
             unsigned lostPackets = 0, diff = 0;
 
             diff =  (blockid >= prevBlockid) ? (blockid - prevBlockid) : (blockid + totBlocks - prevBlockid);
-
             if (diff < _samplesPerPacket) {      // Duplicated packets... ignore
                 ++_packetsRejected; 
                 i -= 1;
@@ -133,6 +132,10 @@ void LofarChunker::next(QIODevice* device)
             }
             else if (diff > _samplesPerPacket)    // Missing packets
                 lostPackets = (diff / _samplesPerPacket) - 1; // -1 since it includes this includes the received packet as well
+
+            if (lostPackets > 0) 
+                printf("Generate %d empty packets, prevSeq: %d, new Seq: %d, prevBlock: %d, newBlock: %d\n", 
+                       lostPackets, prevSeqid, seqid, prevBlockid, blockid);
 
             // Generate lostPackets empty packets, if any
             for (unsigned packetCounter = 0; packetCounter < lostPackets &&
@@ -146,8 +149,9 @@ void LofarChunker::next(QIODevice* device)
 
                 // Check if the number of required packets is reached
                 i += 1;
-                if (i == _nPackets)
+                if (i == _nPackets) {
                     break;
+                }
             }
 
             // Write received packet
@@ -168,6 +172,7 @@ void LofarChunker::next(QIODevice* device)
 
     // Update _startTime
     _startTime = prevSeqid;
+    _startBlockid = prevBlockid;
     //printf("Finished receiving\n");
 }
 

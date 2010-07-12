@@ -52,6 +52,8 @@ void ChannelisedStreamData::serialise(QIODevice& out) const
     out.write((char*)&_nChannels, sizeof(unsigned));
     out.write((char*)&_startFreq, sizeof(double));
     out.write((char*)&_channelFreqDelta, sizeof(double));
+    out.write((char*)&_lofarTimestamp, sizeof(long long));
+    out.write((char*)&_blockRate, sizeof(long));
 
     // Data.
     out.write((char*)&_data[0], _data.size() * sizeof(std::complex<double>));
@@ -83,12 +85,13 @@ quint64 ChannelisedStreamData::serialisedBytes() const
 void ChannelisedStreamData::deserialise(QIODevice& in, QSysInfo::Endian)
 {
     // Read the header.
-    //while (in.bytesAvailable() < 28) in.waitForReadyRead(-1);
     in.read((char*)&_nSubbands, sizeof(unsigned));
     in.read((char*)&_nPolarisations, sizeof(unsigned));
     in.read((char*)&_nChannels, sizeof(unsigned));
     in.read((char*)&_startFreq, sizeof(double));
     in.read((char*)&_channelFreqDelta, sizeof(double));
+    in.read((char*)&_lofarTimestamp, sizeof(long long));
+    in.read((char*)&_blockRate, sizeof(long));
 
     unsigned dataPoints = _nSubbands * _nPolarisations * _nChannels;
     unsigned dataSize = dataPoints * sizeof(std::complex<double>);
@@ -97,7 +100,6 @@ void ChannelisedStreamData::deserialise(QIODevice& in, QSysInfo::Endian)
     resize(_nSubbands, _nPolarisations, _nChannels);
 
     // Read the data.
-    //while (in.bytesAvailable() < dataSize) in.waitForReadyRead(-1);
     in.read((char*)&_data[0], dataSize);
 }
 

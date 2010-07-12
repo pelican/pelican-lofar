@@ -189,65 +189,63 @@ class TimeStamp {
 
 };
 
-// unsigned TimeStamp::clockSpeed = 20000000;
 
 inline TimeStamp::TimeStamp(int64 time)
 {   itsTime = time;   }
 
 inline TimeStamp::TimeStamp(unsigned seqId, unsigned blockId)
 {
-#ifdef EVEN_SECOND_HAS_MORE_SAMPLES
-    itsTime = ((int64) seqId * clockSpeed + 512) / 1024 + blockId;
-#else
-    itsTime = ((int64) seqId * clockSpeed) / 1024 + blockId;
-#endif
+    #ifdef EVEN_SECOND_HAS_MORE_SAMPLES
+        itsTime = ((int64) seqId * clockSpeed + 512) / 1024 + blockId;
+    #else
+        itsTime = ((int64) seqId * clockSpeed) / 1024 + blockId;
+    #endif
 }
 
 inline TimeStamp &TimeStamp::setStamp(unsigned seqId, unsigned blockId)
 {
-#ifdef EVEN_SECOND_HAS_MORE_SAMPLES
-    itsTime = ((int64) seqId * clockSpeed + 512) / 1024 + blockId;
-#else
-    itsTime = ((int64) seqId * clockSpeed) / 1024 + blockId;
-#endif
-    return *this;
+    #ifdef EVEN_SECOND_HAS_MORE_SAMPLES
+        itsTime = ((int64) seqId * clockSpeed + 512) / 1024 + blockId;
+    #else
+        itsTime = ((int64) seqId * clockSpeed) / 1024 + blockId;
+    #endif
+        return *this;
 }
 
 inline unsigned TimeStamp::getSeqId() const
 {
-#ifdef EVEN_SECOND_HAS_MORE_SAMPLES
-    return (unsigned) (1024 * itsTime / clockSpeed);
-#else
-    return (unsigned) ((1024 * itsTime + 512) / clockSpeed);
-#endif
+    #ifdef EVEN_SECOND_HAS_MORE_SAMPLES
+        return (unsigned) (1024 * itsTime / clockSpeed);
+    #else
+        return (unsigned) ((1024 * itsTime + 512) / clockSpeed);
+    #endif
 }
 
 inline unsigned TimeStamp::getBlockId() const
 {
-#ifdef EVEN_SECOND_HAS_MORE_SAMPLES
-    return (unsigned) (1024 * itsTime % clockSpeed / 1024);
-#else
-    return (unsigned) ((1024 * itsTime + 512) % clockSpeed / 1024);
-#endif
+    #ifdef EVEN_SECOND_HAS_MORE_SAMPLES
+        return (unsigned) (1024 * itsTime % clockSpeed / 1024);
+    #else
+        return (unsigned) ((1024 * itsTime + 512) % clockSpeed / 1024);
+    #endif
 }
 
 inline void TimeStamp::setStationClockSpeed(unsigned speed)
 {
-    printf("Using a %f MHz clock", speed/1e6);
     clockSpeed = speed;
 }
 
 template <typename T> inline TimeStamp &TimeStamp::operator += (T increment)
-        {
+{
     itsTime += increment;
     return *this;
-        }
+}
 
 template <typename T> inline TimeStamp &TimeStamp::operator -= (T decrement)
-        {
+{
     itsTime -= decrement;
     return *this;
-        }
+}
 
 inline TimeStamp &TimeStamp::operator ++ ()
 {
@@ -289,13 +287,13 @@ inline TimeStamp::operator int64 () const
 
 inline TimeStamp::operator struct timespec () const
 {
-        int64       ns = (int64) (itsTime * 1024 * 1e9 / clockSpeed);
-        struct timespec ts;
+    int64 ns = (int64) (itsTime * 1024 * 1e9 / clockSpeed);
+    struct timespec ts;
 
-        ts.tv_sec  = ns / 1000000000ULL;
-        ts.tv_nsec = ns % 1000000000ULL;
+    ts.tv_sec  = ns / 1000000000ULL;
+    ts.tv_nsec = ns % 1000000000ULL;
 
-        return ts;
+    return ts;
 }
 
 inline bool TimeStamp::operator > (const TimeStamp &other) const
@@ -317,7 +315,6 @@ inline bool TimeStamp::operator != (const TimeStamp &other) const
         {   return itsTime != other.itsTime;    }
 
 } // namespace TYPES
-
 } // namespace lofar
 } // namespace pelican
 

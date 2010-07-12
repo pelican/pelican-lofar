@@ -99,11 +99,16 @@ void ChanneliserPolyphase::run(const TimeStreamData* timeData,
     const unsigned nPolarisations = 1;
     spectra->resize(nSubbands, nPolarisations, _nChannels);
 
-    // Set up the buffers if required.
+    // Set up the buffers if required
     const unsigned nFilterTaps = filterCoeff->nTaps();
     if (!_buffersInitialised)
         _setupBuffers(nSubbands, _nChannels, nFilterTaps);
 
+    // Set the timing parameters
+    // We only need the timestamp of the first packet for this version of the Channeliser
+    spectra -> setLofarTimestamp(timeData -> getLofarTimestamp());
+    spectra -> setBlockRate(timeData -> getBlockRate());
+    
     // Pointers to processing buffers.
     omp_set_num_threads(_nThreads);
     const unsigned bufferSize = _subbandBuffer[0].size();

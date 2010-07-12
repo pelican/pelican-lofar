@@ -83,6 +83,18 @@ class T_ChannelisedSteamData : public DataBlob
             return _nChannels * ( subband * _nPolarisations + polarisation) + channel;
         }
 
+        // Return the original block rate contained within the output spectra
+        long getBlockRate() const { return _blockRate; }
+
+        // Set the original block rate contained within the output spectra
+        void setBlockRate(long blockRate) { _blockRate = blockRate; }
+
+        // Return the lofar timestamp
+        long long getLofarTimestamp() const { return _lofarTimestamp; }
+
+        // Set the lofar timestamp
+        void setLofarTimestamp(long long timestamp) { _lofarTimestamp = timestamp; }
+
     public: // Accessor methods.
         /// Returns the number of entries in the data blob.
         unsigned size() const { return _data.size(); }
@@ -161,6 +173,8 @@ class T_ChannelisedSteamData : public DataBlob
         unsigned _nChannels;
         double _startFreq;
         double _channelFreqDelta;
+        long long _lofarTimestamp;
+        long   _blockRate;
 };
 
 
