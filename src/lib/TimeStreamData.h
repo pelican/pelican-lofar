@@ -109,6 +109,18 @@ class T_TimeStreamData : public DataBlob
         /// Sets the time interval between samples.
         void setSampleDelta(double value) { _sampleDelta = value; }
 
+        /// Return the block rate (timespan of the entire chunk)
+        long getBlockRate() const { return _blockRate; }
+
+        /// Return the block rate (timespan of the entire chunk)
+        void setBlockRate(long blockRate) { _blockRate = blockRate; }
+
+        // Return the lofar timestamp
+        long long getLofarTimestamp() const { return _lofarTimestamp; }
+
+        // Set the lofar timestamp
+        void setLofarTimestamp(long long timestamp) { _lofarTimestamp = timestamp; }
+
         /// Returns a pointer to the time stream data.
         T* data() { return _data.size() > 0 ? &_data[0] : NULL; }
 
@@ -160,6 +172,8 @@ class T_TimeStreamData : public DataBlob
         unsigned _nSamples;
         double _startTime;
         double _sampleDelta;
+        long     _blockRate;
+        long long _lofarTimestamp;
 };
 
 

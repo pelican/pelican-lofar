@@ -99,6 +99,7 @@ class AdapterTimeStream : public AbstractStreamAdapter
         unsigned _nPolarisations;
         unsigned _nSamples;
         unsigned _sampleBits;
+        unsigned _clock;
 };
 
 PELICAN_DECLARE_ADAPTER(AdapterTimeStream)

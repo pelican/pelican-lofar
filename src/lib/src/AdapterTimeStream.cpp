@@ -30,6 +30,7 @@ AdapterTimeStream::AdapterTimeStream(const ConfigNode& config)
     _nPolarisations = config.getOption("polarisations", "number", "0").toUInt();
     _nSamples = config.getOption("samplesPerPacket", "number", "0").toUInt();
     _sampleBits = config.getOption("sampleSize", "bits", "0").toUInt();
+    _clock = config.getOption("clockSpeed", "value", "200").toUInt();
     _fixedPacketSize = config.getOption("fixedSizePackets", "value", "true").
     		toLower().startsWith("true") ? true : false;
     _combinePols = config.getOption("combinePolarisations", "value", "false").
@@ -75,14 +76,21 @@ void AdapterTimeStream::deserialise(QIODevice* in)
     // UDP packet header.
     UDPPacket::Header header;
 
-    //TODO: Add time information to timedata object (obtainable from seqid and blockid
-    //      using the TimeStamp code in IONproc
     // Loop over UDP packets
     for (unsigned p = 0; p < _nUDPPackets; ++p) {
 
         // Read the header from the IO device.
         in->read(&headerTemp[0], headerSize);
         _readHeader(header, &headerTemp[0]);
+ 
+        // First packet, extract timestamp
+        if (p == 0) {
+            TYPES::TimeStamp timestamp;
+            timestamp.setStationClockSpeed(_clock * 1000000);
+            timestamp.setStamp (header.timestamp, header.blockSequenceNumber);
+            _timeData -> setLofarTimestamp(timestamp.itsTime);
+            _timeData -> setBlockRate(_nSamples * _nUDPPackets); // sample rate when condensed in chunk (ie. diff in time between chunks)
+        }
 
         // Read the useful data (depends on configured dimensions).
         in->read(&dataTemp[0], dataSize);
