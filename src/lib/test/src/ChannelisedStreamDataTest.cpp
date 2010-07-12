@@ -184,8 +184,8 @@ void ChannelisedStreamDataTest::test_serialise_deserialise()
      serialBlob.close();
 
      // check the return byte array is the expected size.
-     qint64 expectedSize = 3 * sizeof(unsigned) + 2 * sizeof(double)
-             + spectrum1.size() * sizeof(std::complex<double>);
+     qint64 expectedSize = 3 * sizeof(unsigned) + 2 * sizeof(double) + sizeof(long long)
+             + spectrum1.size() * sizeof(std::complex<double>) + sizeof(long);
      CPPUNIT_ASSERT_EQUAL(expectedSize, serialBlob.size());
 
      serialBlob.open(QBuffer::ReadOnly);
