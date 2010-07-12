@@ -71,6 +71,19 @@ class SubbandSpectra : public DataBlob
             _spectra.resize(_nTimeBlocks * _nSubbands * _nPolarisations);
         }
 
+        /// Assign memory for the time stream data blob.
+        void resize(unsigned nTimeBlocks, unsigned nSubbands,
+                unsigned nPolarisations, unsigned nChannels)
+        {
+            _nTimeBlocks = nTimeBlocks;
+            _nSubbands = nSubbands;
+            _nPolarisations = nPolarisations;
+            _spectra.resize(_nTimeBlocks * _nSubbands * _nPolarisations);
+            for (unsigned i = 0; i < _spectra.size(); ++i) {
+                _spectra[i].resize(nChannels);
+            }
+        }
+
         /// Returns the data index for a given time block \b, sub-band \s and
         /// polarisation.
         unsigned index(unsigned b, unsigned s, unsigned p)

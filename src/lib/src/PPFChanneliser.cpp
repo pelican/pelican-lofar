@@ -2,11 +2,13 @@
 
 #include "pelican/utility/ConfigNode.h"
 
+#include "SubbandTimeStream.h"
 #include "TimeSeries.h"
 #include "SubbandSpectra.h"
 
 #include <QtCore/QString>
 #include <QtCore/QTime>
+#include <QtCore/QFile>
 
 #include <cstring>
 #include <complex>
@@ -14,8 +16,6 @@
 
 #include <fftw3.h>
 #include <omp.h>
-
-using std::complex;
 
 namespace pelican {
 namespace lofar {
@@ -32,12 +32,30 @@ PPFChanneliser::PPFChanneliser(const ConfigNode& config)
 {
     _buffersInitialised = false;
 
-    // Get options from the config.
+    // Get options from the XML configuration node.
     _nChannels = config.getOption("channels", "number", "512").toUInt();
     _nThreads = config.getOption("processingThreads", "number", "2").toUInt();
+    QString coeffFile = config.getOption("coefficients", "fileName");
+    unsigned nTaps = config.getOption("coefficients", "nTaps", "8").toUInt();
 
+    // Load the coefficients.
+    _coeffs.resize(nTaps, _nChannels);
+    if (!QFile::exists(coeffFile)) {
+        throw QString("PPFChanneliser:: Unable to find coefficient file '%1'.")
+        .arg(coeffFile);
+    }
+
+    try {
+        _coeffs.load(coeffFile, nTaps, _nChannels);
+    }
+    catch (QString err) {
+        std::cout << err.toStdString();
+    }
+
+    // As the channeliser currently only works for even number of channels
+    // enforce this.
     if (_nChannels % 2 != 0) {
-        throw QString("ChanneliserPolyphase: "
+        throw QString("PPFChanneliser: "
                 " Please choose an even number of channels.");
     }
 
@@ -84,20 +102,15 @@ PPFChanneliser::~PPFChanneliser()
 * 						 	coefficients.
 * @param[out] spectrum	 	Set of spectra produced.
 */
-void PPFChanneliser::run(const TimeSeriesC32* timeSeries,
+void PPFChanneliser::run(const SubbandTimeStreamC32* timeSeries,
         SubbandSpectraC32* spectra)
 {
     _checkData(timeSeries);
 
-//  TODO: Combine polarisations ...? (maybe do this in the adapter)
-//	unsigned nPolarisations = timeData->nPolarisations();
-//	unsigned bufferSize = _setupBuffers(nSubbands, _nChannels, nFilterTaps);
-
     // Get local copies of the data dimensions.
     unsigned nSubbands = timeSeries->nSubbands();
     unsigned nPolarisations = timeSeries->nPolarisations();
-    unsigned nTimes = timeSeries->nSamples();
-    unsigned nTimeBlocks = _nChannels / nTimes; // TODO: this must be an int ratio.
+    unsigned nTimeBlocks = timeSeries->nTimeBlocks();
 
     // Resize the output spectra blob.
     spectra->resize(nTimeBlocks, nSubbands, nPolarisations);
@@ -105,53 +118,53 @@ void PPFChanneliser::run(const TimeSeriesC32* timeSeries,
     // Set up the buffers if required.
     unsigned nFilterTaps = _coeffs.nTaps();
     if (!_buffersInitialised) {
-        _setupBuffers(nSubbands, _nChannels, nFilterTaps);
+        _setupWorkBuffers(nSubbands, nPolarisations, _nChannels, nFilterTaps);
     }
 
     // Pointers to processing buffers.
     omp_set_num_threads(_nThreads);
-    unsigned bufferSize = _subbandBuffer[0].size();
+    unsigned bufferSize = _workBuffer[0].size();
     const double* coeff = _coeffs.coefficients();
 
 #pragma omp parallel
     {
         unsigned threadId = omp_get_thread_num();
         unsigned start = 0, end = 0;
-        _threadSubbandRange(start, end, nSubbands, _nThreads, threadId);
+        _threadProcessingIndices(start, end, nTimeBlocks, _nThreads, threadId);
 
-        complex<float>* subbandBuffer;
-        complex<float>* filteredSamples = &(_filteredData[threadId])[0];
-
-        // TODO: loop over time blocks and polarisations.
+        Complex* workBuffer;
+        Complex* filteredSamples = &(_filteredData[threadId])[0];
 
         // Loop over sub-bands.
-        for (unsigned b = 0; b < nTimeBlocks; ++b) {
-            for (unsigned s = start; s < end; ++s) {
+        for (unsigned b = start; b < end; ++b) {
+            for (unsigned s = 0; s < nSubbands; ++s) {
                 for (unsigned p = 0; p < nPolarisations; ++p) {
 
-                    // Get a pointer to the work buffer for the sub-band being
-                    // processed.
-                    subbandBuffer = &(_subbandBuffer[s])[0];
+                    // Get a pointer to the time series.
+                    const TimeSeries<Complex>* times = timeSeries->ptr(b,s,p);
+                    const Complex* timeData = times->ptr();
+                    unsigned nTimes = times->nTimes();
 
-                    const complex<float>* times = timeSeries->ptr(s, p);
+                    if (nTimes != _nChannels) {
+                        throw QString("PPFChanneliser::run(): dimension mismatch");
+                    }
+
+                    // Get a pointer to the work buffer.
+                    workBuffer = &(_workBuffer[s * nPolarisations + p])[0];
 
                     // Update buffered (lagged) data for the sub-band.
-                    _updateBuffer(times, _nChannels,
-                            subbandBuffer, bufferSize);
+                    _updateBuffer(timeData, _nChannels, workBuffer, bufferSize);
 
                     // Apply the PPF.
-                    _filter(subbandBuffer, nFilterTaps, _nChannels, coeff,
+                    _filter(workBuffer, nFilterTaps, _nChannels, coeff,
                             filteredSamples);
 
-                    Spectrum<std::complex<float> >* spectrum =
-                            spectra->ptr(b, s, p);
-
+                    Spectrum<Complex>* spectrum = spectra->ptr(b, s, p);
                     spectrum->resize(_nChannels);
-
-                    std::complex<float>* channelAmps = spectrum->ptr();
+                    Complex* spectrumData = spectrum->ptr();
 
                     // FFT the filtered subband data to form a new spectrum.
-                    _fft(filteredSamples, _nChannels, channelAmps);
+                    _fft(filteredSamples, _nChannels, spectrumData);
                 }
             }
         }
@@ -163,24 +176,25 @@ void PPFChanneliser::run(const TimeSeriesC32* timeSeries,
 /**
 * @details
 */
-void PPFChanneliser::_checkData(const TimeSeriesC32* timeData)
+void PPFChanneliser::_checkData(const SubbandTimeStreamC32* timeData)
 {
     if (!timeData)
-        throw QString("ChanneliserPolyphase: Time stream data blob missing.");
+        throw QString("PPFChanneliser: Time stream data blob missing.");
+
+    if (timeData->nTimeSeries() == 0)
+        throw QString("PPFChanneliser: Empty time data blob");
 
     if (timeData->nSubbands() == 0)
-        throw QString("ChanneliserPolyphase: Empty time data blob");
+        throw QString("PPFChanneliser: Empty time data blob");
 
-    if (timeData->nSamples() == 0)
-        throw QString("ChanneliserPolyphase: Empty time data blob");
+    if (timeData->nPolarisations() == 0)
+        throw QString("PPFChanneliser: Empty time data blob");
 
-    if (timeData->nSamples() != _nChannels)
-        throw QString("ChanneliserPolyphase: Dimension mismatch: "
-                "Number of samples %1 != number of output channels %2.")
-                .arg(timeData->nSamples()).arg(_nChannels);
+    if (timeData->nTimeBlocks() == 0)
+        throw QString("PPFChanneliser: Empty time data blob");
 
     if (_coeffs.nChannels() != _nChannels)
-        throw QString("ChanneliserPolyphase: Dimension mismatch: "
+        throw QString("PPFChanneliser: Dimension mismatch: "
                 "Number of filter channels %1 != number of output channels %2.")
                 .arg(_coeffs.nChannels()).arg(_nChannels);
 }
@@ -194,13 +208,13 @@ void PPFChanneliser::_checkData(const TimeSeriesC32* timeData)
 * @param samples
 * @param nSamples
 */
-void PPFChanneliser::_updateBuffer(const complex<float>* samples,
-        unsigned nSamples, complex<float>* buffer, unsigned bufferSize)
+void PPFChanneliser::_updateBuffer(const Complex* samples,
+        unsigned nSamples, Complex* buffer, unsigned bufferSize)
 {
-    complex<float>* dest = &buffer[nSamples];
-    size_t size = (bufferSize - nSamples) * sizeof(complex<float>);
+    Complex* dest = &buffer[nSamples];
+    size_t size = (bufferSize - nSamples) * sizeof(Complex);
     memmove(dest, buffer, size);
-    memcpy(buffer, samples, nSamples * sizeof(complex<float>));
+    memcpy(buffer, samples, nSamples * sizeof(Complex));
 }
 
 
@@ -213,21 +227,20 @@ void PPFChanneliser::_updateBuffer(const complex<float>* samples,
 * @param nChannels
 * @param filteredSamples
 */
-void PPFChanneliser::_filter(const complex<float>* sampleBuffer,
-        unsigned nTaps, unsigned nChannels,
-        const double* coeffs, complex<float>* filteredSamples)
+void PPFChanneliser::_filter(const Complex* sampleBuffer, unsigned nTaps,
+        unsigned nChannels, const double* coeffs, Complex* filteredSamples)
 {
     for (unsigned i = 0; i < nChannels; ++i) {
-        filteredSamples[i] = complex<float>(0.0, 0.0);
+        filteredSamples[i] = Complex(0.0, 0.0);
     }
 
     for (unsigned c = 0; c < nChannels; ++c) {
         for (unsigned t = 0; t < nTaps; ++t) {
             unsigned iBuffer = (nTaps - t - 1) * nChannels + c;
             unsigned iCoeff = nTaps * c + t;
-            float C = coeffs[iCoeff];
-            complex<float> value = sampleBuffer[iBuffer];
-            filteredSamples[c] += C * value;
+            double re = sampleBuffer[iBuffer].real() * coeffs[iCoeff];
+            double im = sampleBuffer[iBuffer].imag() * coeffs[iCoeff];
+            filteredSamples[c] += std::complex<float>(re, im);
         }
     }
 }
@@ -241,8 +254,8 @@ void PPFChanneliser::_filter(const complex<float>* sampleBuffer,
 * @param nSamples
 * @param spectrum
 */
-void PPFChanneliser::_fft(const complex<float>* samples,
-        unsigned nSamples, complex<float>* spectrum)
+void PPFChanneliser::_fft(const Complex* samples, unsigned nSamples,
+        Complex* spectrum)
 {
     fftwf_execute_dft(_fftPlan, (fftwf_complex*)samples, (fftwf_complex*)spectrum);
     _fftShift(spectrum, nSamples);
@@ -256,46 +269,44 @@ void PPFChanneliser::_fft(const complex<float>* samples,
  * @param spectrum
  * @param nChannels
  */
-void PPFChanneliser::_fftShift(complex<float>* spectrum,
-        unsigned nChannels)
+void PPFChanneliser::_fftShift(Complex* spectrum, unsigned nChannels)
 {
-    std::vector<std::complex<double> > temp(nChannels,
-            std::complex<double>(0.0, 0.0));
+    std::vector<Complex> temp(nChannels, Complex(0.0, 0.0));
     unsigned iZero = nChannels / 2; // FIXME? only works for even nChannels!
-    size_t size = nChannels / 2 * sizeof(complex<double>);
+    size_t size = nChannels / 2 * sizeof(Complex);
     memcpy(&temp[iZero], spectrum,  size);
     memcpy(&temp[0], &spectrum[iZero],  size);
-    memcpy(spectrum, &temp[0], nChannels * sizeof(complex<double>));
+    memcpy(spectrum, &temp[0], nChannels * sizeof(Complex));
 }
-
 
 /**
  * @details
- * Returns the subband range to process for a given number of subbands,
- * number of threads and thread Id.
+ * Calculates start and end indices for a given thread for splitting nValues
+ * of a processing dimension between nThreads.
  *
  * @param start
  * @param end
+ * @param nValues
+ * @param nThreads
  * @param threadId
- * @param nTreads
  */
-void PPFChanneliser::_threadSubbandRange(unsigned& start,
-        unsigned& end, unsigned nSubbands, unsigned nThreads,
+void PPFChanneliser::_threadProcessingIndices(unsigned& start,
+        unsigned& end, unsigned nValues, unsigned nThreads,
         unsigned threadId)
 {
     if (threadId >= nThreads) {
-        throw QString("ChanneliserPolyphase::_threadSubbandRange(): "
+        throw QString("PPFChanneliser::_threadProcessingIndices(): "
                 "threadId '%1' out of range for nThreads = %2.").arg(threadId).
                 arg(nThreads);
     }
 
-    if (threadId >= nSubbands) {
+    if (threadId >= nValues) {
         start = end = 0;
         return;
     }
 
-    unsigned number = nSubbands / nThreads;
-    unsigned remainder = nSubbands % nThreads;
+    unsigned number = nValues / nThreads;
+    unsigned remainder = nValues % nThreads;
     if (threadId < remainder)
         number++;
 
@@ -312,13 +323,16 @@ void PPFChanneliser::_threadSubbandRange(unsigned& start,
 * @param nChannels
 * @param nFilterTaps
 */
-unsigned PPFChanneliser::_setupBuffers(unsigned nSubbands,
-        unsigned nChannels, unsigned nFilterTaps)
+unsigned PPFChanneliser::_setupWorkBuffers(unsigned nSubbands,
+        unsigned nPolarisations, unsigned nChannels, unsigned nTaps)
 {
-    _subbandBuffer.resize(nSubbands);
-    unsigned bufferSize = nChannels * nFilterTaps;
-    for (unsigned s = 0; s < nSubbands; ++s) {
-        _subbandBuffer[s].resize(bufferSize, complex<float>(0.0, 0.0));
+    _workBuffer.resize(nSubbands * nPolarisations);
+    unsigned bufferSize = nChannels * nTaps;
+    for (unsigned i = 0, s = 0; s < nSubbands; ++s) {
+        for (unsigned p = 0; p < nPolarisations; ++p) {
+            _workBuffer[i].resize(bufferSize, Complex(0.0, 0.0));
+            i++;
+        }
     }
     _buffersInitialised = true;
     return bufferSize;

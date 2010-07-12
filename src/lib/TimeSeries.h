@@ -5,7 +5,6 @@
  * @file TimeSeries.h
  */
 
-#include "pelican/data/DataBlob.h"
 #include <vector>
 #include <complex>
 
@@ -23,25 +22,20 @@ namespace lofar {
  * @details
  * Used for time domain processing application such as channeliser modules.
  *
- * Multidimensional data holding a time series for a number of sub-bands
- * and polarisations.
- *
- * Data is held in a vector ordered by
- *
  */
 
 template <class T>
-class TimeSeries : public DataBlob
+class TimeSeries
 {
     public:
+        /// Constructs an empty time series.
+        TimeSeries() : _nTimes(0), _startTime(0.0), _sampleDelta(0.0) {}
 
-        /// Constructs an empty time stream data blob.
-        TimeSeries(const QString& type) : DataBlob(type) {
-            _nSubbands = 0;
-            _nPolarisations = 0;
-            _nSamples = 0;
-            _startTime = 0.0;
-            _sampleDelta = 0.0;
+        /// Constructs and assigns memory for the time series.
+        TimeSeries(unsigned nTimes)
+        : _startTime(0.0), _sampleDelta(0.0)
+        {
+            resize(nTimes);
         }
 
         /// Destroys the time stream data blob.
@@ -52,42 +46,24 @@ class TimeSeries : public DataBlob
         void clear()
         {
             _data.clear();
-            _nSubbands = 0;
-            _nPolarisations = 0;
-            _nSamples = 0;
+            _nTimes = 0;
             _startTime = 0.0;
             _sampleDelta = 0.0;
         }
 
         /// Assign memory for the time stream data blob.
-        void resize(unsigned nSubbands, unsigned nPolarisations,
-                unsigned nSamples)
+        void resize(unsigned nTimes)
         {
-            _nSubbands = nSubbands;
-            _nPolarisations = nPolarisations;
-            _nSamples = nSamples;
-            _data.resize(_nSubbands * _nPolarisations * _nSamples);
-        }
-
-        /// Returns the data index for a given sub-band, polarisation and
-        /// sample.
-        unsigned index(unsigned subband, unsigned pol, unsigned sample)
-        {
-            return _nSamples * ( subband * _nPolarisations + pol) + sample;
+            _nTimes = nTimes;
+            _data.resize(_nTimes);
         }
 
     public: // accessor methods
         /// Returns the number of entries in the data blob.
         unsigned size() { return _data.size(); }
 
-        /// Returns the number of sub-bands in the data.
-        unsigned nSubbands() const { return _nSubbands; }
-
-        /// Returns the number of polarisations in the data.
-        unsigned nPolarisations() const { return _nPolarisations; }
-
         /// Returns the number of time samples in the data.
-        unsigned nSamples() const { return _nSamples; }
+        unsigned nTimes() const { return _nTimes; }
 
         /// Returns the start time of the data.
         double startTime() const { return _startTime; }
@@ -102,62 +78,18 @@ class TimeSeries : public DataBlob
         void setSampleDelta(double value) { _sampleDelta = value; }
 
         /// Returns a pointer to the time stream data.
-        T* data() { return _data.size() > 0 ? &_data[0] : NULL; }
+        T* ptr() { return _data.size() > 0 ? &_data[0] : NULL; }
 
         /// Returns a pointer to the time stream data (const overload).
-        const T* data() const  { return _data.size() > 0 ? &_data[0] : NULL; }
-
-        /// Returns a pointer to the time stream data for the specified
-        /// /p subband and /p polarisation.
-        T* ptr(unsigned subband, unsigned polarisation = 0)
-        {
-            unsigned index = _nSamples * (subband * _nPolarisations + polarisation);
-            return (_data.size() > 0 && subband < _nSubbands
-                    && polarisation < _nPolarisations && index < _data.size()) ?
-                    &_data[index] : NULL;
-        }
-
-        /// Returns a pointer to the time stream data for the specified
-        /// /p subband (const overload).
-        const T* ptr(unsigned subband, unsigned polarisation = 0) const
-        {
-            unsigned index = 0;
-            return (_data.size() > 0 && subband < _nSubbands
-                    && polarisation < _nPolarisations && index < _data.size()) ?
-                            &_data[index] : NULL;
-        }
+        const T* ptr() const  { return _data.size() > 0 ? &_data[0] : NULL; }
 
     protected:
         std::vector<T> _data;
-        unsigned _nSubbands;
-        unsigned _nPolarisations;
-        unsigned _nSamples;
+        unsigned _nTimes;
         double _startTime;
         double _sampleDelta;
 };
 
-
-
-/**
- * @class TimeStreaData
- *
- * @brief
- * Container class for double format time stream data.
- *
- * @details
- */
-
-class TimeSeriesC32 : public TimeSeries<complex<float> >
-{
-    public:
-        /// Constructs an empty time stream data blob.
-        TimeSeriesC32() : TimeSeries<complex<float> >("TimeSeriesC32") {}
-
-        /// Destroys the time stream data blob.
-        ~TimeSeriesC32() {}
-};
-
-PELICAN_DECLARE_DATABLOB(TimeSeriesC32)
 
 }// namespace lofar
 }// namespace pelican

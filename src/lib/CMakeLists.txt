@@ -16,6 +16,7 @@ set(lib_src
     src/PelicanBlobClient.cpp
     src/PolyphaseCoefficients.cpp
     src/SubbandSpectra.cpp
+    src/PPFChanneliser.cpp
 )
 
 # Create pelican-lofar library.
@@ -36,8 +37,10 @@ set_target_properties(pelican-lofar PROPERTIES
     LINK_FLAGS "${OpenMP_CXX_FLAGS}"
 )
 install(TARGETS pelican-lofar DESTINATION ${LIBRARY_INSTALL_DIR})
+
 target_link_libraries(pelican-lofar
-    ${FFTW3_LIBRARIES}
+    ${FFTW3_FFTW_LIBRARY}
+    ${FFTW3_FFTWF_LIBRARY}
 )
 
 

@@ -16,12 +16,13 @@ set(lofarTest_src
     #src/DataStreamingTest.cpp
     src/TimeStreamDataTest.cpp
     src/ChannelisedStreamDataTest.cpp
-    #src/AdapterTimeStreamTest.cpp
-    src/PolyphaseCoefficientsTest.cpp
+    src/AdapterTimeStreamTest.cpp
     src/ChanneliserPolyphaseTest.cpp
     #src/PelicanBlobClientTest.cpp
+    src/PolyphaseCoefficientsTest.cpp
     src/SpectrumTest.cpp
     src/SubbandSpectraTest.cpp
+    src/PPFChanneliserTest.cpp
 )
 
 add_executable(lofarTest ${lofarTest_src})
@@ -33,7 +34,8 @@ target_link_libraries(lofarTest
     lofarTestLib
     pelican-lofar_static
     ${PELICAN_LIBRARY}
-    ${FFTW3_LIBRARIES}
+    ${FFTW3_FFTW_LIBRARY}
+    ${FFTW3_FFTWF_LIBRARY}
     ${CPPUNIT_LIBRARIES}
 )
 add_test(lofarTest lofarTest)
