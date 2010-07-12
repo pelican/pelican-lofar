@@ -21,7 +21,7 @@ class ConfigNode;
 
 namespace lofar {
 
-class SubbandTimeStreamC32;
+class SubbandTimeSeriesC32;
 class SubbandSpectraC32;
 
 /**
@@ -67,12 +67,12 @@ class PPFChanneliser : public AbstractModule
         ~PPFChanneliser();
 
         /// Method converting the time stream to a spectrum.
-        void run(const SubbandTimeStreamC32* timeSeries,
+        void run(const SubbandTimeSeriesC32* timeSeries,
                 SubbandSpectraC32* spectra);
 
     private:
         /// Sainity checking.
-        void _checkData(const SubbandTimeStreamC32* timeData);
+        void _checkData(const SubbandTimeSeriesC32* timeData);
 
         /// Update the sample buffer.
         void _updateBuffer(const Complex* samples, unsigned nSamples,

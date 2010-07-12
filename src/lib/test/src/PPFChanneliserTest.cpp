@@ -2,7 +2,7 @@
 
 #include "PPFChanneliser.h"
 #include "SubbandSpectra.h"
-#include "SubbandTimeStream.h"
+#include "SubbandTimeSeries.h"
 
 #include "pelican/utility/ConfigNode.h"
 
@@ -300,10 +300,10 @@ void PPFChanneliserTest::test_run()
     unsigned nPol = 2;
     SubbandSpectraC32 spectra;
     spectra.resize(nTimeBlocks, nSubbands, nPol);
-    SubbandTimeStreamC32 timeStream;
-    timeStream.resize(nTimeBlocks, nSubbands, nPol);
-    for (unsigned i = 0; i < timeStream.nTimeSeries(); ++i) {
-        TimeSeries<PPFChanneliser::Complex>* t = timeStream.ptr(i);
+    SubbandTimeSeriesC32 timeSeries;
+    timeSeries.resize(nTimeBlocks, nSubbands, nPol);
+    for (unsigned i = 0; i < timeSeries.nTimeSeries(); ++i) {
+        TimeSeries<PPFChanneliser::Complex>* t = timeSeries.ptr(i);
         t->resize(nChan);
     }
 
@@ -311,7 +311,7 @@ void PPFChanneliserTest::test_run()
     QTime timer;
     timer.start();
     for (unsigned i = 0; i < nIter; ++i) {
-        channeliser.run(&timeStream, &spectra);
+        channeliser.run(&timeSeries, &spectra);
     }
     int elapsed = timer.elapsed();
     std::cout << "\n[PPFChanneliser]: Time for run method using "
@@ -346,7 +346,7 @@ void PPFChanneliserTest::test_makeSpectrum()
     double sampleRate = 50.0; // Hz
 
 
-    SubbandTimeStreamC32 data;
+    SubbandTimeSeriesC32 data;
     data.resize(nTimeBlocks, nSubbands, nPol, nChan);
 
     // Generate signal.
@@ -430,7 +430,7 @@ void PPFChanneliserTest::test_channelProfile()
 
         unsigned nTimeBlocks = nTaps;
 
-        SubbandTimeStreamC32 data;
+        SubbandTimeSeriesC32 data;
         data.resize(nTimeBlocks, nSubbands, nPolarisations, nChannels);
 
         SubbandSpectraC32 spectra;

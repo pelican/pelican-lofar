@@ -1,8 +1,8 @@
-#ifndef SUBBAND_TIME_STREAM_H_
-#define SUBBAND_TIME_STREAM_H_
+#ifndef SUBBAND_TIME_SERIES_H_
+#define SUBBAND_TIME_SERIES_H_
 
 /**
- * @file SubbandTimeStream.h
+ * @file SubbandTimeSeries.h
  */
 
 #include "pelican/data/DataBlob.h"
@@ -17,7 +17,7 @@ namespace pelican {
 namespace lofar {
 
 /**
- * @class SubbandTimeStream
+ * @class SubbandTimeSeries
  *
  * @brief
  * Container class to hold a buffer of time series data for a number of
@@ -30,16 +30,16 @@ namespace lofar {
  */
 
 template <class T>
-class SubbandTimeStream : public DataBlob
+class SubbandTimeSeries : public DataBlob
 {
     public:
 
         /// Constructs an empty time stream data blob.
-        SubbandTimeStream(const QString& type = "SubbandTimeStream")
+        SubbandTimeSeries(const QString& type = "SubbandTimeSeries")
         : DataBlob(type), _nTimeBlocks(0), _nSubbands(0), _nPolarisations(0) {}
 
         /// Destroys the time stream data blob.
-        virtual ~SubbandTimeStream() {}
+        virtual ~SubbandTimeSeries() {}
 
     public:
         /// Clears the time stream data.
@@ -149,27 +149,27 @@ class SubbandTimeStream : public DataBlob
 
 
 /**
- * @class SubbandTimeStreamC32
+ * @class SubbandTimeSeriesC32
  *
  * @brief
  *
  * @details
  */
 
-class SubbandTimeStreamC32 : public SubbandTimeStream<std::complex<float> >
+class SubbandTimeSeriesC32 : public SubbandTimeSeries<std::complex<float> >
 {
     public:
         /// Constructs an empty time stream data blob.
-        SubbandTimeStreamC32()
-        : SubbandTimeStream<std::complex<float> >("SubbandTimeStreamC32") {}
+        SubbandTimeSeriesC32()
+        : SubbandTimeSeries<std::complex<float> >("SubbandTimeSeriesC32") {}
 
         /// Destroys the time stream data blob.
-        ~SubbandTimeStreamC32() {}
+        ~SubbandTimeSeriesC32() {}
 };
 
-PELICAN_DECLARE_DATABLOB(SubbandTimeStreamC32)
+PELICAN_DECLARE_DATABLOB(SubbandTimeSeriesC32)
 
 }// namespace lofar
 }// namespace pelican
 
-#endif // SUBBAND_TIME_STREAM_H_
+#endif // SUBBAND_TIME_SERIES_H_

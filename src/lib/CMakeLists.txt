@@ -17,6 +17,7 @@ set(lib_src
     src/PolyphaseCoefficients.cpp
     src/SubbandSpectra.cpp
     src/PPFChanneliser.cpp
+    src/AdapterSubbandTimeSeries.cpp
 )
 
 # Create pelican-lofar library.

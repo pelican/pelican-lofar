@@ -2,7 +2,7 @@
 
 #include "pelican/utility/ConfigNode.h"
 
-#include "SubbandTimeStream.h"
+#include "SubbandTimeSeries.h"
 #include "TimeSeries.h"
 #include "SubbandSpectra.h"
 
@@ -102,7 +102,7 @@ PPFChanneliser::~PPFChanneliser()
 * 						 	coefficients.
 * @param[out] spectrum	 	Set of spectra produced.
 */
-void PPFChanneliser::run(const SubbandTimeStreamC32* timeSeries,
+void PPFChanneliser::run(const SubbandTimeSeriesC32* timeSeries,
         SubbandSpectraC32* spectra)
 {
     _checkData(timeSeries);
@@ -176,7 +176,7 @@ void PPFChanneliser::run(const SubbandTimeStreamC32* timeSeries,
 /**
 * @details
 */
-void PPFChanneliser::_checkData(const SubbandTimeStreamC32* timeData)
+void PPFChanneliser::_checkData(const SubbandTimeSeriesC32* timeData)
 {
     if (!timeData)
         throw QString("PPFChanneliser: Time stream data blob missing.");
