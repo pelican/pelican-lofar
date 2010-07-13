@@ -17,7 +17,8 @@ target_link_libraries(mdsmPipeline
     pelicanMdsm
     pelican-lofar_static
     ${PELICAN_LIBRARY}
-    ${FFTW3_LIBRARIES}
+    ${FFTW3_FFTW_LIBRARY}
+    ${FFTW3_FFTWF_LIBRARY}
 )
 
 install(TARGETS mdsmPipeline DESTINATION ${BINARY_INSTALL_DIR})

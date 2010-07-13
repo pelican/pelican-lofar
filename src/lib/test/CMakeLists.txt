@@ -12,8 +12,8 @@ add_library(lofarTestLib STATIC ${lofarTestLib_src})
 # ------------------------------------------------------------------------------
 set(lofarTest_src
     src/libTest.cpp
-    #src/LofarChunkerTest.cpp
-    #src/DataStreamingTest.cpp
+    src/LofarChunkerTest.cpp
+    src/DataStreamingTest.cpp
     src/TimeStreamDataTest.cpp
     src/ChannelisedStreamDataTest.cpp
     src/AdapterTimeStreamTest.cpp

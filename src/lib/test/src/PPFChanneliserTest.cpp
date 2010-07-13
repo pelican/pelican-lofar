@@ -211,7 +211,7 @@ void PPFChanneliserTest::test_filter()
     PPFChanneliser::Complex* filteredSamples = &filteredData[0];
     PPFChanneliser::Complex* workBuffer;
 
-    const double* coeff = channeliser._coeffs.coefficients();
+    const double* coeff = channeliser._coeffs.ptr();
 
     QTime timer;
     timer.start();

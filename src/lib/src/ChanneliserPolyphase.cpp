@@ -108,11 +108,11 @@ void ChanneliserPolyphase::run(const TimeStreamData* timeData,
     // We only need the timestamp of the first packet for this version of the Channeliser
     spectra -> setLofarTimestamp(timeData -> getLofarTimestamp());
     spectra -> setBlockRate(timeData -> getBlockRate());
-    
+
     // Pointers to processing buffers.
     omp_set_num_threads(_nThreads);
     const unsigned bufferSize = _subbandBuffer[0].size();
-    const double* coeff = filterCoeff->coefficients();
+    const double* coeff = filterCoeff->ptr();
 
 #pragma omp parallel
     {
@@ -124,7 +124,7 @@ void ChanneliserPolyphase::run(const TimeStreamData* timeData,
         complex<double>* filteredSamples = &(_filteredData[threadId])[0];
 
         for (unsigned s = start; s < end; ++s) {
-    
+
             // Get a pointer to the work buffer for the sub-band being processed.
             subbandBuffer = &(_subbandBuffer[s])[0];
 

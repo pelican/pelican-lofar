@@ -5,6 +5,8 @@
 
 #include <QtCore/QIODevice>
 
+#include <boost/multi_array.hpp>
+
 #include <vector>
 #include <complex>
 
@@ -68,10 +70,10 @@ class T_PolyphaseCoefficients : public DataBlob
         unsigned nChannels() const { return _nChannels; }
 
         /// Returns a pointer to the vector of coefficients.
-        T* coefficients() { return _coeff.size() > 0 ? &_coeff[0] : NULL; }
+        T* ptr() { return _coeff.size() > 0 ? &_coeff[0] : NULL; }
 
         /// Returns a pointer to the vector of coefficients (const overload).
-        const T* coefficients() const {
+        const T* ptr() const {
             return _coeff.size() > 0 ? &_coeff[0] : NULL;
         }
 
@@ -95,6 +97,13 @@ class T_PolyphaseCoefficients : public DataBlob
 class PolyphaseCoefficients : public T_PolyphaseCoefficients<double>
 {
     public:
+        friend class PolyphaseCoefficientsTest;
+
+    public:
+        typedef enum { HAMMING, BLACKMAN, GAUSSIAN, KAISER } FirWindow;
+
+    public:
+
         /// Constructs an empty polyphase filter coefficient data blob.
         PolyphaseCoefficients() : T_PolyphaseCoefficients<double>
         ("PolyphaseCoefficients") {}
@@ -118,6 +127,30 @@ class PolyphaseCoefficients : public T_PolyphaseCoefficients<double>
         /// Load coefficients from matlab coefficient dump.
         void load(const QString& fileName, unsigned nFilterTaps,
                 unsigned nChannels);
+
+        void genereateFilter(unsigned nTaps, unsigned nChannels,
+                FirWindow windowType = KAISER);
+
+    private:
+        // The following methods are taken from LOFAR CNProc FIR.cc under GPL
+        double _besselI0(double x);
+
+        void _kaiser(int n, double beta, double* d);
+
+        void _gaussian(int n, double a, double* d);
+
+        void _hamming(unsigned n, double* d);
+
+        void _blackman(unsigned n, double* d);
+
+        void _interpolate(const double* x, const double* y,
+                unsigned nX, unsigned n, double* result);
+
+        unsigned _nextPowerOf2(unsigned n);
+
+        void _generateFirFilter(unsigned n, double w,
+                const double* window, double* result);
+
 };
 
 PELICAN_DECLARE_DATABLOB(PolyphaseCoefficients)

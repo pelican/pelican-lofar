@@ -124,7 +124,7 @@ void PPFChanneliser::run(const SubbandTimeSeriesC32* timeSeries,
     // Pointers to processing buffers.
     omp_set_num_threads(_nThreads);
     unsigned bufferSize = _workBuffer[0].size();
-    const double* coeff = _coeffs.coefficients();
+    const double* coeff = _coeffs.ptr();
 
 #pragma omp parallel
     {

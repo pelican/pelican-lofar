@@ -171,7 +171,7 @@ void ChanneliserPolyphaseTest::test_filter()
     ChanneliserPolyphase channeliser(config);
 
     PolyphaseCoefficients filterCoeff(nTaps, nChan);
-    const double* coeff = filterCoeff.coefficients();
+    const double* coeff = filterCoeff.ptr();
 
     unsigned bufferSize = nChan * nTaps;
     channeliser._setupBuffers(nSubbands, nChan, nTaps);
@@ -340,7 +340,7 @@ void ChanneliserPolyphaseTest::test_makeSpectrum()
     ConfigNode config(_configXml(nChannels));
     ChanneliserPolyphase channeliser(config);
     PolyphaseCoefficients filterCoeff(nTaps, nChannels);
-    double* coeff = filterCoeff.coefficients();
+    double* coeff = filterCoeff.ptr();
     filterCoeff.load(coeffFileName, nTaps, nChannels);
 
     // Get object data pointers.
@@ -425,7 +425,7 @@ void ChanneliserPolyphaseTest::test_channelProfile()
         ConfigNode config(_configXml(nChannels));
         ChanneliserPolyphase channeliser(config);
         PolyphaseCoefficients filterCoeff(nTaps, nChannels);
-        double* coeff = filterCoeff.coefficients();
+        double* coeff = filterCoeff.ptr();
         filterCoeff.load(coeffFileName, nTaps, nChannels);
 //    	CPPUNIT_ASSERT_DOUBLES_EQUAL(-1.0314158132996589e-04,
 //    			filterCoeff.coefficients()[0], 1e-5);
