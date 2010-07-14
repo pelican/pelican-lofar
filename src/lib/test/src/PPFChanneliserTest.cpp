@@ -296,7 +296,7 @@ void PPFChanneliserTest::test_run()
     PPFChanneliser channeliser(config);
 
     unsigned nSubbands = 62;
-    unsigned nTimeBlocks = 1;
+    unsigned nTimeBlocks = 1000;
     unsigned nPol = 2;
     SubbandSpectraC32 spectra;
     spectra.resize(nTimeBlocks, nSubbands, nPol);
@@ -307,7 +307,7 @@ void PPFChanneliserTest::test_run()
         t->resize(nChan);
     }
 
-    unsigned nIter = 100;
+    unsigned nIter = 10;
     QTime timer;
     timer.start();
     for (unsigned i = 0; i < nIter; ++i) {
@@ -319,6 +319,9 @@ void PPFChanneliserTest::test_run()
             << nTimeBlocks << " time blocks = "
             << double(elapsed)/double(nIter) << " ms. ("
             << nThreads << " threads)\n";
+    std::cout << "NOTE: Needs to be <= "
+              << (2.56 * double(nTimeBlocks) * double(nSubbands)) / double(nSubbands)
+              << " ms to keep up with real time." << std::endl;
 }
 
 
