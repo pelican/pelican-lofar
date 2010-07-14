@@ -327,8 +327,8 @@ void PolyphaseCoefficients::genereateFilter(unsigned nTaps,
             // [n,Wn,bta,filtype] = kaiserord([fsin/channels 1.4*fsin/channels],
             //                        [1 0],[10^(0.5/20) 10^(-91/20)], fsin);
             // where fsin is the sample freq.
-            //double beta = 9.0695;
-            double beta = 1.0;
+            double beta = 9.0695;
+            //double beta = 1.0;
             _kaiser(n, beta, window);
             break;
         }

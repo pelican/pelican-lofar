@@ -75,7 +75,8 @@ class PPFChanneliserTest : public CppUnit::TestFixture
     private:
         /// Generate configuration XML.
         QString _configXml(unsigned nChannels, unsigned nThreads,
-                const QString& coeffFile, unsigned nTaps);
+                unsigned nTaps, const QString& coeffFile = "",
+                const QString& windowType = "");
 
 };
 

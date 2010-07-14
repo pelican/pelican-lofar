@@ -35,8 +35,9 @@ PPFChanneliser::PPFChanneliser(const ConfigNode& config)
     // Get options from the XML configuration node.
     _nChannels = config.getOption("channels", "number", "512").toUInt();
     _nThreads = config.getOption("processingThreads", "number", "2").toUInt();
-    QString coeffFile = config.getOption("coefficients", "fileName", "");
     unsigned nTaps = config.getOption("coefficients", "nTaps", "8").toUInt();
+    QString window = config.getOption("filter", "filterWindow", "kaiser");
+    QString coeffFile = config.getOption("filter", "fileName", "");
 
     // Load the coefficients.
     _coeffs.resize(nTaps, _nChannels);
@@ -49,8 +50,26 @@ PPFChanneliser::PPFChanneliser(const ConfigNode& config)
         _coeffs.load(coeffFile, nTaps, _nChannels);
     }
     else {
-        std::cout << "Generating coefficients..." << std::endl;
-        _coeffs.genereateFilter(nTaps, _nChannels, PolyphaseCoefficients::KAISER);
+//        std::cout << "Generating coefficients..." << std::endl;
+        window = window.toLower();
+        PolyphaseCoefficients::FirWindow windowType;
+        if (window == "kaiser") {
+            windowType = PolyphaseCoefficients::KAISER;
+        }
+        else if (window == "gaussian") {
+            windowType = PolyphaseCoefficients::GAUSSIAN;
+        }
+        else if (window == "blackman") {
+            windowType = PolyphaseCoefficients::BLACKMAN;
+        }
+        else if (window == "hamming") {
+            windowType = PolyphaseCoefficients::HAMMING;
+        }
+        else {
+            throw QString("PPFChanneliser: "
+                    "Unknown coefficient window type '%1'.").arg(window);
+        }
+        _coeffs.genereateFilter(nTaps, _nChannels, windowType);
     }
 
 

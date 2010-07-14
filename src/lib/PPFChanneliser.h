@@ -51,10 +51,10 @@ class SubbandSpectraC32;
  * - filter: Options for FIR filer coefficients.
  *     - nTaps: Number of filter taps in the PPF coefficient data
  *     - filterWindow(optional): The filter window type used in generating
- *       FIR filer coefficients. Possible options are: kaiser (default),
- *       gaussian, blackman and hamming.
+ *       FIR filer coefficients. Possible options are: "kaiser" (default),
+ *       "gaussian", "blackman" and "hamming".
  *     - fileName(optional): This option specifies a coefficient file to use rather
- *           than using the genertor.
+ *           than using the generator.
  *
  *
  */

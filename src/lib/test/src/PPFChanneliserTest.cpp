@@ -34,7 +34,7 @@ void PPFChanneliserTest::test_configuration()
     unsigned nTaps = 8;
     if (!QFile::exists(coeffFile)) return;
     try {
-        ConfigNode config(_configXml(nChannels, nThreads, coeffFile, nTaps));
+        ConfigNode config(_configXml(nChannels, nThreads, nTaps, coeffFile));
         PPFChanneliser channeliser(config);
         CPPUNIT_ASSERT_EQUAL(nChannels, channeliser._nChannels);
         CPPUNIT_ASSERT_EQUAL(nThreads, channeliser._nThreads);
@@ -55,7 +55,7 @@ void PPFChanneliserTest::test_threadAssign()
     QString coeffFile = "lib/test/data/coeffs_512_1.dat";
     if (!QFile::exists(coeffFile)) return;
     unsigned nTaps = 8;
-    ConfigNode config(_configXml(nChannels, nThreads, coeffFile, nTaps));
+    ConfigNode config(_configXml(nChannels, nThreads, nTaps, coeffFile));
     PPFChanneliser channeliser(config);
 
 
@@ -142,7 +142,7 @@ void PPFChanneliserTest::test_updateBuffer()
     QString coeffFile = "lib/test/data/coeffs_512_1.dat";
     if (!QFile::exists(coeffFile)) return;
     unsigned nTaps = 8;
-    ConfigNode config(_configXml(nChan, nThreads, coeffFile, nTaps));
+    ConfigNode config(_configXml(nChan, nThreads, nTaps, coeffFile));
     PPFChanneliser channeliser(config);
 
     // Setup the work buffers.
@@ -197,7 +197,7 @@ void PPFChanneliserTest::test_filter()
     if (!QFile::exists(coeffFile))
         return;
     unsigned nTaps = 8;
-    ConfigNode config(_configXml(nChan, nThreads, coeffFile, nTaps));
+    ConfigNode config(_configXml(nChan, nThreads, nTaps, coeffFile));
     PPFChanneliser channeliser(config);
 
     // Setup work buffers.
@@ -246,7 +246,7 @@ void PPFChanneliserTest::test_fft()
     QString coeffFile = "lib/test/data/coeffs_512_1.dat";
     if (!QFile::exists(coeffFile)) return;
     unsigned nTaps = 8;
-    ConfigNode config(_configXml(nChan, nThreads, coeffFile, nTaps));
+    ConfigNode config(_configXml(nChan, nThreads, nTaps, coeffFile));
     PPFChanneliser channeliser(config);
 
     unsigned nSubbands = 62;
@@ -292,7 +292,7 @@ void PPFChanneliserTest::test_run()
     QString coeffFile = "lib/test/data/coeffs_512_1.dat";
     if (!QFile::exists(coeffFile)) return;
     unsigned nTaps = 8;
-    ConfigNode config(_configXml(nChan, nThreads, coeffFile, nTaps));
+    ConfigNode config(_configXml(nChan, nThreads, nTaps, coeffFile));
     PPFChanneliser channeliser(config);
 
     unsigned nSubbands = 62;
@@ -335,7 +335,7 @@ void PPFChanneliserTest::test_makeSpectrum()
     QString coeffFile = "lib/test/data/coeffs_64_1.dat";
     if (!QFile::exists(coeffFile)) return;
     unsigned nTaps = 8;
-    ConfigNode config(_configXml(nChan, nThreads, coeffFile, nTaps));
+    ConfigNode config(_configXml(nChan, nThreads, nTaps, coeffFile));
     PPFChanneliser channeliser(config);
 
     unsigned nSubbands = 1;
@@ -404,8 +404,8 @@ void PPFChanneliserTest::test_channelProfile()
     unsigned nSamples = nChannels;
     unsigned nTaps = 8;
     unsigned nThreads = 1;
-    QString coeffFileName = "lib/test/data/coeffs_64_1.dat";
-    if (!QFile::exists(coeffFileName)) return;
+    QString coeffFile = "lib/test/data/coeffs_64_1.dat";
+    if (!QFile::exists(coeffFile)) return;
 
     unsigned nProfiles = 2;
     double sampleRate = 50.0; // Hz
@@ -426,7 +426,7 @@ void PPFChanneliserTest::test_channelProfile()
     testIndices[1] = 46;
 
     try {
-        ConfigNode config(_configXml(nChannels, nThreads, coeffFileName, nTaps));
+        ConfigNode config(_configXml(nChannels, nThreads, nTaps, coeffFile));
         PPFChanneliser channeliser(config);
 
         unsigned nTimeBlocks = nTaps;
@@ -506,7 +506,7 @@ void PPFChanneliserTest::test_channelProfileGeneratedWeights()
     unsigned nSamples = nChannels;
     unsigned nTaps = 8;
     unsigned nThreads = 1;
-    QString coeffFileName = "";
+    QString coeffFile = "";
 
     unsigned nProfiles = 2;
     double sampleRate = 50.0e6; // Hz
@@ -527,7 +527,8 @@ void PPFChanneliserTest::test_channelProfileGeneratedWeights()
     testIndices[1] = 46;
 
     try {
-        ConfigNode config(_configXml(nChannels, nThreads, coeffFileName, nTaps));
+        ConfigNode config(_configXml(nChannels, nThreads, nTaps, coeffFile,
+                "kaiser"));
         PPFChanneliser channeliser(config);
 
         unsigned nTimeBlocks = nTaps;
@@ -600,14 +601,16 @@ void PPFChanneliserTest::test_channelProfileGeneratedWeights()
  * @return
  */
 QString PPFChanneliserTest::_configXml(unsigned nChannels,
-        unsigned nThreads, const QString& coeffFile, unsigned nTaps)
+        unsigned nThreads, unsigned nTaps, const QString& coeffFile,
+        const QString& windowType)
 {
     QString xml =
             "<PPFChanneliser>"
             "	<channels number=\"" + QString::number(nChannels) + "\"/>"
             "	<processingThreads number=\"" + QString::number(nThreads) + "\"/>"
-            "	<coefficients fileName=\"" + coeffFile + "\" nTaps=\"" +
-                    QString::number(nTaps) + "\"/>"
+            "	<filter fileName=\"" + coeffFile + "\" nTaps=\"" +
+                QString::number(nTaps) + "\" filterWindow=\"" +
+                    windowType + "\"/>"
             "</PPFChanneliser>";
     return xml;
 }
