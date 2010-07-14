@@ -412,6 +412,7 @@ void PPFChanneliserTest::test_channelProfile()
     double startFreq = 8.0; // Hz
     unsigned nSteps = 1000;
     double freqInc = 0.01;
+    std::vector<double> freqs(nSteps);
 
     double channelDelta = double(nChannels) / double(sampleRate);
     double endFreq = startFreq + freqInc * nSteps;
@@ -447,6 +448,7 @@ void PPFChanneliserTest::test_channelProfile()
 
             // Generate signal.
             double freq = startFreq + k * freqInc;
+            freqs[k] = freq;
             for (unsigned i = 0, t = 0; t < nTimeBlocks; ++t) {
                 PPFChanneliser::Complex* timeData = data.ptr(t)->ptr();
                 for (unsigned c = 0; c < nChannels; ++c) {
@@ -475,6 +477,7 @@ void PPFChanneliserTest::test_channelProfile()
         }
         QTextStream out(&file);
         for (unsigned i = 0; i < nSteps; ++i) {
+            out << freqs[i] << " ";
             for (unsigned p = 0; p < nProfiles; ++p) {
                 out << 20 * std::log10(std::abs(channelProfile[p][i])) << " ";
             }
@@ -486,6 +489,108 @@ void PPFChanneliserTest::test_channelProfile()
         std::cout << err.toStdString() << std::endl;
     }
 }
+
+
+
+/**
+ * @details
+ * Test to generate a channel profile.
+ */
+void PPFChanneliserTest::test_channelProfileGeneratedWeights()
+{
+    // Options.
+    //--------------------------------------------------------------------------
+    unsigned nChannels = 64;
+    unsigned nSubbands = 1;
+    unsigned nPolarisations = 1;
+    unsigned nSamples = nChannels;
+    unsigned nTaps = 8;
+    unsigned nThreads = 1;
+    QString coeffFileName = "";
+
+    unsigned nProfiles = 2;
+    double sampleRate = 50.0e6; // Hz
+    double startFreq = 8.0e6; // Hz
+    unsigned nSteps = 1000;
+    double freqInc = 0.01e6;
+    std::vector<double> freqs(nSteps);
+
+    double channelDelta = double(nChannels) / double(sampleRate);
+    double endFreq = startFreq + freqInc * nSteps;
+    double midTestFreq = startFreq + (endFreq - startFreq) / 2.0;
+    std::cout << "scanning freqs " << startFreq << " -> " << endFreq << " ("
+              << midTestFreq << ")" << std::endl;
+
+    //	unsigned testChannelIndex = nChannels / 2 + std::floor(midTestFreq / channelDelta);
+    std::vector<unsigned> testIndices(nProfiles);
+    testIndices[0] = 45;
+    testIndices[1] = 46;
+
+    try {
+        ConfigNode config(_configXml(nChannels, nThreads, coeffFileName, nTaps));
+        PPFChanneliser channeliser(config);
+
+        unsigned nTimeBlocks = nTaps;
+
+        SubbandTimeSeriesC32 data;
+        data.resize(nTimeBlocks, nSubbands, nPolarisations, nChannels);
+
+        SubbandSpectraC32 spectra;
+        spectra.resize(nTimeBlocks, nSubbands, nPolarisations, nChannels);
+
+        std::vector<std::vector<PPFChanneliser::Complex> > channelProfile;
+        channelProfile.resize(nProfiles);
+        for (unsigned i = 0; i < nProfiles; ++i) {
+            channelProfile[i].resize(nSteps);
+        }
+
+        // Scan frequencies to generate channel profile.
+        for (unsigned k = 0; k < nSteps; ++k) {
+
+            // Generate signal.
+            double freq = startFreq + k * freqInc;
+            freqs[k] = freq;
+            for (unsigned i = 0, t = 0; t < nTimeBlocks; ++t) {
+                PPFChanneliser::Complex* timeData = data.ptr(t)->ptr();
+                for (unsigned c = 0; c < nChannels; ++c) {
+                    double t = double(i) / sampleRate;
+                    double re = std::cos(2 * math::pi * freq * t);
+                    double im = std::sin(2 * math::pi * freq * t);
+                    timeData[c] = PPFChanneliser::Complex(re, im);
+                    i++;
+                }
+            }
+
+            channeliser.run(&data, &spectra);
+
+            // Save the amplitude of the specified channel.
+            PPFChanneliser::Complex* spectrum =
+                    spectra.ptr(nTimeBlocks-1, 0, 0)->ptr();
+            for (unsigned p = 0; p < nProfiles; ++p) {
+                channelProfile[p][k] = spectrum[testIndices[p]];
+            }
+        }
+
+        // Write the channel profile to file.
+        QFile file("channelProfileGeneratedCoeffs.dat");
+        if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
+            return;
+        }
+        QTextStream out(&file);
+        for (unsigned i = 0; i < nSteps; ++i) {
+            out << freqs[i] << " ";
+            for (unsigned p = 0; p < nProfiles; ++p) {
+                out << 20 * std::log10(std::abs(channelProfile[p][i])) << " ";
+            }
+            out << endl;
+        }
+        file.close();
+    }
+    catch (QString err) {
+        std::cout << err.toStdString() << std::endl;
+    }
+}
+
 
 
 /**

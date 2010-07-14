@@ -35,22 +35,24 @@ PPFChanneliser::PPFChanneliser(const ConfigNode& config)
     // Get options from the XML configuration node.
     _nChannels = config.getOption("channels", "number", "512").toUInt();
     _nThreads = config.getOption("processingThreads", "number", "2").toUInt();
-    QString coeffFile = config.getOption("coefficients", "fileName");
+    QString coeffFile = config.getOption("coefficients", "fileName", "");
     unsigned nTaps = config.getOption("coefficients", "nTaps", "8").toUInt();
 
     // Load the coefficients.
     _coeffs.resize(nTaps, _nChannels);
-    if (!QFile::exists(coeffFile)) {
-        throw QString("PPFChanneliser:: Unable to find coefficient file '%1'.")
-        .arg(coeffFile);
-    }
 
-    try {
+    if (!coeffFile.isEmpty()) {
+        if (!QFile::exists(coeffFile)) {
+            throw QString("PPFChanneliser:: Unable to find coefficient file '%1'.")
+            .arg(coeffFile);
+        }
         _coeffs.load(coeffFile, nTaps, _nChannels);
     }
-    catch (QString err) {
-        std::cout << err.toStdString();
+    else {
+        std::cout << "Generating coefficients..." << std::endl;
+        _coeffs.genereateFilter(nTaps, _nChannels, PolyphaseCoefficients::KAISER);
     }
+
 
     // As the channeliser currently only works for even number of channels
     // enforce this.

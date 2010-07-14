@@ -41,15 +41,21 @@ class SubbandSpectraC32;
  * 		<ChanneliserPolyphase name="">
  * 			<channels number="512"/>
  * 			<processingThreads number="2"/>
- * 			<coefficients fileName="coeffs.dat" nTaps="8"/>
+ * 			<filter nTaps="8" filterWindow="kaiser" fileName="coeffs.dat"/>
+ * 			<coefficientFile name="coeffs.dat"/>
  * 		</ChanneliserPolyphase>
  * \verbatim
  *
- * - channels: Number of channels generated in the spectra.
- * - processingThreads: Number of threads to parallelise over.
- * - coefficients:
- * 		 fileName: file containing the PPF coefficients.
- * 		 nTaps: Number of filter taps in the PPF coefficient data
+ * - channels: The number of channels generated in the spectra.
+ * - processingThreads: The number of threads to parallelise over.
+ * - filter: Options for FIR filer coefficients.
+ *     - nTaps: Number of filter taps in the PPF coefficient data
+ *     - filterWindow(optional): The filter window type used in generating
+ *       FIR filer coefficients. Possible options are: kaiser (default),
+ *       gaussian, blackman and hamming.
+ *     - fileName(optional): This option specifies a coefficient file to use rather
+ *           than using the genertor.
+ *
  *
  */
 

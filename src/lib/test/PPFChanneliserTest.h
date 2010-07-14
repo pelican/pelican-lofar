@@ -34,14 +34,15 @@ class PPFChanneliserTest : public CppUnit::TestFixture
     public:
         /// Register test methods.
         CPPUNIT_TEST_SUITE(PPFChanneliserTest);
-        CPPUNIT_TEST(test_configuration);
-        CPPUNIT_TEST(test_threadAssign);
-        CPPUNIT_TEST(test_updateBuffer);
-        CPPUNIT_TEST(test_filter);
-        CPPUNIT_TEST(test_fft);
-        CPPUNIT_TEST(test_run);
-        CPPUNIT_TEST(test_makeSpectrum);
+//        CPPUNIT_TEST(test_configuration);
+//        CPPUNIT_TEST(test_threadAssign);
+//        CPPUNIT_TEST(test_updateBuffer);
+//        CPPUNIT_TEST(test_filter);
+//        CPPUNIT_TEST(test_fft);
+//        CPPUNIT_TEST(test_run);
+//        CPPUNIT_TEST(test_makeSpectrum);
         CPPUNIT_TEST(test_channelProfile);
+        CPPUNIT_TEST(test_channelProfileGeneratedWeights);
         CPPUNIT_TEST_SUITE_END();
 
     public:
@@ -67,6 +68,9 @@ class PPFChanneliserTest : public CppUnit::TestFixture
 
         /// Test the channel profile for a given set of weights.
         void test_channelProfile();
+
+        /// Test the channel profile for generated weights.
+        void test_channelProfileGeneratedWeights();
 
     private:
         /// Generate configuration XML.

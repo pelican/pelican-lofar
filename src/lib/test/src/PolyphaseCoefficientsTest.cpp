@@ -130,7 +130,7 @@ void PolyphaseCoefficientsTest::test_generate()
         std::vector<double> window(nPoints);
         coeff._kaiser(nPoints, 9.0695, &window[0]);
         //coeff._gaussian(nPoints, 3.5, &window[0]);
-        QFile file("window.txt");
+        QFile file("window.dat");
         if (!file.open(QIODevice::WriteOnly | QIODevice::Text))
             return;
         QTextStream out(&file);
@@ -149,7 +149,7 @@ void PolyphaseCoefficientsTest::test_generate()
 //        coeff._blackman(nPoints, &window[0]);
         std::vector<double> filter(nPoints);
         coeff._generateFirFilter(nPoints - 1, 1.0 / nChan, &window[0], &filter[0]);
-        QFile file("filter.txt");
+        QFile file("filter.dat");
         if (!file.open(QIODevice::WriteOnly | QIODevice::Text))
             return;
         QTextStream out(&file);
@@ -164,7 +164,7 @@ void PolyphaseCoefficientsTest::test_generate()
         coeff.genereateFilter(nTaps, nChannels, PolyphaseCoefficients::KAISER);
         const double* coefficients = coeff.ptr();
 
-        QFile file("coeffs.txt");
+        QFile file("coeffs.dat");
         if (!file.open(QIODevice::WriteOnly | QIODevice::Text))
             return;
         QTextStream out(&file);
