@@ -347,13 +347,14 @@ void PolyphaseCoefficients::genereateFilter(unsigned nTaps,
 //    unsigned index = 0;
     for(unsigned c = 0; c < nChannels; ++c) {
         for(int t = nTaps-1; t >= 0; --t) { // store the taps in reverse!
-
+        //for (int t = 0; t < nTaps; ++t) {
             // Negate all odd channels (see comment at the top of this file)
             // Correct total power.
             // we use the 256 channel case as a reference, so we
             // multiply by 256, and divide by the number of channels
             unsigned i = c * nTaps + t;
             unsigned index = t * nChannels + c;
+            //unsigned index = (nTaps - t - 1) * nChannels + c;
 
             //_coeff[i] = result[index] * 256.0 / nChannels;
             _coeff[i] = result[index] / nChannels;

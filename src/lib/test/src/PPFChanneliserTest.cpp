@@ -211,11 +211,11 @@ void PPFChanneliserTest::test_filter()
     PPFChanneliser::Complex* filteredSamples = &filteredData[0];
     PPFChanneliser::Complex* workBuffer;
 
-    const double* coeff = channeliser._coeffs.ptr();
+    const double* coeff = channeliser._ppfCoeffs.ptr();
 
     QTime timer;
     timer.start();
-    unsigned nIter = 500;
+    unsigned nIter = 1000;
     for (unsigned b = 0; b < nTimeBlocks; ++b) {
         for (unsigned i = 0; i < nIter; ++i) {
             for (unsigned s = 0; s < nSubbands; ++s) {
@@ -302,7 +302,7 @@ void PPFChanneliserTest::test_run()
     spectra.resize(nTimeBlocks, nSubbands, nPol);
     SubbandTimeSeriesC32 timeSeries;
     timeSeries.resize(nTimeBlocks, nSubbands, nPol);
-    for (unsigned i = 0; i < timeSeries.nTimeSeries(); ++i) {
+    for (unsigned i = 0; i < timeSeries.size(); ++i) {
         TimeSeries<PPFChanneliser::Complex>* t = timeSeries.ptr(i);
         t->resize(nChan);
     }

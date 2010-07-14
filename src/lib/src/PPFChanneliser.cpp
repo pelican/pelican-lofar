@@ -17,6 +17,17 @@
 #include <fftw3.h>
 #include <omp.h>
 
+//#ifdef USING_MKL
+//    #include <mkl.h>
+//    #define USE_CBLAS
+//#else
+//    extern "C" {
+//        #include <cblas.h>
+//    }
+//    #define USE_CBLAS
+//#endif
+
+
 namespace pelican {
 namespace lofar {
 
@@ -40,14 +51,14 @@ PPFChanneliser::PPFChanneliser(const ConfigNode& config)
     QString coeffFile = config.getOption("filter", "fileName", "");
 
     // Load the coefficients.
-    _coeffs.resize(nTaps, _nChannels);
+    _ppfCoeffs.resize(nTaps, _nChannels);
 
     if (!coeffFile.isEmpty()) {
         if (!QFile::exists(coeffFile)) {
             throw QString("PPFChanneliser:: Unable to find coefficient file '%1'.")
             .arg(coeffFile);
         }
-        _coeffs.load(coeffFile, nTaps, _nChannels);
+        _ppfCoeffs.load(coeffFile, nTaps, _nChannels);
     }
     else {
 //        std::cout << "Generating coefficients..." << std::endl;
@@ -69,9 +80,15 @@ PPFChanneliser::PPFChanneliser(const ConfigNode& config)
             throw QString("PPFChanneliser: "
                     "Unknown coefficient window type '%1'.").arg(window);
         }
-        _coeffs.genereateFilter(nTaps, _nChannels, windowType);
+        _ppfCoeffs.genereateFilter(nTaps, _nChannels, windowType);
     }
 
+//    const double* c = _ppfCoeffs.ptr();
+//    unsigned nCoeffs = _ppfCoeffs.size();
+//    _coeffs.resize(nCoeffs);
+//    for (unsigned i = 0; i < nCoeffs; ++i) {
+//        _coeffs[i] = float(c[i]);
+//    }
 
     // As the channeliser currently only works for even number of channels
     // enforce this.
@@ -137,15 +154,17 @@ void PPFChanneliser::run(const SubbandTimeSeriesC32* timeSeries,
     spectra->resize(nTimeBlocks, nSubbands, nPolarisations);
 
     // Set up the buffers if required.
-    unsigned nFilterTaps = _coeffs.nTaps();
+    unsigned nFilterTaps = _ppfCoeffs.nTaps();
     if (!_buffersInitialised) {
         _setupWorkBuffers(nSubbands, nPolarisations, _nChannels, nFilterTaps);
     }
 
+    //const float* coeffs = &_coeffs[0];
+    const double* coeffs = _ppfCoeffs.ptr();
+
     // Pointers to processing buffers.
     omp_set_num_threads(_nThreads);
     unsigned bufferSize = _workBuffer[0].size();
-    const double* coeff = _coeffs.ptr();
 
 #pragma omp parallel
     {
@@ -177,7 +196,7 @@ void PPFChanneliser::run(const SubbandTimeSeriesC32* timeSeries,
                     _updateBuffer(timeData, _nChannels, workBuffer, bufferSize);
 
                     // Apply the PPF.
-                    _filter(workBuffer, nFilterTaps, _nChannels, coeff,
+                    _filter(workBuffer, nFilterTaps, _nChannels, coeffs,
                             filteredSamples);
 
                     Spectrum<Complex>* spectrum = spectra->ptr(b, s, p);
@@ -202,7 +221,7 @@ void PPFChanneliser::_checkData(const SubbandTimeSeriesC32* timeData)
     if (!timeData)
         throw QString("PPFChanneliser: Time stream data blob missing.");
 
-    if (timeData->nTimeSeries() == 0)
+    if (timeData->size() == 0)
         throw QString("PPFChanneliser: Empty time data blob");
 
     if (timeData->nSubbands() == 0)
@@ -214,10 +233,10 @@ void PPFChanneliser::_checkData(const SubbandTimeSeriesC32* timeData)
     if (timeData->nTimeBlocks() == 0)
         throw QString("PPFChanneliser: Empty time data blob");
 
-    if (_coeffs.nChannels() != _nChannels)
+    if (_ppfCoeffs.nChannels() != _nChannels)
         throw QString("PPFChanneliser: Dimension mismatch: "
                 "Number of filter channels %1 != number of output channels %2.")
-                .arg(_coeffs.nChannels()).arg(_nChannels);
+                .arg(_ppfCoeffs.nChannels()).arg(_nChannels);
 }
 
 
@@ -255,14 +274,28 @@ void PPFChanneliser::_filter(const Complex* sampleBuffer, unsigned nTaps,
         filteredSamples[i] = Complex(0.0, 0.0);
     }
 
+//#undef USE_CBLAS // undefine the use of cblas
+
     for (unsigned c = 0; c < nChannels; ++c) {
+//#ifdef USE_CBLAS
+//        unsigned iCoeff = c * nTaps;
+//        unsigned iBuffer = (nTaps - 1) * nChannels + c;
+//        //std::cout << c << " "<< iCoeff << " " << iBuffer << std::endl;
+//        const Complex* x = &(sampleBuffer[iBuffer]);
+//        // NOTE: coeffs are real and samples are complex!
+//        const Complex* y = &(coeffs[iCoeff]);
+//        Complex result;
+//        cblas_cdotu_sub(nTaps, x, -64, y, 1, &result);
+//        filteredSamples[c] = result;
+//#else
         for (unsigned t = 0; t < nTaps; ++t) {
             unsigned iBuffer = (nTaps - t - 1) * nChannels + c;
             unsigned iCoeff = nTaps * c + t;
-            double re = sampleBuffer[iBuffer].real() * coeffs[iCoeff];
-            double im = sampleBuffer[iBuffer].imag() * coeffs[iCoeff];
+            float re = sampleBuffer[iBuffer].real() * coeffs[iCoeff];
+            float im = sampleBuffer[iBuffer].imag() * coeffs[iCoeff];
             filteredSamples[c] += std::complex<float>(re, im);
         }
+//#endif
     }
 }
 

@@ -83,7 +83,7 @@ class SubbandTimeSeries : public DataBlob
 
     public: // accessor methods
         /// Returns the number of entries in the data blob.
-        unsigned nTimeSeries() const { return _data.size(); }
+        unsigned size() const { return _data.size(); }
 
         /// Returns the number of blocks of sub-band spectra.
         unsigned nTimeBlocks() const { return _nTimeBlocks; }

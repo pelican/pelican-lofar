@@ -57,7 +57,7 @@ class SubbandTimeSeriesC32;
 class AdapterSubbandTimeSeries : public AbstractStreamAdapter
 {
     private:
-        friend class AdapterSubbandTimeStreamTest;
+        friend class AdapterSubbandTimeSeriesTest;
 
     public:
         /// Constructs a new AdapterTimeStream.

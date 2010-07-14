@@ -39,10 +39,15 @@ set_target_properties(pelican-lofar PROPERTIES
 )
 install(TARGETS pelican-lofar DESTINATION ${LIBRARY_INSTALL_DIR})
 
-target_link_libraries(pelican-lofar
+set(pelican-lofar_externals
     ${FFTW3_FFTW_LIBRARY}
     ${FFTW3_FFTWF_LIBRARY}
+    #${CBLAS_LIBS}
 )
+
+target_link_libraries(pelican-lofar_static ${pelican-lofar_externals})
+
+target_link_libraries(pelican-lofar ${pelican-lofar_externals})
 
 
 file(GLOB public_headers RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} "*.h")

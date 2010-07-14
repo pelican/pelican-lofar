@@ -109,7 +109,8 @@ class PPFChanneliser : public AbstractModule
         bool _buffersInitialised;
         unsigned _nChannels;
         unsigned _nThreads;
-        PolyphaseCoefficients _coeffs;
+        PolyphaseCoefficients _ppfCoeffs;
+//        std::vector<float> _coeffs;
         fftwf_plan _fftPlan;
         // Work Buffers (need to have a buffer per thread).
         std::vector<std::vector<Complex> > _workBuffer;
