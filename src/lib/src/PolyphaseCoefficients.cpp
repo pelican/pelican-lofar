@@ -344,30 +344,25 @@ void PolyphaseCoefficients::genereateFilter(unsigned nTaps,
 
     _coeff.resize(nChannels * nTaps);
 
-//    unsigned index = 0;
-    for(unsigned c = 0; c < nChannels; ++c) {
-        for(int t = nTaps-1; t >= 0; --t) { // store the taps in reverse!
-        //for (int t = 0; t < nTaps; ++t) {
-            // Negate all odd channels (see comment at the top of this file)
-            // Correct total power.
-            // we use the 256 channel case as a reference, so we
-            // multiply by 256, and divide by the number of channels
-            unsigned i = c * nTaps + t;
+    // Testing
+    // ----------------
+    for(int t = 0; t < nTaps; ++t) { // store the taps in reverse!
+        for(unsigned c = 0; c < nChannels; ++c) {
+            //unsigned i = c * nTaps + (nTaps - t - 1);
+            unsigned i = (nTaps - t - 1) * nChannels + c;
             unsigned index = t * nChannels + c;
-            //unsigned index = (nTaps - t - 1) * nChannels + c;
-
-            //_coeff[i] = result[index] * 256.0 / nChannels;
             _coeff[i] = result[index] / nChannels;
-
-            //unsigned index = i;
-//            if(c % 2 == 0) {
-//                _coeff[i] = result[index] * 256.0 / nChannels;
-//            } else {
-//                _coeff[i] = -result[index] * 256.0 / nChannels;
-//            }
-//            index++; // index the other way?
         }
     }
+    // ---------------
+
+//    for(unsigned c = 0; c < nChannels; ++c) {
+//        for(int t = 0; t < nTaps; ++t) {
+//            unsigned i = c * nTaps + (nTaps - t - 1);
+//            unsigned index = t * nChannels + c;
+//            _coeff[i] = result[index] / nChannels;
+//        }
+//    }
 
     delete[] result;
 }

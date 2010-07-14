@@ -12,16 +12,16 @@ add_library(lofarTestLib STATIC ${lofarTestLib_src})
 # ------------------------------------------------------------------------------
 set(lofarTest_src
     src/libTest.cpp
-    src/LofarChunkerTest.cpp
-    src/DataStreamingTest.cpp
-    src/TimeStreamDataTest.cpp
-    src/ChannelisedStreamDataTest.cpp
-    src/AdapterTimeStreamTest.cpp
-    src/ChanneliserPolyphaseTest.cpp
+    #src/LofarChunkerTest.cpp
+    #src/DataStreamingTest.cpp
+    #src/TimeStreamDataTest.cpp
+    #src/ChannelisedStreamDataTest.cpp
+    #src/AdapterTimeStreamTest.cpp
+    #src/ChanneliserPolyphaseTest.cpp
     #######src/PelicanBlobClientTest.cpp
-    src/PolyphaseCoefficientsTest.cpp
-    src/SpectrumTest.cpp
-    src/SubbandSpectraTest.cpp
+    #src/PolyphaseCoefficientsTest.cpp
+    #src/SpectrumTest.cpp
+    #src/SubbandSpectraTest.cpp
     src/PPFChanneliserTest.cpp
     #src/AdapterSubbandTimeSeriesTest.cpp
 )

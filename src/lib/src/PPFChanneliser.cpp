@@ -276,27 +276,39 @@ void PPFChanneliser::_filter(const Complex* sampleBuffer, unsigned nTaps,
 
 //#undef USE_CBLAS // undefine the use of cblas
 
-    for (unsigned c = 0; c < nChannels; ++c) {
-//#ifdef USE_CBLAS
-//        unsigned iCoeff = c * nTaps;
-//        unsigned iBuffer = (nTaps - 1) * nChannels + c;
-//        //std::cout << c << " "<< iCoeff << " " << iBuffer << std::endl;
-//        const Complex* x = &(sampleBuffer[iBuffer]);
-//        // NOTE: coeffs are real and samples are complex!
-//        const Complex* y = &(coeffs[iCoeff]);
-//        Complex result;
-//        cblas_cdotu_sub(nTaps, x, -64, y, 1, &result);
-//        filteredSamples[c] = result;
-//#else
-        for (unsigned t = 0; t < nTaps; ++t) {
-            unsigned iBuffer = (nTaps - t - 1) * nChannels + c;
-            unsigned iCoeff = nTaps * c + t;
+    for (unsigned t = 0; t < nTaps; ++t) {
+        for (unsigned c = 0; c < nChannels; ++c) {
+            unsigned iBuffer = t * nChannels + c;
+            unsigned iCoeff = t * nChannels + c;
             float re = sampleBuffer[iBuffer].real() * coeffs[iCoeff];
             float im = sampleBuffer[iBuffer].imag() * coeffs[iCoeff];
             filteredSamples[c] += std::complex<float>(re, im);
+
         }
-//#endif
     }
+
+//    for (unsigned c = 0; c < nChannels; ++c) {
+//        //#ifdef USE_CBLAS
+//        //        unsigned iCoeff = c * nTaps;
+//        //        unsigned iBuffer = (nTaps - 1) * nChannels + c;
+//        //        //std::cout << c << " "<< iCoeff << " " << iBuffer << std::endl;
+//        //        const Complex* x = &(sampleBuffer[iBuffer]);
+//        //        // NOTE: coeffs are real and samples are complex!
+//        //        const Complex* y = &(coeffs[iCoeff]);
+//        //        Complex result;
+//        //        cblas_cdotu_sub(nTaps, x, -64, y, 1, &result);
+//        //        filteredSamples[c] = result;
+//        //#else
+//        for (unsigned t = 0; t < nTaps; ++t) {
+//            //unsigned iBuffer = (nTaps - t - 1) * nChannels + c;
+//            unsigned iBuffer = t * nChannels + c;
+//            unsigned iCoeff = nTaps * c + t;
+//            float re = sampleBuffer[iBuffer].real() * coeffs[iCoeff];
+//            float im = sampleBuffer[iBuffer].imag() * coeffs[iCoeff];
+//            filteredSamples[c] += std::complex<float>(re, im);
+//        }
+//        //#endif
+//    }
 }
 
 

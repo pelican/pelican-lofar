@@ -288,7 +288,7 @@ void PPFChanneliserTest::test_run()
 {
     // Setup the channeliser.
     unsigned nChan = 512;
-    unsigned nThreads = 2;
+    unsigned nThreads = 4;
     QString coeffFile = "lib/test/data/coeffs_512_1.dat";
     if (!QFile::exists(coeffFile)) return;
     unsigned nTaps = 8;
