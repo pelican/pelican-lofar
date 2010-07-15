@@ -32,13 +32,13 @@ class AdapterSubbandTimeSeriesTest : public CppUnit::TestFixture
         CPPUNIT_TEST_SUITE(AdapterSubbandTimeSeriesTest);
         CPPUNIT_TEST(test_configuration);
         CPPUNIT_TEST(test_checkDataFixedPacket);
-//        CPPUNIT_TEST(test_checkDataVariablePacket);
-//        CPPUNIT_TEST(test_deserialise);
+        CPPUNIT_TEST(test_checkDataVariablePacket);
+        CPPUNIT_TEST(test_deserialise);
         CPPUNIT_TEST_SUITE_END();
 
     public:
-        void setUp();
-        void tearDown();
+        void setUp() {}
+        void tearDown() {}
 
         /// Method to test the adapter configuration.
         void test_configuration();
