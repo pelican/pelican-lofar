@@ -22,19 +22,19 @@ namespace lofar {
  * @brief
  *    translates the station configuration file into a LofarStationConfiguration object
  * @details
- * 
+ *
  */
 
 class LofarStationConfigurationAdapter : public AbstractServiceAdapter
 {
     public:
-        LofarStationConfigurationAdapter( const ConfigNode& config  );
+        LofarStationConfigurationAdapter(const ConfigNode& config);
         ~LofarStationConfigurationAdapter();
-        void deserialise(QIODevice&);
+        void deserialise(QIODevice*);
 
     private:
 };
 
 } // namespace lofar
 } // namespace pelican
-#endif // LOFARSTATIONCONFIGURATIONADAPTER_H 
+#endif // LOFARSTATIONCONFIGURATIONADAPTER_H

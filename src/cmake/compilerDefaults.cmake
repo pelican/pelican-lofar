@@ -13,7 +13,7 @@ if(NOT CMAKE_BUILD_TYPE MATCHES "^RELEASE|DEBUG|[Rr]elease|[Dd]ebug$")
 endif(NOT CMAKE_BUILD_TYPE MATCHES "^RELEASE|DEBUG|[Rr]elease|[Dd]ebug$")
 
 # Set the C++ release flags.
-set(CMAKE_CXX_FLAGS_RELEASE "-O2 -DQT_NO_DEBUG -DNDEBUG")
+set(CMAKE_CXX_FLAGS_RELEASE "-O3 -DQT_NO_DEBUG -DNDEBUG")
 
 if(CMAKE_COMPILER_IS_GNUCXX)
     add_definitions(-Wall -Wextra)
@@ -23,7 +23,9 @@ elseif(CMAKE_CXX_COMPILER MATCHES icpc)
     add_definitions(-Wall -Wcheck)
     add_definitions(-wd383 -wd981)  # Suppress remarks / warnings.
     add_definitions(-ww111 -ww1572) # Promote remarks to warnings.
-    set(CMAKE_CXX_FLAGS_RELEASE "-O3 -DQT_NO_DEBUG -DNDEBUG -xSSSE3")
+    #set(CMAKE_CXX_FLAGS_RELEASE "-O3 -DQT_NO_DEBUG -DNDEBUG -xSSSE3") # Core 2
+    #set(CMAKE_CXX_FLAGS_RELEASE "-O3 -DQT_NO_DEBUG -DNDEBUG -xSSE4.2") # i7
+    set(CMAKE_CXX_FLAGS_RELEASE "-O3 -DQT_NO_DEBUG -DNDEBUG")
 else(CMAKE_COMPILER_IS_GNUCXX)
     # use defaults (and pray it works...)
 endif(CMAKE_COMPILER_IS_GNUCXX)

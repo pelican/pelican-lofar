@@ -7,7 +7,7 @@ namespace lofar {
 
 
 /**
- *@details LofarStationConfigurationAdapter 
+ *@details LofarStationConfigurationAdapter
  */
 LofarStationConfigurationAdapter::LofarStationConfigurationAdapter( const ConfigNode& config )
     : AbstractServiceAdapter( config )
@@ -24,7 +24,7 @@ LofarStationConfigurationAdapter::~LofarStationConfigurationAdapter()
 /**
  *@details
  */
-void LofarStationConfigurationAdapter::deserialise(QIODevice&)
+void LofarStationConfigurationAdapter::deserialise(QIODevice*)
 {
 }
 

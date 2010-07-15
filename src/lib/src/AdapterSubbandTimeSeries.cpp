@@ -198,7 +198,8 @@ void AdapterSubbandTimeSeries::_readData(SubbandTimeSeriesC32* timeSeries,
             for (unsigned p = 0; p < _nPolarisations; ++p) {
                 fComplex* data = timeSeries->ptr(iTimeBlock, c, p)->ptr();
 
-                unsigned packetIndex = _nPolarisations * (t * _nSubbands + c) + p;;
+                // FIXME: packetIndex hides packet index in arg list!
+                //unsigned packetIndex = _nPolarisations * (t * _nSubbands + c) + p;;
                 unsigned blobIndex = _nSamplesPerPacket * (c * _nPolarisations + p) + t;
 
                 if (_sampleBits == 8) {

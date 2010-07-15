@@ -69,7 +69,7 @@ void LofarChunker::next(QIODevice* device)
     unsigned         offset                    = 0;
     unsigned         prevSeqid                 = _startTime;
     unsigned         prevBlockid               = _startBlockid;
-    UDPPacket        currPacket, emptyPacket;
+    UDPPacket         currPacket, emptyPacket;
     qint64           sizeDatagram;
 
     WritableData writableData = getDataStorage( _nPackets * _packetSize);
@@ -85,7 +85,7 @@ void LofarChunker::next(QIODevice* device)
             // Wait for datagram to be available
             while (!socket -> hasPendingDatagrams())
                 socket -> waitForReadyRead(100);
-    
+
             if ( ( sizeDatagram = socket -> readDatagram(reinterpret_cast<char*>(&currPacket), _packetSize) ) <= 0 ) {
                 std::cout << "LofarChunker::next(): Error while receiving UDP Packet!" << std::endl;
                 i--;
@@ -110,7 +110,7 @@ void LofarChunker::next(QIODevice* device)
                 prevBlockid = _startBlockid = _startBlockid == 0 ? blockid : _startBlockid;
             }
 
-            // Sanity check in seqid. If the seconds counter is 0xFFFFFFFF, 
+            // Sanity check in seqid. If the seconds counter is 0xFFFFFFFF,
             // the data cannot be trusted (ignore)
             if (seqid == ~0U || prevSeqid + 10 < seqid) {
                 ++_packetsRejected;
@@ -126,16 +126,17 @@ void LofarChunker::next(QIODevice* device)
 
             diff =  (blockid >= prevBlockid) ? (blockid - prevBlockid) : (blockid + totBlocks - prevBlockid);
             if (diff < _samplesPerPacket) {      // Duplicated packets... ignore
-                ++_packetsRejected; 
+                ++_packetsRejected;
                 i -= 1;
                 continue;
             }
             else if (diff > _samplesPerPacket)    // Missing packets
                 lostPackets = (diff / _samplesPerPacket) - 1; // -1 since it includes this includes the received packet as well
 
-            if (lostPackets > 0) 
-                printf("Generate %d empty packets, prevSeq: %d, new Seq: %d, prevBlock: %d, newBlock: %d\n", 
+            if (lostPackets > 0) {
+                printf("Generate %u empty packets, prevSeq: %u, new Seq: %u, prevBlock: %u, newBlock: %u\n",
                        lostPackets, prevSeqid, seqid, prevBlockid, blockid);
+            }
 
             // Generate lostPackets empty packets, if any
             for (unsigned packetCounter = 0; packetCounter < lostPackets &&
@@ -163,7 +164,7 @@ void LofarChunker::next(QIODevice* device)
                 prevBlockid = blockid;
             }
         }
-    } 
+    }
     else {
         // Must discard the datagram if there is no available space.
         socket->readDatagram(0, 0);
@@ -195,7 +196,7 @@ void LofarChunker::generateEmptyPacket(UDPPacket& packet, unsigned int seqid, un
  * @details
  * Write packet to WritableData object
  */
-unsigned LofarChunker::writePacket(WritableData *writer, UDPPacket& packet, unsigned offset)
+int LofarChunker::writePacket(WritableData *writer, UDPPacket& packet, unsigned offset)
 {
     if (writer -> isValid()) {
         writer -> write(reinterpret_cast<void*>(&packet), _packetSize, offset);
