@@ -349,9 +349,10 @@ void PolyphaseCoefficients::genereateFilter(unsigned nTaps,
     for(int t = 0; t < nTaps; ++t) { // store the taps in reverse!
         for(unsigned c = 0; c < nChannels; ++c) {
             //unsigned i = c * nTaps + (nTaps - t - 1);
-            unsigned i = (nTaps - t - 1) * nChannels + c;
+//            unsigned i = (nTaps - t - 1) * nChannels + c;
             unsigned index = t * nChannels + c;
-            _coeff[i] = result[index] / nChannels;
+//            _coeff[i] = result[index] / nChannels;
+            _coeff[index] = result[index] / nChannels;
         }
     }
     // ---------------

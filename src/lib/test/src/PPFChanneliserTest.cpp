@@ -212,6 +212,12 @@ void PPFChanneliserTest::test_filter()
     PPFChanneliser::Complex* workBuffer;
 
     const double* coeff = channeliser._ppfCoeffs.ptr();
+    unsigned nCoeffs =  channeliser._ppfCoeffs.size();
+    float* fCoeffs = new float[nCoeffs];
+    for (unsigned i = 0; i < nCoeffs; ++i) {
+        fCoeffs[i] = float(coeff[i]);
+    }
+
 
     QTime timer;
     timer.start();
@@ -221,7 +227,7 @@ void PPFChanneliserTest::test_filter()
             for (unsigned s = 0; s < nSubbands; ++s) {
                 for (unsigned p = 0; p < nPol; ++p) {
                     workBuffer = &(channeliser._workBuffer[s * nPol + p])[0];
-                    channeliser._filter(workBuffer, nTaps, nChan, coeff,
+                    channeliser._filter(workBuffer, nTaps, nChan, fCoeffs,
                             filteredSamples);
                 }
             }
@@ -288,7 +294,7 @@ void PPFChanneliserTest::test_run()
 {
     // Setup the channeliser.
     unsigned nChan = 512;
-    unsigned nThreads = 4;
+    unsigned nThreads = 2;
     QString coeffFile = "lib/test/data/coeffs_512_1.dat";
     if (!QFile::exists(coeffFile)) return;
     unsigned nTaps = 8;
@@ -307,7 +313,7 @@ void PPFChanneliserTest::test_run()
         t->resize(nChan);
     }
 
-    unsigned nIter = 10;
+    unsigned nIter = 20;
     QTime timer;
     timer.start();
     for (unsigned i = 0; i < nIter; ++i) {

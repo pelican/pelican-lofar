@@ -103,6 +103,9 @@ PPFChanneliser::PPFChanneliser(const ConfigNode& config)
         _filteredData[i].resize(_nChannels);
     }
 
+
+    _iOldSamples = 0;
+
     // Create the FFTW plan.
     size_t fftSize = _nChannels * sizeof(fftwf_complex);
     fftwf_complex* in = (fftwf_complex*) fftwf_malloc(fftSize);
@@ -161,6 +164,12 @@ void PPFChanneliser::run(const SubbandTimeSeriesC32* timeSeries,
 
     //const float* coeffs = &_coeffs[0];
     const double* coeffs = _ppfCoeffs.ptr();
+    unsigned nCoeffs = _ppfCoeffs.size();
+    float* fCoeffs = new float[nCoeffs];
+    for (unsigned i = 0; i < nCoeffs; ++i) {
+        fCoeffs[i] = float(coeffs[i]);
+    }
+
 
     // Pointers to processing buffers.
     omp_set_num_threads(_nThreads);
@@ -196,7 +205,7 @@ void PPFChanneliser::run(const SubbandTimeSeriesC32* timeSeries,
                     _updateBuffer(timeData, _nChannels, workBuffer, bufferSize);
 
                     // Apply the PPF.
-                    _filter(workBuffer, nFilterTaps, _nChannels, coeffs,
+                    _filter(workBuffer, nFilterTaps, _nChannels, fCoeffs,
                             filteredSamples);
 
                     Spectrum<Complex>* spectrum = spectra->ptr(b, s, p);
@@ -251,10 +260,39 @@ void PPFChanneliser::_checkData(const SubbandTimeSeriesC32* timeData)
 void PPFChanneliser::_updateBuffer(const Complex* samples,
         unsigned nSamples, Complex* buffer, unsigned bufferSize)
 {
-    Complex* dest = &buffer[nSamples];
-    size_t size = (bufferSize - nSamples) * sizeof(Complex);
-    memmove(dest, buffer, size);
-    memcpy(buffer, samples, nSamples * sizeof(Complex));
+//    Complex* dest = &buffer[nSamples];
+//    size_t size = (bufferSize - nSamples) * sizeof(Complex);
+    unsigned nTaps = bufferSize / nSamples;
+    size_t blockSize = nSamples * sizeof(Complex);
+
+//    std::cout << "nTaps =  " << nTaps << std::endl;
+//    std::cout << (nTaps - 2) * nSamples << std::endl;
+
+
+//    for (int i = 0; i <= nSamples * (nTaps - 2); i += nSamples) {
+//        std::cout << i << std::endl;
+//        memcpy(&buffer[i], &buffer[i+nSamples], blockSize);
+//    }
+
+//    for (int i = (nTaps-2) * nSamples; i >= 0; i -= nSamples) {
+//////        std::cout << "i = " <<  i << std::endl;
+//        //memcpy(&buffer[i + nSamples], &buffer[i], blockSize);
+//        for (unsigned j = i; j < i + nSamples; ++j) {
+//            buffer[j + nSamples] = buffer[j];
+//        }
+//    }
+
+
+
+//    memmove(dest, buffer, size);
+//    memcpy(buffer, samples, nSamples * sizeof(Complex));
+
+
+    //std::cout << std::endl;
+//    std::cout << "oldest = " << _iOldest << std::endl;
+
+    memcpy(&buffer[_iOldSamples * nSamples], samples, blockSize);
+    _iOldSamples = (_iOldSamples + 1) % nTaps;
 }
 
 
@@ -268,22 +306,25 @@ void PPFChanneliser::_updateBuffer(const Complex* samples,
 * @param filteredSamples
 */
 void PPFChanneliser::_filter(const Complex* sampleBuffer, unsigned nTaps,
-        unsigned nChannels, const double* coeffs, Complex* filteredSamples)
+        unsigned nChannels, const float* coeffs, Complex* filteredSamples)
 {
     for (unsigned i = 0; i < nChannels; ++i) {
         filteredSamples[i] = Complex(0.0, 0.0);
     }
 
 //#undef USE_CBLAS // undefine the use of cblas
+    unsigned iBuffer = 0;
+    unsigned idx = 0;
 
-    for (unsigned t = 0; t < nTaps; ++t) {
+    for (unsigned i = 0, t = 0; t < nTaps; ++t) {
+        iBuffer = ((_iOldSamples + t) % nTaps) * nChannels;
+
         for (unsigned c = 0; c < nChannels; ++c) {
-            unsigned iBuffer = t * nChannels + c;
-            unsigned iCoeff = t * nChannels + c;
-            float re = sampleBuffer[iBuffer].real() * coeffs[iCoeff];
-            float im = sampleBuffer[iBuffer].imag() * coeffs[iCoeff];
-            filteredSamples[c] += std::complex<float>(re, im);
 
+            idx = iBuffer + c;
+            filteredSamples[c].real() += sampleBuffer[idx].real() * coeffs[i];
+            filteredSamples[c].imag() += sampleBuffer[idx].imag() * coeffs[i];
+            i++;
         }
     }
 

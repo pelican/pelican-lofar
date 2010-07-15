@@ -14,10 +14,6 @@ list(INSERT CMAKE_MODULE_PATH 0 ${CMAKE_SOURCE_DIR}/cmake)
 enable_testing()
 
 # === Options and defaults.
-if(NOT CMAKE_BUILD_TYPE)
-    set(CMAKE_BUILD_TYPE debug)
-endif(NOT CMAKE_BUILD_TYPE)
-
 if(NOT PELICAN_LOFAR_INSTALL_DIR)
     set(PELICAN_LOFAR_INSTALL_DIR "pelican-lofar")
 endif(NOT PELICAN_LOFAR_INSTALL_DIR)
@@ -34,6 +30,7 @@ if(NOT BINARY_INSTALL_DIR)
     set(BINARY_INSTALL_DIR "${PELICAN_LOFAR_INSTALL_DIR}/bin")
 endif(NOT BINARY_INSTALL_DIR)
 
+include(compilerDefaults)
 
 # === Find Dependencies.
 find_package(Pelican REQUIRED)

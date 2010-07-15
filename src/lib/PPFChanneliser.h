@@ -87,7 +87,7 @@ class PPFChanneliser : public AbstractModule
         /// Filter the matrix of samples (dimensions nTaps by nChannels)
         /// to create a vector of samples for the FFT.
         void _filter(const Complex* sampleBuffer, unsigned nTaps,
-                unsigned nChannels, const double* coeffs,
+                unsigned nChannels, const float* coeffs,
                 Complex* filteredSamples);
 
         /// FFT filtered samples to form a spectrum.
@@ -110,6 +110,7 @@ class PPFChanneliser : public AbstractModule
         unsigned _nChannels;
         unsigned _nThreads;
         PolyphaseCoefficients _ppfCoeffs;
+        unsigned _iOldSamples;
 //        std::vector<float> _coeffs;
         fftwf_plan _fftPlan;
         // Work Buffers (need to have a buffer per thread).
