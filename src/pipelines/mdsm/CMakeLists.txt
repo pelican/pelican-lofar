@@ -25,6 +25,7 @@ install(TARGETS mdsmPipeline DESTINATION ${BINARY_INSTALL_DIR})
 
 include(CopyFiles)
 copy_files(${CMAKE_CURRENT_SOURCE_DIR}/data/*.xml . mdsmXmlFiles)
+copy_files(${CMAKE_CURRENT_SOURCE_DIR}/data/*.dat . mdsmChanCoeffs)
 
 
 #add_subdirectory(test)
