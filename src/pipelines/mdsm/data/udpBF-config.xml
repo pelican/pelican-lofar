@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE pelican>
+
+<configuration version="1.0">
+    <pipeline>
+
+        <buffers>
+           <TimeStreamData>
+               <buffer maxSize="100000000" maxChunkSize="100000000"/>
+           </TimeStreamData>
+        </buffers>
+
+        <chunkers>
+           <LofarChunker>
+               <data type="SubbandTimeSeriesC32"/>
+               <connection host="127.0.0.1" port="8090"/>
+               <params samplesPerPacket="32"
+                       nrPolarisation="2"
+                       subbandsPerPacket="42"
+                       packets="16"
+                       clock="200"/>
+               <samples type="8" />
+           </LofarChunker>
+        </chunkers>
+
+        <clients>
+            <LofarStreamDataClient>
+                <data type="SubbandTimeSeriesC32" adapter="AdapterSubbandTimeSeries" />
+            </LofarStreamDataClient>
+        </clients>
+
+        <adapters>
+            <AdapterSubbandTimeSeries>
+                <fixedSizePackets value="false" />
+                <sampleSize bits="8" />
+                <packetsPerChunk number="16"/>
+                <samplesPerPacket number="32"/>
+                <samplesPerTimeBlock number="512"/>
+                <subbands number="42"/>
+                <polarisations number="2"/>
+            </AdapterSubbandTimeSeries>
+        </adapters>
+
+        <modules>
+            <PPFChanneliser>
+                <channels number="512" />
+                <processingThreads number="2" />
+                <filter nTaps="8" filterWindow="kaiser"/>
+            </PPFChanneliser>
+        </modules>
+
+        <output>
+          <streamers>
+             <PelicanTCPBlobServer active="true" >
+                 <connection port="6969" />
+             </PelicanTCPBlobServer>
+          </streamers>
+          <dataStreams>
+             <stream name="SubbandSpectra" listeners="PelicanTCPBlobServer" />
+          </dataStreams>
+        </output>
+
+    </pipeline>
+</configuration>
+
+

@@ -38,11 +38,11 @@ class SubbandSpectraC32;
  * Example configuration node.
  *
  * \verbatim
- * 		<ChanneliserPolyphase name="">
+ * 		<PPFChanneliser name="">
  * 			<channels number="512"/>
  * 			<processingThreads number="2"/>
  * 			<filter nTaps="8" filterWindow="kaiser"/>
- * 		</ChanneliserPolyphase>
+ * 		</PPFChanneliser>
  * \verbatim
  *
  * - channels: The number of channels generated in the spectra.

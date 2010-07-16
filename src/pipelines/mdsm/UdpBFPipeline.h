@@ -19,11 +19,11 @@ namespace lofar {
 
 /**
  * @class UdpBFPipeline
- *  
+ *
  * @brief
- * 
+ *
  * @details
- * 
+ *
  */
 class UdpBFPipeline : public AbstractPipeline
 {
@@ -43,7 +43,7 @@ class UdpBFPipeline : public AbstractPipeline
 
         /// Local data blob
         SubbandSpectraC32* spectra;
-	SubbandTimeSeriesC32 *timeSeries;
+        SubbandTimeSeriesC32 *timeSeries;
 
         unsigned _iteration;
 };
@@ -51,4 +51,4 @@ class UdpBFPipeline : public AbstractPipeline
 } // namespace lofar
 } // namespace pelican
 
-#endif // UDP_BF_PIPELINE_H 
+#endif // UDP_BF_PIPELINE_H

@@ -23,8 +23,10 @@ int main(int argc, char* argv[])
         // Register the pipelines that can run.
         pApp.registerPipeline(new UdpBFPipeline);
 
+        //std::cout << "hereA" << std::endl;
         // Set the data client.
         pApp.setDataClient("LofarStreamDataClient");
+        //std::cout << "hereB" << std::endl;
 
         // Start the pipeline driver.
         pApp.start();
