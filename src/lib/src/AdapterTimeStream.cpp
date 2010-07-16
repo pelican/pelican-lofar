@@ -189,6 +189,7 @@ void AdapterTimeStream::_readData(std::complex<double>* data, char* buffer)
             for (unsigned p = 0; p < _nPolarisations; ++p) {
 
                 //unsigned packetIndex = _nPolarisations * (t * _nSubbands + c) + p;;
+                // TODO: test this index... could be wrong.
                 unsigned blobIndex = _nSamples * (c * _nPolarisations + p) + t;
 
                 if (_sampleBits == 4) {

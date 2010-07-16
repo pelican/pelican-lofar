@@ -51,7 +51,7 @@ void UdpBFPipeline::run(QHash<QString, DataBlob*>& remoteData)
     // Run the polyphase channeliser.
     // Note: This channelises all of the subbands, and polarisations in the time series for
     // a number of blocks of spectra.
-//    ppfChanneliser->run(timeSeries, spectra);
+    ppfChanneliser->run(timeSeries, spectra);
 
     // stokes->run(spectra, outputBlob)
 

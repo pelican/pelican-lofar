@@ -185,18 +185,18 @@ void PPFChanneliser::run(const SubbandTimeSeriesC32* timeSeries,
                     // Get a pointer to the work buffer.
                     workBuffer = &(_workBuffer[s * nPolarisations + p])[0];
 
-                    // Update buffered (lagged) data for the sub-band.
-//                    _updateBuffer(timeData, _nChannels, nFilterTaps,  workBuffer);
-//
-//                    // Apply the PPF.
-//                    _filter(workBuffer, nFilterTaps, _nChannels, coeffs, filteredSamples);
-//
-//                    Spectrum<Complex>* spectrum = spectra->ptr(b, s, p);
-//                    spectrum->resize(_nChannels);
-//                    Complex* spectrumData = spectrum->ptr();
-//
-//                    // FFT the filtered subband data to form a new spectrum.
-//                    _fft(filteredSamples, spectrumData);
+//                    Update buffered (lagged) data for the sub-band.
+                    _updateBuffer(timeData, _nChannels, nFilterTaps,  workBuffer);
+
+                    // Apply the PPF.
+                    _filter(workBuffer, nFilterTaps, _nChannels, coeffs, filteredSamples);
+
+                    Spectrum<Complex>* spectrum = spectra->ptr(b, s, p);
+                    spectrum->resize(_nChannels);
+                    Complex* spectrumData = spectrum->ptr();
+
+                    // FFT the filtered subband data to form a new spectrum.
+                    _fft(filteredSamples, spectrumData);
                 }
             }
         }
