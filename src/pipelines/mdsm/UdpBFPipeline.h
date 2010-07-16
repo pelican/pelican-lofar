@@ -43,7 +43,7 @@ class UdpBFPipeline : public AbstractPipeline
 
         /// Local data blob
         SubbandSpectraC32* spectra;
-        SubbandTimeSeriesC32 *timeSeries;
+        SubbandTimeSeriesC32* timeSeries;
 
         unsigned _iteration;
 };

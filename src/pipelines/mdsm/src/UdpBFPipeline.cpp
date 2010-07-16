@@ -46,15 +46,17 @@ void UdpBFPipeline::run(QHash<QString, DataBlob*>& remoteData)
     // Get pointer to the remote time series data blob.
     // Note: This contains the time series data in blocks of nChannels for
     // a number of subbands, polarisations and blocks.
-    timeSeries = (SubbandTimeSeriesC32 *) remoteData["SubbandTimeSeriesC32"];
+    timeSeries = (SubbandTimeSeriesC32*) remoteData["SubbandTimeSeriesC32"];
 
     // Run the polyphase channeliser.
     // Note: This channelises all of the subbands, and polarisations in the time series for
     // a number of blocks of spectra.
-    ppfChanneliser->run(timeSeries, spectra);
+//    ppfChanneliser->run(timeSeries, spectra);
+
+    // stokes->run(spectra, outputBlob)
 
     // Output channelised data blob (which has dimensions: number of spectra x subbands x polarisations)
-    dataOutput(spectra, "SubbandSpectraC32");
+//   dataOutput(spectra, "SubbandSpectraC32");
 
     if (_iteration % 200 == 0) std::cout << "Finished the UDP beamforming pipeline, iteration " << _iteration << std::endl;
     _iteration++;

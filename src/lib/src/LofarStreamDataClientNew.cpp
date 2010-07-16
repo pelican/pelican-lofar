@@ -1,4 +1,4 @@
-#include "LofarStreamDataClient.h"
+#include "LofarStreamDataClientNew.h"
 #include "LofarChunker.h"
 
 #include "pelican/utility/memCheck.h"
@@ -10,18 +10,17 @@ namespace lofar {
 /**
  *@details LofarStreamDataClient
  */
-LofarStreamDataClient::LofarStreamDataClient(const ConfigNode& configNode,
+LofarStreamDataClientNew::LofarStreamDataClientNew(const ConfigNode& configNode,
         const DataTypes& types, const Config* config)
 : DirectStreamDataClient(configNode, types, config)
 {
-    addChunker( "TimeStreamData", "LofarChunker" );
-    //addChunker("SubbandTimeSeriesC32", "LofarChunker");
+    addChunker("SubbandTimeSeriesC32", "LofarChunker");
 }
 
 /**
  *@details
  */
-LofarStreamDataClient::~LofarStreamDataClient()
+LofarStreamDataClientNew::~LofarStreamDataClientNew()
 {
 }
 

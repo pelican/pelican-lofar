@@ -4,6 +4,7 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 # ------------------------------------------------------------------------------
 set(lib_src
     src/AdapterTimeStream.cpp
+    src/AdapterSubbandTimeSeries.cpp
     src/ChannelisedStreamData.cpp
     src/ChanneliserPolyphase.cpp
     src/OutputHDF5Lofar.cpp
@@ -11,13 +12,13 @@ set(lib_src
     src/LofarChunker.cpp
     src/LofarServerClient.cpp
     src/LofarStreamDataClient.cpp
+    src/LofarStreamDataClientNew.cpp
     src/LofarStationConfiguration.cpp
     src/LofarStationConfigurationAdapter.cpp
     src/PelicanBlobClient.cpp
     src/PolyphaseCoefficients.cpp
     src/SubbandSpectra.cpp
     src/PPFChanneliser.cpp
-    src/AdapterSubbandTimeSeries.cpp
 )
 
 # Create pelican-lofar library.

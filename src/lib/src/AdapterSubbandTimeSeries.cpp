@@ -130,9 +130,10 @@ void AdapterSubbandTimeSeries::_checkData()
     }
 
     // If any service data exists update the visibility dimensions from it.
-    if (!_serviceData.empty()) {
-        _updateDimensions();
-    }
+    // FIXME: it exists all the time at the moment.
+//    if (!_serviceData.empty()) {
+//        _updateDimensions();
+//    }
 
     // Check that the adapter dimensions agree with what could come from
     // packets. TODO test this...
@@ -156,6 +157,15 @@ void AdapterSubbandTimeSeries::_checkData()
     unsigned nTimeBlocks = nTimesTotal / _nSamplesPerTimeBlock;
     _timeData = static_cast<SubbandTimeSeriesC32*>(_data);
     _timeData->resize(nTimeBlocks, _nSubbands, _nPolarisations, _nSamplesPerTimeBlock);
+
+//    std::cout << "AdapterSubbandTimeSeries::_checkData(): nTimeBlocks = "
+//              << nTimeBlocks << std::endl;
+//    std::cout << "AdapterSubbandTimeSeries::_checkData(): nSubbands = "
+//                  << _nSubbands << std::endl;
+//    std::cout << "AdapterSubbandTimeSeries::_checkData(): nPolarisations = "
+//                  << _nPolarisations << std::endl;
+//    std::cout << "AdapterSubbandTimeSeries::_checkData(): nSamplesPerTimeBlock = "
+//                  << _nSamplesPerTimeBlock << std::endl;
 }
 
 
@@ -194,19 +204,21 @@ void AdapterSubbandTimeSeries::_readData(SubbandTimeSeriesC32* timeSeries,
 
         for (unsigned c = 0; c < _nSubbands; ++c) {
             for (unsigned p = 0; p < _nPolarisations; ++p) {
-
                 fComplex* data = timeSeries->ptr(iTimeBlock, c, p)->ptr();
 
                 unsigned index = _nSamplesPerPacket * (c * _nPolarisations + p) + t;
+                std::cout << "adapter index = " << index << std::endl;
 
                 if (_sampleBits == 8) {
                     TYPES::i8complex i8c = *reinterpret_cast<TYPES::i8complex*>(&buffer[iPtr]);
-                    data[index] = fComplex(float(i8c.real()), float(i8c.imag()));
+                    data[index].real() = float(i8c.real());
+                    data[index].imag() = float(i8c.imag());
                     iPtr += sizeof(TYPES::i8complex);
                 }
                 else if (_sampleBits == 16) {
                     TYPES::i16complex i16c = *reinterpret_cast<TYPES::i16complex*>(&buffer[iPtr]);
-                    data[index] = fComplex(float(i16c.real()), float(i16c.imag()));
+                    data[index].real() = float(i16c.real());
+                    data[index].imag() = float(i16c.imag());
                     iPtr += sizeof(TYPES::i16complex);
                 }
                 else {
@@ -226,8 +238,9 @@ void AdapterSubbandTimeSeries::_readData(SubbandTimeSeriesC32* timeSeries,
  */
 void AdapterSubbandTimeSeries::_updateDimensions()
 {
-    throw QString("AdapterSubbandTimeSeries::_updateDimensions(): "
-            "Updating dimensions from service data not currently supported.");
+    // TODO: FIX this !!!
+//	throw QString("AdapterSubbandTimeSeries::_updateDimensions(): "
+//            "Updating dimensions from service data not currently supported.");
     // Example (if any service data exists):
     // _nTimes = serverData.nTimes;
     // _timeData.resize(_nTimes);

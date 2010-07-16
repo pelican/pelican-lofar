@@ -35,7 +35,7 @@ LofarChunker::LofarChunker(const ConfigNode& config) : AbstractChunker(config)
 
     // Some sanity checking.
     if (type().isEmpty())
-        throw QString("TestUdpChunker::TestUdpChunker(): Data type unspecified.");
+        throw QString("LofarChunker::LofarChunker(): Data type unspecified.");
 
     _packetSize = _subbandsPerPacket * _samplesPerPacket * _nrPolarisations;
 
@@ -133,10 +133,10 @@ void LofarChunker::next(QIODevice* device)
             else if (diff > _samplesPerPacket)    // Missing packets
                 lostPackets = (diff / _samplesPerPacket) - 1; // -1 since it includes this includes the received packet as well
 
-            if (lostPackets > 0) {
-                printf("Generate %u empty packets, prevSeq: %u, new Seq: %u, prevBlock: %u, newBlock: %u\n",
-                       lostPackets, prevSeqid, seqid, prevBlockid, blockid);
-            }
+//            if (lostPackets > 0) {
+//                printf("Generate %u empty packets, prevSeq: %u, new Seq: %u, prevBlock: %u, newBlock: %u\n",
+//                       lostPackets, prevSeqid, seqid, prevBlockid, blockid);
+//            }
 
             // Generate lostPackets empty packets, if any
             for (unsigned packetCounter = 0; packetCounter < lostPackets &&
@@ -168,7 +168,8 @@ void LofarChunker::next(QIODevice* device)
     else {
         // Must discard the datagram if there is no available space.
         socket->readDatagram(0, 0);
-        std::cout << "Data not valid.\n";
+        std::cout << "LofarChunker::LofarChunker(): "
+                "Wriable data not valid discarding packets." << std::endl;
     }
 
     // Update _startTime

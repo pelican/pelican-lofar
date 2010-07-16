@@ -148,6 +148,12 @@ void PPFChanneliser::run(const SubbandTimeSeriesC32* timeSeries,
         _setupWorkBuffers(nSubbands, nPolarisations, _nChannels, nFilterTaps);
     }
 
+//    std::cout << std::endl;
+//    std::cout << "nSubbands = " << nSubbands << std::endl;
+//    std::cout << "nPolarisations = " << nPolarisations << std::endl;
+//    std::cout << "nTimeBlocks = " << nTimeBlocks << std::endl;
+//    std::cout << "nFilterTaps = " << nFilterTaps << std::endl;
+
     const float* coeffs = &_coeffs[0];
 
     // Pointers to processing buffers.
@@ -180,18 +186,17 @@ void PPFChanneliser::run(const SubbandTimeSeriesC32* timeSeries,
                     workBuffer = &(_workBuffer[s * nPolarisations + p])[0];
 
                     // Update buffered (lagged) data for the sub-band.
-                    _updateBuffer(timeData, _nChannels, nFilterTaps,  workBuffer);
-
-                    // Apply the PPF.
-                    _filter(workBuffer, nFilterTaps, _nChannels, coeffs,
-                            filteredSamples);
-
-                    Spectrum<Complex>* spectrum = spectra->ptr(b, s, p);
-                    spectrum->resize(_nChannels);
-                    Complex* spectrumData = spectrum->ptr();
-
-                    // FFT the filtered subband data to form a new spectrum.
-                    _fft(filteredSamples, spectrumData);
+//                    _updateBuffer(timeData, _nChannels, nFilterTaps,  workBuffer);
+//
+//                    // Apply the PPF.
+//                    _filter(workBuffer, nFilterTaps, _nChannels, coeffs, filteredSamples);
+//
+//                    Spectrum<Complex>* spectrum = spectra->ptr(b, s, p);
+//                    spectrum->resize(_nChannels);
+//                    Complex* spectrumData = spectrum->ptr();
+//
+//                    // FFT the filtered subband data to form a new spectrum.
+//                    _fft(filteredSamples, spectrumData);
                 }
             }
         }

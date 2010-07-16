@@ -98,7 +98,6 @@ class AdapterSubbandTimeSeries : public AbstractStreamAdapter
         unsigned _sampleBits;
 };
 
-
 PELICAN_DECLARE_ADAPTER(AdapterSubbandTimeSeries)
 
 } // namespace lofar

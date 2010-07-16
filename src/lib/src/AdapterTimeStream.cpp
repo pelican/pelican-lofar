@@ -32,9 +32,9 @@ AdapterTimeStream::AdapterTimeStream(const ConfigNode& config)
     _sampleBits = config.getOption("sampleSize", "bits", "0").toUInt();
     _clock = config.getOption("clockSpeed", "value", "200").toUInt();
     _fixedPacketSize = config.getOption("fixedSizePackets", "value", "true").
-    		toLower().startsWith("true") ? true : false;
+            toLower().startsWith("true") ? true : false;
     _combinePols = config.getOption("combinePolarisations", "value", "false").
-        		toLower().startsWith("true") ? true : false;
+                toLower().startsWith("true") ? true : false;
 }
 
 
@@ -62,7 +62,7 @@ void AdapterTimeStream::deserialise(QIODevice* in)
     // Must divide by 4 because we're using sampleBits * 2 for
     // each value (complex data).
     size_t dataSize = _fixedPacketSize ?
-    		8130 : _nSubbands * _nPolarisations * _nSamples * _sampleBits / 4;
+            8130 : _nSubbands * _nPolarisations * _nSamples * _sampleBits / 4;
     size_t paddingSize = _fixedPacketSize ? packetSize - headerSize - dataSize : 0;
 
     // Temporary arrays for buffering data from the IO Device.
@@ -108,7 +108,7 @@ void AdapterTimeStream::deserialise(QIODevice* in)
 void AdapterTimeStream::_checkData()
 {
     // Check for supported sample bits.
-	if (_sampleBits != 4 && _sampleBits != 8  && _sampleBits != 16) {
+    if (_sampleBits != 4 && _sampleBits != 8  && _sampleBits != 16) {
         throw QString("AdapterTimeStream: Specified number of sample bits not "
                       "supported.");
     }
@@ -120,7 +120,7 @@ void AdapterTimeStream::_checkData()
 
     unsigned packetBits = _nSubbands * _nPolarisations * _nSamples * _sampleBits * 2;
     unsigned packetSize = _fixedPacketSize ?
-    		sizeof(UDPPacket) : sizeof(UDPPacket::Header) + packetBits / 8;
+            sizeof(UDPPacket) : sizeof(UDPPacket::Header) + packetBits / 8;
 
     // Check the chunk size matches the expected number of UDPPackets
     if (_chunkSize != packetSize * _nUDPPackets) {
@@ -136,9 +136,10 @@ void AdapterTimeStream::_checkData()
     }
 
     // If any service data exists update the visibility dimensions from it.
-    if (!_serviceData.empty()) {
-        _updateDimensions();
-    }
+    // FIXME: It seems to exist all the time at the moment...
+//    if (!_serviceData.empty()) {
+//        _updateDimensions();
+//    }
 
     // Check that the adapter dimensions agree with what could come from
     // packets. TODO test this...
@@ -264,17 +265,17 @@ void AdapterTimeStream::_printHeader(const UDPPacket::Header& header)
  * @param out
  */
 void AdapterTimeStream::_combinePolarisations(std::complex<double>* in,
-		const unsigned nSubbands, const unsigned nPolarisations,
-		const unsigned nSamples, std::complex<double>* out)
+        const unsigned nSubbands, const unsigned nPolarisations,
+        const unsigned nSamples, std::complex<double>* out)
 {
-	for (unsigned index = 0, c = 0; c < nSubbands; ++c) {
-		for (unsigned t = 0; t < nSamples; ++t) {
-			unsigned iPol1 =  nSamples * (c * nPolarisations + 0) + t;
-			unsigned iPol2 =  nSamples * (c * nPolarisations + 1) + t;
-			out[index] = in[iPol1] + in[iPol2]; // TODO: combine properly.
-			index++;
-		}
-	}
+    for (unsigned index = 0, c = 0; c < nSubbands; ++c) {
+        for (unsigned t = 0; t < nSamples; ++t) {
+            unsigned iPol1 =  nSamples * (c * nPolarisations + 0) + t;
+            unsigned iPol2 =  nSamples * (c * nPolarisations + 1) + t;
+            out[index] = in[iPol1] + in[iPol2]; // TODO: combine properly.
+            index++;
+        }
+    }
 }
 
 

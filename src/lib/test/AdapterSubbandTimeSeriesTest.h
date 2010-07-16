@@ -43,6 +43,9 @@ class AdapterSubbandTimeSeriesTest : public CppUnit::TestFixture
         /// Method to test the adapter configuration.
         void test_configuration();
 
+        /// Test creating with factory.
+        void test_factoryCreate();
+
         /// Method to check data validation performed by the adapter for fixed
         /// packet size.
         void test_checkDataFixedPacket();

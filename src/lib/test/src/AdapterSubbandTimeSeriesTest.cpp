@@ -2,6 +2,8 @@
 
 #include "AdapterSubbandTimeSeries.h"
 
+#include "pelican/utility/FactoryGeneric.h"
+
 #include "pelican/utility/ConfigNode.h"
 #include "SubbandTimeSeries.h"
 #include "LofarUdpHeader.h"
@@ -103,6 +105,12 @@ void AdapterSubbandTimeSeriesTest::test_checkDataFixedPacket()
     }
 }
 
+
+void AdapterSubbandTimeSeriesTest::test_factoryCreate()
+{
+//    FactoryGeneric<AbstractAdapter> factory;
+//    AbstractAdapter* a = factory.create("AdapterSubbandTimeSeries");
+}
 
 /**
  * @details

@@ -16,7 +16,7 @@
                <connection host="127.0.0.1" port="8090"/>
                <params samplesPerPacket="32"
                        nrPolarisation="2"
-                       subbandsPerPacket="42"
+                       subbandsPerPacket="62"
                        packets="16"
                        clock="200"/>
                <samples type="8" />
@@ -32,7 +32,7 @@
         <adapters>
             <AdapterTimeStream>
                 <packetsPerChunk number="16"/>
-                <subbands number="42" />
+                <subbands number="62" /> <!-- number of subbands -->
                 <polarisations number="2" />
                 <samplesPerPacket number="32" />
                 <sampleSize bits="8" />

@@ -1,12 +1,13 @@
 #include "pelican/core/PipelineApplication.h"
 
-#include "LofarStreamDataClient.h"
+#include "LofarStreamDataClientNew.h"
 #include "UdpBFPipeline.h"
+#include "AdapterSubbandTimeSeries.h"
 
 #include <QtCore/QCoreApplication>
 
 #include <iostream>
-
+#include <map>
 
 using namespace pelican;
 using namespace pelican::lofar;
@@ -23,10 +24,8 @@ int main(int argc, char* argv[])
         // Register the pipelines that can run.
         pApp.registerPipeline(new UdpBFPipeline);
 
-        //std::cout << "hereA" << std::endl;
         // Set the data client.
-        pApp.setDataClient("LofarStreamDataClient");
-        //std::cout << "hereB" << std::endl;
+        pApp.setDataClient("LofarStreamDataClientNew");
 
         // Start the pipeline driver.
         pApp.start();

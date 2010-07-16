@@ -5,6 +5,7 @@
 #include "pelican/core/AbstractPipeline.h"
 #include "pelican/data/DataBlob.h"
 #include "pelican/output/PelicanTCPBlobServer.h"
+
 #include "ChanneliserPolyphase.h"
 #include "PolyphaseCoefficients.h"
 #include "ChannelisedStreamData.h"
@@ -18,11 +19,11 @@ namespace lofar {
 
 /**
  * @class MdsmPipeline
- *  
+ *
  * @brief
- * 
+ *
  * @details
- * 
+ *
  */
 class MdsmPipeline : public AbstractPipeline
 {
@@ -51,4 +52,4 @@ class MdsmPipeline : public AbstractPipeline
 } // namespace lofar
 } // namespace pelican
 
-#endif // MDSMPIPELINE_H 
+#endif // MDSMPIPELINE_H
