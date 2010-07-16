@@ -188,27 +188,25 @@ void AdapterSubbandTimeSeries::_readData(SubbandTimeSeriesC32* timeSeries,
     unsigned tStart = packetIndex * _nSamplesPerPacket;
 
     // Loop over dimensions in the packet and write into the data blob.
-    // TODO: Check endiannes ... somehow.
     for (unsigned iPtr = 0, t = 0; t < _nSamplesPerPacket; ++t) {
 
-        // TODO: check this index is right... probably not at the moment.
-        unsigned iTimeBlock = tStart + t / _nSamplesPerTimeBlock;
+        unsigned iTimeBlock = (tStart + t) / _nSamplesPerTimeBlock;
 
         for (unsigned c = 0; c < _nSubbands; ++c) {
             for (unsigned p = 0; p < _nPolarisations; ++p) {
+
                 fComplex* data = timeSeries->ptr(iTimeBlock, c, p)->ptr();
 
-                unsigned packetIndex = _nPolarisations * (t * _nSubbands + c) + p;;
-                unsigned blobIndex = _nSamplesPerPacket * (c * _nPolarisations + p) + t;
+                unsigned index = _nSamplesPerPacket * (c * _nPolarisations + p) + t;
 
                 if (_sampleBits == 8) {
                     TYPES::i8complex i8c = *reinterpret_cast<TYPES::i8complex*>(&buffer[iPtr]);
-                    data[blobIndex] = fComplex(float(i8c.real()), float(i8c.imag()));
+                    data[index] = fComplex(float(i8c.real()), float(i8c.imag()));
                     iPtr += sizeof(TYPES::i8complex);
                 }
                 else if (_sampleBits == 16) {
                     TYPES::i16complex i16c = *reinterpret_cast<TYPES::i16complex*>(&buffer[iPtr]);
-                    data[blobIndex] = fComplex(float(i16c.real()), float(i16c.imag()));
+                    data[index] = fComplex(float(i16c.real()), float(i16c.imag()));
                     iPtr += sizeof(TYPES::i16complex);
                 }
                 else {

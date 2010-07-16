@@ -34,7 +34,7 @@ class LofarChunker : public AbstractChunker
         LofarChunker(const ConfigNode&);
 
         /// Destroys the LofarChunker.
-        ~LofarChunker() { } 
+        ~LofarChunker() { }
 
         /// Creates the socket to use for the incoming data stream.
         virtual QIODevice* newDevice();
@@ -50,10 +50,10 @@ class LofarChunker : public AbstractChunker
         void generateEmptyPacket(UDPPacket& packet, unsigned int seqid, unsigned int blockid);
 
         /// Write UDPPacket to writeableData object
-        unsigned writePacket(WritableData *writer, UDPPacket& packet, unsigned offset);
+        int writePacket(WritableData* writer, UDPPacket& packet, unsigned offset);
 
     private:
-  
+
         int _nPackets;
         unsigned _packetsRejected;
         unsigned _packetsAccepted;

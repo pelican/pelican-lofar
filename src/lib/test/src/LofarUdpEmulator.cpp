@@ -124,7 +124,7 @@ void LofarUdpEmulator::getPacketData(char*& ptr, unsigned long& size)
     // Calculate seqid and blockid from packet counter and clock
     if (!_looseEvenPackets || (_looseEvenPackets && _packetCounter % 2 == 1)) {
         _packet.header.timestamp = 1 + (_blockid + _samplesPerPacket) / (_clock == 160 ? 156250 : (_timestamp % 2 == 0 ? 195213 : 195212));
-        _packet.header.blockSequenceNumber = (_blockid + _samplesPerPacket) % 
+        _packet.header.blockSequenceNumber = (_blockid + _samplesPerPacket) %
                                        (_clock == 160 ? 156250 : (_timestamp % 2 == 0 ? 195213 : 195212));
         _timestamp = _packet.header.timestamp;
         _blockid = _packet.header.blockSequenceNumber;
@@ -132,8 +132,8 @@ void LofarUdpEmulator::getPacketData(char*& ptr, unsigned long& size)
         _packet.header.timestamp = _timestamp;
         _packet.header.blockSequenceNumber = _blockid;
         _timestamp = 1 + (_blockid + _samplesPerPacket) / (_clock == 160 ? 156250 : (_timestamp % 2 == 0 ? 195213 : 195212));
-        _blockid = (_blockid + _samplesPerPacket) % 
-                                       (_clock == 160 ? 156250 : (_timestamp % 2 == 0 ? 195213 : 195212));        
+        _blockid = (_blockid + _samplesPerPacket) %
+                                       (_clock == 160 ? 156250 : (_timestamp % 2 == 0 ? 195213 : 195212));
    }
 
     // Increment packet counter.
@@ -150,11 +150,11 @@ void LofarUdpEmulator::setPacketHeader(UDPPacket::Header* packetHeader)
 {
     // Create packet header.
     if (packetHeader == NULL) {
-        _packet.header.version    = (uint8_t) 0xAAAB; // Hardcoded in RSP firmware
-        _packet.header.nrBeamlets = _subbandsPerPacket;
-        _packet.header.nrBlocks   = _samplesPerPacket;
-        _packet.header.station    = (uint16_t) 0x00EA; // Pelican
-        _packet.header.sourceInfo = (uint8_t) 1010;   // LofarUdpEmulator!
+        _packet.header.version    = (uint8_t) 0xAAAB;   // Hardcoded in RSP firmware
+        _packet.header.nrBeamlets = _subbandsPerPacket; // FIXME nrBeamlets is uint8_t need to cast?!
+        _packet.header.nrBlocks   = _samplesPerPacket;  // FIXME nrBeamlets is uint8_t need to cast?!
+        _packet.header.station    = (uint16_t) 0x00EA;  // Pelican
+        _packet.header.sourceInfo = (uint8_t) 1010;     // LofarUdpEmulator!
     }
     else {
         // Copy header to packet.

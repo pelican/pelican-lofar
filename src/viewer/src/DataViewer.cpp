@@ -94,7 +94,7 @@ DataBlobWidget* DataViewer::getWidgetViewer(const QString& stream) const
 void DataViewer::setConfig(const ConfigNode& config)
 {
     // set basic connection information
-    _port = config.getOption("connection", "port").toInt();
+    _port = (quint16)config.getOption("connection", "port").toInt();
     _server = config.getOption("connection", "host");
 
     // set stream activation defaults

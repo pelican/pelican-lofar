@@ -47,54 +47,40 @@ PPFChanneliser::PPFChanneliser(const ConfigNode& config)
     _nChannels = config.getOption("channels", "number", "512").toUInt();
     _nThreads = config.getOption("processingThreads", "number", "2").toUInt();
     unsigned nTaps = config.getOption("coefficients", "nTaps", "8").toUInt();
-    QString window = config.getOption("filter", "filterWindow", "kaiser");
-    QString coeffFile = config.getOption("filter", "fileName", "");
+    QString window = config.getOption("filter", "filterWindow", "kaiser").toLower();
 
-    // Load the coefficients.
-    _ppfCoeffs.resize(nTaps, _nChannels);
-
-    if (!coeffFile.isEmpty()) {
-        if (!QFile::exists(coeffFile)) {
-            throw QString("PPFChanneliser:: Unable to find coefficient file '%1'.")
-            .arg(coeffFile);
-        }
-        _ppfCoeffs.load(coeffFile, nTaps, _nChannels);
-    }
-    else {
-//        std::cout << "Generating coefficients..." << std::endl;
-        window = window.toLower();
-        PolyphaseCoefficients::FirWindow windowType;
-        if (window == "kaiser") {
-            windowType = PolyphaseCoefficients::KAISER;
-        }
-        else if (window == "gaussian") {
-            windowType = PolyphaseCoefficients::GAUSSIAN;
-        }
-        else if (window == "blackman") {
-            windowType = PolyphaseCoefficients::BLACKMAN;
-        }
-        else if (window == "hamming") {
-            windowType = PolyphaseCoefficients::HAMMING;
-        }
-        else {
-            throw QString("PPFChanneliser: "
-                    "Unknown coefficient window type '%1'.").arg(window);
-        }
-        _ppfCoeffs.genereateFilter(nTaps, _nChannels, windowType);
-    }
-
-//    const double* c = _ppfCoeffs.ptr();
-//    unsigned nCoeffs = _ppfCoeffs.size();
-//    _coeffs.resize(nCoeffs);
-//    for (unsigned i = 0; i < nCoeffs; ++i) {
-//        _coeffs[i] = float(c[i]);
-//    }
-
-    // As the channeliser currently only works for even number of channels
-    // enforce this.
+    // Enforce even number of channels.
     if (_nChannels % 2 != 0) {
         throw QString("PPFChanneliser: "
                 " Please choose an even number of channels.");
+    }
+
+    // Generate PPF coefficients.
+    _ppfCoeffs.resize(nTaps, _nChannels);
+    PolyphaseCoefficients::FirWindow windowType;
+    if (window == "kaiser") {
+        windowType = PolyphaseCoefficients::KAISER;
+    }
+    else if (window == "gaussian") {
+        windowType = PolyphaseCoefficients::GAUSSIAN;
+    }
+    else if (window == "blackman") {
+        windowType = PolyphaseCoefficients::BLACKMAN;
+    }
+    else if (window == "hamming") {
+        windowType = PolyphaseCoefficients::HAMMING;
+    }
+    else {
+        throw QString("PPFChanneliser: "
+                "Unknown coefficient window type '%1'.").arg(window);
+    }
+    _ppfCoeffs.genereateFilter(nTaps, _nChannels, windowType);
+
+    // Convert Coefficients to single precision.
+    _coeffs.resize(_ppfCoeffs.size());
+    const double* coeffs = _ppfCoeffs.ptr();
+    for (unsigned i = 0; i < _ppfCoeffs.size(); ++i) {
+        _coeffs[i] = float(coeffs[i]);
     }
 
     // Allocate buffers used for holding the output of the FIR stage.
@@ -102,6 +88,9 @@ PPFChanneliser::PPFChanneliser(const ConfigNode& config)
     for (unsigned i = 0; i < _nThreads; ++i) {
         _filteredData[i].resize(_nChannels);
     }
+
+    // Initialise pointer to the current oldest sample set.
+    _iOldestSamples = 0;
 
     // Create the FFTW plan.
     size_t fftSize = _nChannels * sizeof(fftwf_complex);
@@ -159,12 +148,10 @@ void PPFChanneliser::run(const SubbandTimeSeriesC32* timeSeries,
         _setupWorkBuffers(nSubbands, nPolarisations, _nChannels, nFilterTaps);
     }
 
-    //const float* coeffs = &_coeffs[0];
-    const double* coeffs = _ppfCoeffs.ptr();
+    const float* coeffs = &_coeffs[0];
 
     // Pointers to processing buffers.
     omp_set_num_threads(_nThreads);
-    unsigned bufferSize = _workBuffer[0].size();
 
 #pragma omp parallel
     {
@@ -193,7 +180,7 @@ void PPFChanneliser::run(const SubbandTimeSeriesC32* timeSeries,
                     workBuffer = &(_workBuffer[s * nPolarisations + p])[0];
 
                     // Update buffered (lagged) data for the sub-band.
-                    _updateBuffer(timeData, _nChannels, workBuffer, bufferSize);
+                    _updateBuffer(timeData, _nChannels, nFilterTaps,  workBuffer);
 
                     // Apply the PPF.
                     _filter(workBuffer, nFilterTaps, _nChannels, coeffs,
@@ -204,7 +191,7 @@ void PPFChanneliser::run(const SubbandTimeSeriesC32* timeSeries,
                     Complex* spectrumData = spectrum->ptr();
 
                     // FFT the filtered subband data to form a new spectrum.
-                    _fft(filteredSamples, _nChannels, spectrumData);
+                    _fft(filteredSamples, spectrumData);
                 }
             }
         }
@@ -249,12 +236,11 @@ void PPFChanneliser::_checkData(const SubbandTimeSeriesC32* timeData)
 * @param nSamples
 */
 void PPFChanneliser::_updateBuffer(const Complex* samples,
-        unsigned nSamples, Complex* buffer, unsigned bufferSize)
+        unsigned nSamples, unsigned nTaps, Complex* buffer)
 {
-    Complex* dest = &buffer[nSamples];
-    size_t size = (bufferSize - nSamples) * sizeof(Complex);
-    memmove(dest, buffer, size);
-    memcpy(buffer, samples, nSamples * sizeof(Complex));
+    size_t blockSize = nSamples * sizeof(Complex);
+    memcpy(&buffer[_iOldestSamples * nSamples], samples, blockSize);
+    _iOldestSamples = (_iOldestSamples + 1) % nTaps;
 }
 
 
@@ -268,47 +254,27 @@ void PPFChanneliser::_updateBuffer(const Complex* samples,
 * @param filteredSamples
 */
 void PPFChanneliser::_filter(const Complex* sampleBuffer, unsigned nTaps,
-        unsigned nChannels, const double* coeffs, Complex* filteredSamples)
+        unsigned nChannels, const float* coeffs, Complex* filteredSamples)
 {
     for (unsigned i = 0; i < nChannels; ++i) {
         filteredSamples[i] = Complex(0.0, 0.0);
     }
 
-//#undef USE_CBLAS // undefine the use of cblas
+    unsigned iBuffer = 0, idx = 0;
+    float re, im, coeff;
 
-    for (unsigned t = 0; t < nTaps; ++t) {
+    for (unsigned i = 0, t = 0; t < nTaps; ++t) {
+        iBuffer = ((_iOldestSamples + t) % nTaps) * nChannels;
         for (unsigned c = 0; c < nChannels; ++c) {
-            unsigned iBuffer = t * nChannels + c;
-            unsigned iCoeff = t * nChannels + c;
-            float re = sampleBuffer[iBuffer].real() * coeffs[iCoeff];
-            float im = sampleBuffer[iBuffer].imag() * coeffs[iCoeff];
-            filteredSamples[c] += std::complex<float>(re, im);
-
+            idx = iBuffer + c;
+            coeff = coeffs[i];
+            re = sampleBuffer[idx].real() * coeff;
+            im = sampleBuffer[idx].imag() * coeff;
+            filteredSamples[c].real() += re;
+            filteredSamples[c].imag() += im;
+            i++;
         }
     }
-
-//    for (unsigned c = 0; c < nChannels; ++c) {
-//        //#ifdef USE_CBLAS
-//        //        unsigned iCoeff = c * nTaps;
-//        //        unsigned iBuffer = (nTaps - 1) * nChannels + c;
-//        //        //std::cout << c << " "<< iCoeff << " " << iBuffer << std::endl;
-//        //        const Complex* x = &(sampleBuffer[iBuffer]);
-//        //        // NOTE: coeffs are real and samples are complex!
-//        //        const Complex* y = &(coeffs[iCoeff]);
-//        //        Complex result;
-//        //        cblas_cdotu_sub(nTaps, x, -64, y, 1, &result);
-//        //        filteredSamples[c] = result;
-//        //#else
-//        for (unsigned t = 0; t < nTaps; ++t) {
-//            //unsigned iBuffer = (nTaps - t - 1) * nChannels + c;
-//            unsigned iBuffer = t * nChannels + c;
-//            unsigned iCoeff = nTaps * c + t;
-//            float re = sampleBuffer[iBuffer].real() * coeffs[iCoeff];
-//            float im = sampleBuffer[iBuffer].imag() * coeffs[iCoeff];
-//            filteredSamples[c] += std::complex<float>(re, im);
-//        }
-//        //#endif
-//    }
 }
 
 
@@ -320,41 +286,16 @@ void PPFChanneliser::_filter(const Complex* sampleBuffer, unsigned nTaps,
 * @param nSamples
 * @param spectrum
 */
-void PPFChanneliser::_fft(const Complex* samples, unsigned nSamples,
-        Complex* spectrum)
+void PPFChanneliser::_fft(const Complex* samples, Complex* spectrum)
 {
     fftwf_execute_dft(_fftPlan, (fftwf_complex*)samples, (fftwf_complex*)spectrum);
-    _fftShift(spectrum, nSamples);
 }
 
-
-/**
- * @details
- * Shift the zero frequency component to the centre of the spectrum.
- *
- * @param spectrum
- * @param nChannels
- */
-void PPFChanneliser::_fftShift(Complex* spectrum, unsigned nChannels)
-{
-    std::vector<Complex> temp(nChannels, Complex(0.0, 0.0));
-    unsigned iZero = nChannels / 2; // FIXME? only works for even nChannels!
-    size_t size = nChannels / 2 * sizeof(Complex);
-    memcpy(&temp[iZero], spectrum,  size);
-    memcpy(&temp[0], &spectrum[iZero],  size);
-    memcpy(spectrum, &temp[0], nChannels * sizeof(Complex));
-}
 
 /**
  * @details
  * Calculates start and end indices for a given thread for splitting nValues
  * of a processing dimension between nThreads.
- *
- * @param start
- * @param end
- * @param nValues
- * @param nThreads
- * @param threadId
  */
 void PPFChanneliser::_threadProcessingIndices(unsigned& start,
         unsigned& end, unsigned nValues, unsigned nThreads,
@@ -384,16 +325,14 @@ void PPFChanneliser::_threadProcessingIndices(unsigned& start,
 
 /**
 * @details
-* Sets up processing buffers
-*
-* @param nChannels
-* @param nFilterTaps
+* Set up buffers used to store the last nTaps * nChannels time series values
+* for each sub-band and polarisation.
 */
 unsigned PPFChanneliser::_setupWorkBuffers(unsigned nSubbands,
         unsigned nPolarisations, unsigned nChannels, unsigned nTaps)
 {
-    _workBuffer.resize(nSubbands * nPolarisations);
     unsigned bufferSize = nChannels * nTaps;
+    _workBuffer.resize(nSubbands * nPolarisations);
     for (unsigned i = 0, s = 0; s < nSubbands; ++s) {
         for (unsigned p = 0; p < nPolarisations; ++p) {
             _workBuffer[i].resize(bufferSize, Complex(0.0, 0.0));

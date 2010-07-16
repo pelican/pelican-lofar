@@ -11,7 +11,7 @@ namespace lofar {
 
 
 /**
- *@details OutputHDF5Lofar 
+ *@details OutputHDF5Lofar
  */
 OutputHDF5Lofar::OutputHDF5Lofar(  const ConfigNode& configNode )
     : AbstractOutputStream( configNode )
@@ -25,11 +25,11 @@ OutputHDF5Lofar::~OutputHDF5Lofar()
 {
 }
 
-void OutputHDF5Lofar::send(const QString& streamName, const DataBlob* dataBlob)
+void OutputHDF5Lofar::send(const QString& /*streamName*/, const DataBlob* dataBlob)
 {
-    if( dataBlob->type() == "LofarData" )
+    if (dataBlob->type() == "LofarData")
     {
-        const LofarStationConfiguration& config = static_cast<const LofarData*>(dataBlob)->configuration();
+        //const LofarStationConfiguration& config = static_cast<const LofarData*>(dataBlob)->configuration();
         // TODO
     }
 }

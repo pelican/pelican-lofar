@@ -55,6 +55,14 @@ void PolyphaseCoefficients::load(const QString& fileName,
 
 
 
+
+
+
+
+
+
+
+
 //==============================================================================
 // The following are taken from LOFAR CNProc FIR.cc under GNU GPL
 // (TODO: check this)
@@ -249,7 +257,7 @@ void PolyphaseCoefficients::_generateFirFilter(unsigned n, double w,
 
     // copy first part of grid
     for(unsigned i=0; i<grid_n+1; i++) {
-        cinput[i][0] = grid[i];
+        cinput[i][0] = float(grid[i]);
     }
 
     // append zeros
@@ -259,7 +267,7 @@ void PolyphaseCoefficients::_generateFirFilter(unsigned n, double w,
 
     // now append the grid in reverse order
     for(unsigned i=grid_n-1, index=0; i >=1; i--, index++) {
-        cinput[grid_n*3+1 + index][0] = grid[i];
+        cinput[grid_n*3+1 + index][0] = float(grid[i]);
     }
 
     fftwf_plan plan = fftwf_plan_dft_1d(grid_n*4, cinput, coutput,
@@ -323,12 +331,7 @@ void PolyphaseCoefficients::genereateFilter(unsigned nTaps,
         }
         case KAISER:
         {
-            // The beta parameter is found in matlab / octave with
-            // [n,Wn,bta,filtype] = kaiserord([fsin/channels 1.4*fsin/channels],
-            //                        [1 0],[10^(0.5/20) 10^(-91/20)], fsin);
-            // where fsin is the sample freq.
             double beta = 9.0695;
-            //double beta = 1.0;
             _kaiser(n, beta, window);
             break;
         }
@@ -344,33 +347,19 @@ void PolyphaseCoefficients::genereateFilter(unsigned nTaps,
 
     _coeff.resize(nChannels * nTaps);
 
-    // Testing
-    // ----------------
-    for(int t = 0; t < nTaps; ++t) { // store the taps in reverse!
+    for(int t = 0; t < nTaps; ++t) {
         for(unsigned c = 0; c < nChannels; ++c) {
-            //unsigned i = c * nTaps + (nTaps - t - 1);
-            unsigned i = (nTaps - t - 1) * nChannels + c;
             unsigned index = t * nChannels + c;
-            _coeff[i] = result[index] / nChannels;
+            _coeff[index] = result[index] / nChannels;
+            if (c%2 == 0)
+                _coeff[index] = result[index] / nChannels;
+            else
+                _coeff[index] = -result[index] / nChannels;
         }
     }
-    // ---------------
-
-//    for(unsigned c = 0; c < nChannels; ++c) {
-//        for(int t = 0; t < nTaps; ++t) {
-//            unsigned i = c * nTaps + (nTaps - t - 1);
-//            unsigned index = t * nChannels + c;
-//            _coeff[i] = result[index] / nChannels;
-//        }
-//    }
 
     delete[] result;
 }
-
-
-
-
-
 
 
 

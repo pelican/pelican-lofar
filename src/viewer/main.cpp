@@ -4,11 +4,12 @@
  * Attaches to a data stream from the Lofar pipeline to display
  * it in real time.
  *
- * Copyright OerC 2010
+ * Copyright OeRC 2010
  *
  */
 
 #include <iostream>
+#include <cstdlib>
 #include <QtGui/QApplication>
 #include <boost/program_options.hpp>
 #include "pelican/utility/Config.h"
@@ -37,7 +38,6 @@ pelican::Config createConfig(int argc, char** argv)
     // Check for help message.
     if (varMap.count("help")) {
         std::cout << desc << "\n";
-        exit;
     }
 
     // Get the configuration file name.
@@ -60,8 +60,8 @@ int main(int argc, char* argv[])
     pelican::Config::TreeAddress address;
     address << pelican::Config::NodeId("dataviewer", "");
 
-    config.save("config.xml");
-    config.summary();
+//    config.save("config.xml");
+//    config.summary();
 
     pelican::lofar::LofarDataViewer ldv(config.get(address));
 

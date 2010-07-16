@@ -41,8 +41,7 @@ class SubbandSpectraC32;
  * 		<ChanneliserPolyphase name="">
  * 			<channels number="512"/>
  * 			<processingThreads number="2"/>
- * 			<filter nTaps="8" filterWindow="kaiser" fileName="coeffs.dat"/>
- * 			<coefficientFile name="coeffs.dat"/>
+ * 			<filter nTaps="8" filterWindow="kaiser"/>
  * 		</ChanneliserPolyphase>
  * \verbatim
  *
@@ -50,12 +49,9 @@ class SubbandSpectraC32;
  * - processingThreads: The number of threads to parallelise over.
  * - filter: Options for FIR filer coefficients.
  *     - nTaps: Number of filter taps in the PPF coefficient data
- *     - filterWindow(optional): The filter window type used in generating
- *       FIR filer coefficients. Possible options are: "kaiser" (default),
- *       "gaussian", "blackman" and "hamming".
- *     - fileName(optional): This option specifies a coefficient file to use rather
- *           than using the generator.
- *
+ *     - filterWindow: The filter window type used in generating FIR filer
+ *       coefficients. Possible options are: "kaiser" (default), "gaussian",
+ *       "blackman" and "hamming".
  *
  */
 
@@ -82,17 +78,16 @@ class PPFChanneliser : public AbstractModule
 
         /// Update the sample buffer.
         void _updateBuffer(const Complex* samples, unsigned nSamples,
-                Complex* buffer, unsigned bufferSize);
+                unsigned nTaps, Complex* buffer);
 
         /// Filter the matrix of samples (dimensions nTaps by nChannels)
         /// to create a vector of samples for the FFT.
         void _filter(const Complex* sampleBuffer, unsigned nTaps,
-                unsigned nChannels, const double* coeffs,
+                unsigned nChannels, const float* coeffs,
                 Complex* filteredSamples);
 
         /// FFT filtered samples to form a spectrum.
-        void _fft(const Complex* samples, unsigned nSamples,
-                Complex* spectrum);
+        void _fft(const Complex* samples, Complex* spectrum);
 
         /// Shift the zero frequency component to the centre of the spectrum.
         void _fftShift(Complex* spectrum, unsigned nChannels);
@@ -109,9 +104,14 @@ class PPFChanneliser : public AbstractModule
         bool _buffersInitialised;
         unsigned _nChannels;
         unsigned _nThreads;
+
         PolyphaseCoefficients _ppfCoeffs;
-//        std::vector<float> _coeffs;
+        std::vector<float> _coeffs;
+
+        unsigned _iOldestSamples; // Pointer to the oldest samples.
+
         fftwf_plan _fftPlan;
+
         // Work Buffers (need to have a buffer per thread).
         std::vector<std::vector<Complex> > _workBuffer;
         std::vector<std::vector<Complex> > _filteredData;

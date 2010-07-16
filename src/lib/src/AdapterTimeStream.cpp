@@ -82,7 +82,7 @@ void AdapterTimeStream::deserialise(QIODevice* in)
         // Read the header from the IO device.
         in->read(&headerTemp[0], headerSize);
         _readHeader(header, &headerTemp[0]);
- 
+
         // First packet, extract timestamp
         if (p == 0) {
             TYPES::TimeStamp timestamp;
@@ -187,7 +187,7 @@ void AdapterTimeStream::_readData(std::complex<double>* data, char* buffer)
         for (unsigned c = 0; c < _nSubbands; ++c) {
             for (unsigned p = 0; p < _nPolarisations; ++p) {
 
-                unsigned packetIndex = _nPolarisations * (t * _nSubbands + c) + p;;
+                //unsigned packetIndex = _nPolarisations * (t * _nSubbands + c) + p;;
                 unsigned blobIndex = _nSamples * (c * _nPolarisations + p) + t;
 
                 if (_sampleBits == 4) {
