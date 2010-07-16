@@ -37,7 +37,7 @@ void MdsmPipeline::init()
 
     // Hard-code filename, taps and channels.
     // FIXME These are quick hard-coded hacks at the moment.
-    QString coeffFileName = "../../../pipelines/mdsm/data/coeffs_512_1.dat";
+    QString coeffFileName = "/code/pelican-lmofar/release/pipelines/mdsm/data/coeffs_512_1.dat";
     int nTaps = 8;
     int nChannels = 512;
     polyphaseCoeff->load(coeffFileName, nTaps, nChannels);
