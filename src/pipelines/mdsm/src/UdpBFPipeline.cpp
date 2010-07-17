@@ -48,6 +48,18 @@ void UdpBFPipeline::run(QHash<QString, DataBlob*>& remoteData)
     // a number of subbands, polarisations and blocks.
     timeSeries = (SubbandTimeSeriesC32*) remoteData["SubbandTimeSeriesC32"];
 
+//    unsigned block = 0, subband = 0, pol = 0;
+//    std::complex<float>* t = timeSeries->ptr(block, subband, pol)->ptr();
+//    std::cout << "t[0] = " << t[0] << " (b=" << block << ", s=" << subband << ", p=" << pol << ")" << std::endl;
+//    std::cout << "t[1] = " << t[1] << " (b=" << block << ", s=" << subband << ", p=" << pol << ")" << std::endl;
+//    std::cout << "t[2] = " << t[1] << " (b=" << block << ", s=" << subband << ", p=" << pol << ")" << std::endl;
+//
+//    block = 0, subband = 2, pol = 0;
+//    t = timeSeries->ptr(block, subband, pol)->ptr();
+//    std::cout << "t[0] = " << t[0] << " (b=" << block << ", s=" << subband << ", p=" << pol << ")" << std::endl;
+//    std::cout << "t[1] = " << t[1] << " (b=" << block << ", s=" << subband << ", p=" << pol << ")" << std::endl;
+//    std::cout << "t[2] = " << t[1] << " (b=" << block << ", s=" << subband << ", p=" << pol << ")" << std::endl;
+
     // Run the polyphase channeliser.
     // Note: This channelises all of the subbands, and polarisations in the time series for
     // a number of blocks of spectra.
@@ -56,7 +68,7 @@ void UdpBFPipeline::run(QHash<QString, DataBlob*>& remoteData)
     // stokes->run(spectra, outputBlob)
 
     // Output channelised data blob (which has dimensions: number of spectra x subbands x polarisations)
-//   dataOutput(spectra, "SubbandSpectraC32");
+   dataOutput(spectra, "SubbandSpectraC32");
 
     if (_iteration % 200 == 0) std::cout << "Finished the UDP beamforming pipeline, iteration " << _iteration << std::endl;
     _iteration++;

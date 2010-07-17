@@ -18,6 +18,7 @@ set(lib_src
     src/PelicanBlobClient.cpp
     src/PolyphaseCoefficients.cpp
     src/SubbandSpectra.cpp
+    src/SubbandTimeSeries.cpp
     src/PPFChanneliser.cpp
 )
 

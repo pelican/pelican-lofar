@@ -165,6 +165,9 @@ class SubbandTimeSeriesC32 : public SubbandTimeSeries<std::complex<float> >
 
         /// Destroys the time stream data blob.
         ~SubbandTimeSeriesC32() {}
+
+    public:
+        void write(const QString& fileName) const;
 };
 
 PELICAN_DECLARE_DATABLOB(SubbandTimeSeriesC32)

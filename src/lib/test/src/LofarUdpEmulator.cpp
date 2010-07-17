@@ -65,7 +65,8 @@ void LofarUdpEmulator::fillPacket()
 
     // Create test data in packet.
     switch (_sampleType) {
-    case i4complex: {
+    case i4complex:
+    {
         TYPES::i4complex *s = reinterpret_cast<TYPES::i4complex*>(_packet.data);
         for (int i = 0; i < _samplesPerPacket; i++) {
             for (int j = 0; j < _subbandsPerPacket; j++) {
@@ -77,7 +78,8 @@ void LofarUdpEmulator::fillPacket()
         }
         break;
     }
-    case i8complex: {
+    case i8complex:
+    {
         TYPES::i8complex *s = reinterpret_cast<TYPES::i8complex*>(_packet.data);
         for (int i = 0; i < _samplesPerPacket; i++) {
             for (int j = 0; j < _subbandsPerPacket; j++) {
@@ -89,7 +91,8 @@ void LofarUdpEmulator::fillPacket()
         }
         break;
     }
-    case i16complex: {
+    case i16complex:
+    {
         TYPES::i16complex *s = reinterpret_cast<TYPES::i16complex*>(_packet.data);
         for (int i = 0; i < _samplesPerPacket; i++) {
             for (int j = 0; j < _subbandsPerPacket; j++) {

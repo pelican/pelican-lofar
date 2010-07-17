@@ -85,6 +85,8 @@ void AdapterSubbandTimeSeries::deserialise(QIODevice* in)
         in->read(&headerTemp[0], headerSize);
         _readHeader(header, &headerTemp[0]);
 
+        // TODO: copy timestamp stuff from AdapterTimeStream.
+
         // Read the useful data (depends on configured dimensions).
         in->read(&dataTemp[0], dataSize);
         _readData(_timeData, &dataTemp[0], p);
