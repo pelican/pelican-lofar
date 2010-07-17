@@ -168,8 +168,8 @@ void LofarChunker::next(QIODevice* device)
     else {
         // Must discard the datagram if there is no available space.
         socket->readDatagram(0, 0);
-//        std::cout << "LofarChunker::LofarChunker(): "
-//                "Wriable data not valid discarding packets." << std::endl;
+        std::cout << "LofarChunker::LofarChunker(): "
+                "Wriable data not valid discarding packets." << std::endl;
     }
 
     // Update _startTime
