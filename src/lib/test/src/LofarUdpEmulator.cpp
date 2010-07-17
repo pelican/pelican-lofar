@@ -89,15 +89,15 @@ void LofarUdpEmulator::fillPacket()
                 for (int p = 0; p < _nrPolarisations; ++p) {
                     unsigned index = i * _subbandsPerPacket * _nrPolarisations +
                         j * _nrPolarisations + p;
-                    float t = float(i) / _samplesPerPacket;
-                    float re = sin(2.0 * M_PI * t * 2.1 * (p + j));
-                    float im = cos(2.0 * M_PI * t * 2.1 * (p + j));
-                    s[index] = TYPES::i8complex(re, im);
+//                    float t = float(i) / _samplesPerPacket;
+//                    float re = sin(2.0 * M_PI * t * 2.1 * (p + j));
+//                    float im = cos(2.0 * M_PI * t * 2.1 * (p + j));
+//                    s[index] = TYPES::i8complex(re, im);
 //                    std::cout << float(s[index].real()) << std::endl;
 //                    std::cout << float(s[index].imag()) << std::endl;
 //                    s[index] = TYPES::i8complex(_packetCounter, p);
 //                    std::cout << _packetCounter << std::endl;
-                    //s[index] = TYPES::i8complex(i + j, i);
+                    s[index] = TYPES::i8complex(i + j, i);
                 }
             }
         }

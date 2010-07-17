@@ -220,6 +220,9 @@ void AdapterSubbandTimeSeries::_readData(SubbandTimeSeriesC32* timeSeries,
 
                 if (_sampleBits == 8) {
                     TYPES::i8complex i8c = *reinterpret_cast<TYPES::i8complex*>(&buffer[iPtr]);
+
+                    // TODO VITAL CONVERSION OF INT8 to float!!! (see lofar code)
+
                     data[index].real() = float(i8c.real());
                     data[index].imag() = float(i8c.imag());
                     iPtr += sizeof(TYPES::i8complex);
