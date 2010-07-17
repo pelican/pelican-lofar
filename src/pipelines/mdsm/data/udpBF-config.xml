@@ -69,7 +69,7 @@
                     <file filepath="stokes.dat" />
                     <params channelOneFrequency="120"
                             frequencyOffset="0.00038085938"
-                            numberOfChannels="3968"
+                            numberOfChannels="1984"
                             samplingTime="0.001"
                             telescope="LOFAR"
                             nPols="1"/>
