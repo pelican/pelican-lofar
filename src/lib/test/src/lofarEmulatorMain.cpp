@@ -37,7 +37,7 @@ int main(int argc, char** argv)
             "<LofarUdpEmulator>"
             "    <connection host=\"127.0.0.1\" port=\"8090\"/>"
             "    <params clock=\""         + QString::number(clock) + "\"/>"
-            "    <packet interval=\"1\""
+            "    <packet interval=\"160\""
             "            startDelay=\"1\""
             "            sampleSize=\"8\""
             "            samples=\""       + QString::number(samplesPerPacket)  + "\""
