@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>603</width>
-    <height>311</height>
+    <height>318</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -18,12 +18,18 @@
     <layout class="QVBoxLayout" name="verticalLayout">
      <item>
       <widget class="QGroupBox" name="groupBox_flow">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
        <property name="title">
         <string>Flow Control</string>
        </property>
        <layout class="QGridLayout" name="gridLayout_2">
         <item row="0" column="0">
          <widget class="QPushButton" name="pushButton_pause">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
           <property name="text">
            <string>Pause</string>
           </property>
@@ -31,6 +37,9 @@
         </item>
         <item row="0" column="1">
          <widget class="QPushButton" name="pushButton_resume">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
           <property name="text">
            <string>Resume</string>
           </property>
@@ -90,13 +99,27 @@
           </property>
          </widget>
         </item>
+        <item row="0" column="0">
+         <widget class="QLabel" name="label_timeBlock">
+          <property name="text">
+           <string>Time block ID</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="1">
+         <widget class="QSpinBox" name="spinBox_timeBlock">
+          <property name="maximum">
+           <number>999</number>
+          </property>
+         </widget>
+        </item>
        </layout>
       </widget>
      </item>
      <item>
       <widget class="QGroupBox" name="groupBox_output">
        <property name="enabled">
-        <bool>true</bool>
+        <bool>false</bool>
        </property>
        <property name="title">
         <string>Output</string>
@@ -104,6 +127,9 @@
        <layout class="QGridLayout" name="gridLayout_3">
         <item row="0" column="0">
          <widget class="QPushButton" name="pushButton_save">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
           <property name="text">
            <string>Save Plot</string>
           </property>
