@@ -35,7 +35,7 @@ void SubbandSpectrumWidget::updateData(DataBlob* data)
 //     std::cout << "nPolarisations = " << nPolarisations << std::endl;
 //     std::cout << "nChannels      = " << nChannels << std::endl;
 
-     if (subband >= nSubbands || polarisation >= nPolarisations) {
+     if (subband >= nSubbands || polarisation >= nPolarisations || timeSample >= nTimeBlocks) {
          plot->clear();
          return;
      }
@@ -55,9 +55,9 @@ void SubbandSpectrumWidget::updateData(DataBlob* data)
      //cout << "----- spectrum[1] = " << spectrum[1] << " " << spectrumAmp[1] << endl;
      // Set the plot title.
      plot->setTitle(QString("Spectrum (sample %1/%2, subband %3/%4, polarisation %5/%6)")
-             .arg(timeSample).arg(nTimeBlocks - 1)
-             .arg(subband).arg(nSubbands - 1)
-             .arg(polarisation).arg(nPolarisations - 1));
+             .arg(timeSample).arg(nTimeBlocks)
+             .arg(subband).arg(nSubbands)
+             .arg(polarisation).arg(nPolarisations));
 
      // Update the plot with the spectrum.
      plot->plotCurve(nChannels, &frequencyIndex[0], &spectrumAmp[0]);

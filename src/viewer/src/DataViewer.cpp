@@ -1,4 +1,9 @@
 #include "viewer/DataViewer.h"
+#include "viewer/DataBlobWidget.h"
+#include "viewer/SubbandSpectrumWidget.h"
+
+#include "pelican/utility/ConfigNode.h"
+
 #include <QtGui/QMessageBox>
 #include <QtGui/QVBoxLayout>
 #include <QtGui/QActionGroup>
@@ -6,9 +11,9 @@
 #include <QtGui/QMenu>
 #include <QtGui/QMenuBar>
 #include <QtGui/QTabWidget>
-#include "viewer/DataBlobWidget.h"
-#include "viewer/SubbandSpectrumWidget.h"
-#include "pelican/utility/ConfigNode.h"
+#include <QtGui/QCloseEvent>
+
+
 
 namespace pelican {
 
@@ -136,6 +141,17 @@ void DataViewer::_updatedStreams( const QSet<QString>& streams )
 
     }
 }
+
+
+
+/**
+ * @details
+ */
+void DataViewer::closeEvent(QCloseEvent* event)
+{
+    event->accept();
+}
+
 
 void DataViewer::about()
 {

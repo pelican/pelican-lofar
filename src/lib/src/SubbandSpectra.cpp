@@ -193,7 +193,7 @@ void SubbandSpectraStokes::serialise(QIODevice& out) const
  * @details
  * Deserialises the data blob.
  */
-void SubbandSpectraStokes::deserialise(QIODevice& in, QSysInfo::Endian endian)
+void SubbandSpectraStokes::deserialise(QIODevice& in, QSysInfo::Endian /*endian*/)
 {
 
     // TODO: the endianness parameter is broken somewhere...

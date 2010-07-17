@@ -41,13 +41,13 @@ class PelicanBlobClient
 
     private:
         AbstractClientProtocol* _protocol;
-        QTcpSocket*		_tcpSocket;
-        QString 		_server;
-        QString			_blobType;
-        unsigned int 		_port;
+        QTcpSocket* _tcpSocket;
+        QString _server;
+        QString _blobType;
+        unsigned _port;
 };
 
 } // namespace lofar
 } // namespace pelican
 
-#endif // PELICANBLOBCLIENT_H 
+#endif // PELICANBLOBCLIENT_H

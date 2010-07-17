@@ -49,14 +49,14 @@ void StokesGenerator::run(const SubbandSpectraC32* channeliserOutput,
             for (unsigned c = 0; c < nChannels; ++c) {
                 powerX = _sqr(dataPolX[c].real()) + _sqr(dataPolX[c].imag());
                 powerY = _sqr(dataPolY[c].real()) + _sqr(dataPolY[c].imag());
-//                I[c] = powerX + powerY;
-//                Q[c] = powerX - powerY;
-//                U[c] = 2.0 * real(dataPolX[c] * conj(dataPolY[c]));
-//                V[c] = 2.0 * imag(dataPolX[c] * conj(dataPolY[c]));
-                I[c] = sin(2 * M_PI * 2.0 * c * 0.1);//powerX + powerY;
-                Q[c] = c;//powerX - powerY;
-                U[c] = 2*c;//2.0 * real(dataPolX[c] * conj(dataPolY[c]));
-                V[c] = 3+3*c;//2.0 * imag(dataPolX[c] * conj(dataPolY[c]));
+                I[c] = powerX + powerY;
+                Q[c] = powerX - powerY;
+                U[c] = 2.0 * real(dataPolX[c] * conj(dataPolY[c]));
+                V[c] = 2.0 * imag(dataPolX[c] * conj(dataPolY[c]));
+//                I[c] = sin(2 * M_PI * 2.0 * c * 0.1);//powerX + powerY;
+//                Q[c] = c;//powerX - powerY;
+//                U[c] = 2*c;//2.0 * real(dataPolX[c] * conj(dataPolY[c]));
+//                V[c] = 3+3*c;//2.0 * imag(dataPolX[c] * conj(dataPolY[c]));
             }
         }
     }
