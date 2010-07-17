@@ -19,6 +19,7 @@ SigprocStokesWriter::SigprocStokesWriter(const ConfigNode& configNode )
     _foff     = configNode.getOption("params", "frequencyOffset", "0").toFloat();
     _tsamp    = configNode.getOption("params", "samplingTime", "0").toFloat();
     _nchans   = configNode.getOption("params", "numberOfChannels", "31").toFloat();
+    _nPols    = configNode.getOption("params", "nPols", "1").toUInt();
 
     // Open file
     _file.open(_filepath.toUtf8().data(), std::ios::out | std::ios::binary);
@@ -38,7 +39,7 @@ SigprocStokesWriter::SigprocStokesWriter(const ConfigNode& configNode )
     WriteDouble("tsamp", _tsamp);
     WriteInt("nbits", 32);         // Only 32-bit binary data output is implemented for now
     WriteDouble("tstart", 0);      //TODO: Extract start time from first packet
-    WriteInt("nifs", 4);		   // Polarisation channels.
+    WriteInt("nifs", int(_nPols));		   // Polarisation channels.
     WriteString("HEADER_END");
     _file.flush();
 }
@@ -89,13 +90,13 @@ void SigprocStokesWriter::send(const QString& streamName, const DataBlob* incomi
 
         unsigned nSamples = stokes->nTimeBlocks();
         unsigned nSubbands = stokes->nSubbands();
-        unsigned nPolarisations = stokes->nPolarisations();
+//        unsigned nPolarisations = stokes->nPolarisations();
         unsigned nChannels = stokes->ptr(0, 0, 0)->nChannels();
         float* data;
         size_t dataSize = nChannels * sizeof(float);
 
         for (unsigned t = 0; t < nSamples; ++t) {
-            for (unsigned p = 0; p < nPolarisations; ++p) {
+            for (unsigned p = 0; p < _nPols; ++p) {
                 for (unsigned s = 0; s < nSubbands; ++s) {
                     data = stokes->ptr(t, s, p)->ptr();
                     _file.write(reinterpret_cast<char*>(data), dataSize);

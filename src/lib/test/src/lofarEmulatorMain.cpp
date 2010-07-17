@@ -15,7 +15,7 @@ int main(int argc, char** argv)
     //int numPackets        = 10000;   // Number of packet to send
     int clock             = 200;  // Rounded up clock station clock speed
     //int subbandsPerPacket = (clock == 200) ? 42 : 54;  //  Number of block per frame
-    int subbandsPerPacket = 62;
+    int subbandsPerPacket = 31;
 
     // Set up LOFAR data emulator configuration.
 //    ConfigNode emulatorConfig(

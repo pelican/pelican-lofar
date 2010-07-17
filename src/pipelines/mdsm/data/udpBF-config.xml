@@ -16,7 +16,7 @@
                <connection host="127.0.0.1" port="8090"/>
                <params samplesPerPacket="32"
                        nrPolarisation="2"
-                       subbandsPerPacket="62"
+                       subbandsPerPacket="31"
                        packets="16"
                        clock="200"/> <!-- packets = packets in a chunk -->
                <samples type="8" />
@@ -36,7 +36,7 @@
                 <packetsPerChunk number="16"/>
                 <samplesPerPacket number="32"/>
                 <samplesPerTimeBlock number="64"/>
-                <subbands number="62"/> <!-- number of subbands -->
+                <subbands number="31"/> <!-- number of subbands -->
                 <polarisations number="2"/>
             </AdapterSubbandTimeSeries>
         </adapters>
@@ -71,7 +71,8 @@
                             frequencyOffset="0.00038085938"
                             numberOfChannels="3968"
                             samplingTime="0.001"
-                            telescope="LOFAR"/>
+                            telescope="LOFAR"
+                            nPols="1"/>
               </SigprocStokesWriter>
           </streamers>
 
