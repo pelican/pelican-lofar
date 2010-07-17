@@ -56,7 +56,7 @@
              </PelicanTCPBlobServer>
           </streamers>
           <dataStreams>
-             <stream name="SubbandSpectra" listeners="PelicanTCPBlobServer" />
+             <stream name="SubbandSpectraC32" listeners="PelicanTCPBlobServer" />
           </dataStreams>
         </output>
 

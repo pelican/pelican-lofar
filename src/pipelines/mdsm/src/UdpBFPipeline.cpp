@@ -69,6 +69,8 @@ void UdpBFPipeline::run(QHash<QString, DataBlob*>& remoteData)
 
     // Output channelised data blob (which has dimensions: number of spectra x subbands x polarisations)
    dataOutput(spectra, "SubbandSpectraC32");
+   // calls output stream managed->send(data, stream)
+   // the output stream manager is configured in the xml
 
     if (_iteration % 200 == 0) std::cout << "Finished the UDP beamforming pipeline, iteration " << _iteration << std::endl;
     _iteration++;
