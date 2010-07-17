@@ -17,7 +17,7 @@
                <params samplesPerPacket="32"
                        nrPolarisation="2"
                        subbandsPerPacket="62"
-                       packets="64"
+                       packets="16"
                        clock="200"/> <!-- packets = packets in a chunk -->
                <samples type="8" />
            </LofarChunker>
@@ -33,9 +33,9 @@
             <AdapterSubbandTimeSeries>
                 <fixedSizePackets value="false" />
                 <sampleSize bits="8" />
-                <packetsPerChunk number="64"/>
+                <packetsPerChunk number="16"/>
                 <samplesPerPacket number="32"/>
-                <samplesPerTimeBlock number="512"/>
+                <samplesPerTimeBlock number="64"/>
                 <subbands number="62"/> <!-- number of subbands -->
                 <polarisations number="2"/>
             </AdapterSubbandTimeSeries>
@@ -43,7 +43,7 @@
 
         <modules>
             <PPFChanneliser>
-                <channels number="512" />
+                <channels number="64" />
                 <processingThreads number="2" />
                 <filter nTaps="8" filterWindow="kaiser"/>
             </PPFChanneliser>
@@ -70,8 +70,8 @@
              <SigprocStokesWriter>
                     <file filepath="stokes.dat" />
                     <params channelOneFrequency="120"
-                            frequencyOffset="0.0195"
-                            numberOfChannels="31744"
+                            frequencyOffset="0.00038085938"
+                            numberOfChannels="3968"
                             samplingTime="0.001"
                             telescope="LOFAR"/>
               </SigprocStokesWriter>

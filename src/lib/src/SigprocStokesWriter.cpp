@@ -25,8 +25,8 @@ SigprocStokesWriter::SigprocStokesWriter(const ConfigNode& configNode )
 
     // Write header
     WriteString("HEADER_START");
-    WriteString("Telescope");
-    WriteString("LOFAR");
+    //WriteString("Telescope");
+    //WriteString("LOFAR");
     WriteInt("machine_id", 0);    // Ignore for now
     WriteInt("telescope_id", 0);  // Ignore for now
     WriteInt("data_type", 1);     // Channelised Data
@@ -40,6 +40,7 @@ SigprocStokesWriter::SigprocStokesWriter(const ConfigNode& configNode )
     WriteDouble("tstart", 0);      //TODO: Extract start time from first packet
     WriteInt("nifs", 4);		   // Polarisation channels.
     WriteString("HEADER_END");
+    _file.flush();
 }
 
 // Destructor

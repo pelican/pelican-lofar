@@ -88,6 +88,8 @@ void UdpBFPipeline::run(QHash<QString, DataBlob*>& remoteData)
 
     dataOutput(stokes, "SubbandSpectraStokes");
 
+    stop();
+
     if (_iteration % 200 == 0) std::cout << "Finished the UDP beamforming pipeline, iteration " << _iteration << std::endl;
     _iteration++;
 }
