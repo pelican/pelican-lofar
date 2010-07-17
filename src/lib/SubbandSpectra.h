@@ -215,6 +215,15 @@ class SubbandSpectraStokes : public SubbandSpectra<float>
 
         /// Destructor.
         ~SubbandSpectraStokes() {}
+
+    public:
+        quint64 serialisedBytes() const;
+
+        /// Serialises the data blob.
+        void serialise(QIODevice&) const;
+
+        /// Deserialises the data blob.
+        void deserialise(QIODevice&, QSysInfo::Endian);
 };
 
 

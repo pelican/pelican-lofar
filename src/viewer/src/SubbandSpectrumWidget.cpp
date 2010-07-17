@@ -15,7 +15,6 @@ SubbandSpectrumWidget::SubbandSpectrumWidget(QWidget* parent)
     plot->setXLabel("Frequency Index");
     plot->setYLabel("Amplitude");
     plot->showGrid(true);
-
 }
 
 void SubbandSpectrumWidget::updateData(DataBlob* data)
@@ -23,7 +22,7 @@ void SubbandSpectrumWidget::updateData(DataBlob* data)
     // Get data selection from widget controls.
      unsigned subband = spinBox_subband->value();
      unsigned polarisation = spinBox_polarisation->value();
-     unsigned timeSample = 0;
+     unsigned timeSample = spinBox_timeBlock->value();
 
      // Extra plot data from the data blob.
      SubbandSpectraStokes* spectra = (SubbandSpectraStokes*)data;
@@ -31,6 +30,10 @@ void SubbandSpectrumWidget::updateData(DataBlob* data)
      unsigned nSubbands = spectra->nSubbands();
      unsigned nPolarisations = spectra->nPolarisations();
      unsigned nChannels = spectra->ptr(0,0,0)->nChannels();
+//     std::cout << "nTimeBlocks    = " << nTimeBlocks << std::endl;
+//     std::cout << "nSubbands      = " << nSubbands << std::endl;
+//     std::cout << "nPolarisations = " << nPolarisations << std::endl;
+//     std::cout << "nChannels      = " << nChannels << std::endl;
 
      if (subband >= nSubbands || polarisation >= nPolarisations) {
          plot->clear();
@@ -39,19 +42,22 @@ void SubbandSpectrumWidget::updateData(DataBlob* data)
 
      std::vector<double> frequencyIndex(nChannels);
      std::vector<double> spectrumAmp(nChannels);
+//     std::cout << "t, s, p) = " << timeSample << " " << subband << " " << polarisation << std::endl;
      float* spectrum = spectra->ptr(timeSample, subband, polarisation)->ptr();
+//     std::cout << "spectrum[0] = " << spectrum[0] << std::endl;
+
      for (unsigned i = 0; i < nChannels; ++i) {
          frequencyIndex[i] = double(i);
-         spectrumAmp[i] = spectrum[i];
+         spectrumAmp[i] = double(spectrum[i]);
      }
 
      //cout << "----- spectrum[0] = " << spectrum[0] << " " << spectrumAmp[0] << endl;
      //cout << "----- spectrum[1] = " << spectrum[1] << " " << spectrumAmp[1] << endl;
      // Set the plot title.
-     plot->setTitle(QString("Spectrum (subband %1/%2, polarisation %3/%4)")
-             .arg(subband).arg(nSubbands)
-             .arg(polarisation).arg(nPolarisations));
-
+     plot->setTitle(QString("Spectrum (sample %1/%2, subband %3/%4, polarisation %5/%6)")
+             .arg(timeSample).arg(nTimeBlocks - 1)
+             .arg(subband).arg(nSubbands - 1)
+             .arg(polarisation).arg(nPolarisations - 1));
 
      // Update the plot with the spectrum.
      plot->plotCurve(nChannels, &frequencyIndex[0], &spectrumAmp[0]);

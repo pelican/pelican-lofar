@@ -64,7 +64,6 @@ int main(int argc, char* argv[])
 //    config.summary();
 
     pelican::lofar::LofarDataViewer ldv(config.get(address));
-
     ldv.show();
     return app.exec();
 }
