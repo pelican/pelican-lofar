@@ -7,8 +7,10 @@
 #include "pelican/output/PelicanTCPBlobServer.h"
 
 #include "PPFChanneliser.h"
+#include "StokesGenerator.h"
 #include "SubbandSpectra.h"
 #include "SubbandTimeSeries.h"
+#include "SigprocStokesWriter.h"
 
 /**
  * @file UdpBFPipeline.h
@@ -40,10 +42,12 @@ class UdpBFPipeline : public AbstractPipeline
     private:
         /// Module pointers
         PPFChanneliser* ppfChanneliser;
+        StokesGenerator* stokesGenerator;
 
         /// Local data blob
         SubbandSpectraC32* spectra;
         SubbandTimeSeriesC32* timeSeries;
+        SubbandSpectraStokes* stokes;
 
         unsigned _iteration;
 };

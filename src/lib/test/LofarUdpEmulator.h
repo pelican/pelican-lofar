@@ -16,11 +16,11 @@ namespace lofar {
 
 /**
  * @class LofarUdpEmulator
- *  
+ *
  * @brief
- * 
+ *
  * @details
- * 
+ *
  */
 class LofarUdpEmulator : public AbstractUdpEmulator
 {
@@ -71,7 +71,7 @@ class LofarUdpEmulator : public AbstractUdpEmulator
         unsigned long _packetSize;      ///< Actual packet size in bytes.
         unsigned long _interval;        ///< The interval between packets in microseconds.
         unsigned int  _clock;           ///< Station clock speed
-        UDPPacket _packet;              ///< The packet to send.
+        UDPPacket _packet;               ///< The packet to send.
 
         unsigned int _timestamp;        ///< The timestamp of the preceeding packet
         unsigned int _blockid;          ///< The blockSequenceNumber of the preceeding packet
@@ -80,4 +80,4 @@ class LofarUdpEmulator : public AbstractUdpEmulator
 } // namespace lofar
 } // namespace pelican
 
-#endif // LOFARUDPEMULATOR_H 
+#endif // LOFARUDPEMULATOR_H

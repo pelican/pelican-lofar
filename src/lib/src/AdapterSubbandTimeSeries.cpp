@@ -61,7 +61,7 @@ void AdapterSubbandTimeSeries::deserialise(QIODevice* in)
     size_t headerSize = sizeof(UDPPacket::Header);
 
     // Must divide by 4 because we're using sampleBits * 2 for
-    // each value (complex data). (TODO: check this statement.)
+    // each value (complex data).
     size_t packetDataSize = _nSubbands * _nPolarisations * _nSamplesPerPacket
             * _sampleBits / 4;
     size_t dataSize = _fixedPacketSize ? 8130 : packetDataSize;
@@ -197,9 +197,9 @@ void AdapterSubbandTimeSeries::_readData(SubbandTimeSeriesC32* timeSeries,
         char* buffer, unsigned packetIndex)
 {
     typedef std::complex<float> fComplex;
-    unsigned tStart = packetIndex * _nSamplesPerPacket;
-//    std::cout << "tStart = " << tStart << std::endl;
+    unsigned tStart = packetIndex * _nSamplesPerPacket; // TODO check this.
 
+//    std::cout << "tStart = " << tStart << std::endl;
 //    std::cout << "_nSamplesPerPacket = " << _nSamplesPerPacket << std::endl;
 //    std::cout << "_nPolarisations = " << _nPolarisations << std::endl;
 
@@ -216,6 +216,7 @@ void AdapterSubbandTimeSeries::_readData(SubbandTimeSeriesC32* timeSeries,
 
                 // TODO: This needs double checking...
                 unsigned index = tStart - (iTimeBlock * _nSamplesPerTimeBlock) + t;
+
 
                 if (_sampleBits == 8) {
                     TYPES::i8complex i8c = *reinterpret_cast<TYPES::i8complex*>(&buffer[iPtr]);

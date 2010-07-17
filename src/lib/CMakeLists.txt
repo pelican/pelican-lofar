@@ -20,6 +20,8 @@ set(lib_src
     src/SubbandSpectra.cpp
     src/SubbandTimeSeries.cpp
     src/PPFChanneliser.cpp
+    src/StokesGenerator.cpp
+    src/SigprocStokesWriter.cpp
 )
 
 # Create pelican-lofar library.

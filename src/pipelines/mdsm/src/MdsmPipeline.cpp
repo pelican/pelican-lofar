@@ -61,7 +61,6 @@ void MdsmPipeline::run(QHash<QString, DataBlob*>& remoteData)
 
     // Send the blob using the output module.
 //    tcpBlobServer->send("ChannelisedStreamData", channelisedData);
-
     dataOutput( channelisedData, "ChannelisedStreamData" );
 
     if (_iteration % 200 == 0) std::cout << "Finished the MDSM pipeline, iteration " << _iteration << std::endl;

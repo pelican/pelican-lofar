@@ -47,17 +47,36 @@
                 <processingThreads number="2" />
                 <filter nTaps="8" filterWindow="kaiser"/>
             </PPFChanneliser>
+
+            <StokesGenerator>
+            </StokesGenerator>
         </modules>
 
         <output>
+
+          <dataStreams>
+            <!--
+             <stream name="SubbandSpectraC32" listeners="PelicanTCPBlobServer" />
+             -->
+             <stream name="SubbandSpectraStokes" listeners="SigprocStokesWriter"/>
+          </dataStreams>
+
           <streamers>
+            <!--
              <PelicanTCPBlobServer active="true" >
                  <connection port="6969" />
              </PelicanTCPBlobServer>
+             -->
+             <SigprocStokesWriter>
+                    <file filepath="stokes.dat" />
+                    <params channelOneFrequency="120"
+                            frequencyOffset="0.0195"
+                            numberOfChannels="31744"
+                            samplingTime="0.001"
+                            telescope="LOFAR"/>
+              </SigprocStokesWriter>
           </streamers>
-          <dataStreams>
-             <stream name="SubbandSpectraC32" listeners="PelicanTCPBlobServer" />
-          </dataStreams>
+
         </output>
 
     </pipeline>

@@ -5,6 +5,8 @@
 #include "pelican/utility/ConfigNode.h"
 #include "pelican/utility/memCheck.h"
 
+#include <iostream>
+
 namespace pelican {
 namespace lofar {
 
@@ -83,10 +85,13 @@ void LofarUdpEmulator::fillPacket()
         TYPES::i8complex *s = reinterpret_cast<TYPES::i8complex*>(_packet.data);
         for (int i = 0; i < _samplesPerPacket; i++) {
             for (int j = 0; j < _subbandsPerPacket; j++) {
-                unsigned index = i * _subbandsPerPacket * _nrPolarisations +
-                        j * _nrPolarisations;
-                s[index] = TYPES::i8complex(i + j, i);
-                s[index + 1] = TYPES::i8complex(i + j, i);
+                for (int p = 0; p < _nrPolarisations; ++p) {
+                    unsigned index = i * _subbandsPerPacket * _nrPolarisations +
+                        j * _nrPolarisations + p;
+                    s[index] = TYPES::i8complex(_packetCounter, p);
+//                    std::cout << _packetCounter << std::endl;
+                    //s[index] = TYPES::i8complex(i + j, i);
+                }
             }
         }
         break;
@@ -141,6 +146,8 @@ void LofarUdpEmulator::getPacketData(char*& ptr, unsigned long& size)
         _blockid = (_blockid + _samplesPerPacket) %
                 (_clock == 160 ? 156250 : (_timestamp % 2 == 0 ? 195213 : 195212));
    }
+
+    //fillPacket();
 
     // Increment packet counter.
     _packetCounter++;

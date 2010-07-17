@@ -31,7 +31,8 @@ LofarDataViewer::LofarDataViewer(const ConfigNode& config, QWidget* parent)
     qDebug() << "LofarDataViewer(): port = " << port() << endl;
 
     //_client = new ThreadedBlobClient( server(), port(), _dataStream);
-    _client = new ThreadedBlobClient("127.0.0.1", qint16(6969), _dataStream);
+    //_client = new ThreadedBlobClient("127.0.0.1", qint16(6969), _dataStream);
+    _client = new ThreadedBlobClient("127.0.0.1", qint16(2000), _dataStream);
 
     connect(_client, SIGNAL(dataUpdated(const QString& , DataBlob*)),
             this, SLOT(dataUpdated(const QString& , DataBlob*)));

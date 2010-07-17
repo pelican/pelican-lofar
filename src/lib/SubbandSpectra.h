@@ -86,7 +86,7 @@ class SubbandSpectra : public DataBlob
 
         /// Returns the data index for a given time block \b, sub-band \s and
         /// polarisation.
-        unsigned index(unsigned b, unsigned s, unsigned p)
+        unsigned index(unsigned b, unsigned s, unsigned p) const
         {
             return _nPolarisations * (b * _nSubbands + s) + p;
         }
@@ -197,7 +197,30 @@ class SubbandSpectraC32 : public SubbandSpectra<std::complex<float> >
 };
 
 
+
+/**
+ * @class
+ *
+ * @brief
+ *
+ * @details
+ */
+
+class SubbandSpectraStokes : public SubbandSpectra<float>
+{
+    public:
+        /// Constructor.
+        SubbandSpectraStokes()
+        : SubbandSpectra<float>("SubbandSpectraStokes") {}
+
+        /// Destructor.
+        ~SubbandSpectraStokes() {}
+};
+
+
+
 PELICAN_DECLARE_DATABLOB(SubbandSpectraC32)
+PELICAN_DECLARE_DATABLOB(SubbandSpectraStokes)
 
 
 }// namespace lofar
