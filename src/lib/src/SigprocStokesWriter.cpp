@@ -99,7 +99,7 @@ void SigprocStokesWriter::send(const QString& /*streamName*/, const DataBlob* in
             for (unsigned p = 0; p < _nPols; ++p) {
                 for (int s = nSubbands - 1; s >= 0; --s) {
                     data = stokes->ptr(t, s, p)->ptr();
-	            for(int i = dataSize - 1; i >= 0 ; --i )
+	            for(int i = nChannels - 1; i >= 0 ; --i )
 		    {
 	               //_file.write(reinterpret_cast<char*>(data), dataSize);
 	               _file.write(reinterpret_cast<char* >(&data[i]), sizeof(float));
