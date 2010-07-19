@@ -1,9 +1,10 @@
-#include <QCoreApplication>
-#include <iostream>
 #include "viewer/ThreadedBlobClient.h"
 #include "lib/PelicanBlobClient.h"
-#include "lib/ChannelisedStreamData.h"
+#include "lib/SubbandSpectra.h"
 
+#include <QtCore/QCoreApplication>
+
+#include <iostream>
 
 namespace pelican {
 
@@ -36,16 +37,22 @@ void ThreadedBlobClient::run()
 {
     _isRunning = true;
     _client = new PelicanBlobClient(_dataStream, _host, _port);
-    ChannelisedStreamData blob;
-    ChannelisedStreamData lastBlob;
+    SubbandSpectraStokes blob;
+    SubbandSpectraStokes lastBlob;
     QHash<QString, DataBlob*> dataHash;
     dataHash.insert(_dataStream, &blob);
     while( _isRunning )
     {
-        _client->getData(dataHash);
-        lastBlob = blob;
-        emit dataUpdated(_dataStream, &lastBlob);
-        QCoreApplication::processEvents();
+        try {
+            _client->getData(dataHash);
+            lastBlob = blob;
+            emit dataUpdated(_dataStream, &lastBlob);
+            QCoreApplication::processEvents();
+        }
+        catch (QString e) {
+            std::cout << "ThreadedBlobClient::run(): ERROR: "
+                    << e.toStdString() << std::endl;
+        }
     }
     delete _client;
 }

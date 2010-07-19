@@ -134,6 +134,96 @@ void SubbandSpectraC32::deserialise(QIODevice& in, QSysInfo::Endian endian)
     }
 }
 
+//------------------------------------------------------------------------------
+
+
+/**
+ * @details
+ * Returns the number of serialised bytes in the data blob when using
+ * the serialise() method.
+ */
+quint64 SubbandSpectraStokes::serialisedBytes() const
+{
+    // Sub-band spactra dimensions.
+    quint64 size = 3 * sizeof(unsigned);
+//    std::cout << "SubbandSpectraStokes::serialisedBytes(): nSpectra = " << _spectra.size() << std::endl;
+//    std::cout << "SubbandSpectraStokes::serialisedBytes(): nTimeBlocks = " << nTimeBlocks() << std::endl;
+//    std::cout << "SubbandSpectraStokes::serialisedBytes(): nSubbands = " << nSubbands() << std::endl;
+//    std::cout << "SubbandSpectraStokes::serialisedBytes(): nPolarisations = " << nPolarisations() << std::endl;
+//    std::cout << "SubbandSpectraStokes::serialisedBytes(): nChannels = " << _spectra[0].nChannels() << std::endl;
+    for (unsigned i = 0; i < _spectra.size(); ++i) {
+        // Spectrum header.
+        size += sizeof(unsigned) + 2 * sizeof(double);
+        // Spectrum data.
+        size += _spectra[i].nChannels() * sizeof(float);
+    }
+//    std::cout << "SubbandSpectraStokes::serialisedBytes(): bytes = " << size << std::endl;
+    return size;
+}
+
+
+/**
+ * @details
+ * Serialises the data blob.
+ */
+void SubbandSpectraStokes::serialise(QIODevice& out) const
+{
+    // Sub-band spectrum dimensions.
+    out.write((char*)&_nTimeBlocks, sizeof(unsigned));
+    out.write((char*)&_nSubbands, sizeof(unsigned));
+    out.write((char*)&_nPolarisations, sizeof(unsigned));
+
+    // Loop over and write each spectrum.
+    for (unsigned i = 0; i < _spectra.size(); ++i) {
+        unsigned nChannels = _spectra[i].nChannels();
+        double startFreq = _spectra[i].startFrequency();
+        double deltaFreq = _spectra[i].channelFrequencyDelta();
+        // Spectrum header.
+        out.write((char*)&nChannels, sizeof(unsigned));
+        out.write((char*)&startFreq, sizeof(double));
+        out.write((char*)&deltaFreq, sizeof(double));
+        // Spectrum data.
+        const float* spectrum = _spectra[i].ptr();
+        out.write((char*)spectrum, nChannels * sizeof(float));
+    }
+}
+
+
+/**
+ * @details
+ * Deserialises the data blob.
+ */
+void SubbandSpectraStokes::deserialise(QIODevice& in, QSysInfo::Endian /*endian*/)
+{
+
+    // TODO: the endianness parameter is broken somewhere...
+//    if (endian != QSysInfo::ByteOrder) {
+//        throw QString("SubbandSpectraStokes::deserialise(): Endianness "
+//                "of serial data not supported.");
+//    }
+
+    // Read spectrum dimensions.
+    in.read((char*)&_nTimeBlocks, sizeof(unsigned));
+    in.read((char*)&_nSubbands, sizeof(unsigned));
+    in.read((char*)&_nPolarisations, sizeof(unsigned));
+    resize(_nTimeBlocks, _nSubbands, _nPolarisations);
+
+    unsigned nChannels = 0;
+    double startFreq = 0.0, deltaFreq = 0.0;
+
+    // Loop over and write each spectrum.
+    for (unsigned i = 0; i < _spectra.size(); ++i) {
+        // Read the spectrum header.
+        in.read((char*)&nChannels, sizeof(unsigned));
+        in.read((char*)&startFreq, sizeof(double));
+        in.read((char*)&deltaFreq, sizeof(double));
+        // Read the spectrum data.
+        _spectra[i].resize(nChannels);
+        in.read((char*)_spectra[i].ptr(), nChannels * sizeof(float));
+    }
+}
+
+
 
 } // namespace lofar
 } // namespace pelican

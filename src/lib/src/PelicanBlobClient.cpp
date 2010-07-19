@@ -8,6 +8,7 @@
 // Pelican-Lofar stuff
 #include "PelicanBlobClient.h"
 #include "ChannelisedStreamData.h"
+//#include "SubbandSpectra.h" // FIXME for new data blob.
 
 // QT stuff
 #include <QtCore/QByteArray>
@@ -39,6 +40,8 @@ PelicanBlobClient::~PelicanBlobClient()
 // Read data from the Pelican Lofar pipeline
 void PelicanBlobClient::getData(QHash<QString, DataBlob*>& dataHash)
 {
+//    std::cout << "PelicanBlobClient::getData()" << std::endl;
+
     // Check that we are still connected to server, if not reconnect
     if (_tcpSocket->state() == QAbstractSocket::UnconnectedState) {
         std::cout << "PelicanBlobClient: Disconnected from server, reconnecting."
@@ -47,23 +50,26 @@ void PelicanBlobClient::getData(QHash<QString, DataBlob*>& dataHash)
     }
 
     // Get a pointer to the data blob from the hash.
+    // FIXME for new stokes data blob.
+    //SubbandSpectraStokes* blob = (SubbandSpectraStokes*) dataHash["SubbandSpectraStokes"];
     ChannelisedStreamData* blob = (ChannelisedStreamData*) dataHash["ChannelisedStreamData"];
 
     // Wait for data to be available to socket, and read
-    _tcpSocket -> waitForReadyRead();
-    boost::shared_ptr<ServerResponse> r = _protocol -> receive(*_tcpSocket);
+    _tcpSocket->waitForReadyRead();
+    boost::shared_ptr<ServerResponse> r = _protocol->receive(*_tcpSocket);
+//    std::cout << "PelicanBlobClient::getData(): type = " << r->type() << std::endl;
 
     // Check what type of response we have
-    switch( r -> type() ) {
+    switch(r->type()) {
         case ServerResponse::Error:  // Error occurred!!
-            std::cerr << "PelicanBlobClient: Server Error: " << r -> message().toStdString() << std::endl;
+            std::cerr << "PelicanBlobClient: Server Error: '"
+                      << r->message().toStdString() << "'" << std::endl;
             break;
         case ServerResponse::Blob:   // We have received a blob
             {
                 DataBlobResponse* res = static_cast<DataBlobResponse*>(r.get());
                 while (_tcpSocket->bytesAvailable() < (qint64)res->dataSize())
                    _tcpSocket -> waitForReadyRead(-1);
-
                 blob->deserialise(*_tcpSocket, res->byteOrder());
             }
             break;
@@ -82,7 +88,7 @@ void PelicanBlobClient::getData(QHash<QString, DataBlob*>& dataHash)
 // Connect to Pelican Lofar and register requested data type
 void PelicanBlobClient::connectToLofarPelican()
 {
-    while (_tcpSocket -> state() == QAbstractSocket::UnconnectedState) {
+    while (_tcpSocket->state() == QAbstractSocket::UnconnectedState) {
 
         _tcpSocket->connectToHost(_server, _port);
 
@@ -102,7 +108,7 @@ void PelicanBlobClient::connectToLofarPelican()
         require.setStreamData(_blobType);
         req.addDataOption(require);
 
-        QByteArray data = _protocol -> serialise(req);
+        QByteArray data = _protocol->serialise(req);
         _tcpSocket -> write(data);
         _tcpSocket -> waitForBytesWritten(data.size());
         _tcpSocket -> flush();

@@ -23,11 +23,11 @@ namespace lofar {
 
 /**
  * @class DataViewer
- *  
+ *
  * @brief
  *    base class to view data streams
  * @details
- * 
+ *
  */
 
 class DataViewer : public QWidget
@@ -63,6 +63,7 @@ class DataViewer : public QWidget
         virtual DataBlobWidget* getWidgetViewer(const QString& stream) const;
         void connectStreams( );
         void _updatedStreams( const QSet<QString>& streams );
+        void closeEvent(QCloseEvent* event);
 
     protected slots:
         void _streamToggled();
@@ -86,4 +87,4 @@ class DataViewer : public QWidget
 
 } // namespace lofar
 } // namespace pelican
-#endif // DATAVIEWER_H 
+#endif // DATAVIEWER_H

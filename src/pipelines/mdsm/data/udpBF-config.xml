@@ -55,17 +55,16 @@
         <output>
 
           <dataStreams>
-
-             <stream name="SubbandSpectraC32" listeners="PelicanTCPBlobServer" />
-
+             <!-- <stream name="SubbandSpectraStokes" listeners="PelicanTCPBlobServer" />  -->
              <stream name="SubbandSpectraStokes" listeners="SigprocStokesWriter"/>
           </dataStreams>
 
           <streamers>
-             <PelicanTCPBlobServer active="true" >
+              <!-- <PelicanTCPBlobServer active="true" >
                  <connection port="6969" />
              </PelicanTCPBlobServer>
-             <SigprocStokesWriter>
+              -->
+              <SigprocStokesWriter>
                     <file filepath="stokes.dat" />
                     <params channelOneFrequency="120"
                             frequencyOffset="0.00038085938"

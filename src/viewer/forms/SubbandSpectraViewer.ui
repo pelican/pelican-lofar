@@ -102,7 +102,7 @@
         <item row="0" column="0">
          <widget class="QLabel" name="label_timeBlock">
           <property name="text">
-           <string>Time block ID</string>
+           <string>Time (block) ID</string>
           </property>
          </widget>
         </item>
