@@ -11,6 +11,7 @@
 #include <boost/cstdint.hpp>
 #include <cmath>
 #include <iostream>
+#include <complex>
 
 namespace pelican {
 namespace lofar {
@@ -217,17 +218,18 @@ void AdapterSubbandTimeSeries::_readData(SubbandTimeSeriesC32* timeSeries,
                 // TODO: This needs double checking...
                 unsigned index = tStart - (iTimeBlock * _nSamplesPerTimeBlock) + t;
 
-
                 if (_sampleBits == 8) {
                     TYPES::i8complex i8c = *reinterpret_cast<TYPES::i8complex*>(&buffer[iPtr]);
-                    data[index].real() = float(i8c.real());
-                    data[index].imag() = float(i8c.imag());
+                    // TODO *IMPORTANT* check complex conversion.
+                    // see: lofar ASTRO repos LCS/Common/lofar_complex.h
+                    data[index] = _makeComplex(i8c);
                     iPtr += sizeof(TYPES::i8complex);
                 }
                 else if (_sampleBits == 16) {
                     TYPES::i16complex i16c = *reinterpret_cast<TYPES::i16complex*>(&buffer[iPtr]);
-                    data[index].real() = float(i16c.real());
-                    data[index].imag() = float(i16c.imag());
+                    // TODO *IMPORTANT* check complex conversion.
+                    // see: lofar ASTRO repos LCS/Common/lofar_complex.h
+                    data[index] = _makeComplex(i16c);
                     iPtr += sizeof(TYPES::i16complex);
                 }
                 else {
@@ -279,6 +281,21 @@ void AdapterSubbandTimeSeries::_printHeader(const UDPPacket::Header& header)
     std::cout << QString(80, '-').toStdString() << std::endl;
     std::cout << std::endl;
 }
+
+
+std::complex<float> AdapterSubbandTimeSeries::_makeComplex(const TYPES::i8complex& z)
+{
+    //TODO Check (see LCS/Common/lofar_complex.h)
+    return std::complex<float>(float(real(z)), float(imag(z)));
+}
+
+
+std::complex<float> AdapterSubbandTimeSeries::_makeComplex(const TYPES::i16complex& z)
+{
+    //TODO Check (see LCS/Common/lofar_complex.h)
+    return std::complex<float>(float(real(z)), float(imag(z)));
+}
+
 
 
 } // namespace lofar

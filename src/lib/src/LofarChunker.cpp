@@ -70,7 +70,7 @@ void LofarChunker::next(QIODevice* device)
     unsigned         prevSeqid                 = _startTime;
     unsigned         prevBlockid               = _startBlockid;
     UDPPacket         currPacket, emptyPacket;
-    qint64           sizeDatagram;
+    qint64            sizeDatagram;
 
     WritableData writableData = getDataStorage( _nPackets * _packetSize);
 
@@ -133,10 +133,10 @@ void LofarChunker::next(QIODevice* device)
             else if (diff > _samplesPerPacket)    // Missing packets
                 lostPackets = (diff / _samplesPerPacket) - 1; // -1 since it includes this includes the received packet as well
 
-//            if (lostPackets > 0) {
-//                printf("Generate %u empty packets, prevSeq: %u, new Seq: %u, prevBlock: %u, newBlock: %u\n",
-//                       lostPackets, prevSeqid, seqid, prevBlockid, blockid);
-//            }
+            if (lostPackets > 0) {
+                printf("Generate %u empty packets, prevSeq: %u, new Seq: %u, prevBlock: %u, newBlock: %u\n",
+                       lostPackets, prevSeqid, seqid, prevBlockid, blockid);
+            }
 
             // Generate lostPackets empty packets, if any
             for (unsigned packetCounter = 0; packetCounter < lostPackets &&

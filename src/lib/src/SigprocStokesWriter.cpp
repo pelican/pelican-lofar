@@ -80,7 +80,7 @@ void SigprocStokesWriter::WriteLong(QString name, long value)
 // ---------------------------- Data helpers --------------------------
 
 // Write data blob to disk
-void SigprocStokesWriter::send(const QString& streamName, const DataBlob* incoming)
+void SigprocStokesWriter::send(const QString& /*streamName*/, const DataBlob* incoming)
 {
     SubbandSpectraStokes* stokes;
     DataBlob* blob = const_cast<DataBlob*>(incoming);
@@ -90,7 +90,7 @@ void SigprocStokesWriter::send(const QString& streamName, const DataBlob* incomi
 
         unsigned nSamples = stokes->nTimeBlocks();
         unsigned nSubbands = stokes->nSubbands();
-//        unsigned nPolarisations = stokes->nPolarisations();
+//        unsigned nPolarisations = stokes->nPolarisations(); // this is now an option.
         unsigned nChannels = stokes->ptr(0, 0, 0)->nChannels();
         float* data;
         size_t dataSize = nChannels * sizeof(float);

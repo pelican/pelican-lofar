@@ -27,8 +27,8 @@ LofarChunkerTest::LofarChunkerTest()
     _nrPolarisations   = 2;    // Number of polarization in the data
     _numPackets        = 10000;   // Number of packet to send
     _clock             = 200;  // Rounded up clock station clock speed
-    _subbandsPerPacket = _clock == 200 ? 42 : 54;  //  Number of block per frame 
-    
+    _subbandsPerPacket = _clock == 200 ? 42 : 54;  //  Number of block per frame
+
     QString serverXml =
     "<buffers>"
     "   <LofarData>"
@@ -87,7 +87,7 @@ void LofarChunkerTest::setUp()
  * Destroys objects and reset environment
  */
 void LofarChunkerTest::tearDown()
-{ 
+{
 }
 
 /**
@@ -129,7 +129,7 @@ void LofarChunkerTest::test_normalPackets()
 
         UDPPacket *packet;
         unsigned packetSize = sizeof(struct UDPPacket::Header) + _subbandsPerPacket *
-                              _samplesPerPacket * _nrPolarisations * sizeof(TYPES::i8complex);
+                _samplesPerPacket * _nrPolarisations * sizeof(TYPES::i8complex);
 
         unsigned int val;
         for (int counter = 0; counter < _numPackets; counter++) {
@@ -204,7 +204,7 @@ void LofarChunkerTest::test_lostPackets()
                    if (counter % 2 == 1)
                        CPPUNIT_ASSERT(k + j ==  s[k * _subbandsPerPacket * _nrPolarisations +
                                                   j * _nrPolarisations].real());
-                   else 
+                   else
                        CPPUNIT_ASSERT(s[k * _subbandsPerPacket * _nrPolarisations +
                                         j * _nrPolarisations].real() == 0);
         }

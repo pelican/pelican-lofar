@@ -147,7 +147,7 @@ void AdapterTimeStreamTest::test_checkDataVariablePacket()
     // Set the data blob to be adapted, the input chuck size and associated
     // service data.
     size_t packetSize = sizeof(UDPPacket::Header) +
-    		(nSubbands * nPolarisations * nSamples * sampleBits * 2) / 8;
+            (nSubbands * nPolarisations * nSamples * sampleBits * 2) / 8;
     size_t chunkSize = packetSize * nPackets;
     adapter.config(&data, chunkSize, QHash<QString, DataBlob*>());
 
@@ -215,12 +215,12 @@ void AdapterTimeStreamTest::test_deserialise()
     for (unsigned i = 0; i < nPackets; ++i) {
 
         // Fill in the header
-        packets[i].header.version             = 0 + i;
-        packets[i].header.sourceInfo          = 1 + i;
-        packets[i].header.configuration       = sampleBits;
-        packets[i].header.station             = 3 + i;
-        packets[i].header.nrBeamlets          = 4 + i;
-        packets[i].header.nrBlocks            = 5 + i;
+        packets[i].header.version             = uint8_t(0 + i);
+        packets[i].header.sourceInfo          = uint8_t(1 + i);
+        packets[i].header.configuration       = uint16_t(sampleBits);
+        packets[i].header.station             = uint16_t(3 + i);
+        packets[i].header.nrBeamlets          = uint8_t(4 + i);
+        packets[i].header.nrBlocks            = uint8_t(5 + i);
         packets[i].header.timestamp           = 6 + i;
         packets[i].header.blockSequenceNumber = 7 + i;
 
@@ -230,21 +230,21 @@ void AdapterTimeStreamTest::test_deserialise()
                 for (unsigned p = 0; p < nPolarisations; ++p) {
 
                     if (sampleBits == 4) {
-                        iComplex8* data = reinterpret_cast<iComplex8*>(packets[i].data);
+                        iComplex8* values = reinterpret_cast<iComplex8*>(packets[i].data);
                         int index = nPolarisations * (t * nSubbands + c) + p;
-                        data[index] = iComplex8(double(ii), double(i));
+                        values[index] = iComplex8(double(ii), double(i));
                         ++ii;
                     }
                     else if (sampleBits == 8) {
-                        iComplex16* data = reinterpret_cast<iComplex16*>(packets[i].data);
+                        iComplex16* values = reinterpret_cast<iComplex16*>(packets[i].data);
                         int index = nPolarisations * (t * nSubbands + c) + p;
-                        data[index] = iComplex16(ii, i);
+                        values[index] = iComplex16(ii, i);
                         ++ii;
                     }
                     else if (sampleBits == 16) {
-                        iComplex32* data = reinterpret_cast<iComplex32*>(packets[i].data);
+                        iComplex32* values = reinterpret_cast<iComplex32*>(packets[i].data);
                         int index = nPolarisations * (t * nSubbands + c) + p;
-                        data[index] = iComplex32(ii, i);
+                        values[index] = iComplex32(ii, i);
                         ++ii;
                     }
 

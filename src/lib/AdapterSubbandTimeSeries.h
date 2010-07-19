@@ -3,6 +3,7 @@
 
 #include "pelican/core/AbstractStreamAdapter.h"
 #include "LofarUdpHeader.h"
+#include "LofarTypes.h"
 #include <complex>
 
 /**
@@ -86,6 +87,12 @@ class AdapterSubbandTimeSeries : public AbstractStreamAdapter
 
         /// Prints the header to standard out (for debugging).
         void _printHeader(const UDPPacket::Header& header);
+
+        /// Converts a i8Complex to std::complex float.
+        std::complex<float> _makeComplex(const TYPES::i8complex& z);
+
+        /// Converts a i8Complex to std::complex float.
+        std::complex<float> _makeComplex(const TYPES::i16complex& z);
 
     private:
         SubbandTimeSeriesC32* _timeData;
