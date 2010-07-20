@@ -54,7 +54,10 @@ QIODevice* LofarChunker::newDevice()
 {
     QUdpSocket* socket = new QUdpSocket;
     QHostAddress hostAddress(host());
-    socket -> bind( hostAddress, port() );
+    //socket -> bind( hostAddress, port() );
+    if (!socket->bind(port())) {
+        std::cerr << "LofarChunker::newDevice(): Unabled to bind to UDP port!" << std::endl;
+    }
     return socket;
 }
 
