@@ -28,12 +28,20 @@ pelican::Config createConfig(int argc, char** argv)
     // Declare the supported options.
     opts::options_description desc("Allowed options");
     desc.add_options()
-        ("help", "Produce help message.")
-        ("config,c", opts::value<std::string>(), "Set configuration file.");
+        ("help,h", "Produce help message.")
+        ("config,c", opts::value<std::string>(), "Set configuration file.")
+        ("port,p", opts::value<unsigned>(), "port.")
+        ("address,a", opts::value<std::string>(), "port.");
+
+
+    // Configuration option without a selection flag in the first argument
+    // position is assumed to be a fits file
+    opts::positional_options_description p;
+    p.add("config", -1);
 
     // Parse the command line arguments.
     opts::variables_map varMap;
-    opts::store(opts::parse_command_line(argc, argv, desc), varMap);
+    opts::store(opts::command_line_parser(argc, argv).options(desc).positional(p).run(), varMap);
     opts::notify(varMap);
 
     // Check for help message.
@@ -44,10 +52,37 @@ pelican::Config createConfig(int argc, char** argv)
 
     // Get the configuration file name.
     std::string configFilename = "";
-    if (varMap.count("config"))
+    if (varMap.count("config")) {
         configFilename = varMap["config"].as<std::string>();
+        //std::cout << "--- " << configFilename << std::endl;
+    }
 
-    pelican::Config config(QString(configFilename.c_str()));
+    pelican::Config config;
+    if (!configFilename.empty()) {
+        config = pelican::Config(QString(configFilename.c_str()));
+    }
+
+    pelican::Config::TreeAddress baseAddress;
+    baseAddress << pelican::Config::NodeId("DataViewer", "");
+
+    unsigned port = 0;
+    if (varMap.count("port")) {
+        port = varMap["port"].as<unsigned>();
+        pelican::Config::TreeAddress a;
+        a << pelican::Config::NodeId("DataViewer", "");
+        a << pelican::Config::NodeId("server", "");
+        config.setAttribute(a, "port", QString::number(port));
+
+    }
+
+    std::string address = "";
+    if (varMap.count("address")) {
+        address = varMap["address"].as<std::string>();
+        pelican::Config::TreeAddress a;
+        a << pelican::Config::NodeId("DataViewer", "");
+        a << pelican::Config::NodeId("server", "");
+        config.setAttribute(a, "address", QString::fromStdString(address));
+    }
 
     return config;
 }
