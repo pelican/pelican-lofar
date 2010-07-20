@@ -7,7 +7,7 @@
 
 // Pelican-Lofar stuff
 #include "PelicanBlobClient.h"
-#include "ChannelisedStreamData.h"
+//#include "ChannelisedStreamData.h"
 #include "SubbandSpectra.h" // FIXME for new data blob.
 
 // QT stuff
@@ -57,7 +57,7 @@ void PelicanBlobClient::getData(QHash<QString, DataBlob*>& dataHash)
     // Wait for data to be available to socket, and read
     _tcpSocket->waitForReadyRead();
     boost::shared_ptr<ServerResponse> r = _protocol->receive(*_tcpSocket);
-    std::cout << "PelicanBlobClient::getData(): type = " << r->type() << std::endl;
+    //std::cout << "PelicanBlobClient::getData(): type = " << r->type() << std::endl;
 
     // Check what type of response we have
     switch(r->type()) {
