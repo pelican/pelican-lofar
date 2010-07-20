@@ -11,6 +11,7 @@
 #
 
 # Find the pelican cmake modules directory.
+#message(STATUS "xx $ENV{PP}/share/pelican/cmake")
 find_path(PELICAN_CMAKE_MODULE_DIR FindPelicanInstall.cmake
     PATHS
     /usr/
@@ -21,6 +22,8 @@ find_path(PELICAN_CMAKE_MODULE_DIR FindPelicanInstall.cmake
     /usr/local/share
     /usr/local/share/pelican
     /usr/local/share/pelican/cmake
+    $ENV{PELICAN_INSTALL_DIR}/share/pelican/cmake
+    ${PELICAN_INSTALL_DIR}/share/pelican/cmake
     PATH_SUFFIXES
     share
     cmake
