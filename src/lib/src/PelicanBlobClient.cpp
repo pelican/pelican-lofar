@@ -51,8 +51,8 @@ void PelicanBlobClient::getData(QHash<QString, DataBlob*>& dataHash)
 
     // Get a pointer to the data blob from the hash.
     // FIXME for new stokes data blob.
-    //SubbandSpectraStokes* blob = (SubbandSpectraStokes*) dataHash["SubbandSpectraStokes"];
-    ChannelisedStreamData* blob = (ChannelisedStreamData*) dataHash["ChannelisedStreamData"];
+    SubbandSpectraStokes* blob = (SubbandSpectraStokes*) dataHash["SubbandSpectraStokes"];
+    //ChannelisedStreamData* blob = (ChannelisedStreamData*) dataHash["ChannelisedStreamData"];
 
     // Wait for data to be available to socket, and read
     _tcpSocket->waitForReadyRead();
