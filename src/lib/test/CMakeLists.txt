@@ -54,7 +54,7 @@ target_link_libraries(lofarEmulator
 )
 
 # Copy files required for testing to the build directory.
-include(CopyFiles)
+include(${CMAKE_SOURCE_DIR}/cmake/CopyFiles.cmake)
 copy_files(${CMAKE_CURRENT_SOURCE_DIR}/data/*.* . testLibFiles)
 
 
