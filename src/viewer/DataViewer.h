@@ -44,6 +44,7 @@ class DataViewer : public QWidget
         // returns the connected server port
         quint16 port() { return _port; };
 
+
         // enable tracking of the specified stream
         void enableStream( const QString& );
         // disable tracking of the specified stream

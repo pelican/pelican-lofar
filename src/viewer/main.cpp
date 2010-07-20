@@ -14,6 +14,7 @@
 #include <boost/program_options.hpp>
 #include "pelican/utility/Config.h"
 #include "viewer/LofarDataViewer.h"
+#include <iostream>
 
 namespace opts = boost::program_options;
 
@@ -38,6 +39,7 @@ pelican::Config createConfig(int argc, char** argv)
     // Check for help message.
     if (varMap.count("help")) {
         std::cout << desc << "\n";
+        exit(0);
     }
 
     // Get the configuration file name.
@@ -46,6 +48,7 @@ pelican::Config createConfig(int argc, char** argv)
         configFilename = varMap["config"].as<std::string>();
 
     pelican::Config config(QString(configFilename.c_str()));
+
     return config;
 }
 
@@ -55,16 +58,22 @@ int main(int argc, char* argv[])
 {
     QApplication app(argc, argv);
 
-    pelican::Config config = createConfig(argc, argv);
+    try {
+        pelican::Config config = createConfig(argc, argv);
 
-    pelican::Config::TreeAddress address;
-    address << pelican::Config::NodeId("dataviewer", "");
+        pelican::Config::TreeAddress address;
+        address << pelican::Config::NodeId("DataViewer", "");
 
-//    config.save("config.xml");
-//    config.summary();
+//        config.save("config.xml");
+//        config.summary();
 
-    pelican::lofar::LofarDataViewer ldv(config.get(address));
-    ldv.show();
+        pelican::lofar::LofarDataViewer ldv(config.get(address));
+        ldv.show();
+    }
+    catch (QString err) {
+        std::cout << "ERROR: " << err.toStdString() << std::endl;
+    }
+
     return app.exec();
 }
 

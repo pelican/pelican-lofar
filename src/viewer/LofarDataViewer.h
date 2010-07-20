@@ -36,6 +36,8 @@ class LofarDataViewer : public DataViewer
     private:
         ThreadedBlobClient* _client;
         QString _dataStream;
+        quint16 _port;
+        QString _address;
 };
 
 } // namespace lofar
