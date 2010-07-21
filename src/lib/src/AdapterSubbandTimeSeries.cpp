@@ -205,12 +205,13 @@ void AdapterSubbandTimeSeries::_readData(SubbandTimeSeriesC32* timeSeries,
 //    std::cout << "_nPolarisations = " << _nPolarisations << std::endl;
 
     // Loop over dimensions in the packet and write into the data blob.
-    for (unsigned iPtr = 0, t = 0; t < _nSamplesPerPacket; ++t) {
+    unsigned iPtr = 0;
+    for (unsigned c = 0; c < _nSubbands; ++c) {
+       for (unsigned t = 0; t < _nSamplesPerPacket; ++t) {
 
         unsigned iTimeBlock = (tStart + t) / _nSamplesPerTimeBlock;
 //        std::cout << "iTimeBlock = " << iTimeBlock << std::endl;
 
-        for (unsigned c = 0; c < _nSubbands; ++c) {
             for (unsigned p = 0; p < _nPolarisations; ++p) {
 
                 fComplex* data = timeSeries->ptr(iTimeBlock, c, p)->ptr();
