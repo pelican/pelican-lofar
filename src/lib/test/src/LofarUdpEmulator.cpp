@@ -138,18 +138,18 @@ void LofarUdpEmulator::getPacketData(char*& ptr, unsigned long& size)
     // Calculate seqid and blockid from packet counter and clock
     if (!_looseEvenPackets || (_looseEvenPackets && _packetCounter % 2 == 1)) {
         _packet.header.timestamp = 1 + (_blockid + _samplesPerPacket) /
-                (_clock == 160 ? 156250 : (_timestamp % 2 == 0 ? 195213 : 195212));
+                (_clock == 160 ? 156250 : (_timestamp % 2 == 0 ? 195313 : 195212));
         _packet.header.blockSequenceNumber = (_blockid + _samplesPerPacket) %
-                (_clock == 160 ? 156250 : (_timestamp % 2 == 0 ? 195213 : 195212));
+                (_clock == 160 ? 156250 : (_timestamp % 2 == 0 ? 195313 : 195212));
         _timestamp = _packet.header.timestamp;
         _blockid = _packet.header.blockSequenceNumber;
     }
     else {
         _packet.header.timestamp = _timestamp;
         _packet.header.blockSequenceNumber = _blockid;
-        _timestamp = 1 + (_blockid + _samplesPerPacket) / (_clock == 160 ? 156250 : (_timestamp % 2 == 0 ? 195213 : 195212));
+        _timestamp = 1 + (_blockid + _samplesPerPacket) / (_clock == 160 ? 156250 : (_timestamp % 2 == 0 ? 195313 : 195212));
         _blockid = (_blockid + _samplesPerPacket) %
-                (_clock == 160 ? 156250 : (_timestamp % 2 == 0 ? 195213 : 195212));
+                (_clock == 160 ? 156250 : (_timestamp % 2 == 0 ? 195313 : 195212));
    }
 
     //fillPacket();
