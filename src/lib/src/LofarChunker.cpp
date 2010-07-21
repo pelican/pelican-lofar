@@ -124,10 +124,11 @@ void LofarChunker::next(QIODevice* device)
             // Check that the packets are contiguous. Block id increments by no_blocks
             // which is defined in the header. Blockid is reset every interval (although
             // it might not start from 0 as the previous frame might contain data from this one)
-            unsigned totBlocks = _clock == 160 ? 156250 : (prevSeqid % 2 == 0 ? 195213 : 195212);
+            unsigned totBlocks = _clock == 160 ? 156250 : (prevSeqid % 2 == 0 ? 195313 : 195312);
             unsigned lostPackets = 0, diff = 0;
 
             diff =  (blockid >= prevBlockid) ? (blockid - prevBlockid) : (blockid + totBlocks - prevBlockid);
+
             if (diff < _samplesPerPacket) {      // Duplicated packets... ignore
                 ++_packetsRejected;
                 i -= 1;
