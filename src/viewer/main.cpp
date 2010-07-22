@@ -103,8 +103,8 @@ int main(int argc, char* argv[])
 //        config.save("config.xml");
         //config.summary();
 
-        pelican::lofar::LofarDataViewer ldv(config.get(address));
-        ldv.show();
+        pelican::lofar::LofarDataViewer* ldv = new pelican::lofar::LofarDataViewer(config.get(address));
+        ldv->show();
 	std::cout << "entering exec()" << std::endl;
 	return app.exec();
     }
