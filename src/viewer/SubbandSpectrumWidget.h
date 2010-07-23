@@ -37,6 +37,11 @@ class SubbandSpectrumWidget : public DataBlobWidget, public Ui::SubbandSpectraVi
 
         void updateData(DataBlob* data);
 
+     private:
+	void _plot(const std::vector<double>& vec);
+
+	std::vector<double> _spectrumAmp;
+	unsigned int _integrationCount;
 };
 
 } // namespace lofar
