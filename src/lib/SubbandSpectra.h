@@ -32,7 +32,7 @@ namespace lofar {
  *
  *  Dimension order (outer -> inner):
  *
- *  	Time blocks -> sub-bands -> polarisations.
+ *      Time blocks -> sub-bands -> polarisations.
  *
  *  Polarisations is therefore the fastest varying index.
  *
@@ -49,21 +49,21 @@ class SubbandSpectra : public DataBlob
         SubbandSpectra(const QString& type = "SubbandSpectra")
         : DataBlob(type), _nTimeBlocks(0), _nSubbands(0), _nPolarisations(0) {}
 
-	/// Constructs an empty sub-band spectra from a SubbandTimeSeries
+    /// Constructs an empty sub-band spectra from a SubbandTimeSeries
         SubbandSpectra(const SubbandTimeSeries<T>& ts, const QString& type = "SubbandSpectra")
         : DataBlob(type)
         {
             resize(ts.nTimeBlocks(),ts.nSubbands(), ts.nPolarisations(), 1 ); 
             for (unsigned t = 0; t < ts.nTimeBlocks(); ++t) {
-               for (unsigned p = 0; p < ts.nPolarisations(); ++p) {
-                   for (unsigned s = 0; s < ts.nSubbands(); ++s) {
-			int idx = index( t, s, p);
-			T* data = ts.ptr(t,s,p)->ptr();
-			_spectra[idx].push_back(data[idx]);
-                   }
-               }
+                for (unsigned p = 0; p < ts.nPolarisations(); ++p) {
+                    for (unsigned s = 0; s < ts.nSubbands(); ++s) {
+                        int idx = index( t, s, p);
+                        T* data = ts.ptr(t,s,p)->ptr();
+                        _spectra[idx].push_back(data[idx]);
+                    }
+                }
             }
-       }
+        }
 
         /// Destroys the object.
         virtual ~SubbandSpectra() {}
@@ -92,6 +92,7 @@ class SubbandSpectra : public DataBlob
         void resize(unsigned nTimeBlocks, unsigned nSubbands,
                 unsigned nPolarisations, unsigned nChannels)
         {
+            resize( nTimeBlocks, nSubbands, nPolarisations);
             _nTimeBlocks = nTimeBlocks;
             _nSubbands = nSubbands;
             _nPolarisations = nPolarisations;
@@ -106,6 +107,23 @@ class SubbandSpectra : public DataBlob
         unsigned index(unsigned b, unsigned s, unsigned p) const
         {
             return _nPolarisations * (b * _nSubbands + s) + p;
+        }
+
+        /// add the supplied subband spectra values to this object
+        SubbandSpectra& operator+(const SubbandSpectra& spectra)
+        {
+            for (unsigned t = 0; t < spectra.nTimeBlocks(); ++t) {
+                for (unsigned p = 0; p < spectra.nPolarisations(); ++p) {
+                    for (unsigned s = 0; s < spectra.nSubbands(); ++s) {
+                        int idx = index( t, s, p);
+                         T* spectrum = spectra->ptr(t, s, p)->ptr();
+                         unsigned nChannels = spectra->ptr(t,s,p)->nChannels();
+                         for (unsigned i = 0; i < nChannels; ++i) {
+                             _spectra[idx][i] += spectrum[i];
+                         }
+                    }
+                }
+            }
         }
 
     public: // Accessor methods.
