@@ -36,7 +36,7 @@ class DataViewer : public QWidget
 
     public:
         DataViewer( const ConfigNode& config, QWidget* parent=0 );
-        ~DataViewer();
+        virtual ~DataViewer();
 
         // returns the connected server host
         const QString& server() { return _server; };

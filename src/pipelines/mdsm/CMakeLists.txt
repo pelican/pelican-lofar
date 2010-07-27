@@ -4,8 +4,17 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 set(pipeline_lib_src
     src/MdsmPipeline.cpp
     src/UdpBFPipeline.cpp
+    src/EmptyPipeline.cpp
 )
 add_library(pelicanMdsm ${pipeline_lib_src})
+
+# === Build the Empty Pipeline for max performance testing
+add_executable(emptyPipeline src/emptyPipelineMain.cpp)
+target_link_libraries(emptyPipeline
+    pelicanMdsm
+    pelican-lofar_static
+    ${PELICAN_LIBRARY}
+)
 
 # === Build the UDP Beamforming pipeline binary.
 add_executable(udpBFPipeline src/udpBFmain.cpp)

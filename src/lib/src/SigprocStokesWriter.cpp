@@ -93,13 +93,17 @@ void SigprocStokesWriter::send(const QString& /*streamName*/, const DataBlob* in
 //        unsigned nPolarisations = stokes->nPolarisations(); // this is now an option.
         unsigned nChannels = stokes->ptr(0, 0, 0)->nChannels();
         float* data;
-        size_t dataSize = nChannels * sizeof(float);
+        //size_t dataSize = nChannels * sizeof(float);
 
         for (unsigned t = 0; t < nSamples; ++t) {
             for (unsigned p = 0; p < _nPols; ++p) {
-                for (unsigned s = 0; s < nSubbands; ++s) {
+                for (int s = nSubbands - 1; s >= 0; --s) {
                     data = stokes->ptr(t, s, p)->ptr();
-                    _file.write(reinterpret_cast<char*>(data), dataSize);
+	            for(int i = nChannels - 1; i >= 0 ; --i )
+		    {
+	               //_file.write(reinterpret_cast<char*>(data), dataSize);
+	               _file.write(reinterpret_cast<char* >(&data[i]), sizeof(float));
+	            }
                     _file.flush();
                 }
             }
