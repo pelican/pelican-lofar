@@ -41,7 +41,7 @@ void SubbandSpectrumWidget::updateData(DataBlob* data)
             return;
     }
 
-    if( _spectrumAmp.capacity() != nChannels )
+    if( _spectrumAmp.size() != nChannels )
     {
         plot->setTitle(QString("Spectrum (sample %1/%2, subband %3/%4, polarisation %5/%6)")
                     .arg(timeSample + 1).arg(nTimeBlocks)
@@ -52,9 +52,10 @@ void SubbandSpectrumWidget::updateData(DataBlob* data)
     }
     float* spectrum = spectra->ptr(timeSample, subband, polarisation)->ptr();
     for (unsigned i = 0; i < nChannels; ++i) {
-            _spectrumAmp[i]+=double(spectrum[i]);
+        _spectrumAmp[i] += double(spectrum[i]);
     }
-    if( _integrationCount++ % integrationMax == 0 ) {
+    if(  ++_integrationCount >= integrationMax ) {
+        //std::cout << "max=" << integrationMax << " iteration=" <<  _integrationCount << std::endl;
             plot->setTitle(QString("Spectrum (sample %1/%2, subband %3/%4, polarisation %5/%6)")
             .arg(timeSample + 1).arg(nTimeBlocks)
             .arg(subband + 1).arg(nSubbands)
@@ -82,10 +83,10 @@ void SubbandSpectrumWidget::_plot(const std::vector<double>& vec)
             //cout << "----- spectrum[1] = " << spectrum[1] << " " << spectrumAmp[1] << endl;
             // Set the plot title.
 
-            // Update the plot with the spectrum.
-    plot->plotCurve(nChannels, &frequencyIndex[0], &avvec[0]);
-    //cout << "** plotting nChan = " << nChannels << endl;
-    //plot->plotCurve(nChannels, &frequencyIndex[0], &frequencyIndex[0]);
+    // Update the plot with the spectrum.
+    //
+    if( nChannels > 0 )
+        plot->plotCurve(nChannels, &frequencyIndex[0], &avvec[0]);
 }
 
 
