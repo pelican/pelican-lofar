@@ -8,8 +8,8 @@ namespace pelican {
 namespace lofar {
 
 
-SubbandSpectrumWidget::SubbandSpectrumWidget(QWidget* parent)
-: DataBlobWidget(parent), _integrationCount(0)
+SubbandSpectrumWidget::SubbandSpectrumWidget(const ConfigNode& config, QWidget* parent)
+: DataBlobWidget(config, parent), _integrationCount(0)
 {
     setupUi(this);
     plot->setXLabel("Frequency Index");

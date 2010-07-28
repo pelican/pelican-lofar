@@ -56,7 +56,7 @@ int main(int argc, char** argv)
         server.send("SubbandSpectraStokes", &spectra);
         counter++;
         if (counter > 1e3) counter = 0;
-        sleep(1);
+//        sleep(1);
     }
 
     //return 0;
