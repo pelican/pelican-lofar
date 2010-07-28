@@ -41,7 +41,7 @@ void PolyphaseCoefficients::load(const QString& fileName,
         }
         QString line = in.readLine();
         QStringList chanCoeff = line.split(" ");
-        if (chanCoeff.size() != nFilterTaps) {
+        if (chanCoeff.size() != (int)nFilterTaps) {
             throw QString("PolyphaseCoefficients::load(): "
                     "File format error. %1 %2").arg(nFilterTaps)
                     .arg(chanCoeff.size());
