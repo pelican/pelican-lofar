@@ -6,6 +6,7 @@
  */
 
 #include "pelican/modules/AbstractModule.h"
+#include "SubbandTimeSeries.h"
 
 #include <vector>
 #include <complex>
@@ -40,6 +41,8 @@ class StokesGenerator : public AbstractModule
         ///
         void run(const SubbandSpectraC32* channeliserOutput,
                 SubbandSpectraStokes* stokes);
+	void run(const SubbandTimeSeriesC32* streamData,
+        	SubbandSpectraStokes* stokes);
 
     private:
         float _sqr(float x) { return x * x; }

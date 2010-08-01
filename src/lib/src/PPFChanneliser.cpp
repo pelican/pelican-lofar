@@ -142,6 +142,11 @@ void PPFChanneliser::run(const SubbandTimeSeriesC32* timeSeries,
     // Resize the output spectra blob.
     spectra->resize(nTimeBlocks, nSubbands, nPolarisations);
 
+    // Set the timing parameters
+    // We only need the timestamp of the first packet for this version of the Channeliser
+    spectra -> setLofarTimestamp(timeSeries -> getLofarTimestamp());
+    spectra -> setBlockRate(timeSeries -> getBlockRate());
+
     // Set up the buffers if required.
     unsigned nFilterTaps = _ppfCoeffs.nTaps();
     if (!_buffersInitialised) {
@@ -179,6 +184,7 @@ void PPFChanneliser::run(const SubbandTimeSeriesC32* timeSeries,
                     unsigned nTimes = times->nTimes();
 
                     if (nTimes != _nChannels) {
+                        std::cout << "nTimes: " << nTimes << " nChannels: " << _nChannels << std::endl;
                         throw QString("PPFChanneliser::run(): dimension mismatch");
                     }
 

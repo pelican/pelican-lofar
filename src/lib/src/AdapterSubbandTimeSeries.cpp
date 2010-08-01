@@ -37,6 +37,7 @@ AdapterSubbandTimeSeries::AdapterSubbandTimeSeries(const ConfigNode& config)
     _nSamplesPerTimeBlock = config.getOption("samplesPerTimeBlock", "number", "0").toUInt();
     _nSubbands = config.getOption("subbands", "number", "0").toUInt();
     _nPolarisations = config.getOption("polarisations", "number", "0").toUInt();
+    _clock = config.getOption("clock", "number", "200").toUInt();
 }
 
 
@@ -76,9 +77,6 @@ void AdapterSubbandTimeSeries::deserialise(QIODevice* in)
     // UDP packet header.
     UDPPacket::Header header;
 
-    // TODO: Add time information to time data object (obtainable from seqid
-    // and blockid using the TimeStamp code in IONproc).
-
     // Loop over UDP packets
     for (unsigned p = 0; p < _nUDPPacketsPerChunk; ++p) {
 
@@ -86,7 +84,14 @@ void AdapterSubbandTimeSeries::deserialise(QIODevice* in)
         in->read(&headerTemp[0], headerSize);
         _readHeader(header, &headerTemp[0]);
 
-        // TODO: copy timestamp stuff from AdapterTimeStream.
+        // First packet, extract timestamp
+        if (p == 0) {
+            TYPES::TimeStamp timestamp;
+            timestamp.setStationClockSpeed(_clock * 1000000);
+            timestamp.setStamp (header.timestamp, header.blockSequenceNumber);
+            _timeData -> setLofarTimestamp(timestamp.itsTime);
+            _timeData -> setBlockRate(_nSamplesPerTimeBlock); // sample rate when condensed in chunk (ie. diff in time between chunks)
+        }
 
         // Read the useful data (depends on configured dimensions).
         in->read(&dataTemp[0], dataSize);
@@ -149,7 +154,6 @@ void AdapterSubbandTimeSeries::_checkData()
     }
 
     unsigned nTimesTotal = _nSamplesPerPacket * _nUDPPacketsPerChunk;
-
     if (nTimesTotal % _nSamplesPerTimeBlock != 0) {
         throw QString("AdapterSubbandTimeSeries:: Number of time samples not "
                 "evenly devisable by the number of samples in a block.");
@@ -213,9 +217,7 @@ void AdapterSubbandTimeSeries::_readData(SubbandTimeSeriesC32* timeSeries,
 //        std::cout << "iTimeBlock = " << iTimeBlock << std::endl;
 
             for (unsigned p = 0; p < _nPolarisations; ++p) {
-
                 fComplex* data = timeSeries->ptr(iTimeBlock, c, p)->ptr();
-
                 // TODO: This needs double checking...
                 unsigned index = tStart - (iTimeBlock * _nSamplesPerTimeBlock) + t;
 
