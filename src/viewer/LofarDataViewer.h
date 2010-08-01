@@ -3,7 +3,7 @@
 #include <QtCore/QSet>
 
 
-#include "viewer/DataViewer.h"
+#include "pelican/viewer/DataViewer.h"
 
 /**
  * @file LofarDataViewer.h
@@ -30,7 +30,7 @@ class LofarDataViewer : public DataViewer
     Q_OBJECT
 
     public:
-        LofarDataViewer(const ConfigNode& config, QWidget* parent=0);
+        LofarDataViewer(const Config& config, const Config::TreeAddress& base, QWidget* parent=0);
         ~LofarDataViewer();
 
     private:
