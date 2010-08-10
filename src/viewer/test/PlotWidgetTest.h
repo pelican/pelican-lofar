@@ -3,6 +3,7 @@
 
 #include "viewer/PlotWidget.h"
 #include "viewer/SubbandSpectrumWidget.h"
+#include "pelican/utility/ConfigNode.h"
 
 #include <QtGui/QApplication>
 #include <QtCore/QObject>
@@ -20,7 +21,7 @@ class PlotWidgetTest : public QObject
     public:
         PlotWidgetTest() {
             _plotWidget = new PlotWidget;
-            _ssViewer = new SubbandSpectrumWidget;
+            _ssViewer = new SubbandSpectrumWidget(_config);
         }
         ~PlotWidgetTest() {
             delete _plotWidget;
@@ -60,6 +61,7 @@ class PlotWidgetTest : public QObject
     private:
         PlotWidget* _plotWidget;
         SubbandSpectrumWidget* _ssViewer;
+        ConfigNode _config;
 };
 
 

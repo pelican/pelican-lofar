@@ -38,7 +38,7 @@ class SigprocStokesWriter : public AbstractOutputStream
         std::ofstream _file;
         float         _fch1, _foff, _tsamp;
         int           _nchans;
-        unsigned	   _nPols;
+        unsigned      _nPols;
 
 };
 

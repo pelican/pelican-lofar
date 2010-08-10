@@ -94,6 +94,18 @@ class SubbandTimeSeries : public DataBlob
         /// Returns the number of polarisations in the data.
         unsigned nPolarisations() const { return _nPolarisations; }
 
+        /// Return the block rate (timespan of the entire chunk)
+        long getBlockRate() const { return _blockRate; }
+
+        /// Return the block rate (timespan of the entire chunk)
+        void setBlockRate(long blockRate) { _blockRate = blockRate; }
+
+        // Return the lofar timestamp
+        long long getLofarTimestamp() const { return _lofarTimestamp; }
+
+        // Set the lofar timestamp
+        void setLofarTimestamp(long long timestamp) { _lofarTimestamp = timestamp; }
+
         /// Returns a pointer to the time stream data.
         TimeSeries<T>* ptr() { return _data.size() > 0 ? &_data[0] : 0; }
 
@@ -144,6 +156,8 @@ class SubbandTimeSeries : public DataBlob
         unsigned _nTimeBlocks;
         unsigned _nSubbands;
         unsigned _nPolarisations;
+        long     _blockRate;
+        long long _lofarTimestamp;
 };
 
 
