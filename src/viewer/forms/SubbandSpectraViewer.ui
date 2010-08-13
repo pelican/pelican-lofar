@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>603</width>
-    <height>326</height>
+    <height>318</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -80,9 +80,6 @@
         </item>
         <item row="1" column="1">
          <widget class="QSpinBox" name="spinBox_subband">
-          <property name="minimum">
-           <number>1</number>
-          </property>
           <property name="maximum">
            <number>999</number>
           </property>
@@ -97,9 +94,6 @@
         </item>
         <item row="2" column="1">
          <widget class="QSpinBox" name="spinBox_polarisation">
-          <property name="minimum">
-           <number>1</number>
-          </property>
           <property name="maximum">
            <number>999</number>
           </property>
@@ -114,9 +108,6 @@
         </item>
         <item row="0" column="1">
          <widget class="QSpinBox" name="spinBox_timeBlock">
-          <property name="minimum">
-           <number>1</number>
-          </property>
           <property name="maximum">
            <number>999</number>
           </property>

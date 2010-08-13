@@ -20,9 +20,9 @@ SubbandSpectrumWidget::SubbandSpectrumWidget(QWidget* parent)
 void SubbandSpectrumWidget::updateData(DataBlob* data)
 {
     // Get data selection from widget controls.
-     unsigned subband = spinBox_subband->value() - 1 ;
-     unsigned polarisation = spinBox_polarisation->value() - 1;
-     unsigned timeSample = spinBox_timeBlock->value() - 1;
+     unsigned subband = spinBox_subband->value();
+     unsigned polarisation = spinBox_polarisation->value();
+     unsigned timeSample = spinBox_timeBlock->value();
 
      // Extra plot data from the data blob.
      SubbandSpectraStokes* spectra = (SubbandSpectraStokes*)data;
@@ -55,9 +55,9 @@ void SubbandSpectrumWidget::updateData(DataBlob* data)
      //cout << "----- spectrum[1] = " << spectrum[1] << " " << spectrumAmp[1] << endl;
      // Set the plot title.
      plot->setTitle(QString("Spectrum (sample %1/%2, subband %3/%4, polarisation %5/%6)")
-             .arg(timeSample + 1).arg(nTimeBlocks)
-             .arg(subband + 1).arg(nSubbands)
-             .arg(polarisation + 1).arg(nPolarisations));
+             .arg(timeSample).arg(nTimeBlocks)
+             .arg(subband).arg(nSubbands)
+             .arg(polarisation).arg(nPolarisations));
 
      // Update the plot with the spectrum.
      plot->plotCurve(nChannels, &frequencyIndex[0], &spectrumAmp[0]);

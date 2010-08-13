@@ -21,6 +21,7 @@ set(lib_src
     src/SubbandTimeSeries.cpp
     src/PPFChanneliser.cpp
     src/StokesGenerator.cpp
+    src/StokesIntegrator.cpp
     src/SigprocStokesWriter.cpp
 )
 

@@ -11,7 +11,6 @@
 #include <iostream>
 #include <cstdlib>
 #include <QtGui/QApplication>
-#include <QString>
 #include <boost/program_options.hpp>
 #include "pelican/utility/Config.h"
 #include "viewer/LofarDataViewer.h"
@@ -94,7 +93,7 @@ int main(int argc, char* argv[])
 {
     QApplication app(argc, argv);
 
-    try {
+//    try {
         pelican::Config config = createConfig(argc, argv);
 
         pelican::Config::TreeAddress address;
@@ -103,13 +102,13 @@ int main(int argc, char* argv[])
 //        config.save("config.xml");
         //config.summary();
 
-        pelican::lofar::LofarDataViewer* ldv = new pelican::lofar::LofarDataViewer(config.get(address));
-        ldv->show();
-	std::cout << "entering exec()" << std::endl;
-	return app.exec();
-    }
-    catch (const QString err) {
-        std::cout << "ERROR: " << err.toStdString() << std::endl;
-    }
+        pelican::lofar::LofarDataViewer ldv(config.get(address));
+        ldv.show();
+//    }
+//    catch (QString err) {
+//        std::cout << "ERROR: " << err.toStdString() << std::endl;
+//    }
+
+    return app.exec();
 }
 

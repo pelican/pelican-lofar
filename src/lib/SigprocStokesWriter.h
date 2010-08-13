@@ -32,13 +32,20 @@ class SigprocStokesWriter : public AbstractOutputStream
         void WriteLong(QString name, long value);
 
         // Data helpers
+    protected:
+        // buffer and write data in blocks
+        void _write(char*,size_t);
 
     private:
         QString       _filepath;
         std::ofstream _file;
-        float         _fch1, _foff, _tsamp;
+	std::vector<char> _buffer;
+        float         _fch1, _foff, _tsamp, _refdm;
         int           _nchans;
+	int _buffSize;
         unsigned	   _nPols;
+        unsigned	   _nSubbandsToStore;
+	int _cur;
 
 };
 
