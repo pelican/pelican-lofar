@@ -93,22 +93,22 @@ int main(int argc, char* argv[])
 {
     QApplication app(argc, argv);
 
-//    try {
-        pelican::Config config = createConfig(argc, argv);
-
-        pelican::Config::TreeAddress address;
-        address << pelican::Config::NodeId("DataViewer", "");
-
-//        config.save("config.xml");
-        //config.summary();
-
-        pelican::lofar::LofarDataViewer* ldv = new pelican::lofar::LofarDataViewer( config, address);
-        ldv->show();
-	std::cout << "entering exec()" << std::endl;
-	return app.exec();
+    //    try {
+    pelican::Config config = createConfig(argc, argv);
+    
+    pelican::Config::TreeAddress address;
+    address << pelican::Config::NodeId("DataViewer", "");
+    
+    //        config.save("config.xml");
+    //config.summary();
+    try{
+      pelican::lofar::LofarDataViewer* ldv = new pelican::lofar::LofarDataViewer( config, address);
+      ldv->show();
+      std::cout << "entering exec()" << std::endl;
+      return app.exec();
     }
     catch (const QString err) {
-        std::cout << "ERROR: " << err.toStdString() << std::endl;
+      std::cout << "ERROR: " << err.toStdString() << std::endl;
     }
 }
 
