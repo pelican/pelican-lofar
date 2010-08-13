@@ -31,7 +31,7 @@ int main(int argc, char* argv[])
         pApp.start();
     }
     catch (const QString& error) {
-        std::cout << "Error: " << error.toStdString() << std::endl;
+        std::cout << "Error caught in updBFmain.cpp: " << error.toStdString() << std::endl;
     }
 
     return 0;
