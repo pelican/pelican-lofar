@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE pelican>
+
+<configuration version="1.0">
+    <pipeline>
+
+        <buffers>
+           <SubbandTimeSeriesC32>
+               <buffer maxSize="100000000" maxChunkSize="100000000"/>
+           </SubbandTimeSeriesC32>
+        </buffers>
+
+        <chunkers>
+           <LofarChunker>
+               <data type="SubbandTimeSeriesC32"/>
+               <connection host="127.0.0.1" port="8090"/>
+               <params samplesPerPacket="32"
+                       nrPolarisation="2"
+                       subbandsPerPacket="31"
+                       packets="16"
+                       clock="200"/> <!-- packets = packets in a chunk -->
+               <samples type="8" />
+           </LofarChunker>
+        </chunkers>
+
+        <clients>
+            <LofarStreamDataClientNew>
+                <data type="SubbandTimeSeriesC32" adapter="AdapterSubbandTimeSeries" />
+            </LofarStreamDataClientNew>
+        </clients>
+
+        <adapters>
+            <AdapterSubbandTimeSeries>
+                <fixedSizePackets value="false" />
+                <sampleSize bits="8" />
+                <packetsPerChunk number="16"/>
+                <samplesPerPacket number="32"/>
+                <samplesPerTimeBlock number="64"/>
+                <subbands number="31"/> <!-- number of subbands -->
+                <polarisations number="2"/>
+            </AdapterSubbandTimeSeries>
+        </adapters>
+
+        <modules>
+            <PPFChanneliser>
+                <channels number="64" />
+                <processingThreads number="2" />
+                <filter nTaps="8" filterWindow="kaiser"/>
+            </PPFChanneliser>
+
+            <StokesGenerator>
+            </StokesGenerator>
+        </modules>
+
+        <output>
+
+          <dataStreams>
+             <!-- <stream name="SubbandSpectraStokes" listeners="PelicanTCPBlobServer" />  -->
+             <stream name="SubbandSpectraStokes" listeners="SigprocStokesWriter"/>
+          </dataStreams>
+
+          <streamers>
+              <!-- <PelicanTCPBlobServer active="true" >
+                 <connection port="6969" />
+             </PelicanTCPBlobServer>
+              -->
+              <SigprocStokesWriter>
+                    <file filepath="stokes.dat" />
+                    <params channelOneFrequency="120"
+                            frequencyOffset="0.00038085938"
+                            numberOfChannels="1984"
+                            samplingTime="0.001"
+                            telescope="LOFAR"
+                            nPols="1"/>
+              </SigprocStokesWriter>
+          </streamers>
+
+        </output>
+
+    </pipeline>
+</configuration>
+
+
