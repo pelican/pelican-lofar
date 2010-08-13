@@ -7,6 +7,7 @@
 
 #include "pelican/data/DataBlob.h"
 #include "Spectrum.h"
+#include "SubbandTimeSeries.h"
 
 #include <QtCore/QIODevice>
 #include <QtCore/QSysInfo>
@@ -31,7 +32,7 @@ namespace lofar {
  *
  *  Dimension order (outer -> inner):
  *
- *  	Time blocks -> sub-bands -> polarisations.
+ *      Time blocks -> sub-bands -> polarisations.
  *
  *  Polarisations is therefore the fastest varying index.
  *
@@ -47,6 +48,22 @@ class SubbandSpectra : public DataBlob
         /// Constructs an empty sub-band spectra data blob.
         SubbandSpectra(const QString& type = "SubbandSpectra")
         : DataBlob(type), _nTimeBlocks(0), _nSubbands(0), _nPolarisations(0) {}
+
+    /// Constructs an empty sub-band spectra from a SubbandTimeSeries
+        SubbandSpectra(const SubbandTimeSeries<T>& ts, const QString& type = "SubbandSpectra")
+        : DataBlob(type)
+        {
+            resize(ts.nTimeBlocks(),ts.nSubbands(), ts.nPolarisations(), 1 ); 
+            for (unsigned t = 0; t < ts.nTimeBlocks(); ++t) {
+                for (unsigned p = 0; p < ts.nPolarisations(); ++p) {
+                    for (unsigned s = 0; s < ts.nSubbands(); ++s) {
+                        int idx = index( t, s, p);
+                        T* data = ts.ptr(t,s,p)->ptr();
+                        _spectra[idx].push_back(data[idx]);
+                    }
+                }
+            }
+        }
 
         /// Destroys the object.
         virtual ~SubbandSpectra() {}
@@ -75,6 +92,7 @@ class SubbandSpectra : public DataBlob
         void resize(unsigned nTimeBlocks, unsigned nSubbands,
                 unsigned nPolarisations, unsigned nChannels)
         {
+            resize( nTimeBlocks, nSubbands, nPolarisations);
             _nTimeBlocks = nTimeBlocks;
             _nSubbands = nSubbands;
             _nPolarisations = nPolarisations;
@@ -91,6 +109,23 @@ class SubbandSpectra : public DataBlob
             return _nPolarisations * (b * _nSubbands + s) + p;
         }
 
+        /// add the supplied subband spectra values to this object
+        SubbandSpectra& operator+(const SubbandSpectra& spectra)
+        {
+            for (unsigned t = 0; t < spectra.nTimeBlocks(); ++t) {
+                for (unsigned p = 0; p < spectra.nPolarisations(); ++p) {
+                    for (unsigned s = 0; s < spectra.nSubbands(); ++s) {
+                        int idx = index( t, s, p);
+                         T* spectrum = spectra->ptr(t, s, p)->ptr();
+                         unsigned nChannels = spectra->ptr(t,s,p)->nChannels();
+                         for (unsigned i = 0; i < nChannels; ++i) {
+                             _spectra[idx][i] += spectrum[i];
+                         }
+                    }
+                }
+            }
+        }
+
     public: // Accessor methods.
 
         /// Returns the number of entries in the data blob.
@@ -104,6 +139,18 @@ class SubbandSpectra : public DataBlob
 
         /// Returns the number of polarisations in the data.
         unsigned nPolarisations() const { return _nPolarisations; }
+
+        /// Return the block rate (timespan of the entire chunk)
+        long getBlockRate() const { return _blockRate; }
+
+        /// Return the block rate (timespan of the entire chunk)
+        void setBlockRate(long blockRate) { _blockRate = blockRate; }
+
+        // Return the lofar timestamp
+        long long getLofarTimestamp() const { return _lofarTimestamp; }
+
+        // Set the lofar timestamp
+        void setLofarTimestamp(long long timestamp) { _lofarTimestamp = timestamp; }
 
         /// Returns a pointer to the data.
         Spectrum<T>* ptr() { return _spectra.size() > 0 ? &_spectra[0] : NULL; }
@@ -157,6 +204,8 @@ class SubbandSpectra : public DataBlob
         unsigned _nTimeBlocks;
         unsigned _nSubbands;
         unsigned _nPolarisations;
+        long     _blockRate;
+        long long _lofarTimestamp;
 };
 
 

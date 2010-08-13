@@ -103,6 +103,7 @@ class AdapterSubbandTimeSeries : public AbstractStreamAdapter
         unsigned _nSubbands;
         unsigned _nPolarisations;
         unsigned _sampleBits;
+        unsigned _clock;
 };
 
 PELICAN_DECLARE_ADAPTER(AdapterSubbandTimeSeries)

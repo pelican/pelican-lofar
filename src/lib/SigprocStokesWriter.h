@@ -46,12 +46,13 @@ class SigprocStokesWriter : public AbstractOutputStream
         unsigned	   _nPols;
         unsigned	   _nSubbandsToStore;
 	int _cur;
-
 };
 
 PELICAN_DECLARE(AbstractOutputStream, SigprocStokesWriter)
 
-}
+  
+
+  }
 }
 
 #endif // SIGPROCSTOKESWRITER_H

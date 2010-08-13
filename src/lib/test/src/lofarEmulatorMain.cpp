@@ -10,7 +10,7 @@ int main(int argc, char** argv)
 {
     QCoreApplication app(argc, argv);
 
-    int samplesPerPacket  = 32;   // Number of block per frame (for a 32 MHz beam)
+    int samplesPerPacket  = 16;   // Number of block per frame (for a 32 MHz beam)
     int nrPolarisations   = 2;    // Number of polarization in the data
     //int numPackets        = 10000;   // Number of packet to send
     int clock             = 200;  // Rounded up clock station clock speed
@@ -37,9 +37,10 @@ int main(int argc, char** argv)
             "<LofarUdpEmulator>"
             "    <connection host=\"127.0.0.1\" port=\"8090\"/>"
             "    <params clock=\""         + QString::number(clock) + "\"/>"
-            "    <packet interval=\"160\""
+            //"    <packet interval=\"81.92\""
+            "    <packet interval=\"100\""
             "            startDelay=\"1\""
-            "            sampleSize=\"8\""
+            "            sampleSize=\"16\""
             "            samples=\""       + QString::number(samplesPerPacket)  + "\""
             "            polarisations=\"" + QString::number(nrPolarisations)   + "\""
             "            subbands=\""      + QString::number(subbandsPerPacket) + "\"/>"

@@ -4,7 +4,7 @@
 #include <QtGui/QWidget>
 #include "pelican/data/DataBlob.h"
 
-#include "DataBlobWidget.h"
+#include "pelican/viewer/DataBlobWidget.h"
 
 #include "ui_SubbandSpectraViewer.h"
 
@@ -16,6 +16,8 @@
  */
 
 namespace pelican {
+    class ConfigNode;
+
 namespace lofar {
 
 /**
@@ -31,13 +33,19 @@ class SubbandSpectrumWidget : public DataBlobWidget, public Ui::SubbandSpectraVi
     Q_OBJECT
 
     public:
-        SubbandSpectrumWidget(QWidget* parent = 0);
+        SubbandSpectrumWidget(const ConfigNode& config, QWidget* parent = 0);
 
         virtual ~SubbandSpectrumWidget() {}
 
         void updateData(DataBlob* data);
 
+     private:
+        void _plot(const std::vector<double>& vec);
+        std::vector<double> _spectrumAmp;
+        unsigned int _integrationCount;
 };
+
+PELICAN_DECLARE(DataBlobWidget, SubbandSpectrumWidget);
 
 } // namespace lofar
 } // namespace pelican
