@@ -45,7 +45,7 @@ class SubbandSpectrumWidget : public DataBlobWidget, public Ui::SubbandSpectraVi
         unsigned int _integrationCount;
 };
 
-PELICAN_DECLARE(DataBlobWidget, SubbandSpectrumWidget);
+PELICAN_DECLARE(DataBlobWidget, SubbandSpectrumWidget)
 
 } // namespace lofar
 } // namespace pelican

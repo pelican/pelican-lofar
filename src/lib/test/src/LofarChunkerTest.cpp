@@ -25,7 +25,7 @@ LofarChunkerTest::LofarChunkerTest()
 {
     _samplesPerPacket  = 32;   // Number of block per frame (for a 32 MHz beam)
     _nrPolarisations   = 2;    // Number of polarization in the data
-    _numPackets        = 10000;   // Number of packet to send
+    _numPackets        = 1000; // Number of packet to send
     _clock             = 200;  // Rounded up clock station clock speed
     _subbandsPerPacket = _clock == 200 ? 42 : 54;  //  Number of block per frame
 
@@ -131,16 +131,15 @@ void LofarChunkerTest::test_normalPackets()
         unsigned packetSize = sizeof(struct UDPPacket::Header) + _subbandsPerPacket *
                 _samplesPerPacket * _nrPolarisations * sizeof(TYPES::i8complex);
 
-        unsigned int val;
         for (int counter = 0; counter < _numPackets; counter++) {
 
             packet = (UDPPacket *) (dataPtr + packetSize * counter);
-            TYPES::i8complex *s = reinterpret_cast<TYPES::i8complex *>( &(packet -> data));
+            TYPES::i8complex* s = reinterpret_cast<TYPES::i8complex*>(&(packet->data));
 
             for (int k = 0; k < _samplesPerPacket; k++)
                  for (int j = 0; j < _subbandsPerPacket; j++) {
-                     val = s[k * _subbandsPerPacket * _nrPolarisations +  j * _nrPolarisations].real();
-                     CPPUNIT_ASSERT(k + j == val);
+                     float val = s[k * _subbandsPerPacket * _nrPolarisations +  j * _nrPolarisations].real();
+                     CPPUNIT_ASSERT_EQUAL(float(k + j), val);
                  }
         }
 
@@ -198,15 +197,17 @@ void LofarChunkerTest::test_lostPackets()
         for (int counter = 0; counter < _numPackets; counter++) {
 
             packet = (UDPPacket *) (dataPtr + packetSize * counter);
-            TYPES::i8complex *s = reinterpret_cast<TYPES::i8complex *>( &(packet -> data));
+            TYPES::i8complex* s = reinterpret_cast<TYPES::i8complex*>(&packet->data);
             for (int k = 0; k < _samplesPerPacket; k++)
-                for (int j = 0; j < _subbandsPerPacket; j++)
-                   if (counter % 2 == 1)
-                       CPPUNIT_ASSERT(k + j ==  s[k * _subbandsPerPacket * _nrPolarisations +
-                                                  j * _nrPolarisations].real());
-                   else
-                       CPPUNIT_ASSERT(s[k * _subbandsPerPacket * _nrPolarisations +
-                                        j * _nrPolarisations].real() == 0);
+                for (int j = 0; j < _subbandsPerPacket; j++) {
+                    unsigned index = k * _subbandsPerPacket * _nrPolarisations +
+                            j * _nrPolarisations;
+                    float val = s[index].real();
+                    if (counter % 2 == 1)
+                        CPPUNIT_ASSERT_EQUAL(float(k + j), val);
+                    else
+                        CPPUNIT_ASSERT_EQUAL(0.0f, val);
+                }
         }
 
         std::cout << "Finished LofarChunker lostPackets test" << std::endl;

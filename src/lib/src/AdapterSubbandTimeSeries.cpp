@@ -218,20 +218,15 @@ void AdapterSubbandTimeSeries::_readData(SubbandTimeSeriesC32* timeSeries,
 
             for (unsigned p = 0; p < _nPolarisations; ++p) {
                 fComplex* data = timeSeries->ptr(iTimeBlock, c, p)->ptr();
-                // TODO: This needs double checking...
                 unsigned index = tStart - (iTimeBlock * _nSamplesPerTimeBlock) + t;
 
                 if (_sampleBits == 8) {
                     TYPES::i8complex i8c = *reinterpret_cast<TYPES::i8complex*>(&buffer[iPtr]);
-                    // TODO *IMPORTANT* check complex conversion.
-                    // see: lofar ASTRO repos LCS/Common/lofar_complex.h
                     data[index] = _makeComplex(i8c);
                     iPtr += sizeof(TYPES::i8complex);
                 }
                 else if (_sampleBits == 16) {
                     TYPES::i16complex i16c = *reinterpret_cast<TYPES::i16complex*>(&buffer[iPtr]);
-                    // TODO *IMPORTANT* check complex conversion.
-                    // see: lofar ASTRO repos LCS/Common/lofar_complex.h
                     data[index] = _makeComplex(i16c);
                     iPtr += sizeof(TYPES::i16complex);
                 }
@@ -288,7 +283,6 @@ void AdapterSubbandTimeSeries::_printHeader(const UDPPacket::Header& header)
 
 std::complex<float> AdapterSubbandTimeSeries::_makeComplex(const TYPES::i8complex& z)
 {
-    //TODO Check (see LCS/Common/lofar_complex.h)
     return std::complex<float>(float(real(z)), float(imag(z)));
 }
 

@@ -42,8 +42,8 @@ int main(int argc, char** argv)
                         data = spectra.ptr(t, s, p)->ptr();
                         float nPeriods = float(s + 1) * float(p+1);
                         float x = float(c);
-                        float arg = 2 * M_PI * x * nPeriods / float(nChannels);
-                        float amp = (1.0 + float(counter) / 2.0) * sin(arg);
+                        float arg = 2.0f * float(M_PI) * x * nPeriods / float(nChannels);
+                        float amp = (1.0f + float(counter) / 2.0f) * sin(arg);
                         data[c] = amp + float(t);
                     }
                 }

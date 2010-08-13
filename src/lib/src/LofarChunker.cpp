@@ -73,7 +73,6 @@ void LofarChunker::next(QIODevice* device)
     unsigned prevSeqid = _startTime;
     unsigned prevBlockid = _startBlockid;
     UDPPacket currPacket, emptyPacket;
-    qint64 sizeDatagram;
 
     WritableData writableData = getDataStorage(_nPackets * _packetSize);
 
@@ -89,7 +88,7 @@ void LofarChunker::next(QIODevice* device)
             while (!socket -> hasPendingDatagrams())
                 socket -> waitForReadyRead(100);
 
-            if ( ( sizeDatagram = socket -> readDatagram(reinterpret_cast<char*>(&currPacket), _packetSize) ) <= 0 ) {
+            if (socket->readDatagram(reinterpret_cast<char*>(&currPacket), _packetSize) <= 0) {
                 std::cout << "LofarChunker::next(): Error while receiving UDP Packet!" << std::endl;
                 i--;
                 continue;

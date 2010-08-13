@@ -141,7 +141,7 @@ void DataStreamingTest::test_serverClient()
 /**
  * @details
  */
-void DataStreamingTest::_testLofarDataClient(AbstractDataClient* client)
+void DataStreamingTest::_testLofarDataClient(AbstractDataClient* /*client*/)
 {
     // TODO : write tests to ensure data is being received OK
     // client->getData();

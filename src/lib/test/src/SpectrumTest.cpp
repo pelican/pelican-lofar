@@ -57,7 +57,7 @@ void SpectrumTest::test_accessorMethods()
         CPPUNIT_ASSERT_EQUAL(nChan, spectrum.nChannels());
         float* sIn = spectrum.ptr();
         for (unsigned i = 0; i < nChan; ++i) {
-            sIn[i] = float(i) * 1.1;
+            sIn[i] = float(i) * 1.1f;
         }
         const float* sOut = spectrum.ptr();
         for (unsigned i = 0; i < nChan; ++i) {
