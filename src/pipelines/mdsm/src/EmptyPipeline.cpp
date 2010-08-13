@@ -35,7 +35,7 @@ void EmptyPipeline::init()
  * @details
  * Runs the pipeline.
  */
-void EmptyPipeline::run(QHash<QString, DataBlob*>& remoteData)
+void EmptyPipeline::run(QHash<QString, DataBlob*>& /*remoteData*/)
 {
 
     if (_iteration % 200 == 0) std::cout << "Finished pipeline, iteration " << _iteration << std::endl;

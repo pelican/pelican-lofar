@@ -31,7 +31,7 @@ LofarChunker::LofarChunker(const ConfigNode& config) : AbstractChunker(config)
     _packetsRejected = 0;
 
     // Calculate the number of ethernet frames that will go into a chunk
-    _nPackets = config.getOption("params","packets").toInt();
+    _nPackets = config.getOption("params", "packets").toUInt();
 
     // Some sanity checking.
     if (type().isEmpty())
@@ -69,23 +69,23 @@ void LofarChunker::next(QIODevice* device)
 {
     QUdpSocket *socket = static_cast<QUdpSocket*>(device);
 
-    unsigned         offset                    = 0;
-    unsigned         prevSeqid                 = _startTime;
-    unsigned         prevBlockid               = _startBlockid;
-    UDPPacket         currPacket, emptyPacket;
-    qint64            sizeDatagram;
+    unsigned offset = 0;
+    unsigned prevSeqid = _startTime;
+    unsigned prevBlockid = _startBlockid;
+    UDPPacket currPacket, emptyPacket;
+    qint64 sizeDatagram;
 
-    WritableData writableData = getDataStorage( _nPackets * _packetSize);
+    WritableData writableData = getDataStorage(_nPackets * _packetSize);
 
     if (writableData.isValid()) {
 
         // Loop over UDP packets.
-        for (int i = 0; i < _nPackets; i++) {
+        for (unsigned i = 0; i < _nPackets; i++) {
 
-            // Chunker sanity check
+            // Chunker sanity check.
             if (!isActive()) return;
 
-            // Wait for datagram to be available
+            // Wait for datagram to be available.
             while (!socket -> hasPendingDatagrams())
                 socket -> waitForReadyRead(100);
 
@@ -95,17 +95,17 @@ void LofarChunker::next(QIODevice* device)
                 continue;
             }
 
-            // Check for endianness. Packet data is in little endian format
+            // Check for endianness. Packet data is in little endian format.
             unsigned seqid, blockid;
 
-            #if Q_BYTE_ORDER == Q_BIG_ENDIAN
-                // TODO: Convert from little endian to big endian
-                seqid   = currPacket.header.timestamp;
-                blockid = currPacket.header.blockSequenceNumber;
-            #elif Q_BYTE_ORDER == Q_LITTLE_ENDIAN
-                seqid   = currPacket.header.timestamp;
-                blockid = currPacket.header.blockSequenceNumber;
-            #endif
+#if Q_BYTE_ORDER == Q_BIG_ENDIAN
+            // TODO: Convert from little endian to big endian.
+            seqid   = currPacket.header.timestamp;
+            blockid = currPacket.header.blockSequenceNumber;
+#elif Q_BYTE_ORDER == Q_LITTLE_ENDIAN
+            seqid   = currPacket.header.timestamp;
+            blockid = currPacket.header.blockSequenceNumber;
+#endif
 
             // First time next has been run, initialise startTime and startBlockId
             if (i == 0 && _startTime == 0) {
@@ -139,12 +139,13 @@ void LofarChunker::next(QIODevice* device)
 
             if (lostPackets > 0) {
                 printf("Generate %u empty packets, prevSeq: %u, new Seq: %u, prevBlock: %u, newBlock: %u\n",
-                       lostPackets, prevSeqid, seqid, prevBlockid, blockid);
+                        lostPackets, prevSeqid, seqid, prevBlockid, blockid);
             }
 
             // Generate lostPackets empty packets, if any
-            for (unsigned packetCounter = 0; packetCounter < lostPackets &&
-                                             i + packetCounter < _nPackets; packetCounter++) {
+            for (unsigned packetCounter = 0;
+                    packetCounter < lostPackets && i + packetCounter < _nPackets;
+                    packetCounter++) {
 
                 // Generate empty packet with correct seqid and blockid
                 prevSeqid = (prevBlockid + _samplesPerPacket < totBlocks) ? prevSeqid : prevSeqid + 1;
@@ -154,9 +155,7 @@ void LofarChunker::next(QIODevice* device)
 
                 // Check if the number of required packets is reached
                 i += 1;
-                if (i == _nPackets) {
-                    break;
-                }
+                if (i == _nPackets) break;
             }
 
             // Write received packet
@@ -179,7 +178,6 @@ void LofarChunker::next(QIODevice* device)
     // Update _startTime
     _startTime = prevSeqid;
     _startBlockid = prevBlockid;
-    //printf("Finished receiving\n");
 }
 
 /**

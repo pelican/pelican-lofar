@@ -4,14 +4,14 @@
 #include "pelican/core/DirectStreamDataClient.h"
 
 /**
- * @file LofarStreamDataClient.h
+ * @file LofarStreamDataClientNew.h
  */
 
 namespace pelican {
 namespace lofar {
 
 /**
- * @class LofarStreamDataClient
+ * @class LofarStreamDataClientNew
  *
  * @ingroup pelican_lofar
  *

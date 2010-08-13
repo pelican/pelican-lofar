@@ -1,6 +1,6 @@
 #include "pelican/core/PipelineApplication.h"
 
-#include "LofarStreamDataClientNew.h"
+#include "LofarStreamDataClient.h"
 #include "EmptyPipeline.h"
 #include "AdapterSubbandTimeSeries.h"
 
@@ -25,7 +25,7 @@ int main(int argc, char* argv[])
         pApp.registerPipeline(new EmptyPipeline);
 
         // Set the data client.
-        pApp.setDataClient("LofarStreamDataClientNew");
+        pApp.setDataClient("LofarStreamDataClient");
 
         // Start the pipeline driver.
         pApp.start();

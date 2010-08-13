@@ -19,9 +19,6 @@ CPPUNIT_TEST_SUITE_REGISTRATION(SubbandSpectraTest);
  */
 void SubbandSpectraTest::test_accessorMethods()
 {
-    // Error tolerance use for double comparisons.
-    double err = 1.0e-5;
-
     // Use Case
     // Construct a sub-band spectra data blob directly
     {

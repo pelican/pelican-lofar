@@ -6,9 +6,8 @@
 #include "pelican/data/DataBlob.h"
 #include "pelican/output/PelicanTCPBlobServer.h"
 
-#include "ChanneliserPolyphase.h"
-#include "PolyphaseCoefficients.h"
-#include "ChannelisedStreamData.h"
+//#include "PolyphaseCoefficients.h"
+
 
 /**
  * @file MdsmPipeline.h
@@ -39,12 +38,12 @@ class MdsmPipeline : public AbstractPipeline
 
     private:
         /// Module pointers
-        ChanneliserPolyphase* channeliser;
+//        ChanneliserPolyphase* channeliser;
 //        PelicanTCPBlobServer* tcpBlobServer;
 
         /// Local data blob
-        PolyphaseCoefficients* polyphaseCoeff;
-        ChannelisedStreamData* channelisedData;
+//        PolyphaseCoefficients* polyphaseCoeff;
+//        ChannelisedStreamData* channelisedData;
 
         unsigned _iteration;
 };

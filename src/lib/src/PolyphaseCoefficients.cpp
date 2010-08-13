@@ -347,7 +347,7 @@ void PolyphaseCoefficients::genereateFilter(unsigned nTaps,
 
     _coeff.resize(nChannels * nTaps);
 
-    for(int t = 0; t < nTaps; ++t) {
+    for(unsigned t = 0; t < nTaps; ++t) {
         for(unsigned c = 0; c < nChannels; ++c) {
             unsigned index = t * nChannels + c;
             _coeff[index] = result[index] / nChannels;

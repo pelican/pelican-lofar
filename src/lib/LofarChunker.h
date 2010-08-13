@@ -1,10 +1,13 @@
 #ifndef LOFARCHUNKER_H
 #define LOFARCHUNKER_H
-#include <QtCore/QString>
-#include <QtCore/QObject>
+
 #include "LofarTypes.h"
 #include "LofarUdpHeader.h"
+
 #include "pelican/server/AbstractChunker.h"
+
+#include <QtCore/QString>
+#include <QtCore/QObject>
 
 /**
  * @file LofarChunker.h
@@ -43,7 +46,7 @@ class LofarChunker : public AbstractChunker
         virtual void next(QIODevice*);
 
         /// Sets the number of packets to read.
-        void setPackets(int packets) {_nPackets = packets;}
+        void setPackets(int packets) { _nPackets = packets; }
 
     private:
         /// Generates an empty UDP packet.
@@ -54,7 +57,7 @@ class LofarChunker : public AbstractChunker
 
     private:
 
-        int _nPackets;
+        unsigned _nPackets;
         unsigned _packetsRejected;
         unsigned _packetsAccepted;
         unsigned _samplesPerPacket;
