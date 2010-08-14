@@ -43,7 +43,7 @@ class SigprocStokesWriter : public AbstractOutputStream
         float         _fch1, _foff, _tsamp, _refdm;
         int           _nchans;
 	int _buffSize;
-        unsigned	   _nPols;
+        unsigned	   _nPols, _nChannels, _nSubbands, _clock, _integration ;
         unsigned	   _nSubbandsToStore;
 	int _cur;
 };

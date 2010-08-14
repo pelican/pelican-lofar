@@ -31,13 +31,13 @@ AdapterSubbandTimeSeries::AdapterSubbandTimeSeries(const ConfigNode& config)
     // Grab configuration for the adapter
     _fixedPacketSize = config.getOption("fixedSizePackets", "value", "true").
             toLower().startsWith("true") ? true : false;
-    _sampleBits = config.getOption("sampleSize", "bits", "0").toUInt();
-    _nUDPPacketsPerChunk = config.getOption("packetsPerChunk", "number", "0").toUInt();
-    _nSamplesPerPacket = config.getOption("samplesPerPacket", "number", "0").toUInt();
-    _nSamplesPerTimeBlock = config.getOption("samplesPerTimeBlock", "number", "0").toUInt();
-    _nSubbands = config.getOption("subbands", "number", "0").toUInt();
-    _nPolarisations = config.getOption("polarisations", "number", "0").toUInt();
-    _clock = config.getOption("clock", "number", "200").toUInt();
+    _sampleBits = config.getOption("dataBitSize", "value", "0").toUInt();
+    _nUDPPacketsPerChunk = config.getOption("udpPacketsPerIteration", "value", "0").toUInt();
+    _nSamplesPerPacket = config.getOption("samplesPerPacket", "value", "0").toUInt();
+    _nSamplesPerTimeBlock = config.getOption("outputChannelsPerSubband", "value", "0").toUInt();
+    _nSubbands = config.getOption("subbandsPerPacket", "value", "0").toUInt();
+    _nPolarisations = config.getOption("nRawPolarisations", "value", "0").toUInt();
+    _clock = config.getOption("clock", "value", "200").toUInt();
 }
 
 
@@ -123,7 +123,6 @@ void AdapterSubbandTimeSeries::_checkData()
             * _sampleBits * 2;
     unsigned packetSize = _fixedPacketSize ?
             sizeof(UDPPacket) : sizeof(UDPPacket::Header) + packetUsefulBits / 8;
-
     // Check the chunk size matches the expected number of UDPPackets.
     if (_chunkSize != packetSize * _nUDPPacketsPerChunk) {
         throw QString("AdapterSubbandTimeSeries: Chunk size '%1' doesn't "

@@ -19,7 +19,7 @@ StokesIntegrator::StokesIntegrator(const ConfigNode& config)
 {
 // Get the size for the integration window(step) from the parameter file.
 
-_windowSize    = config.getOption("params", "integrationStep", "1").toUInt();
+_windowSize    = config.getOption("integrateTimeBins", "value", "1").toUInt();
 }
 
 

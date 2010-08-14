@@ -21,17 +21,17 @@ LofarChunker::LofarChunker(const ConfigNode& config) : AbstractChunker(config)
         throw QString("LofarChunker::LofarChunker(): Invalid configuration");
 
     // Get configuration options
-    int _sampleType = config.getOption("samples", "type").toInt();
-    _samplesPerPacket = config.getOption("params","samplesPerPacket").toInt();
-    _subbandsPerPacket = config.getOption("params","subbandsPerPacket").toInt();
-    _nrPolarisations = config.getOption("params","nrPolarisation").toInt();
-    _clock = config.getOption("params", "clock").toInt();
+    int _sampleType = config.getOption("dataBitSize", "value").toInt();
+    _samplesPerPacket = config.getOption("samplesPerPacket","value").toInt();
+    _subbandsPerPacket = config.getOption("subbandsPerPacket","value").toInt();
+    _nrPolarisations = config.getOption("nRawPolarisations","value").toInt();
+    _clock = config.getOption("clock","value").toInt();
     _startTime = _startBlockid = 0;
     _packetsAccepted = 0;
     _packetsRejected = 0;
 
     // Calculate the number of ethernet frames that will go into a chunk
-    _nPackets = config.getOption("params", "packets").toUInt();
+    _nPackets = config.getOption("udpPacketsPerIteration", "value").toUInt();
 
     // Some sanity checking.
     if (type().isEmpty())

@@ -15,15 +15,22 @@ namespace lofar {
 SigprocStokesWriter::SigprocStokesWriter(const ConfigNode& configNode )
 : AbstractOutputStream(configNode)
 {
+  _nSubbands = configNode.getOption("subbandsPerPacket", "value", "0").toUInt();
+  _clock = configNode.getOption("clock", "value", "200").toUInt();
+  _integration    = configNode.getOption("integrateTimeBins", "value", "1").toUInt();
+  _nChannels = configNode.getOption("outputChannelsPerSubband", "value", "512").toUInt();
+ 
+
     // Initliase connection manager thread
     _filepath = configNode.getOption("file", "filepath");
-    _fch1     = configNode.getOption("params", "channelOneFrequency", "0").toFloat();
-    _foff     = configNode.getOption("params", "frequencyOffset", "0").toFloat();
-    _refdm    = configNode.getOption("params", "referenceDM", "0").toFloat();
-    _tsamp    = configNode.getOption("params", "samplingTime", "0").toFloat();
-    _nchans   = configNode.getOption("params", "numberOfChannels", "31").toFloat();
-    _nPols    = configNode.getOption("params", "nPols", "1").toUInt();
-    _nSubbandsToStore  = configNode.getOption("params", "subbandStoreOffset", "0").toUInt();
+    _fch1     = configNode.getOption("topChannelFrequency", "value", "0").toFloat();
+    //_foff     = configNode.getOption("params", "frequencyOffset", "0").toFloat();
+    _foff = float(_clock) / 1024.0 / float(_nChannels);
+    //_tsamp    = configNode.getOption("params", "samplingTime", "0").toFloat();
+    _tsamp = 5.12 * _nChannels * _integration / 1000000.0;
+    _nPols    = configNode.getOption("params", "nPolsToWrite", "1").toUInt();
+    //_nSubbandsToStore  = configNode.getOption("params", "subbandStoreOffset", "0").toUInt();
+    _nchans = _nChannels * _nSubbands;
     _buffSize    = configNode.getOption("params", "bufferSize", "5120").toUInt();
     _cur = 0;
 
@@ -43,7 +50,6 @@ SigprocStokesWriter::SigprocStokesWriter(const ConfigNode& configNode )
     // Need to be parametrised ...
     WriteDouble("fch1", _fch1);
     WriteDouble("foff", _foff);
-    WriteDouble("refdm", _refdm);
     WriteInt("nchans", _nchans);
     WriteDouble("tsamp", _tsamp);
     WriteInt("nbits", 32);         // Only 32-bit binary data output is implemented for now

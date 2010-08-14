@@ -44,9 +44,9 @@ PPFChanneliser::PPFChanneliser(const ConfigNode& config)
     _buffersInitialised = false;
 
     // Get options from the XML configuration node.
-    _nChannels = config.getOption("channels", "number", "512").toUInt();
-    _nThreads = config.getOption("processingThreads", "number", "2").toUInt();
-    unsigned nTaps = config.getOption("coefficients", "nTaps", "8").toUInt();
+    _nChannels = config.getOption("outputChannelsPerSubband", "value", "512").toUInt();
+    _nThreads = config.getOption("processingThreads", "value", "2").toUInt();
+    unsigned nTaps = config.getOption("filter", "nTaps", "8").toUInt();
     QString window = config.getOption("filter", "filterWindow", "kaiser").toLower();
 
     // Enforce even number of channels.
