@@ -41,7 +41,7 @@ class SigprocStokesWriter : public AbstractOutputStream
         std::ofstream _file;
 	std::vector<char> _buffer;
         float         _fch1, _foff, _tsamp, _refdm;
-        int           _nchans;
+        int           _nchans, _nTotalSubbands;
 	int _buffSize;
         unsigned	   _nPols, _nChannels, _nSubbands, _clock, _integration ;
         unsigned	   _nSubbandsToStore;

@@ -16,6 +16,7 @@ SigprocStokesWriter::SigprocStokesWriter(const ConfigNode& configNode )
 : AbstractOutputStream(configNode)
 {
   _nSubbands = configNode.getOption("subbandsPerPacket", "value", "0").toUInt();
+  _nTotalSubbands = configNode.getOption("totalComplexSubbands", "value", "0").toUInt();
   _clock = configNode.getOption("clock", "value", "200").toUInt();
   _integration    = configNode.getOption("integrateTimeBins", "value", "1").toUInt();
   _nChannels = configNode.getOption("outputChannelsPerSubband", "value", "512").toUInt();
@@ -25,9 +26,9 @@ SigprocStokesWriter::SigprocStokesWriter(const ConfigNode& configNode )
     _filepath = configNode.getOption("file", "filepath");
     _fch1     = configNode.getOption("topChannelFrequency", "value", "0").toFloat();
     //_foff     = configNode.getOption("params", "frequencyOffset", "0").toFloat();
-    _foff = float(_clock) / 1024.0 / float(_nChannels);
+    _foff = float(_clock) / (2.0 * _nTotalSubbands) / float(_nChannels);
     //_tsamp    = configNode.getOption("params", "samplingTime", "0").toFloat();
-    _tsamp = 5.12 * _nChannels * _integration / 1000000.0;
+    _tsamp =  (2.0 * _nTotalSubbands) * _nChannels * _integration / float(_clock) / 1e6;
     _nPols    = configNode.getOption("params", "nPolsToWrite", "1").toUInt();
     //_nSubbandsToStore  = configNode.getOption("params", "subbandStoreOffset", "0").toUInt();
     _nchans = _nChannels * _nSubbands;

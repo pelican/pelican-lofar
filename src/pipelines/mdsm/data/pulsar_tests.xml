@@ -8,6 +8,7 @@
       <samplesPerPacket value="16"/>
       <nRawPolarisations value="2"/>
       <dataBitSize value="16"/>
+      <totalComplexSubbands value="512"/>
     </nodeset>
     
     <nodeset name="ChangeParameters">
