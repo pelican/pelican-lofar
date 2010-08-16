@@ -49,11 +49,11 @@ class SubbandSpectra : public DataBlob
         SubbandSpectra(const QString& type = "SubbandSpectra")
         : DataBlob(type), _nTimeBlocks(0), _nSubbands(0), _nPolarisations(0) {}
 
-    /// Constructs an empty sub-band spectra from a SubbandTimeSeries
+        /// Constructs an empty sub-band spectra from a SubbandTimeSeries
         SubbandSpectra(const SubbandTimeSeries<T>& ts, const QString& type = "SubbandSpectra")
         : DataBlob(type)
         {
-            resize(ts.nTimeBlocks(),ts.nSubbands(), ts.nPolarisations(), 1 ); 
+            resize(ts.nTimeBlocks(),ts.nSubbands(), ts.nPolarisations(), 1 );
             for (unsigned t = 0; t < ts.nTimeBlocks(); ++t) {
                 for (unsigned p = 0; p < ts.nPolarisations(); ++p) {
                     for (unsigned s = 0; s < ts.nSubbands(); ++s) {

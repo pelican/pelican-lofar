@@ -63,5 +63,9 @@ target_link_libraries(blobClient
     pelican-lofar_static
 )
 
+#add_subdirectory(data)
+
 # Recurse into the test directory.
 add_subdirectory(test)
+
+
