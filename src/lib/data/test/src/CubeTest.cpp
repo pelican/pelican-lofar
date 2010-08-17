@@ -99,15 +99,17 @@ void CubeTest::test_accessorMethods()
     }
 
     cube3[0][1][0] = 'c';
-    for (unsigned z = 0; z < nZ; ++z) {
-        for (unsigned y = 0; y < nY; ++y) {
-            for (unsigned x = 0; x < nX; ++x) {
-                cout << cube3[z][y][x] << " ";
-            }
-            cout << endl;
-        }
-        cout << endl << endl;
-    }
+    cube3.print();
+
+    // test assignment
+    Cube<char> cube4;
+    cube4 = cube3;
+    std::cout << "cube3----------------------\n";
+    cube3.print();
+    std::cout << "cube4----------------------\n";
+    cube4.print();
+
+
 }
 
 } // namespace lofar
