@@ -14,7 +14,7 @@ set(lofarTest_src
     src/libTest.cpp
     src/LofarChunkerTest.cpp
     src/DataStreamingTest.cpp
-    ######src/PelicanBlobClientTest.cpp
+    ####src/PelicanBlobClientTest.cpp
     src/PolyphaseCoefficientsTest.cpp
     src/AdapterSubbandTimeSeriesTest.cpp
     src/SpectrumTest.cpp
@@ -28,8 +28,8 @@ set_target_properties(lofarTest PROPERTIES
     LINK_FLAGS "${OpenMP_CXX_FLAGS}"
 )
 target_link_libraries(lofarTest
-    lofarTestLib
     pelican-lofar_static
+    lofarTestLib
     ${PELICAN_LIBRARY}
     ${FFTW3_FFTW_LIBRARY}
     ${FFTW3_FFTWF_LIBRARY}

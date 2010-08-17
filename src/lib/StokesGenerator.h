@@ -41,8 +41,8 @@ class StokesGenerator : public AbstractModule
         ///
         void run(const SubbandSpectraC32* channeliserOutput,
                 SubbandSpectraStokes* stokes);
-	void run(const SubbandTimeSeriesC32* streamData,
-        	SubbandSpectraStokes* stokes);
+        void run(const SubbandTimeSeriesC32* streamData,
+                SubbandSpectraStokes* stokes);
 
     private:
         float _sqr(float x) { return x * x; }

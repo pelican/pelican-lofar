@@ -73,7 +73,7 @@ class PPFChanneliser : public AbstractModule
                 SubbandSpectraC32* spectra);
 
     private:
-        /// Sainity checking.
+        /// Sanity checking.
         void _checkData(const SubbandTimeSeriesC32* timeData);
 
         /// Update the sample buffer.
@@ -88,9 +88,6 @@ class PPFChanneliser : public AbstractModule
 
         /// FFT filtered samples to form a spectrum.
         void _fft(const Complex* samples, Complex* spectrum);
-
-        /// Shift the zero frequency component to the centre of the spectrum.
-        void _fftShift(Complex* spectrum, unsigned nChannels);
 
         /// Returns the sub-band ID range to be processed.
         void _threadProcessingIndices(unsigned& start, unsigned& end,
@@ -116,6 +113,22 @@ class PPFChanneliser : public AbstractModule
         std::vector<std::vector<Complex> > _workBuffer;
         std::vector<std::vector<Complex> > _filteredData;
 };
+
+
+/**
+ * @details
+ * FFT a vector of nSamples time data samples to produce a spectrum.
+ *
+ * @param samples
+ * @param nSamples
+ * @param spectrum
+ */
+inline void PPFChanneliser::_fft(const Complex* samples, Complex* spectrum)
+{
+    fftwf_execute_dft(_fftPlan, (fftwf_complex*)samples, (fftwf_complex*)spectrum);
+}
+
+
 
 // Declare this class as a pelican module.
 PELICAN_DECLARE_MODULE(PPFChanneliser)

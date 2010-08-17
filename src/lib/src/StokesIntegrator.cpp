@@ -17,9 +17,9 @@ namespace lofar {
 StokesIntegrator::StokesIntegrator(const ConfigNode& config)
 : AbstractModule(config)
 {
-// Get the size for the integration window(step) from the parameter file.
+    // Get the size for the integration window(step) from the parameter file.
 
-_windowSize    = config.getOption("integrateTimeBins", "value", "1").toUInt();
+    _windowSize    = config.getOption("integrateTimeBins", "value", "1").toUInt();
 }
 
 
@@ -37,24 +37,24 @@ void StokesIntegrator::run(const SubbandSpectraStokes* stokesGeneratorOutput,
     unsigned nSubbands = stokesGeneratorOutput->nSubbands();
     unsigned nChannels = stokesGeneratorOutput->ptr(0,0,0)->nChannels();
     unsigned nPols = stokesGeneratorOutput->nPolarisations();
-//std::cout << "nSamples= " << nSamples << std::endl;
-//std::cout << "nSubbands= " << nSubbands << std::endl;
-//std::cout << "nChannels= " << nChannels << std::endl;
+    //std::cout << "nSamples= " << nSamples << std::endl;
+    //std::cout << "nSubbands= " << nSubbands << std::endl;
+    //std::cout << "nChannels= " << nChannels << std::endl;
 
-//TIMER_ENABLE
+    //TIMER_ENABLE
 
-//    intStokes -> setLofarTimestamp(stokesGeneratorOutput -> getLofarTimestamp());
-//    intStokes -> setBlockRate(stokesGeneratorOutput -> getBlockRate());
+    //    intStokes -> setLofarTimestamp(stokesGeneratorOutput -> getLofarTimestamp());
+    //    intStokes -> setBlockRate(stokesGeneratorOutput -> getBlockRate());
 
-// Checking if the integration window is bigger than the available samples. In case
-// // it is greater a warning is produced and the window size is reduced to the size 
-// // of the samples.
+    // Checking if the integration window is bigger than the available samples. In case
+    // // it is greater a warning is produced and the window size is reduced to the size
+    // // of the samples.
 
     if (_windowSize>nSamples){
-    std::cout << "Warning the window size has been reduced from" << _windowSize << "to the total sample count" << nSamples << std::endl;
-    _windowSize=nSamples;
+        std::cout << "Warning the window size has been reduced from" << _windowSize << "to the total sample count" << nSamples << std::endl;
+        _windowSize=nSamples;
     }
-//std::cout << "_windowSize= " << _windowSize << std::endl;
+    //std::cout << "_windowSize= " << _windowSize << std::endl;
 
     unsigned newSamples = nSamples/_windowSize;
     const float* value;
@@ -63,34 +63,34 @@ void StokesIntegrator::run(const SubbandSpectraStokes* stokesGeneratorOutput,
 
     intStokes->resize(newSamples, nSubbands, nPols, nChannels);
     for (unsigned i=0; i<newSamples*nSubbands*nPols; ++i){
-      value2 = intStokes ->ptr(i)->ptr();
-      for (unsigned c=0; c<nChannels; ++c){
-	value2[c]=0.0;
-      }
+        value2 = intStokes ->ptr(i)->ptr();
+        for (unsigned c=0; c<nChannels; ++c){
+            value2[c]=0.0;
+        }
     }
-    
+
     unsigned timeStart=0;
-    unsigned ts;
     unsigned bufferCounter;
-    //     TIMER_START;
-    
+    //unsigned ts;
+    //TIMER_START;
+
     for (unsigned u = 0; u < newSamples; ++u) {
-      for (unsigned t = timeStart; t < _windowSize+timeStart; ++t) {               
-	for (unsigned p = 0; p < nPols; ++p) {
-	  for (unsigned s = 0; s < nSubbands; ++s) {
-	    value=stokesGeneratorOutput->ptr(t, s, p)->ptr();
-	    float* timeBuffer = intStokes->ptr(u,s,p)->ptr();
-	    for (unsigned c = 0; c < nChannels; ++c){
-	      timeBuffer[c]+= value[c];
-	      bufferCounter++;
-	    }
-	  }
-	}
-      }
-      timeStart=timeStart+_windowSize;
+        for (unsigned t = timeStart; t < _windowSize+timeStart; ++t) {
+            for (unsigned p = 0; p < nPols; ++p) {
+                for (unsigned s = 0; s < nSubbands; ++s) {
+                    value = stokesGeneratorOutput->ptr(t, s, p)->ptr();
+                    float* timeBuffer = intStokes->ptr(u,s,p)->ptr();
+                    for (unsigned c = 0; c < nChannels; ++c){
+                        timeBuffer[c]+= value[c];
+                        bufferCounter++;
+                    }
+                }
+            }
+        }
+        timeStart=timeStart+_windowSize;
     }
-     //TIMER_STOP(ts);
-     //     std::cout << ts << std::endl;
+    //TIMER_STOP(ts);
+    //std::cout << ts << std::endl;
 }
 
 }// namespace lofar

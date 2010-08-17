@@ -3,6 +3,8 @@
 
 #include <cstdlib>
 #include <cstring>
+//#include <iomanip>
+//using std::hex;
 
 template <typename T> class Cube
 {
@@ -11,7 +13,6 @@ template <typename T> class Cube
         unsigned _nY; //
         unsigned _nZ; // Slowest varying dimension.
         T*** _C; // Cube C[z][y][x]
-        //T** _M;  // Maxtrix access to cube M[z][y] = C[z][y]
         T* _a;   // array access to cube data. a[i]
 
     public:
@@ -20,22 +21,38 @@ template <typename T> class Cube
         Cube(unsigned nZ, unsigned nY, unsigned nX)
         : _nX(nX), _nY(nY), _nZ(nZ), _C(0), _a(0)
         {
-            size_t size = _nX * _nY * _nZ * sizeof(T);
-            size += _nY * _nZ * sizeof(T*);
-            size += _nZ * sizeof(T**);
+            size_t size = _nZ * (_nY * (_nX * sizeof(T) + sizeof(T*)) + sizeof(T**));
             _C = (T***) malloc(size);
-
+            unsigned rp = (_nZ * sizeof(T**)) / sizeof(T*);
             unsigned dp = (_nZ * sizeof(T**) + _nZ * _nY * sizeof(T*)) / sizeof(T);
-            unsigned mp = _nZ * sizeof(T**) / sizeof(T);
-
             for (unsigned z = 0; z < _nZ; ++z) {
-                _C[z] = (T**)_C + mp + z * nY * nZ;
+                _C[z] = (T**)_C + rp + z * _nY;
                 for (unsigned y = 0; y < _nY; ++y) {
-                    _C[z][y] = (T*)_C + dp + z * y * _nX;
+                    _C[z][y]  = (T*)_C + dp + _nX * (z * _nY + y);
                 }
             }
+            _a = (T*)_C + dp;
+        }
 
-            _a =(T*)_C + dp;
+        Cube(Cube<T>& c)
+        {
+            _nX = c._nX;
+            _nY = c._nY;
+            _nZ = c._nZ;
+            size_t size = _nZ * (_nY * (_nX * sizeof(T) + sizeof(T*)) + sizeof(T**));
+            std::cout << "size = " << size << std::endl;
+            _C = (T***) malloc(size);
+            memcpy((void*)_C, (void*)c._C, size);
+            // Re-construct the lookup table pointers (so they dont point to the old data!)
+            unsigned rp = (_nZ * sizeof(T**)) / sizeof(T*);
+            unsigned dp = (_nZ * sizeof(T**) + _nZ * _nY * sizeof(T*)) / sizeof(T);
+            for (unsigned z = 0; z < _nZ; ++z) {
+                _C[z] = (T**)_C + rp + z * _nY;
+                for (unsigned y = 0; y < _nY; ++y) {
+                    _C[z][y]  = (T*)_C + dp + _nX * (z * _nY + y);
+                }
+            }
+            _a = (T*)_C + dp;
         }
 
         virtual ~Cube()
@@ -47,9 +64,60 @@ template <typename T> class Cube
         }
 
     public:
-        T*** ptr() { return _C; }
-        const T*** ptr() const { return _C; }
+        bool empty() const
+        { return (_nX == 0 || _nY == 0 || _nZ == 0) ? true : false; }
 
+        void clear() {
+            _nX = _nY = _nZ = 0;
+            if (_C) { free(_C); _C = 0; }
+            _a = 0;
+        }
+
+        void resize(unsigned nZ, unsigned nY, unsigned nX)
+        {
+            // Check if we need to resize
+            if (nZ != 0 && nZ == _nZ && nY != 0 && nY == _nY && nX != 0 && nX == _nX)
+                return;
+            _nX = nX;
+            _nY = nY;
+            _nZ = nZ;
+            size_t size = _nZ * (_nY * (_nX * sizeof(T) + sizeof(T*)) + sizeof(T**));
+            _C = (T***) realloc(_C, size);
+            unsigned rp = (_nZ * sizeof(T**)) / sizeof(T*);
+            unsigned dp = (_nZ * sizeof(T**) + _nZ * _nY * sizeof(T*)) / sizeof(T);
+            for (unsigned z = 0; z < _nZ; ++z) {
+                _C[z] = (T**)_C + rp + z * _nY;
+                for (unsigned y = 0; y < _nY; ++y) {
+                    _C[z][y]  = (T*)_C + dp + _nX * (z * _nY + y);
+                }
+            }
+            _a = (T*)_C + dp;
+        }
+
+        void resize(unsigned nZ, unsigned nY, unsigned nX, T value)
+        {
+            resize(nZ, nY, nX);
+            for (unsigned i = 0; i < (nZ * nY * nX); ++i) _a[i] = value;
+        }
+
+    public:
+        const T*** ptr() const { return _C; }
+        T*** ptr() { return _C; }
+
+        const T* arrayPtr() const { return _a; }
+        T* arrayPtr() { return _a; }
+
+        unsigned size() const { return _nX * _nY * _nZ; }
+        unsigned nX() const { return _nX; }
+        unsigned nY() const { return _nY; }
+        unsigned nZ() const { return _nZ; }
+
+    public:
+        T operator() (unsigned z, unsigned y, unsigned x) const { return _C[z][y][x]; }
+        T& operator() (unsigned z, unsigned y, unsigned x) { return _C[z][y][x]; }
+
+        const T** operator[] (unsigned z) const { return _C[z]; }
+        T** operator[] (unsigned z) { return _C[z]; }
 };
 
 

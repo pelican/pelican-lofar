@@ -27,7 +27,6 @@ class SubbandSpectraStokes;
  * @brief
  *
  * @details
- *
  */
 
 class StokesIntegrator : public AbstractModule
@@ -41,22 +40,18 @@ class StokesIntegrator : public AbstractModule
 
         ///
         void run(const SubbandSpectraStokes* stokesGeneratorOutput, SubbandSpectraStokes* intStokes);
-//	void run(const SubbandTimeSeriesC32* streamData,
-  //      	SubbandSpectraStokes* stokes);
+        //	void run(const SubbandTimeSeriesC32* streamData,
+        //      	SubbandSpectraStokes* stokes);
 
     private:
-    
-    unsigned _windowSize;
-    unsigned timeStart;
-
-
-  
+        unsigned _windowSize;
+        unsigned timeStart;
 };
+
 
 // Declare this class as a pelican module.
 PELICAN_DECLARE_MODULE(StokesIntegrator)
 
 }// namespace lofar
 }// namespace pelican
-
-#endif // PPF_CHANNELISER_H_
+#endif // STOKES_INTEGRATOR_H

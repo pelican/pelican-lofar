@@ -55,7 +55,7 @@ void MatrixTest::test_accessorMethods()
     CPPUNIT_ASSERT_EQUAL(value, m(1,2));
 
     // Test copy constructor.
-    Matrix<int> u = m;
+    Matrix<int> u(m);
     CPPUNIT_ASSERT_EQUAL(nRows, u.nRows());
     CPPUNIT_ASSERT_EQUAL(nColumns, u.nColumns());
     CPPUNIT_ASSERT_EQUAL(value, u[1][2]);
