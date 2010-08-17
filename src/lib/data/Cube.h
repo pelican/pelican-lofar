@@ -124,14 +124,9 @@ template <typename T> class Cube
         const T** operator[] (unsigned z) const { return _C[z]; }
         T** operator[] (unsigned z) { return _C[z]; }
 
-        bool operator!= (const Cube<T>& c) const
-        {
-            return (_C != c._C) ? true : false;
-        }
-
         Cube<T>& operator= (const Cube<T>& other)
         {
-            if (*this != other) // protect against invalid self assignment.
+            if (this != &other) // protect against invalid self assignment.
             {
                 clear();
                 _nX = other._nX; _nY = other._nY; _nZ = other._nZ;
