@@ -49,6 +49,9 @@ PPFChanneliser::PPFChanneliser(const ConfigNode& config)
     unsigned nTaps = config.getOption("filter", "nTaps", "8").toUInt();
     QString window = config.getOption("filter", "filterWindow", "kaiser").toLower();
 
+    // Pointers to processing buffers.
+    omp_set_num_threads(_nThreads);
+
     // Enforce even number of channels.
     if (_nChannels % 2 != 0) {
         throw QString("PPFChanneliser: "
@@ -161,8 +164,7 @@ void PPFChanneliser::run(const SubbandTimeSeriesC32* timeSeries,
 
     const float* coeffs = &_coeffs[0];
 
-    // Pointers to processing buffers.
-    omp_set_num_threads(_nThreads);
+
 
 #pragma omp parallel
     {
