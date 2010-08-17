@@ -40,7 +40,7 @@ template <typename T> class Cube
             size_t size = _nZ * (_nY * (_nX * sizeof(T) + sizeof(T*)) + sizeof(T**));
             _C = (T***) malloc(size);
             memcpy((void*)_C, (void*)c._C, size);
-            // Re-construct the lookup table pointers (so they dont point to the old data!)
+            // Re-construct the lookup table pointers (so they don't point to the old data!)
             unsigned rp = (_nZ * sizeof(T**)) / sizeof(T*);
             unsigned dp = (_nZ * sizeof(T**) + _nZ * _nY * sizeof(T*)) / sizeof(T);
             for (unsigned z = 0; z < _nZ; ++z) {
