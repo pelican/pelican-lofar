@@ -26,7 +26,7 @@ SigprocStokesWriter::SigprocStokesWriter(const ConfigNode& configNode )
     _filepath = configNode.getOption("file", "filepath");
     _fch1     = configNode.getOption("topChannelFrequency", "value", "0").toFloat();
     //_foff     = configNode.getOption("params", "frequencyOffset", "0").toFloat();
-    _foff = float(_clock) / (2.0 * _nTotalSubbands) / float(_nChannels);
+    _foff = - float(_clock) / (2.0 * _nTotalSubbands) / float(_nChannels);
     //_tsamp    = configNode.getOption("params", "samplingTime", "0").toFloat();
     _tsamp =  (2.0 * _nTotalSubbands) * _nChannels * _integration / float(_clock) / 1e6;
     _nPols    = configNode.getOption("params", "nPolsToWrite", "1").toUInt();
