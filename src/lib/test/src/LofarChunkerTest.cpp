@@ -17,11 +17,10 @@ namespace lofar {
 CPPUNIT_TEST_SUITE_REGISTRATION( LofarChunkerTest );
 
 /**
- * @details
- * Constructor
- */
-LofarChunkerTest::LofarChunkerTest()
-    : CppUnit::TestFixture()
+* @details
+* Constructor
+*/
+LofarChunkerTest::LofarChunkerTest() : CppUnit::TestFixture()
 {
     _samplesPerPacket  = 32;   // Number of block per frame (for a 32 MHz beam)
     _nrPolarisations   = 2;    // Number of polarization in the data
@@ -29,26 +28,37 @@ LofarChunkerTest::LofarChunkerTest()
     _clock             = 200;  // Rounded up clock station clock speed
     _subbandsPerPacket = _clock == 200 ? 42 : 54;  //  Number of block per frame
 
-    QString serverXml =
-    "<buffers>"
-    "   <LofarData>"
-    "       <buffer maxSize=\"100000000\" maxChunkSize=\"100000000\"/>"
-    "   </LofarData>"
-    "</buffers>"
-    ""
-    "<chunkers>"
-    "   <LofarChunker>"
-    "       <data type=\"LofarData\"/>"
-    "       <connection host=\"127.0.0.1\" port=\"8090\"/>"
-    "       <params samplesPerPacket=\""  + QString::number(_samplesPerPacket)  + "\""
-    "               nrPolarisation=\""    + QString::number(_nrPolarisations)   + "\""
-    "               subbandsPerPacket=\"" + QString::number(_subbandsPerPacket) + "\""
-    "               packets=\""           + QString::number(_numPackets) + "\""
-    "               clock=\""             + QString::number(_clock)             + "\"/>"
-    "       <samples type=\"8\" />"
-    "   </LofarChunker>"
-    "</chunkers>";
+    QString bufferConfig =
+            "<buffers>"
+            "   <LofarData>"
+            "       <buffer maxSize=\"100000000\" maxChunkSize=\"100000000\"/>"
+            "   </LofarData>"
+            "</buffers>";
 
+    QString chunkerConfig = QString(
+            "<chunkers>"
+            "   <LofarChunker>"
+            "       <connection host=\"127.0.0.1\" port=\"8090\"/>"
+            "       <data type=\"LofarData\"/>"
+            ""
+            "       <dataBitSize            value=\"%1\" />"
+            "       <samplesPerPacket       value=\"%2\" />"
+            "       <subbandsPerPacket      value=\"%3\" />"
+            "       <nRawPolarisations      value=\"%4\" />"
+            "       <clock                  value=\"%5\" />"
+            "       <udpPacketsPerIteration value=\"%6\" />"
+            ""
+            "   </LofarChunker>"
+            "</chunkers>")
+            .arg(8)
+            .arg(_samplesPerPacket)
+            .arg(_subbandsPerPacket)
+            .arg(_nrPolarisations)
+            .arg(_clock)
+            .arg(_numPackets);
+
+
+    QString serverXml = bufferConfig + chunkerConfig;
     config.setFromString("", serverXml);
 
     // Set up LOFAR data emulator configuration.
@@ -67,33 +77,33 @@ LofarChunkerTest::LofarChunkerTest()
 }
 
 /**
- * @details
- * Destructor
- */
+* @details
+* Destructor
+*/
 LofarChunkerTest::~LofarChunkerTest()
 {
 }
 
 /**
- * @details
- * Sets up environment/objects for test class
- */
+* @details
+* Sets up environment/objects for test class
+*/
 void LofarChunkerTest::setUp()
 {
 }
 
 /**
- * @details
- * Destroys objects and reset environment
- */
+* @details
+* Destroys objects and reset environment
+*/
 void LofarChunkerTest::tearDown()
 {
 }
 
 /**
- * @details
- * Test to check that normal packets are read correctly
- */
+* @details
+* Test to check that normal packets are read correctly
+*/
 void LofarChunkerTest::test_normalPackets()
 {
     try {
@@ -137,10 +147,10 @@ void LofarChunkerTest::test_normalPackets()
             TYPES::i8complex* s = reinterpret_cast<TYPES::i8complex*>(&(packet->data));
 
             for (int k = 0; k < _samplesPerPacket; k++)
-                 for (int j = 0; j < _subbandsPerPacket; j++) {
-                     float val = s[k * _subbandsPerPacket * _nrPolarisations +  j * _nrPolarisations].real();
-                     CPPUNIT_ASSERT_EQUAL(float(k + j), val);
-                 }
+                for (int j = 0; j < _subbandsPerPacket; j++) {
+                    float val = s[k * _subbandsPerPacket * _nrPolarisations +  j * _nrPolarisations].real();
+                    CPPUNIT_ASSERT_EQUAL(float(k + j), val);
+                }
         }
 
         std::cout << "Finished LofarChunker normalPackets test" << std::endl;
@@ -152,9 +162,9 @@ void LofarChunkerTest::test_normalPackets()
 }
 
 /**
- * @details
- * Test to check that lost packets are handled appropriately.
- */
+* @details
+* Test to check that lost packets are handled appropriately.
+*/
 void LofarChunkerTest::test_lostPackets()
 {
     try {
@@ -192,7 +202,7 @@ void LofarChunkerTest::test_lostPackets()
 
         UDPPacket *packet;
         unsigned packetSize = sizeof(struct UDPPacket::Header) + _subbandsPerPacket *
-                              _samplesPerPacket * _nrPolarisations * sizeof(TYPES::i8complex);
+                _samplesPerPacket * _nrPolarisations * sizeof(TYPES::i8complex);
 
         for (int counter = 0; counter < _numPackets; counter++) {
 
@@ -215,7 +225,7 @@ void LofarChunkerTest::test_lostPackets()
     }
     catch (QString e) {
         CPPUNIT_FAIL("Unexpected exception: " + e.toStdString());
-     }
+    }
 }
 
 } // namespace lofar

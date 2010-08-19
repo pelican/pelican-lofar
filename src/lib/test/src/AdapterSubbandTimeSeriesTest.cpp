@@ -257,12 +257,12 @@ QString AdapterSubbandTimeSeriesTest::_configXml(
     QString xml = ""
             "<AdapterSubbandTimeSeries name=\"test\">"
             "   <fixedSizePackets value=\"" + fixedSizePackets + "\"/>"
-            "	<sampleSize bits=\"" + QString::number(sampleBits) + "\"/>"
-            "	<packetsPerChunk number=\"" + QString::number(nPacketsPerChunk) + "\"/>"
-            "	<samplesPerPacket number=\"" + QString::number(nSamplesPerPacket) + "\"/>"
-            "	<samplesPerTimeBlock number=\"" + QString::number(nSamplesPerBlock) + "\"/>"
-            "   <subbands number=\"" + QString::number(nSubbands) + "\"/>"
-            "	<polarisations number=\"" + QString::number(nPolarisations) + "\"/>"
+            "   <dataBitSize value=\"" + QString::number(sampleBits) + "\"/>"
+            "   <udpPacketsPerIteration value=\"" + QString::number(nPacketsPerChunk) + "\"/>"
+            "   <samplesPerPacket value=\"" + QString::number(nSamplesPerPacket) + "\"/>"
+            "   <outputChannelsPerSubband value=\"" + QString::number(nSamplesPerBlock) + "\"/>"
+            "   <subbandsPerPacket value=\"" + QString::number(nSubbands) + "\"/>"
+            "   <nRawPolarisations value=\"" + QString::number(nPolarisations) + "\"/>"
             "</AdapterSubbandTimeSeries>";
     return xml;
 }
