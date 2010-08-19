@@ -313,7 +313,7 @@ void PPFChanneliserTest::test_run()
             << double(elapsed)/double(nIter) << " ms. ("
             << nThreads << " threads)\n";
     std::cout << "NOTE: Needs to be <= "
-              << (2.56 * double(nTimeBlocks) * double(nSubbands)) / double(nSubbands)
+              << 5e-3 * double(nChan) * double(nTimeBlocks)
               << " ms to keep up with real time." << std::endl;
 }
 
