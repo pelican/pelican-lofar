@@ -491,8 +491,8 @@ QString PPFChanneliserTest::_configXml(unsigned nChannels,
 {
     QString xml =
             "<PPFChanneliser>"
-            "	<channels number=\"" + QString::number(nChannels) + "\"/>"
-            "	<processingThreads number=\"" + QString::number(nThreads) + "\"/>"
+            "	<outputChannelsPerSubband value=\"" + QString::number(nChannels) + "\"/>"
+            "	<processingThreads value=\"" + QString::number(nThreads) + "\"/>"
             "	<filter nTaps=\"" + QString::number(nTaps) + "\" filterWindow=\"" + windowType + "\"/>"
             "</PPFChanneliser>";
     return xml;

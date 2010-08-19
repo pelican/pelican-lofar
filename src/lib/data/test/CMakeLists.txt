@@ -13,5 +13,5 @@ target_link_libraries(lofarDataTest
     ${CPPUNIT_LIBRARIES}
 )
 
-add_test(lofarTest lofarDataTest)
+#add_test(lofarTest lofarDataTest)
 
