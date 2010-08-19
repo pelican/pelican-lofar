@@ -86,14 +86,13 @@ void SubbandSpectraC32::serialise(QIODevice& out) const
         const std::complex<float>* spectrum = _spectra[i].ptr();
         unsigned nChannels = _spectra[i].nChannels();
         double startFreq = _spectra[i].startFrequency();
-        double deltaFreq = _spectra[i].channelFrequencyDelta();
+        double deltaFreq = _spectra[i].frequencyIncrement();
         // Spectrum header.
         out.write((char*)&nChannels, sizeof(unsigned));
         out.write((char*)&startFreq, sizeof(double));
         out.write((char*)&deltaFreq, sizeof(double));
         // Spectrum data.
-        out.write((char*)&spectrum,
-                nChannels * sizeof(std::complex<float>));
+        out.write((char*)&spectrum, nChannels * sizeof(std::complex<float>));
     }
 }
 
@@ -177,7 +176,7 @@ void SubbandSpectraStokes::serialise(QIODevice& out) const
     for (unsigned i = 0; i < _spectra.size(); ++i) {
         unsigned nChannels = _spectra[i].nChannels();
         double startFreq = _spectra[i].startFrequency();
-        double deltaFreq = _spectra[i].channelFrequencyDelta();
+        double deltaFreq = _spectra[i].frequencyIncrement();
         // Spectrum header.
         out.write((char*)&nChannels, sizeof(unsigned));
         out.write((char*)&startFreq, sizeof(double));
@@ -222,7 +221,6 @@ void SubbandSpectraStokes::deserialise(QIODevice& in, QSysInfo::Endian /*endian*
         in.read((char*)_spectra[i].ptr(), nChannels * sizeof(float));
     }
 }
-
 
 
 } // namespace lofar

@@ -6,7 +6,10 @@
  */
 
 #include "pelican/data/DataBlob.h"
+
+//#include "LofarDataCube.h"
 #include "Spectrum.h"
+
 #include "SubbandTimeSeries.h"
 
 #include <QtCore/QIODevice>
@@ -48,22 +51,6 @@ class SubbandSpectra : public DataBlob
         /// Constructs an empty sub-band spectra data blob.
         SubbandSpectra(const QString& type = "SubbandSpectra")
         : DataBlob(type), _nTimeBlocks(0), _nSubbands(0), _nPolarisations(0) {}
-
-        /// Constructs an empty sub-band spectra from a SubbandTimeSeries
-        SubbandSpectra(const SubbandTimeSeries<T>& ts, const QString& type = "SubbandSpectra")
-        : DataBlob(type)
-        {
-            resize(ts.nTimeBlocks(),ts.nSubbands(), ts.nPolarisations(), 1 );
-            for (unsigned t = 0; t < ts.nTimeBlocks(); ++t) {
-                for (unsigned p = 0; p < ts.nPolarisations(); ++p) {
-                    for (unsigned s = 0; s < ts.nSubbands(); ++s) {
-                        int idx = index( t, s, p);
-                        T* data = ts.ptr(t,s,p)->ptr();
-                        _spectra[idx].push_back(data[idx]);
-                    }
-                }
-            }
-        }
 
         /// Destroys the object.
         virtual ~SubbandSpectra() {}
@@ -249,9 +236,7 @@ class SubbandSpectraC32 : public SubbandSpectra<std::complex<float> >
 
 /**
  * @class
- *
  * @brief
- *
  * @details
  */
 

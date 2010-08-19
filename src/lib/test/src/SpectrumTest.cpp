@@ -28,7 +28,7 @@ void SpectrumTest::test_accessorMethods()
         {
             Spectrum<float> spectrum;
             CPPUNIT_ASSERT_DOUBLES_EQUAL(0.0, spectrum.startFrequency(), err);
-            CPPUNIT_ASSERT_DOUBLES_EQUAL(0.0, spectrum.channelFrequencyDelta(),
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(0.0, spectrum.frequencyIncrement(),
                     err);
             CPPUNIT_ASSERT_EQUAL(unsigned(0), spectrum.nChannels());
         }
@@ -36,7 +36,7 @@ void SpectrumTest::test_accessorMethods()
         unsigned nChan = 20;
         Spectrum<float> spectrum(nChan);
         CPPUNIT_ASSERT_DOUBLES_EQUAL(0.0, spectrum.startFrequency(), err);
-        CPPUNIT_ASSERT_DOUBLES_EQUAL(0.0, spectrum.channelFrequencyDelta(), err);
+        CPPUNIT_ASSERT_DOUBLES_EQUAL(0.0, spectrum.frequencyIncrement(), err);
         CPPUNIT_ASSERT_EQUAL(nChan, spectrum.nChannels());
 
         nChan = 256;
@@ -48,9 +48,9 @@ void SpectrumTest::test_accessorMethods()
         CPPUNIT_ASSERT_DOUBLES_EQUAL(startFreq, spectrum.startFrequency(), err);
 
         double freqDelta = 0.987e8;
-        spectrum.setChannelFrequencyDelta(freqDelta);
+        spectrum.setFrequencyIncrement(freqDelta);
         CPPUNIT_ASSERT_DOUBLES_EQUAL(freqDelta,
-                spectrum.channelFrequencyDelta(), err);
+                spectrum.frequencyIncrement(), err);
 
         nChan = 5;
         spectrum.resize(nChan);

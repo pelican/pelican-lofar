@@ -22,16 +22,15 @@ namespace lofar {
  * @details
  */
 
-template <class T>
-class Spectrum
+template <class T> class Spectrum
 {
     public:
         /// Constructs an empty spectrum.
-        Spectrum() : _startFreq(0.0), _channelFreqDelta(0.0) {}
+        Spectrum() : _startFreq(0.0), _frequencyIncrement(0.0) {}
 
         /// Constructs and assigns memory for the spectrum.
         Spectrum(unsigned nChannels)
-        : _startFreq(0.0), _channelFreqDelta(0.0)
+        : _startFreq(0.0), _frequencyIncrement(0.0)
         {
             resize(nChannels);
         }
@@ -45,14 +44,13 @@ class Spectrum
         {
             _channels.clear();
             _startFreq = 0.0;
-            _channelFreqDelta = 0.0;
+            _frequencyIncrement = 0.0;
         }
 
         /// Resize the spectrum to the number of channels specified.
         void resize(unsigned nChannels) { _channels.resize(nChannels); }
 
-    public: // Accessor methods.
-
+    public:
         /// Returns the number of channels in the spectrum.
         unsigned nChannels() const { return _channels.size(); }
 
@@ -63,17 +61,25 @@ class Spectrum
         void setStartFrequency(double value) { _startFreq = value; }
 
         /// Returns the channel frequency spacing.
-        double channelFrequencyDelta() const { return _channelFreqDelta; }
+        double frequencyIncrement() const { return _frequencyIncrement; }
 
         /// Sets the channel frequency spacing..
-        void setChannelFrequencyDelta(double value) {
-            _channelFreqDelta = value;
+        void setFrequencyIncrement(double value) {
+            _frequencyIncrement = value;
         }
 
         /// Returns a pointer to the spectrum data.
-        T* ptr() { return _channels.size() > 0 ? &_channels[0] : NULL; }
+        T* getData() { return _channels.size() > 0 ? &_channels[0] : NULL; }
 
         /// Returns a pointer to the spectrum data (const overload).
+        const T* getData() const {
+            return _channels.size() > 0 ? &_channels[0] : NULL;
+        }
+
+        /// To be deprecated soon (dont use)
+        T* ptr() { return _channels.size() > 0 ? &_channels[0] : NULL; }
+
+        /// To be deprecated soon (dont use)
         const T* ptr() const {
             return _channels.size() > 0 ? &_channels[0] : NULL;
         }
@@ -81,7 +87,7 @@ class Spectrum
     protected:
         std::vector<T> _channels;
         double _startFreq;
-        double _channelFreqDelta;
+        double _frequencyIncrement;
 };
 
 

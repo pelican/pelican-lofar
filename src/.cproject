@@ -20,16 +20,17 @@
 <folderInfo id="cdt.managedbuild.toolchain.gnu.base.2117271544.1497367702" name="/" resourcePath="">
 <toolChain errorParsers="" id="cdt.managedbuild.toolchain.gnu.base.1670827293" name="cdt.managedbuild.toolchain.gnu.base" superClass="cdt.managedbuild.toolchain.gnu.base">
 <targetPlatform archList="all" binaryParser="org.eclipse.cdt.core.ELF" id="cdt.managedbuild.target.gnu.platform.base.1309439953" name="Debug Platform" osList="linux,hpux,aix,qnx" superClass="cdt.managedbuild.target.gnu.platform.base"/>
+<<<<<<< Updated upstream
 <builder buildPath="${workspace_loc:/pelican-lofar/build}" enabledIncrementalBuild="true" errorParsers="org.eclipse.cdt.core.MakeErrorParser" id="cdt.managedbuild.target.gnu.builder.base.1831517825" incrementalBuildTarget="all" keepEnvironmentInBuildfile="false" managedBuildOn="false" name="Gnu Make Builder" parallelBuildOn="true" parallelizationNumber="2" superClass="cdt.managedbuild.target.gnu.builder.base"/>
+=======
+<builder arguments="VERBOSE=1" buildPath="${workspace_loc:/pelican-lofar/gnu_release}" command="make" enabledIncrementalBuild="true" errorParsers="org.eclipse.cdt.core.MakeErrorParser" id="cdt.managedbuild.target.gnu.builder.base.1831517825" incrementalBuildTarget="all" keepEnvironmentInBuildfile="false" managedBuildOn="false" name="Gnu Make Builder" parallelBuildOn="true" parallelizationNumber="2" superClass="cdt.managedbuild.target.gnu.builder.base"/>
+>>>>>>> Stashed changes
 <tool id="cdt.managedbuild.tool.gnu.archiver.base.1353654170" name="GCC Archiver" superClass="cdt.managedbuild.tool.gnu.archiver.base"/>
 <tool errorParsers="org.eclipse.cdt.core.GCCErrorParser" id="cdt.managedbuild.tool.gnu.cpp.compiler.base.209185580" name="GCC C++ Compiler" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.base">
 <option id="gnu.cpp.compiler.option.include.paths.1872318607" name="Include paths (-I)" superClass="gnu.cpp.compiler.option.include.paths" valueType="includePath">
-<listOptionValue builtIn="false" value="../usr/include/qt4"/>
-<listOptionValue builtIn="false" value="/usr/include/qt4/QtCore"/>
-<listOptionValue builtIn="false" value="/usr/include/qt4/QtNetwork"/>
-<listOptionValue builtIn="false" value="/usr/include/qt4/QtXml"/>
 <listOptionValue builtIn="false" value="/usr/local/include"/>
 <listOptionValue builtIn="false" value="/usr/include"/>
+<listOptionValue builtIn="false" value="/usr/include/qt4"/>
 </option>
 <inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.948994440" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
 </tool>
@@ -395,6 +396,13 @@
 <storageModule moduleId="org.eclipse.cdt.make.core.buildtargets">
 <buildTargets>
 <target name="make" path="build" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
+<buildCommand>make</buildCommand>
+<buildArguments>-j2</buildArguments>
+<stopOnError>true</stopOnError>
+<useDefaultCommand>true</useDefaultCommand>
+<runAllBuilders>true</runAllBuilders>
+</target>
+<target name="make" path="intel_release" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 <buildCommand>make</buildCommand>
 <buildArguments>-j2</buildArguments>
 <buildTarget/>

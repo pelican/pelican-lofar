@@ -77,7 +77,7 @@ void SubbandSpectraTest::test_serialise_deserialise()
         CPPUNIT_ASSERT(spectrum != NULL);
 
         spectrum->setStartFrequency(double(i) + 0.1);
-        spectrum->setChannelFrequencyDelta(double(i) + 0.2);
+        spectrum->setFrequencyIncrement(double(i) + 0.2);
         unsigned nChannels = 10 + i;
         spectrum->resize(nChannels);
         std::complex<float>* channelAmp = spectrum->ptr();

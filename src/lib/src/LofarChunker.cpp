@@ -142,9 +142,8 @@ void LofarChunker::next(QIODevice* device)
             }
 
             // Generate lostPackets empty packets, if any
-            for (unsigned packetCounter = 0;
-                    packetCounter < lostPackets && i + packetCounter < _nPackets;
-                    packetCounter++) {
+            for (unsigned packetCounter = 0; packetCounter < lostPackets &&
+                        i + packetCounter < unsigned(_nPackets); packetCounter++) {
 
                 // Generate empty packet with correct seqid and blockid
                 prevSeqid = (prevBlockid + _samplesPerPacket < totBlocks) ? prevSeqid : prevSeqid + 1;
