@@ -132,21 +132,21 @@ void PPFChanneliserTest::test_updateBuffer()
 {
     try {
         // Setup the channeliser.
-        unsigned nChan = 512;
         unsigned nThreads = 1;
+        unsigned nChan = 16;
         unsigned nTaps = 8;
         ConfigNode config(_configXml(nChan, nThreads, nTaps));
         PPFChanneliser channeliser(config);
 
         // Setup the work buffers.
-        unsigned nPol = 2;
         unsigned nSubbands = 62;
+        unsigned nPol = 2;
         channeliser._setupWorkBuffers(nSubbands, nPol, nChan, nTaps);
 
         // Create a vector of input samples to test with.
-        unsigned nIter = 500;
+        unsigned nTimeBlocks = 10000;
         std::vector<PPFChanneliser::Complex> sampleBuffer(nChan * nSubbands
-                * nPol * nIter);
+                * nPol * nTimeBlocks);
 
         // Local pointers to buffers.
         PPFChanneliser::Complex* subbandBuffer;
@@ -155,25 +155,35 @@ void PPFChanneliserTest::test_updateBuffer()
         // Iterate over the update buffer method to time it.
         QTime timer;
         timer.start();
-        for (unsigned i = 0; i < nIter; ++i) {
-
-            for (unsigned s = 0; s < nSubbands; ++s) {
-                for (unsigned p = 0; p < nPol; ++p) {
-                    unsigned index = i * nChan * nSubbands * nPol +
-                            s * nChan * nPol + p * nChan;
-                    newSamples = &sampleBuffer[index];;
+        for (unsigned b = 0; b < nTimeBlocks; ++b)
+        {
+            for (unsigned s = 0; s < nSubbands; ++s)
+            {
+                for (unsigned p = 0; p < nPol; ++p)
+                {
+                    unsigned i = nChan * (p +  nPol * (s + nSubbands * b));
+                    newSamples = &sampleBuffer[i];;
                     subbandBuffer = &(channeliser._workBuffer[s * nPol + p])[0];
                     channeliser._updateBuffer(newSamples, nChan, nTaps, subbandBuffer);
                 }
             }
-
         }
         int elapsed = timer.elapsed();
-        std::cout << "\n[PPFChanneliser]: Time to update buffers for "
-                << nSubbands << " subbands, " << nPol << " polarisations = "
-                << double(elapsed)/double(nIter) << " ms. (1 thread)\n";
+
+        std::cout << "\n[PPFChanneliser]: _updateBuffer() "
+                  << "("
+                  << "nTimeBlocks = " << nTimeBlocks << ", "
+                  << "nSubbands = " << nSubbands << ", "
+                  << "nPols = " << nPol << ", "
+                  << "nChan = " << nChan
+                  << ") "
+                  << "Elapsed = " << elapsed << " ms. "
+                  << "[1 thread]\n";
+        std::cout << "(data time = " << nTimeBlocks * nChan * 5e-3 << " ms.)" << std::endl;
+
     }
-    catch (QString err) {
+    catch (QString err)
+    {
         CPPUNIT_FAIL(err.toLatin1().data());
     }
 }
@@ -186,7 +196,7 @@ void PPFChanneliserTest::test_updateBuffer()
 void PPFChanneliserTest::test_filter()
 {
     // Setup the channeliser.
-    unsigned nChan = 512;
+    unsigned nChan = 16;
     unsigned nThreads = 1;
     unsigned nTaps = 8;
     ConfigNode config(_configXml(nChan, nThreads, nTaps));
@@ -195,7 +205,7 @@ void PPFChanneliserTest::test_filter()
     // Setup work buffers.
     unsigned nSubbands = 62;
     unsigned nPol = 2;
-    unsigned nTimeBlocks = 1;
+    unsigned nTimeBlocks = 10000;
     channeliser._setupWorkBuffers(nSubbands, nPol, nChan, nTaps);
 
     std::vector<PPFChanneliser::Complex> filteredData(nChan);
@@ -212,22 +222,29 @@ void PPFChanneliserTest::test_filter()
 
     QTime timer;
     timer.start();
-    unsigned nIter = 1000;
     for (unsigned b = 0; b < nTimeBlocks; ++b) {
-        for (unsigned i = 0; i < nIter; ++i) {
-            for (unsigned s = 0; s < nSubbands; ++s) {
-                for (unsigned p = 0; p < nPol; ++p) {
-                    workBuffer = &(channeliser._workBuffer[s * nPol + p])[0];
-                    channeliser._filter(workBuffer, nTaps, nChan, fCoeffs,
-                            filteredSamples);
-                }
+        for (unsigned s = 0; s < nSubbands; ++s) {
+            for (unsigned p = 0; p < nPol; ++p) {
+                workBuffer = &(channeliser._workBuffer[s * nPol + p])[0];
+                channeliser._filter(workBuffer, nTaps, nChan, fCoeffs,
+                        filteredSamples);
             }
         }
     }
     int elapsed = timer.elapsed();
-    std::cout << "\n[PPFChanneliser]: Time for PPF filtering of "
-            << nSubbands << " subbands, " << nPol << " polarisations = "
-            << double(elapsed)/double(nIter) << " ms. (1 thread)\n";
+
+
+    std::cout << "\n[PPFChanneliser]: _filter() "
+              << "("
+              << "nTaps = " << nTaps << ", "
+              << "blocks = " << nTimeBlocks << ", "
+              << "nSubbands = " << nSubbands << ", "
+              << "nPols = " << nPol << ", "
+              << "nChan = " << nChan
+              << ") "
+              << "Elapsed = " << elapsed << " ms. "
+              << "[1 thread]\n";
+    std::cout << "(data time = " << nTimeBlocks * nChan * 5e-3 << " ms.)" << std::endl;
 }
 
 
@@ -238,15 +255,15 @@ void PPFChanneliserTest::test_filter()
 void PPFChanneliserTest::test_fft()
 {
     // Setup the channeliser.
-    unsigned nChan = 512;
     unsigned nThreads = 1;
+    unsigned nChan = 16;
     unsigned nTaps = 8;
     ConfigNode config(_configXml(nChan, nThreads, nTaps));
     PPFChanneliser channeliser(config);
 
     unsigned nSubbands = 62;
     unsigned nPol = 2;
-    unsigned nTimeBlocks = 1;
+    unsigned nTimeBlocks = 10000;
     SubbandSpectraC32 spectra;
     spectra.resize(nTimeBlocks, nSubbands, nPol);
     std::vector<PPFChanneliser::Complex> filteredData(nChan);
@@ -254,24 +271,29 @@ void PPFChanneliserTest::test_fft()
 
     QTime timer;
     timer.start();
-    unsigned nIter = 1000;
-    for (unsigned i = 0; i < nIter; ++i) {
-        for (unsigned b = 0; b < nTimeBlocks; ++b) {
-            for (unsigned s = 0; s < nSubbands; ++s) {
-                for (unsigned p = 0; p < nPol; ++p) {
-                    Spectrum<PPFChanneliser::Complex>* spectrum = spectra.ptr(b, s, p);
-                    spectrum->resize(nChan);
-                    PPFChanneliser::Complex* spectrumData = spectrum->ptr();
-                    channeliser._fft(filteredSamples, spectrumData);
-                }
+    for (unsigned b = 0; b < nTimeBlocks; ++b) {
+        for (unsigned s = 0; s < nSubbands; ++s) {
+            for (unsigned p = 0; p < nPol; ++p) {
+                Spectrum<PPFChanneliser::Complex>* spectrum = spectra.ptr(b, s, p);
+                spectrum->resize(nChan);
+                PPFChanneliser::Complex* spectrumData = spectrum->ptr();
+                channeliser._fft(filteredSamples, spectrumData);
             }
         }
     }
     int elapsed = timer.elapsed();
-    std::cout << "\n[PPFChanneliser]: Time for the FFT of "
-            << nSubbands << " subbands, " << nPol << " polarisations, "
-            << nTimeBlocks << " time blocks = "
-            << double(elapsed)/double(nIter) << " ms. (1 thread)\n";
+
+
+    std::cout << "\n[PPFChanneliser]: _fft() "
+              << "("
+              << "blocks = " << nTimeBlocks << ", "
+              << "nSubbands = " << nSubbands << ", "
+              << "nPols = " << nPol << ", "
+              << "nChan = " << nChan
+              << ") "
+              << "Elapsed = " << elapsed << " ms. "
+              << "[1 thread]\n";
+    std::cout << "(data time = " << nTimeBlocks * nChan * 5e-3 << " ms.)" << std::endl;
 }
 
 
@@ -282,39 +304,35 @@ void PPFChanneliserTest::test_fft()
 void PPFChanneliserTest::test_run()
 {
     // Setup the channeliser.
-    unsigned nChan = 512;
     unsigned nThreads = 2;
+    unsigned nChan = 16;
     unsigned nTaps = 8;
     ConfigNode config(_configXml(nChan, nThreads, nTaps));
     PPFChanneliser channeliser(config);
 
     unsigned nSubbands = 62;
-    unsigned nTimeBlocks = 1000;
+    unsigned nTimeBlocks = 10000;
     unsigned nPol = 2;
     SubbandSpectraC32 spectra;
     spectra.resize(nTimeBlocks, nSubbands, nPol);
     SubbandTimeSeriesC32 timeSeries;
-    timeSeries.resize(nTimeBlocks, nSubbands, nPol);
-    for (unsigned i = 0; i < timeSeries.size(); ++i) {
-        TimeSeries<PPFChanneliser::Complex>* t = timeSeries.ptr(i);
-        t->resize(nChan);
-    }
+    timeSeries.resize(nTimeBlocks, nSubbands, nPol, nChan);
 
-    unsigned nIter = 20;
     QTime timer;
     timer.start();
-    for (unsigned i = 0; i < nIter; ++i) {
-        channeliser.run(&timeSeries, &spectra);
-    }
+    channeliser.run(&timeSeries, &spectra);
     int elapsed = timer.elapsed();
-    std::cout << "\n[PPFChanneliser]: Time for run method using "
-            << nSubbands << " subbands, " << nPol << " polarisations, "
-            << nTimeBlocks << " time blocks = "
-            << double(elapsed)/double(nIter) << " ms. ("
-            << nThreads << " threads)\n";
-    std::cout << "NOTE: Needs to be <= "
-              << 5e-3 * double(nChan) * double(nTimeBlocks)
-              << " ms to keep up with real time." << std::endl;
+
+    std::cout << "\n[PPFChanneliser]: run() "
+              << "("
+              << "blocks = " << nTimeBlocks << ", "
+              << "nSubbands = " << nSubbands << ", "
+              << "nPols = " << nPol << ", "
+              << "nChan = " << nChan
+              << ") "
+              << "Elapsed = " << elapsed << " ms. "
+              << "[" << nThreads << " threads]\n";
+    std::cout << "(data time = " << nTimeBlocks * nChan * 5e-3 << " ms.)" << std::endl;
 }
 
 
@@ -345,7 +363,9 @@ void PPFChanneliserTest::test_makeSpectrum()
 
     // Generate signal.
     for (unsigned i = 0, t = 0; t < nTimeBlocks; ++t) {
-        PPFChanneliser::Complex* timeData = data.ptr(t)->ptr();
+
+        PPFChanneliser::Complex* timeData = data.ptr(t, 0, 0)->ptr();
+
         for (unsigned c = 0; c < nChan; ++c) {
             double time = double(i) / sampleRate;
             double re = std::cos(2 * math::pi * freq * time);
@@ -438,7 +458,7 @@ void PPFChanneliserTest::test_channelProfile()
             double freq = startFreq + k * freqInc;
             freqs[k] = freq;
             for (unsigned i = 0, t = 0; t < nTimeBlocks; ++t) {
-                PPFChanneliser::Complex* timeData = data.ptr(t)->ptr();
+                PPFChanneliser::Complex* timeData = data.ptr(t, 0, 0)->ptr();
                 for (unsigned c = 0; c < nChannels; ++c) {
                     double time = double(i) / sampleRate;
                     double re = std::cos(2 * math::pi * freq * time);

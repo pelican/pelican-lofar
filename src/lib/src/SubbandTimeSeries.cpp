@@ -13,26 +13,23 @@ namespace lofar {
 void SubbandTimeSeriesC32::write(const QString& fileName) const
 {
     QFile file(fileName);
-    if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
-        return;
-    }
+    if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) return;
+
+    const std::complex<float> * times = 0;
+    unsigned nTimes = 0;
 
     QTextStream out(&file);
-    for (unsigned index = 0, b = 0; b < _nTimeBlocks; ++b) {
-        for (unsigned s = 0; s < _nSubbands; ++s) {
-            for (unsigned p = 0; p < _nPolarisations; ++p) {
 
-                // Get a pointer the the spectrum.
-                const std::complex<float>* times = _data[index].ptr();
-                unsigned nTimes = _data[index].nTimes();
-
+    for (unsigned b = 0; b < nTimeBlocks(); ++b) {
+        for (unsigned s = 0; s < nSubbands(); ++s) {
+            for (unsigned p = 0; p < nPolarisations(); ++p) {
+                times = timeSeries(b, s, p);
+                nTimes = this->nTimes(b, s, p);
                 for (unsigned t = 0; t < nTimes; ++t) {
-                    double re = times[t].real();
-                    double im = times[t].imag();
-                    out << QString::number(re, 'g', 16) << " ";
-                    out << QString::number(im, 'g', 16) << endl;
+                    out << QString::number(times[t].real(), 'g', 16) << " ";
+                    out << QString::number(times[t].imag(), 'g', 16);
+                    out << endl;
                 }
-                index++;
                 out << endl;
             }
             out << endl;

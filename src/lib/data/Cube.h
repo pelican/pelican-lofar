@@ -106,11 +106,11 @@ template <typename T> class Cube
 
 
     public:
-        const T*** ptr() const { return _C; }
-        T*** ptr() { return _C; }
+        T const * const * const * ptr() const { return _C; }
+        T * * * ptr() { return _C; }
 
-        const T* arrayPtr() const { return _a; }
-        T* arrayPtr() { return _a; }
+        T const * arrayPtr() const { return _a; }
+        T * arrayPtr() { return _a; }
 
         unsigned size() const { return _nX * _nY * _nZ; }
         unsigned nX() const { return _nX; }
@@ -121,8 +121,8 @@ template <typename T> class Cube
         T operator() (unsigned z, unsigned y, unsigned x) const { return _C[z][y][x]; }
         T& operator() (unsigned z, unsigned y, unsigned x) { return _C[z][y][x]; }
 
-        const T** operator[] (unsigned z) const { return _C[z]; }
-        T** operator[] (unsigned z) { return _C[z]; }
+        T const* const* operator[] (unsigned z) const { return _C[z]; }
+        T * * operator[] (unsigned z) { return _C[z]; }
 
         Cube<T>& operator= (const Cube<T>& other)
         {

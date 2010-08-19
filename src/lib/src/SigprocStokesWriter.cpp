@@ -15,12 +15,12 @@ namespace lofar {
 SigprocStokesWriter::SigprocStokesWriter(const ConfigNode& configNode )
 : AbstractOutputStream(configNode)
 {
-  _nSubbands = configNode.getOption("subbandsPerPacket", "value", "0").toUInt();
-  _nTotalSubbands = configNode.getOption("totalComplexSubbands", "value", "0").toUInt();
-  _clock = configNode.getOption("clock", "value", "200").toUInt();
-  _integration    = configNode.getOption("integrateTimeBins", "value", "1").toUInt();
-  _nChannels = configNode.getOption("outputChannelsPerSubband", "value", "512").toUInt();
- 
+    _nSubbands = configNode.getOption("subbandsPerPacket", "value", "0").toUInt();
+    _nTotalSubbands = configNode.getOption("totalComplexSubbands", "value", "0").toUInt();
+    _clock = configNode.getOption("clock", "value", "200").toUInt();
+    _integration    = configNode.getOption("integrateTimeBins", "value", "1").toUInt();
+    _nChannels = configNode.getOption("outputChannelsPerSubband", "value", "512").toUInt();
+
 
     // Initliase connection manager thread
     _filepath = configNode.getOption("file", "filepath");
@@ -106,34 +106,34 @@ void SigprocStokesWriter::send(const QString& /*streamName*/, const DataBlob* in
 
         unsigned nSamples = stokes->nTimeBlocks();
         unsigned nSubbands = stokes->nSubbands();
-//        unsigned nPolarisations = stokes->nPolarisations(); // this is now an option.
+        //        unsigned nPolarisations = stokes->nPolarisations(); // this is now an option.
         unsigned nChannels = stokes->ptr(0, 0, 0)->nChannels();
         float* data;
-        size_t dataSize = nChannels * sizeof(float);
+        //size_t dataSize = nChannels * sizeof(float);
 
-	//	unsigned chunkFloats = nChannels*nSubbands*_nPols;
-	//std::vector<float> chunkBuffer(chunkFloats);
+        //	unsigned chunkFloats = nChannels*nSubbands*_nPols;
+        //std::vector<float> chunkBuffer(chunkFloats);
         for (unsigned t = 0; t < nSamples; ++t) {
-	  //	  unsigned bufferCounter = 0;
+            //	  unsigned bufferCounter = 0;
             for (unsigned p = 0; p < _nPols; ++p) {
                 for (int s = nSubbands - 1; s >= 0 ; --s) {
                     data = stokes->ptr(t, s, p)->ptr();
-	            for(int i = nChannels - 1; i >= 0 ; --i )
-		    {
-	               //_write(reinterpret_cast<char* >(&data[i]), sizeof(float));
-		             _file.write(reinterpret_cast<char* >(&data[i]), sizeof(float));
+                    for(int i = nChannels - 1; i >= 0 ; --i )
+                    {
+                        //_write(reinterpret_cast<char* >(&data[i]), sizeof(float));
+                        _file.write(reinterpret_cast<char* >(&data[i]), sizeof(float));
 
-			     //      chunkBuffer[bufferCounter]+=data[i];
-			     //      ++bufferCounter;
-		    }
+                        //      chunkBuffer[bufferCounter]+=data[i];
+                        //      ++bufferCounter;
+                    }
                 }
             }
         }
 
-	/*		for (unsigned cb =0; cb < chunkFloats; ++cb){
-			_file.write(reinterpret_cast<char* >(&chunkBuffer[cb]), sizeof(float));
-			}*/
-	_file.flush();
+        /*		for (unsigned cb =0; cb < chunkFloats; ++cb){
+            _file.write(reinterpret_cast<char* >(&chunkBuffer[cb]), sizeof(float));
+            }*/
+        _file.flush();
     }
     else {
         std::cerr << "SigprocStokesWriter::send(): "
@@ -145,14 +145,14 @@ void SigprocStokesWriter::send(const QString& /*streamName*/, const DataBlob* in
 void SigprocStokesWriter::_write(char* data, size_t size)
 {
     int max = _buffer.capacity() -1;
-    int ptr = (_cur + size) % max; 
+    int ptr = (_cur + size) % max;
     if( ptr <= _cur ) {
-	int dsize = max - _cur;
-	 std::memcpy(&_buffer[_cur], data, dsize );
+        int dsize = max - _cur;
+        std::memcpy(&_buffer[_cur], data, dsize );
         _file.write(&_buffer[0], max);
-         _cur = 0; size -= dsize; data += dsize * sizeof(char);
+        _cur = 0; size -= dsize; data += dsize * sizeof(char);
     }
-std::cout << "max=" << max << " ptr=" << ptr << " cur=" << _cur << " size=" << size << "data=" << data << std::endl;
+    std::cout << "max=" << max << " ptr=" << ptr << " cur=" << _cur << " size=" << size << "data=" << data << std::endl;
     std::memcpy( &_buffer[_cur], data, size);
     _cur=ptr;
 }

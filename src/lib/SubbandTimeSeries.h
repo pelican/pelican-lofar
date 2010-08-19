@@ -11,8 +11,6 @@
 #include <vector>
 #include <complex>
 
-using std::complex;
-
 namespace pelican {
 namespace lofar {
 
@@ -20,68 +18,43 @@ namespace lofar {
  * @class SubbandTimeSeries
  *
  * @brief
- * Container class to hold a buffer of time series data for a number of
- * subbands, polarisations and time blocks.
+ * Container class to hold a buffer of blocks of time samples ordered
+ * sub-band and polarisation.
  *
  * @details
- * ordered by:
- * 	time-block -> subband -> polarisation
+ * Data is arranged as a Cube of time series objects (a container class
+ * encapsulating a time series vector) ordered by:
  *
+ * 	1. time block   (Slowest varying dimension)
+ *  2. sub-band
+ *  3. polarisation (Fastest varying dimension)
+ *
+ * The time block dimension is provided so that the PPF channeliser
+ * which uses this container can generate a number of spectra (=nTimeBlocks)
+ * for a given polarisation and sub-band.
  */
 
 template <class T>
 class SubbandTimeSeries : public DataBlob
 {
     public:
-
         /// Constructs an empty time stream data blob.
         SubbandTimeSeries(const QString& type = "SubbandTimeSeries")
-        : DataBlob(type), _nTimeBlocks(0), _nSubbands(0), _nPolarisations(0) {}
+        : DataBlob(type), _nTimeBlocks(0), _nSubbands(0), _nPolarisations(0),
+          _blockRate(0), _lofarTimestamp(0) {}
 
         /// Destroys the time stream data blob.
         virtual ~SubbandTimeSeries() {}
 
     public:
         /// Clears the time stream data.
-        void clear()
-        {
-            _data.clear();
-            _nTimeBlocks = 0;
-            _nSubbands = 0;
-            _nPolarisations = 0;
-        }
+        void clear();
 
-        /// Assign memory for the time stream data blob.
-        void resize(unsigned nTimeBlocks, unsigned nSubbands,
-                unsigned nPolarisations)
-        {
-            _nTimeBlocks = nTimeBlocks;
-            _nSubbands = nSubbands;
-            _nPolarisations = nPolarisations;
-            _data.resize(_nTimeBlocks * _nSubbands * _nPolarisations);
-        }
+        /// Assign memory for the cube of time series each of length nTimes.
+        void resize(unsigned nTimeBlocks, unsigned nSubbands, unsigned nPols,
+                unsigned nTimes = 0);
 
-        /// Assign memory for the time stream data blob.
-        void resize(unsigned nTimeBlocks, unsigned nSubbands,
-                unsigned nPolarisations, unsigned nTimes)
-        {
-            _nTimeBlocks = nTimeBlocks;
-            _nSubbands = nSubbands;
-            _nPolarisations = nPolarisations;
-            _data.resize(_nTimeBlocks * _nSubbands * _nPolarisations);
-            for (unsigned i = 0; i < _data.size(); ++i) {
-                _data[i].resize(nTimes);
-            }
-        }
-
-        /// Returns the data index for a given time block \b, sub-band \s and
-        /// polarisation.
-        unsigned index(unsigned b, unsigned s, unsigned p) const
-        {
-            return _nPolarisations * (b * _nSubbands + s) + p;
-        }
-
-    public: // accessor methods
+    public:
         /// Returns the number of entries in the data blob.
         unsigned size() const { return _data.size(); }
 
@@ -94,80 +67,121 @@ class SubbandTimeSeries : public DataBlob
         /// Returns the number of polarisations in the data.
         unsigned nPolarisations() const { return _nPolarisations; }
 
-        /// Return the block rate (timespan of the entire chunk)
+        /// Return the number of times for the time series
+        /// at time block \p b, sub-band \p s and polarisation \p p.
+        unsigned nTimes(unsigned b, unsigned s, unsigned p) const
+        { return ptr(b, s, p)->nTimes(); }
+
+        /// Return the block rate (time-span of the entire chunk)
         long getBlockRate() const { return _blockRate; }
 
-        /// Return the block rate (timespan of the entire chunk)
+        /// Return the block rate (time-span of the entire chunk)
         void setBlockRate(long blockRate) { _blockRate = blockRate; }
 
-        // Return the lofar timestamp
+        /// Return the lofar time-stamp.
         long long getLofarTimestamp() const { return _lofarTimestamp; }
 
-        // Set the lofar timestamp
+        /// Set the lofar time-stamp.
         void setLofarTimestamp(long long timestamp) { _lofarTimestamp = timestamp; }
-
-        /// Returns a pointer to the time stream data.
-        TimeSeries<T>* ptr() { return _data.size() > 0 ? &_data[0] : 0; }
-
-        /// Returns a pointer to the time stream data (const overload).
-        const TimeSeries<T>* ptr() const
-        {
-            return _data.size() > 0 ? &_data[0] : 0;
-        }
-
-        /// Returns a pointer to the data.
-        TimeSeries<T>* ptr(unsigned i) {
-            return (_data.size() > 0 && i < _data.size()) ? &_data[i] : 0;
-        }
-
-        /// Returns a pointer to the data (const. overload).
-        const TimeSeries<T>* ptr(unsigned i) const  {
-            return (_data.size() > 0 && i < _data.size()) ? &_data[i] : 0;
-        }
 
         /// Returns a pointer to the time series data for the specified time block
         /// \p b, sub-band \p s, and polarisation \p p.
         TimeSeries<T>* ptr(unsigned b, unsigned s, unsigned p)
         {
-            // Check the specified index exists.
-            if (b >= _nTimeBlocks || s >= _nSubbands || p >= _nPolarisations) {
+            if (b >= _nTimeBlocks || s >= _nSubbands || p >= _nPolarisations)
                 return 0;
-            }
-            unsigned idx = index(b, s, p);
-            return (_data.size() > 0 && idx < _data.size()) ? &_data[idx] : 0;
+            unsigned i = _index(b, s, p);
+            return (_data.size() > 0 && i < _data.size()) ? &_data[i] : 0;
         }
 
-
-        /// Returns a pointer to the time series data for the specified time block
-        /// \p b, sub-band \p s, and polarisation \p p (const overload).
+        /// Returns a pointer to the time series data for the specified
+        /// time block \p b, sub-band \p s, and polarisation \p p.
         const TimeSeries<T>* ptr(unsigned b, unsigned s, unsigned p) const
         {
-            // Check the specified index exists.
-            if (b >= _nTimeBlocks || s >= _nSubbands || p >= _nPolarisations) {
-                return NULL;
-            }
-            unsigned idx = index(b, s, p);
-            return (_data.size() > 0 && idx < _data.size()) ? &_data[idx] : 0;
+            if (b >= _nTimeBlocks || s >= _nSubbands || p >= _nPolarisations)
+                return 0;
+            unsigned i = _index(b, s, p);
+            return (_data.size() > 0 && i < _data.size()) ? &_data[i] : 0;
         }
 
-    protected:
-        std::vector<TimeSeries<T> > _data;
+        /// Returns a pointer to start of the time series for the specified
+        /// time block \p b, sub-band \p s, and polarisation \p p.
+        T * timeSeries(unsigned b, unsigned s, unsigned p)
+        {
+            return ptr(b, s, p)->ptr();
+        }
 
+        /// Returns a pointer to start of the time series for the specified
+        /// time block \p b, sub-band \p s, and polarisation \p p.
+        T const * timeSeries(unsigned b, unsigned s, unsigned p) const
+        {
+            return ptr(b, s, p)->ptr();
+        }
+
+    private:
+        /// Data index for a given time block \b, sub-band \s and polarisation.
+        unsigned long _index(unsigned b, unsigned s, unsigned p) const;
+
+    private:
+        std::vector<TimeSeries<T> > _data;
         unsigned _nTimeBlocks;
         unsigned _nSubbands;
         unsigned _nPolarisations;
-        long     _blockRate;
+        long _blockRate;
         long long _lofarTimestamp;
 };
 
 
 
+
+
+
+// -----------------------------------------------------------------------------
+// Inline method/function definitions.
+//
+
+template <typename T>
+inline void SubbandTimeSeries<T>::clear()
+{
+    _data.clear();
+    _nTimeBlocks = _nSubbands = _nPolarisations = 0;
+    _blockRate = 0;
+    _lofarTimestamp = 0;
+}
+
+template <typename T>
+inline void SubbandTimeSeries<T>::resize(unsigned nTimeBlocks,
+        unsigned nSubbands, unsigned nPols, unsigned nTimes)
+{
+    _nTimeBlocks = nTimeBlocks;
+    _nSubbands = nSubbands;
+    _nPolarisations = nPols;
+    _data.resize(_nTimeBlocks * _nSubbands * _nPolarisations);
+    if (nTimes) for (unsigned i = 0; i < _data.size(); ++i)
+        _data[i].resize(nTimes);
+}
+
+
+template <typename T>
+inline unsigned long SubbandTimeSeries<T>::_index(unsigned b, unsigned s,
+        unsigned p) const
+{
+    return _nPolarisations * (b * _nSubbands + s) + p;
+}
+
+
+
+
+
+// -----------------------------------------------------------------------------
+// Template specialisation.
+//
+
 /**
  * @class SubbandTimeSeriesC32
- *
  * @brief
- *
- * @details
+ * Data container holding a complex floating point time series data cube used
+ * in the PPF channeliser.
  */
 
 class SubbandTimeSeriesC32 : public SubbandTimeSeries<std::complex<float> >
@@ -184,9 +198,9 @@ class SubbandTimeSeriesC32 : public SubbandTimeSeries<std::complex<float> >
         void write(const QString& fileName) const;
 };
 
+// Declare the data blob with the pelican the data blob factory.
 PELICAN_DECLARE_DATABLOB(SubbandTimeSeriesC32)
 
 }// namespace lofar
 }// namespace pelican
-
 #endif // SUBBAND_TIME_SERIES_H_

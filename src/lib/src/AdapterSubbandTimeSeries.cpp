@@ -280,12 +280,14 @@ void AdapterSubbandTimeSeries::_printHeader(const UDPPacket::Header& header)
 }
 
 
+inline
 std::complex<float> AdapterSubbandTimeSeries::_makeComplex(const TYPES::i8complex& z)
 {
     return std::complex<float>(float(real(z)), float(imag(z)));
 }
 
 
+inline
 std::complex<float> AdapterSubbandTimeSeries::_makeComplex(const TYPES::i16complex& z)
 {
     //TODO Check (see LCS/Common/lofar_complex.h)

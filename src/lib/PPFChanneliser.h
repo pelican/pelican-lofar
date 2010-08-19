@@ -129,7 +129,6 @@ inline void PPFChanneliser::_fft(const Complex* samples, Complex* spectrum)
 }
 
 
-
 // Declare this class as a pelican module.
 PELICAN_DECLARE_MODULE(PPFChanneliser)
 
