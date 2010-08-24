@@ -18,7 +18,7 @@ namespace lofar {
  * @class SubbandTimeSeries
  *
  * @brief
- * Container class to hold a buffer of blocks of time samples ordered
+ * Container class to hold a buffer of blocks of time samples ordered by
  * sub-band and polarisation.
  *
  * @details

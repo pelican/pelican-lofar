@@ -29,8 +29,8 @@ void SubbandSpectraC32::write(const QString& fileName) const
             for (unsigned p = 0; p < _nPolarisations; ++p) {
 
                 // Get a pointer the the spectrum.
-                const std::complex<float>* spectrum = _spectra[index].ptr();
-                unsigned nChannels = _spectra[index].nChannels();
+                const std::complex<float>* spectrum = _data[index].ptr();
+                unsigned nChannels = _data[index].nChannels();
 
                 for (unsigned c = 0; c < nChannels; ++c) {
                     double re = spectrum[c].real();
@@ -60,11 +60,11 @@ quint64 SubbandSpectraC32::serialisedBytes() const
     // Sub-band spactra dimensions.
     quint64 size = 3 * sizeof(unsigned);
 
-    for (unsigned i = 0; i < _spectra.size(); ++i) {
+    for (unsigned i = 0; i < _data.size(); ++i) {
         // Spectrum header.
         size += sizeof(unsigned) + 2 * sizeof(double);
         // Spectrum data.
-        size += _spectra[i].nChannels() * sizeof(std::complex<float>);
+        size += _data[i].nChannels() * sizeof(std::complex<float>);
     }
     return size;
 }
@@ -82,11 +82,11 @@ void SubbandSpectraC32::serialise(QIODevice& out) const
     out.write((char*)&_nPolarisations, sizeof(unsigned));
 
     // Loop over and write each spectrum.
-    for (unsigned i = 0; i < _spectra.size(); ++i) {
-        const std::complex<float>* spectrum = _spectra[i].ptr();
-        unsigned nChannels = _spectra[i].nChannels();
-        double startFreq = _spectra[i].startFrequency();
-        double deltaFreq = _spectra[i].frequencyIncrement();
+    for (unsigned i = 0; i < _data.size(); ++i) {
+        const std::complex<float>* spectrum = _data[i].ptr();
+        unsigned nChannels = _data[i].nChannels();
+        double startFreq = _data[i].startFrequency();
+        double deltaFreq = _data[i].frequencyIncrement();
         // Spectrum header.
         out.write((char*)&nChannels, sizeof(unsigned));
         out.write((char*)&startFreq, sizeof(double));
@@ -116,7 +116,7 @@ void SubbandSpectraC32::deserialise(QIODevice& in, QSysInfo::Endian endian)
     resize(_nTimeBlocks, _nSubbands, _nPolarisations);
 
     // Loop over and write each spectrum.
-    for (unsigned i = 0; i < _spectra.size(); ++i) {
+    for (unsigned i = 0; i < _data.size(); ++i) {
 
         // Read the spectrum header.
         unsigned nChannels = 0;
@@ -127,8 +127,8 @@ void SubbandSpectraC32::deserialise(QIODevice& in, QSysInfo::Endian endian)
         in.read((char*)&deltaFreq, sizeof(double));
 
         // Read the spectrum data.
-        _spectra[i].resize(nChannels);
-        in.read((char*)_spectra[i].ptr(),
+        _data[i].resize(nChannels);
+        in.read((char*)_data[i].ptr(),
                 nChannels * sizeof(std::complex<float>));
     }
 }
@@ -145,16 +145,16 @@ quint64 SubbandSpectraStokes::serialisedBytes() const
 {
     // Sub-band spactra dimensions.
     quint64 size = 3 * sizeof(unsigned);
-//    std::cout << "SubbandSpectraStokes::serialisedBytes(): nSpectra = " << _spectra.size() << std::endl;
+//    std::cout << "SubbandSpectraStokes::serialisedBytes(): nSpectra = " << _data.size() << std::endl;
 //    std::cout << "SubbandSpectraStokes::serialisedBytes(): nTimeBlocks = " << nTimeBlocks() << std::endl;
 //    std::cout << "SubbandSpectraStokes::serialisedBytes(): nSubbands = " << nSubbands() << std::endl;
 //    std::cout << "SubbandSpectraStokes::serialisedBytes(): nPolarisations = " << nPolarisations() << std::endl;
-//    std::cout << "SubbandSpectraStokes::serialisedBytes(): nChannels = " << _spectra[0].nChannels() << std::endl;
-    for (unsigned i = 0; i < _spectra.size(); ++i) {
+//    std::cout << "SubbandSpectraStokes::serialisedBytes(): nChannels = " << _data[0].nChannels() << std::endl;
+    for (unsigned i = 0; i < _data.size(); ++i) {
         // Spectrum header.
         size += sizeof(unsigned) + 2 * sizeof(double);
         // Spectrum data.
-        size += _spectra[i].nChannels() * sizeof(float);
+        size += _data[i].nChannels() * sizeof(float);
     }
 //    std::cout << "SubbandSpectraStokes::serialisedBytes(): bytes = " << size << std::endl;
     return size;
@@ -173,16 +173,16 @@ void SubbandSpectraStokes::serialise(QIODevice& out) const
     out.write((char*)&_nPolarisations, sizeof(unsigned));
 
     // Loop over and write each spectrum.
-    for (unsigned i = 0; i < _spectra.size(); ++i) {
-        unsigned nChannels = _spectra[i].nChannels();
-        double startFreq = _spectra[i].startFrequency();
-        double deltaFreq = _spectra[i].frequencyIncrement();
+    for (unsigned i = 0; i < _data.size(); ++i) {
+        unsigned nChannels = _data[i].nChannels();
+        double startFreq = _data[i].startFrequency();
+        double deltaFreq = _data[i].frequencyIncrement();
         // Spectrum header.
         out.write((char*)&nChannels, sizeof(unsigned));
         out.write((char*)&startFreq, sizeof(double));
         out.write((char*)&deltaFreq, sizeof(double));
         // Spectrum data.
-        const float* spectrum = _spectra[i].ptr();
+        const float* spectrum = _data[i].ptr();
         out.write((char*)spectrum, nChannels * sizeof(float));
     }
 }
@@ -211,14 +211,14 @@ void SubbandSpectraStokes::deserialise(QIODevice& in, QSysInfo::Endian /*endian*
     double startFreq = 0.0, deltaFreq = 0.0;
 
     // Loop over and write each spectrum.
-    for (unsigned i = 0; i < _spectra.size(); ++i) {
+    for (unsigned i = 0; i < _data.size(); ++i) {
         // Read the spectrum header.
         in.read((char*)&nChannels, sizeof(unsigned));
         in.read((char*)&startFreq, sizeof(double));
         in.read((char*)&deltaFreq, sizeof(double));
         // Read the spectrum data.
-        _spectra[i].resize(nChannels);
-        in.read((char*)_spectra[i].ptr(), nChannels * sizeof(float));
+        _data[i].resize(nChannels);
+        in.read((char*)_data[i].ptr(), nChannels * sizeof(float));
     }
 }
 

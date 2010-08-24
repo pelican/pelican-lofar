@@ -12,6 +12,7 @@
 #include <cmath>
 #include <iostream>
 #include <complex>
+#include <vector>
 
 namespace pelican {
 namespace lofar {
@@ -38,6 +39,20 @@ AdapterSubbandTimeSeries::AdapterSubbandTimeSeries(const ConfigNode& config)
     _nSubbands = config.getOption("subbandsPerPacket", "value", "0").toUInt();
     _nPolarisations = config.getOption("nRawPolarisations", "value", "0").toUInt();
     _clock = config.getOption("clock", "value", "200").toUInt();
+
+    // Packet size variables.
+    _packetSize = sizeof(UDPPacket);
+    _headerSize = sizeof(UDPPacket::Header);
+
+    // Must divide by 4 because we're using sampleBits * 2 for each value (complex data).
+    _packetDataSize = _nSubbands * _nPolarisations * _nSamplesPerPacket * _sampleBits / 4;
+    _dataSize = _fixedPacketSize ? 8130 : _packetDataSize;
+    _paddingSize = _fixedPacketSize ? _packetSize - _headerSize - _dataSize : 0;
+
+    // Temporary arrays for buffering data from the IO Device.
+    _headerTemp.resize(_headerSize);
+    _dataTemp.resize(_dataSize);
+    _paddingTemp.resize(_paddingSize + 1);
 }
 
 
@@ -58,33 +73,21 @@ void AdapterSubbandTimeSeries::deserialise(QIODevice* in)
     // Sanity check on data blob dimensions and chunk size.
     _checkData();
 
-    // Packet size variables.
-    size_t packetSize = sizeof(UDPPacket);
-    size_t headerSize = sizeof(UDPPacket::Header);
-
-    // Must divide by 4 because we're using sampleBits * 2 for
-    // each value (complex data).
-    size_t packetDataSize = _nSubbands * _nPolarisations * _nSamplesPerPacket
-            * _sampleBits / 4;
-    size_t dataSize = _fixedPacketSize ? 8130 : packetDataSize;
-    size_t paddingSize = _fixedPacketSize ? packetSize - headerSize - dataSize : 0;
-
-    // Temporary arrays for buffering data from the IO Device.
-    std::vector<char> headerTemp(headerSize);
-    std::vector<char> dataTemp(dataSize);
-    std::vector<char> paddingTemp(paddingSize + 1);
-
     // UDP packet header.
     UDPPacket::Header header;
+
+    char* headerTemp = &_headerTemp[0];
+    char* dataTemp = &_dataTemp[0];
+    char* paddingTemp = &_paddingTemp[0];
 
     // Loop over UDP packets
     for (unsigned p = 0; p < _nUDPPacketsPerChunk; ++p) {
 
         // Read the header from the IO device.
-        in->read(&headerTemp[0], headerSize);
-        _readHeader(header, &headerTemp[0]);
+        in->read(headerTemp, _headerSize);
+        _readHeader(header, headerTemp);
 
-        // First packet, extract timestamp
+        // First packet, extract time-stamp
         if (p == 0) {
             TYPES::TimeStamp timestamp;
             timestamp.setStationClockSpeed(_clock * 1000000);
@@ -94,11 +97,11 @@ void AdapterSubbandTimeSeries::deserialise(QIODevice* in)
         }
 
         // Read the useful data (depends on configured dimensions).
-        in->read(&dataTemp[0], dataSize);
-        _readData(_timeData, &dataTemp[0], p);
+        in->read(dataTemp, _dataSize);
+        _readData(_timeData, dataTemp, p);
 
         // Read off padding (from word alignment of the packet).
-        in->read(&paddingTemp[0], paddingSize);
+        in->read(paddingTemp, _paddingSize);
     }
 }
 
@@ -109,7 +112,7 @@ void AdapterSubbandTimeSeries::deserialise(QIODevice* in)
 void AdapterSubbandTimeSeries::_checkData()
 {
     // Check for supported sample bits.
-    if (_sampleBits != 8  && _sampleBits != 16) {
+    if (_sampleBits != 8 && _sampleBits != 16) {
         throw QString("AdapterSubbandTimeSeries: Specified number of "
                 "sample (%1) bits not supported.").arg(_sampleBits);
     }
@@ -163,15 +166,6 @@ void AdapterSubbandTimeSeries::_checkData()
     unsigned nTimeBlocks = nTimesTotal / _nSamplesPerTimeBlock;
     _timeData = static_cast<SubbandTimeSeriesC32*>(_data);
     _timeData->resize(nTimeBlocks, _nSubbands, _nPolarisations, _nSamplesPerTimeBlock);
-
-//    std::cout << "AdapterSubbandTimeSeries::_checkData(): nTimeBlocks = "
-//              << nTimeBlocks << std::endl;
-//    std::cout << "AdapterSubbandTimeSeries::_checkData(): nSubbands = "
-//                  << _nSubbands << std::endl;
-//    std::cout << "AdapterSubbandTimeSeries::_checkData(): nPolarisations = "
-//                  << _nPolarisations << std::endl;
-//    std::cout << "AdapterSubbandTimeSeries::_checkData(): nSamplesPerTimeBlock = "
-//                  << _nSamplesPerTimeBlock << std::endl;
 }
 
 
@@ -200,23 +194,18 @@ void AdapterSubbandTimeSeries::_readHeader(UDPPacket::Header& header,
 void AdapterSubbandTimeSeries::_readData(SubbandTimeSeriesC32* timeSeries,
         char* buffer, unsigned packetIndex)
 {
-    typedef std::complex<float> fComplex;
-    unsigned tStart = packetIndex * _nSamplesPerPacket; // TODO check this.
-
-//    std::cout << "tStart = " << tStart << std::endl;
-//    std::cout << "_nSamplesPerPacket = " << _nSamplesPerPacket << std::endl;
-//    std::cout << "_nPolarisations = " << _nPolarisations << std::endl;
+    unsigned tStart = packetIndex * _nSamplesPerPacket;
 
     // Loop over dimensions in the packet and write into the data blob.
     unsigned iPtr = 0;
+
     for (unsigned c = 0; c < _nSubbands; ++c) {
        for (unsigned t = 0; t < _nSamplesPerPacket; ++t) {
 
         unsigned iTimeBlock = (tStart + t) / _nSamplesPerTimeBlock;
-//        std::cout << "iTimeBlock = " << iTimeBlock << std::endl;
 
             for (unsigned p = 0; p < _nPolarisations; ++p) {
-                fComplex* data = timeSeries->ptr(iTimeBlock, c, p)->ptr();
+                Complex* data = timeSeries->ptr(iTimeBlock, c, p)->ptr();
                 unsigned index = tStart - (iTimeBlock * _nSamplesPerTimeBlock) + t;
 
                 if (_sampleBits == 8) {
@@ -280,18 +269,16 @@ void AdapterSubbandTimeSeries::_printHeader(const UDPPacket::Header& header)
 }
 
 
-inline
-std::complex<float> AdapterSubbandTimeSeries::_makeComplex(const TYPES::i8complex& z)
+inline AdapterSubbandTimeSeries::Complex AdapterSubbandTimeSeries::_makeComplex(const TYPES::i8complex& z)
 {
-    return std::complex<float>(float(real(z)), float(imag(z)));
+    return std::complex<Real>(Real(z.real()), (Real)z.imag() );
 }
 
 
-inline
-std::complex<float> AdapterSubbandTimeSeries::_makeComplex(const TYPES::i16complex& z)
+inline AdapterSubbandTimeSeries::Complex AdapterSubbandTimeSeries::_makeComplex(const TYPES::i16complex& z)
 {
     //TODO Check (see LCS/Common/lofar_complex.h)
-    return std::complex<float>(float(real(z)), float(imag(z)));
+    return std::complex<Real>(Real(real(z)), Real(imag(z)));
 }
 
 

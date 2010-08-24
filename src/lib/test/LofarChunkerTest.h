@@ -27,7 +27,8 @@ class LofarChunkerTest : public CppUnit::TestFixture
         CPPUNIT_TEST_SUITE( LofarChunkerTest );
         CPPUNIT_TEST( test_normalPackets );
         CPPUNIT_TEST( test_lostPackets );
-        CPPUNIT_TEST_SUITE_END();
+        CPPUNIT_TEST( test_update );
+        CPPUNIT_TEST_SUITE_END( );
 
     public:
         void setUp();
@@ -36,17 +37,19 @@ class LofarChunkerTest : public CppUnit::TestFixture
         // Test Methods
         void test_normalPackets();
         void test_lostPackets();
+        void test_update();
 
     public:
-        LofarChunkerTest(  );
+        LofarChunkerTest();
         ~LofarChunkerTest();
 
     private:
 
     private:
-        Config config;
+        QString _serverXML;
+        Config _config;
         ConfigNode _emulatorNode;
-        
+
         // Data Params
         int _subbandsPerPacket;
         int _samplesPerPacket;
@@ -59,4 +62,4 @@ class LofarChunkerTest : public CppUnit::TestFixture
 } // namespace lofar
 } // namespace pelican
 
-#endif 
+#endif

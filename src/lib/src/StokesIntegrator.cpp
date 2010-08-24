@@ -2,8 +2,8 @@
 //#include "StokesGenerator.h"
 #include "SubbandSpectra.h"
 #include "Spectrum.h"
-#include "../../../pelican/pelican/utility/pelicanTimer.h"
 
+#include "pelican/utility/pelicanTimer.h"
 #include "pelican/utility/ConfigNode.h"
 
 #include <iostream>
@@ -62,11 +62,9 @@ void StokesIntegrator::run(const SubbandSpectraStokes* stokesGeneratorOutput,
     //    unsigned timeFloats = nPols*nSubbands*nChannels;
 
     intStokes->resize(newSamples, nSubbands, nPols, nChannels);
-    for (unsigned i=0; i<newSamples*nSubbands*nPols; ++i){
-        value2 = intStokes ->ptr(i)->ptr();
-        for (unsigned c=0; c<nChannels; ++c){
-            value2[c]=0.0;
-        }
+    for (unsigned i = 0; i < newSamples * nSubbands * nPols; ++i) {
+        value2 = intStokes->ptr(i)->ptr();
+        for (unsigned c = 0; c < nChannels; ++c) value2[c] = 0.0;
     }
 
     unsigned timeStart=0;
@@ -89,6 +87,7 @@ void StokesIntegrator::run(const SubbandSpectraStokes* stokesGeneratorOutput,
         }
         timeStart=timeStart+_windowSize;
     }
+
     //TIMER_STOP(ts);
     //std::cout << ts << std::endl;
 }

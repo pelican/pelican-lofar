@@ -6,8 +6,10 @@
 
 #include "pelican/emulator/EmulatorDriver.h"
 #include "pelican/server/DataManager.h"
-#include "pelican/utility/memCheck.h"
 #include "pelican/comms/Data.h"
+#include "pelican/server/test/ChunkerTester.h"
+
+#include "pelican/utility/memCheck.h"
 
 #include <boost/shared_ptr.hpp>
 
@@ -22,18 +24,19 @@ CPPUNIT_TEST_SUITE_REGISTRATION( LofarChunkerTest );
 */
 LofarChunkerTest::LofarChunkerTest() : CppUnit::TestFixture()
 {
-    _samplesPerPacket  = 32;   // Number of block per frame (for a 32 MHz beam)
-    _nrPolarisations   = 2;    // Number of polarization in the data
-    _numPackets        = 1000; // Number of packet to send
-    _clock             = 200;  // Rounded up clock station clock speed
-    _subbandsPerPacket = _clock == 200 ? 42 : 54;  //  Number of block per frame
-
     QString bufferConfig =
             "<buffers>"
             "   <LofarData>"
             "       <buffer maxSize=\"100000000\" maxChunkSize=\"100000000\"/>"
             "   </LofarData>"
             "</buffers>";
+
+    // Chunker configuration.
+    _samplesPerPacket  = 32;   // Number of block per frame (for a 32 MHz beam).
+    _nrPolarisations   = 2;    // Number of polarisation in the data.
+    _numPackets        = 1000; // Number of packet to send.
+    _clock             = 200;  // Rounded up clock station clock speed.
+    _subbandsPerPacket = _clock == 200 ? 42 : 54;  // Number of blocks per frame.
 
     QString chunkerConfig = QString(
             "<chunkers>"
@@ -58,23 +61,42 @@ LofarChunkerTest::LofarChunkerTest() : CppUnit::TestFixture()
             .arg(_numPackets);
 
 
+
+    // Create the server configuration from the buffer and chunker.
     QString serverXml = bufferConfig + chunkerConfig;
-    config.setFromString("", serverXml);
+    _config.setFromString("", serverXml);
+
 
     // Set up LOFAR data emulator configuration.
-    _emulatorNode.setFromString(""
+    unsigned interval = 1000;
+    unsigned startDelay = 1;
+    unsigned sampleBytes = 8;
+    QString emulatorConfig = QString(
             "<LofarUdpEmulator>"
             "    <connection host=\"127.0.0.1\" port=\"8090\"/>"
-            "    <params clock=\""         + QString::number(_clock)             + "\"/>"
-            "    <packet interval=\"1000\""
-            "            startDelay=\"1\""
-            "            sampleSize=\"8\""
-            "            samples=\""       + QString::number(_samplesPerPacket)  + "\""
-            "            polarisations=\"" + QString::number(_nrPolarisations)   + "\""
-            "            subbands=\""      + QString::number(_subbandsPerPacket) + "\""
-            "            nPackets=\""      + QString::number(_numPackets + 10)        + "\"/>"
-            "</LofarUdpEmulator>");
+            "    <params clock=\"%1\"/>"
+            "    <packet interval=\"%2\""
+            "            startDelay=\"%3\""
+            "            sampleSize=\"%4\""
+            "            samples=\"%5\""
+            "            polarisations=\"%6\""
+            "            subbands=\"%7\""
+            "            nPackets=\"%8\"/>"
+            "</LofarUdpEmulator>"
+    )
+    .arg(_clock)
+    .arg(interval)
+    .arg(startDelay)
+    .arg(sampleBytes)
+    .arg(_samplesPerPacket)
+    .arg(_nrPolarisations)
+    .arg(_subbandsPerPacket)
+    .arg(_numPackets + 10);
+
+    _emulatorNode.setFromString(emulatorConfig);
 }
+
+
 
 /**
 * @details
@@ -110,47 +132,49 @@ void LofarChunkerTest::test_normalPackets()
         std::cout << "---------------------------------" << std::endl;
         std::cout << "Starting LofarChunker normalPackets test" << std::endl;
 
-        // Get chunker configuration
+        // Get chunker configuration.
         Config::TreeAddress address;
         address << Config::NodeId("server", "");
         address << Config::NodeId("chunkers", "");
         address << Config::NodeId("LofarChunker", "");
-        ConfigNode configNode = config.get(address);
+        ConfigNode configNode = _config.get(address);
 
-        // Create and setup chunker
+        // Create and setup chunker.
         LofarChunker chunker(configNode);
         QIODevice* device = chunker.newDevice();
         chunker.setDevice(device);
 
-        // Create Data Manager
-        pelican::DataManager dataManager(&config);
+        // Create Data Manager.
+        pelican::DataManager dataManager(&_config);
         dataManager.getStreamBuffer("LofarData");
         chunker.setDataManager(&dataManager);
 
-        // Start Lofar Data Generator
+        // Start Lofar Data Generator.
         EmulatorDriver emulator(new LofarUdpEmulator(_emulatorNode));
 
-        // Acquire data through chunker
+        // Acquire data through chunker.
         chunker.next(device);
 
-        // Test read data
+        // Test read data.
         LockedData d = dataManager.getNext("LofarData");
-        char* dataPtr = (char *)(reinterpret_cast<AbstractLockableData*>(d.object()) -> data() -> data() );
+        char* dataPtr = (char *)reinterpret_cast<AbstractLockableData*>(d.object())->data()->data();
 
         UDPPacket *packet;
         unsigned packetSize = sizeof(struct UDPPacket::Header) + _subbandsPerPacket *
                 _samplesPerPacket * _nrPolarisations * sizeof(TYPES::i8complex);
 
-        for (int counter = 0; counter < _numPackets; counter++) {
-
+        for (int counter = 0; counter < _numPackets; ++counter)
+        {
             packet = (UDPPacket *) (dataPtr + packetSize * counter);
-            TYPES::i8complex* s = reinterpret_cast<TYPES::i8complex*>(&(packet->data));
+            TYPES::i8complex* s = reinterpret_cast<TYPES::i8complex*>(&packet->data);
 
-            for (int k = 0; k < _samplesPerPacket; k++)
-                for (int j = 0; j < _subbandsPerPacket; j++) {
-                    float val = s[k * _subbandsPerPacket * _nrPolarisations +  j * _nrPolarisations].real();
+            for (int k = 0; k < _samplesPerPacket; ++k) {
+                for (int j = 0; j < _subbandsPerPacket; ++j) {
+                    float val = s[k * _subbandsPerPacket * _nrPolarisations
+                                  + j * _nrPolarisations].real();
                     CPPUNIT_ASSERT_EQUAL(float(k + j), val);
                 }
+            }
         }
 
         std::cout << "Finished LofarChunker normalPackets test" << std::endl;
@@ -176,7 +200,7 @@ void LofarChunkerTest::test_lostPackets()
         address << Config::NodeId("server", "");
         address << Config::NodeId("chunkers", "");
         address << Config::NodeId("LofarChunker", "");
-        ConfigNode configNode = config.get(address);
+        ConfigNode configNode = _config.get(address);
 
         // Create and setup chunker
         LofarChunker chunker(configNode);
@@ -184,7 +208,7 @@ void LofarChunkerTest::test_lostPackets()
         chunker.setDevice(device);
 
         // Create Data Manager
-        pelican::DataManager dataManager(&config);
+        pelican::DataManager dataManager(&_config);
         dataManager.getStreamBuffer("LofarData");
         chunker.setDataManager(&dataManager);
 
@@ -208,6 +232,7 @@ void LofarChunkerTest::test_lostPackets()
 
             packet = (UDPPacket *) (dataPtr + packetSize * counter);
             TYPES::i8complex* s = reinterpret_cast<TYPES::i8complex*>(&packet->data);
+
             for (int k = 0; k < _samplesPerPacket; k++)
                 for (int j = 0; j < _subbandsPerPacket; j++) {
                     unsigned index = k * _subbandsPerPacket * _nrPolarisations +
@@ -227,6 +252,20 @@ void LofarChunkerTest::test_lostPackets()
         CPPUNIT_FAIL("Unexpected exception: " + e.toStdString());
     }
 }
+
+
+void LofarChunkerTest::test_update()
+{
+//    try {
+//        unsigned long bufferSize = 100;
+//        ChunkerTester tester("LofarChunker", bufferSize, _serverXML);
+//    }
+//    catch (const QString& msg)
+//    {
+//        CPPUNIT_FAIL(msg.toStdString());
+//    }
+}
+
 
 } // namespace lofar
 } // namespace pelican

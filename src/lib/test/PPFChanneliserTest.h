@@ -23,13 +23,6 @@ namespace lofar {
 
 class PPFChanneliserTest : public CppUnit::TestFixture
 {
-    public:
-        PPFChanneliserTest() : CppUnit::TestFixture() {};
-        ~PPFChanneliserTest() {}
-
-    public:
-        void setUp() {}
-        void tearDown() {}
 
     public:
         /// Register test methods.
@@ -45,6 +38,9 @@ class PPFChanneliserTest : public CppUnit::TestFixture
         CPPUNIT_TEST_SUITE_END();
 
     public:
+        void setUp();
+        void tearDown() {}
+
         /// Test module configuration.
         void test_configuration();
 
@@ -68,11 +64,23 @@ class PPFChanneliserTest : public CppUnit::TestFixture
         /// Test the channel profile for a given set of weights.
         void test_channelProfile();
 
+    public:
+        PPFChanneliserTest() : CppUnit::TestFixture() {}
+        ~PPFChanneliserTest() {}
+
     private:
         /// Generate configuration XML.
         QString _configXml(unsigned nChannels, unsigned nThreads,
                 unsigned nTaps, const QString& windowType = "kaiser");
 
+    private:
+        bool _verbose;
+        unsigned _nBlocks;
+        unsigned _nSubbands;
+        unsigned _nPols;
+        unsigned _nChannels;
+
+        unsigned _nTaps;
 };
 
 } // namespace lofar

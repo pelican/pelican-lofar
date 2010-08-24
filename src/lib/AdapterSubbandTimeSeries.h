@@ -60,6 +60,9 @@ class AdapterSubbandTimeSeries : public AbstractStreamAdapter
     private:
         friend class AdapterSubbandTimeSeriesTest;
 
+        typedef float Real;
+        typedef std::complex<Real> Complex;
+
     public:
         /// Constructs a new AdapterTimeStream.
         AdapterSubbandTimeSeries(const ConfigNode& config);
@@ -89,10 +92,10 @@ class AdapterSubbandTimeSeries : public AbstractStreamAdapter
         void _printHeader(const UDPPacket::Header& header);
 
         /// Converts a i8Complex to std::complex float.
-        std::complex<float> _makeComplex(const TYPES::i8complex& z);
+        Complex _makeComplex(const TYPES::i8complex& z);
 
         /// Converts a i8Complex to std::complex float.
-        std::complex<float> _makeComplex(const TYPES::i16complex& z);
+        Complex _makeComplex(const TYPES::i16complex& z);
 
     private:
         SubbandTimeSeriesC32* _timeData;
@@ -104,7 +107,18 @@ class AdapterSubbandTimeSeries : public AbstractStreamAdapter
         unsigned _nPolarisations;
         unsigned _sampleBits;
         unsigned _clock;
+
+        size_t _packetSize;
+        size_t _headerSize;
+        size_t _packetDataSize;
+        size_t _dataSize;
+        size_t _paddingSize;
+        std::vector<char> _headerTemp;
+        std::vector<char> _dataTemp;
+        std::vector<char> _paddingTemp;
 };
+
+
 
 PELICAN_DECLARE_ADAPTER(AdapterSubbandTimeSeries)
 

@@ -64,25 +64,22 @@ template <class T> class Spectrum
         double frequencyIncrement() const { return _frequencyIncrement; }
 
         /// Sets the channel frequency spacing..
-        void setFrequencyIncrement(double value) {
-            _frequencyIncrement = value;
-        }
+        void setFrequencyIncrement(double value)
+        { _frequencyIncrement = value; }
 
         /// Returns a pointer to the spectrum data.
-        T* getData() { return _channels.size() > 0 ? &_channels[0] : NULL; }
+        T * getData() { return _channels.size() > 0 ? &_channels[0] : 0; }
 
         /// Returns a pointer to the spectrum data (const overload).
-        const T* getData() const {
-            return _channels.size() > 0 ? &_channels[0] : NULL;
-        }
+        T const* getData() const
+        { return _channels.size() > 0 ? &_channels[0] : 0; }
 
         /// To be deprecated soon (dont use)
-        T* ptr() { return _channels.size() > 0 ? &_channels[0] : NULL; }
+        T * ptr() { return _channels.size() > 0 ? &_channels[0] : 0; }
 
         /// To be deprecated soon (dont use)
-        const T* ptr() const {
-            return _channels.size() > 0 ? &_channels[0] : NULL;
-        }
+        T const * ptr() const
+        { return _channels.size() > 0 ? &_channels[0] : 0; }
 
     protected:
         std::vector<T> _channels;
