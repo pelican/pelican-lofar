@@ -1,6 +1,6 @@
-#include "test/AdapterSubbandTimeSeriesTest.h"
+#include "test/AdapterTimeSeriesDataSetTest.h"
 
-#include "AdapterSubbandTimeSeries.h"
+#include "AdapterTimeSeriesDataSet.h"
 
 #include "pelican/utility/FactoryGeneric.h"
 
@@ -22,14 +22,14 @@
 namespace pelican {
 namespace lofar {
 
-CPPUNIT_TEST_SUITE_REGISTRATION(AdapterSubbandTimeSeriesTest);
+CPPUNIT_TEST_SUITE_REGISTRATION(AdapterTimeSeriesDataSetTest);
 
 
 /**
  * @details
  * Method to test the adapter configuration.
  */
-void AdapterSubbandTimeSeriesTest::test_configuration()
+void AdapterTimeSeriesDataSetTest::test_configuration()
 {
     // Create configuration node.
     QString fixedSizePackets = "true";
@@ -44,7 +44,7 @@ void AdapterSubbandTimeSeriesTest::test_configuration()
     ConfigNode configNode(xml);
 
     // Construct the adapter.
-    AdapterSubbandTimeSeries adapter(configNode);
+    AdapterTimeSeriesDataSet adapter(configNode);
 
     // Check configuration.
     CPPUNIT_ASSERT_EQUAL(true, adapter._fixedPacketSize);
@@ -61,7 +61,7 @@ void AdapterSubbandTimeSeriesTest::test_configuration()
  * @details
  * Method to test the _checkData() method of the adapter.
  */
-void AdapterSubbandTimeSeriesTest::test_checkDataFixedPacket()
+void AdapterTimeSeriesDataSetTest::test_checkDataFixedPacket()
 {
     // Create configuration node.
     QString fixedSizePackets = "true";
@@ -76,7 +76,7 @@ void AdapterSubbandTimeSeriesTest::test_checkDataFixedPacket()
     ConfigNode configNode(xml);
 
     // Construct the adapter.
-    AdapterSubbandTimeSeries adapter(configNode);
+    AdapterTimeSeriesDataSet adapter(configNode);
 
     // Construct a data blob to adapt into.
     TimeSeriesDataSetC32 timeSeries;
@@ -106,7 +106,7 @@ void AdapterSubbandTimeSeriesTest::test_checkDataFixedPacket()
 }
 
 
-void AdapterSubbandTimeSeriesTest::test_factoryCreate()
+void AdapterTimeSeriesDataSetTest::test_factoryCreate()
 {
 //    FactoryGeneric<AbstractAdapter> factory;
 //    AbstractAdapter* a = factory.create("AdapterSubbandTimeSeries");
@@ -116,7 +116,7 @@ void AdapterSubbandTimeSeriesTest::test_factoryCreate()
  * @details
  * Method to test the _checkData() method of the adapter.
  */
-void AdapterSubbandTimeSeriesTest::test_checkDataVariablePacket()
+void AdapterTimeSeriesDataSetTest::test_checkDataVariablePacket()
 {
     // Create configuration node.
     QString fixedSizePackets = "false";
@@ -131,7 +131,7 @@ void AdapterSubbandTimeSeriesTest::test_checkDataVariablePacket()
     ConfigNode configNode(xml);
 
     // Construct the adapter.
-    AdapterSubbandTimeSeries adapter(configNode);
+    AdapterTimeSeriesDataSet adapter(configNode);
 
     // Construct a data blob to adapt into.
     TimeSeriesDataSetC32 timeSeries;
@@ -165,7 +165,7 @@ void AdapterSubbandTimeSeriesTest::test_checkDataVariablePacket()
  * @details
  * Method to test the deserialise() method of the adapter.
  */
-void AdapterSubbandTimeSeriesTest::test_deserialise()
+void AdapterTimeSeriesDataSetTest::test_deserialise()
 {
     // Create configuration node.
     QString fixedSizePackets = "true";
@@ -183,7 +183,7 @@ void AdapterSubbandTimeSeriesTest::test_deserialise()
     typedef TYPES::i16complex iComplex32;
 
     // Construct the adapter.
-    AdapterSubbandTimeSeries adapter(configNode);
+    AdapterTimeSeriesDataSet adapter(configNode);
 
     // Construct a data blob to adapt into.
     TimeSeriesDataSetC32 timeSeries;
@@ -248,7 +248,7 @@ void AdapterSubbandTimeSeriesTest::test_deserialise()
 
 
 
-QString AdapterSubbandTimeSeriesTest::_configXml(
+QString AdapterTimeSeriesDataSetTest::_configXml(
         const QString& fixedSizePackets, unsigned sampleBits,
         unsigned nPacketsPerChunk, unsigned nSamplesPerPacket,
         unsigned nSamplesPerBlock, unsigned nSubbands,
