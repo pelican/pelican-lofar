@@ -50,9 +50,7 @@ PPFChanneliser::PPFChanneliser(const ConfigNode& config)
     // Generate PPF coefficients.
     _ppfCoeffs.resize(nTaps, _nChannels);
     PolyphaseCoefficients::FirWindow windowType;
-    if (window == "kaiser") {
-        windowType = PolyphaseCoefficients::KAISER;
-    }
+    if (window == "kaiser") windowType = PolyphaseCoefficients::KAISER;
     else if (window == "gaussian") {
         windowType = PolyphaseCoefficients::GAUSSIAN;
     }
@@ -152,14 +150,17 @@ void PPFChanneliser::run(const SubbandTimeSeriesC32* timeSeries,
     {
         unsigned threadId = omp_get_thread_num();
         unsigned start = 0, end = 0;
-        _threadProcessingIndices(start, end, nTimeBlocks, _nThreads, threadId);
+        //_threadProcessingIndices(start, end, nTimeBlocks, _nThreads, threadId);
+        _threadProcessingIndices(start, end, nSubbands, _nThreads, threadId);
 
         Complex* workBuffer;
         Complex* filteredSamples = &_filteredData[threadId][0];
 
         // Loop over sub-bands.
-        for (unsigned b = start; b < end; ++b) {
-            for (unsigned s = 0; s < nSubbands; ++s) {
+//        for (unsigned b = start; b < end; ++b) {
+//            for (unsigned s = 0; s < nSubbands; ++s) {
+        for (unsigned s = start; s < end; ++s) {
+            for (unsigned b = 0; b < nTimeBlocks; ++b) {
                 for (unsigned p = 0; p < nPolarisations; ++p) {
 
                     // Get a pointer to the time series.
