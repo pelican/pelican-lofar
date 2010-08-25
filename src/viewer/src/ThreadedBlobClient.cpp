@@ -1,6 +1,6 @@
 #include "viewer/ThreadedBlobClient.h"
 #include "lib/PelicanBlobClient.h"
-#include "lib/SubbandSpectra.h"
+#include "lib/SpectrumDataSet.h"
 
 #include <QtCore/QCoreApplication>
 
@@ -37,8 +37,8 @@ void ThreadedBlobClient::run()
 {
     _isRunning = true;
     _client = new PelicanBlobClient(_dataStream, _host, _port);
-    SubbandSpectraStokes blob;
-    SubbandSpectraStokes lastBlob;
+    SpectrumDataSetStokes blob;
+    SpectrumDataSetStokes lastBlob;
     QHash<QString, DataBlob*> dataHash;
     dataHash.insert(_dataStream, &blob);
     while( _isRunning )

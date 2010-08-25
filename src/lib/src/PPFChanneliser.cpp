@@ -2,9 +2,8 @@
 
 #include "pelican/utility/ConfigNode.h"
 
-#include "SubbandTimeSeries.h"
-#include "TimeSeries.h"
-#include "SubbandSpectra.h"
+#include "TimeSeriesDataSet.h"
+#include "SpectrumDataSet.h"
 
 #include <QtCore/QString>
 #include <QtCore/QTime>
@@ -119,8 +118,8 @@ PPFChanneliser::~PPFChanneliser()
 * 						 	coefficients.
 * @param[out] spectrum	 	Set of spectra produced.
 */
-void PPFChanneliser::run(const SubbandTimeSeriesC32* timeSeries,
-        SubbandSpectraC32* spectra)
+void PPFChanneliser::run(const TimeSeriesDataSetC32* timeSeries,
+        SpectrumDataSetC32* spectra)
 {
     _checkData(timeSeries);
 
@@ -142,14 +141,14 @@ void PPFChanneliser::run(const SubbandTimeSeriesC32* timeSeries,
     unsigned nFilterTaps = _ppfCoeffs.nTaps();
     if (!_buffersInitialised)
         _setupWorkBuffers(nSubbands, nPolarisations, _nChannels, nFilterTaps);
-    
+
     const float* coeffs = &_coeffs[0];
 
 #pragma omp parallel
     {
         unsigned threadId = omp_get_thread_num();
         unsigned start = 0, end = 0;
-        //_threadProcessingIndices(start, end, nTimeBlocks, _nThreads, threadId);
+//        _threadProcessingIndices(start, end, nTimeBlocks, _nThreads, threadId);
         _threadProcessingIndices(start, end, nSubbands, _nThreads, threadId);
 
         Complex* workBuffer;
@@ -159,14 +158,14 @@ void PPFChanneliser::run(const SubbandTimeSeriesC32* timeSeries,
         Complex const* timeData = 0;
 
         // Loop over sub-bands.
-        //for (unsigned b = start; b < end; ++b) {
-        //for (unsigned s = 0; s < nSubbands; ++s) {
+//        for (unsigned b = start; b < end; ++b) {
+//        for (unsigned s = 0; s < nSubbands; ++s) {
         for (unsigned b = 0; b < nTimeBlocks; ++b) {
             for (unsigned s = start; s < end; ++s) {
                 for (unsigned p = 0; p < nPolarisations; ++p) {
 
                     // Get a pointer to the time series.
-                    timeData = timeSeries->timeSeries(b, s, p);
+                    timeData = timeSeries->timeSeriesData(b, s, p);
 
                     //if (nTimes != _nChannels) {
                     //   std::cout << "nTimes: " << nTimes << " nChannels: " << _nChannels << std::endl;
@@ -181,9 +180,9 @@ void PPFChanneliser::run(const SubbandTimeSeriesC32* timeSeries,
 
                     // Apply the PPF.
                     _filter(workBuffer, nFilterTaps, _nChannels, coeffs, filteredSamples);
-                    
+
                     // FFT the filtered sub-band data to form a new spectrum.
-                    spectrum = spectra->spectrum(b, s ,p);
+                    spectrum = spectra->spectrumData(b, s ,p);
                     _fft(filteredSamples, spectrum);
                 }
             }
@@ -195,7 +194,7 @@ void PPFChanneliser::run(const SubbandTimeSeriesC32* timeSeries,
 /**
 * @details
 */
-void PPFChanneliser::_checkData(const SubbandTimeSeriesC32* timeData)
+void PPFChanneliser::_checkData(const TimeSeriesDataSetC32* timeData)
 {
     if (!timeData)
         throw QString("PPFChanneliser: Time stream data blob missing.");

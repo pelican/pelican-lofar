@@ -1,7 +1,7 @@
 #include "AdapterSubbandTimeSeries.h"
 
 #include "LofarTypes.h"
-#include "SubbandTimeSeries.h"
+#include "TimeSeriesDataSet.h"
 
 #include "pelican/utility/ConfigNode.h"
 #include "pelican/core/AbstractStreamAdapter.h"
@@ -164,7 +164,7 @@ void AdapterSubbandTimeSeries::_checkData()
     // Resize the time stream data blob being read into to match the adapter
     // dimensions.
     unsigned nTimeBlocks = nTimesTotal / _nSamplesPerTimeBlock;
-    _timeData = static_cast<SubbandTimeSeriesC32*>(_data);
+    _timeData = static_cast<TimeSeriesDataSetC32*>(_data);
     _timeData->resize(nTimeBlocks, _nSubbands, _nPolarisations, _nSamplesPerTimeBlock);
 }
 
@@ -191,7 +191,7 @@ void AdapterSubbandTimeSeries::_readHeader(UDPPacket::Header& header,
  * @param[out] data		time stream data data array (assumes double precision).
  * @param[in]  buffer 	Char* buffer read from the IO device.
  */
-void AdapterSubbandTimeSeries::_readData(SubbandTimeSeriesC32* timeSeries,
+void AdapterSubbandTimeSeries::_readData(TimeSeriesDataSetC32* timeSeries,
         char* buffer, unsigned packetIndex)
 {
     unsigned tStart = packetIndex * _nSamplesPerPacket;
@@ -205,7 +205,7 @@ void AdapterSubbandTimeSeries::_readData(SubbandTimeSeriesC32* timeSeries,
         unsigned iTimeBlock = (tStart + t) / _nSamplesPerTimeBlock;
 
             for (unsigned p = 0; p < _nPolarisations; ++p) {
-                Complex* data = timeSeries->ptr(iTimeBlock, c, p)->ptr();
+                Complex* data = timeSeries->timeSeriesData(iTimeBlock, c, p);
                 unsigned index = tStart - (iTimeBlock * _nSamplesPerTimeBlock) + t;
 
                 if (_sampleBits == 8) {

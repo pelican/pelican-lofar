@@ -13,8 +13,8 @@ set(lib_src
     src/LofarStationConfigurationAdapter.cpp
     src/PelicanBlobClient.cpp
     src/PolyphaseCoefficients.cpp
-    src/SubbandSpectra.cpp
-    src/SubbandTimeSeries.cpp
+    src/SpectrumDataSet.cpp
+    src/TimeSeriesDataSet.cpp
     src/PPFChanneliser.cpp
     src/StokesGenerator.cpp
     src/StokesIntegrator.cpp

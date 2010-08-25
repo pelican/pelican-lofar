@@ -16,7 +16,7 @@ class ConfigNode;
 
 namespace lofar {
 
-class SubbandTimeSeriesC32;
+class TimeSeriesDataSetC32;
 
 /**
  * @class AdapterSubbandTimeSeries
@@ -82,7 +82,7 @@ class AdapterSubbandTimeSeries : public AbstractStreamAdapter
         void _readHeader(UDPPacket::Header& header, char* buffer);
 
         /// Reads the udp data data section into the data blob data array.
-        void _readData(SubbandTimeSeriesC32* data, char* buffer,
+        void _readData(TimeSeriesDataSetC32* data, char* buffer,
                 unsigned packetIndex);
 
         /// Updates dimensions of t	he time stream data being de-serialised.
@@ -98,7 +98,7 @@ class AdapterSubbandTimeSeries : public AbstractStreamAdapter
         Complex _makeComplex(const TYPES::i16complex& z);
 
     private:
-        SubbandTimeSeriesC32* _timeData;
+        TimeSeriesDataSetC32* _timeData;
         bool _fixedPacketSize;
         unsigned _nUDPPacketsPerChunk;
         unsigned _nSamplesPerPacket;

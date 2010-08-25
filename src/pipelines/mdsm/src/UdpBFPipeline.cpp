@@ -32,9 +32,9 @@ void UdpBFPipeline::init()
     stokesGenerator = (StokesGenerator *) createModule("StokesGenerator");
     stokesIntegrator = (StokesIntegrator *) createModule("StokesIntegrator");
     // Create local datablobs
-    spectra = (SubbandSpectraC32*) createBlob("SubbandSpectraC32");
-    stokes = (SubbandSpectraStokes*) createBlob("SubbandSpectraStokes");
-    intStokes = (SubbandSpectraStokes*) createBlob("SubbandSpectraStokes");
+    spectra = (SpectrumDataSetC32*) createBlob("SubbandSpectraC32");
+    stokes = (SpectrumDataSetStokes*) createBlob("SubbandSpectraStokes");
+    intStokes = (SpectrumDataSetStokes*) createBlob("SubbandSpectraStokes");
     // Request remote data
     requestRemoteData("SubbandTimeSeriesC32");
 }
@@ -48,7 +48,7 @@ void UdpBFPipeline::run(QHash<QString, DataBlob*>& remoteData)
     // Get pointer to the remote time series data blob.
     // Note: This contains the time series data in blocks of nChannels for
     // a number of subbands, polarisations and blocks.
-    timeSeries = (SubbandTimeSeriesC32*) remoteData["SubbandTimeSeriesC32"];
+    timeSeries = (TimeSeriesDataSetC32*) remoteData["SubbandTimeSeriesC32"];
 
 //    unsigned block = 0, subband = 0, pol = 0;
 //    std::cout << "--------- iteration = " << _iteration << " -------- "<<  std::endl;

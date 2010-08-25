@@ -1,16 +1,13 @@
-#ifndef SUBBAND_SPECTRA_H_
-#define SUBBAND_SPECTRA_H_
+#ifndef SPECTRUM_DATA_SET_H
+#define SPECTRUM_DATA_SET_H
 
 /**
- * @file SubbandSpectra.h
+ * @file SpectrumDataSet
  */
 
 #include "pelican/data/DataBlob.h"
 
-//#include "LofarDataCube.h"
 #include "Spectrum.h"
-
-#include "SubbandTimeSeries.h"
 
 #include <QtCore/QIODevice>
 #include <QtCore/QSysInfo>
@@ -23,15 +20,15 @@ namespace pelican {
 namespace lofar {
 
 /**
- * @class SubbandSpectra
+ * @class SpectrumDataSet
  *
  * @brief
  * Container class to hold a buffer of blocks of spectra ordered by time,
  * sub-band and polarisation.
  *
  * @details
- * Data is arranged as a Cube of time series objects (a container class
- * encapsulating a time series vector) ordered by:
+ * Data is arranged as a Cube of spectrum objects (a container class
+ * encapsulating a spectrum vector) ordered by:
  *
  *  - time-block (slowest varying dimension)
  *  - sub-band
@@ -46,16 +43,16 @@ namespace lofar {
  */
 
 template <class T>
-class SubbandSpectra : public DataBlob
+class SpectrumDataSet : public DataBlob
 {
     public:
         /// Constructs an empty sub-band spectra data blob.
-        SubbandSpectra(const QString& type = "SubbandSpectra")
+        SpectrumDataSet(const QString& type = "SpectrumDataSet")
         : DataBlob(type), _nTimeBlocks(0), _nSubbands(0), _nPolarisations(0),
           _blockRate(0), _lofarTimestamp(0) {}
 
         /// Destroys the object.
-        virtual ~SubbandSpectra() {}
+        virtual ~SpectrumDataSet() {}
 
     public:
         /// Clears the data.
@@ -89,6 +86,11 @@ class SubbandSpectra : public DataBlob
         unsigned nChannels(unsigned b, unsigned s, unsigned p) const
         { return ptr(b, s, p)->nChannels(); }
 
+        /// Return the number of channels for the spectrum specified by
+        /// index \p i
+        unsigned nChannels(unsigned i) const
+        { return spectrum(i)->nChannels(); }
+
         /// Return the block rate (time-span of the entire chunk)
         long getBlockRate() const { return _blockRate; }
 
@@ -102,13 +104,25 @@ class SubbandSpectra : public DataBlob
         void setLofarTimestamp(long long timestamp) { _lofarTimestamp = timestamp; }
 
         /// Returns a spectrum pointer at index \p i.
-        Spectrum<T> * ptr(unsigned i)
+        Spectrum<T> * spectrum(unsigned i)
         { return (_data.size() > 0 && i < _data.size()) ? &_data[i] : 0; }
 
         /// Returns a spectrum pointer at index \p i. (const overload).
-        Spectrum<T> const * ptr(unsigned i) const
+        Spectrum<T> const * spectrum(unsigned i) const
         { return (_data.size() > 0 && i < _data.size()) ? &_data[i] : 0; }
 
+        /// Returns a pointer to the spectrum data for the specified time block
+        /// \p b, sub-band \p s, and polarisation \p p (const overload).
+        T * spectrumData(unsigned b, unsigned s, unsigned p)
+        { return ptr(b, s, p)->ptr(); }
+
+        /// Returns a pointer to the spectrum data for the specified time block
+        /// \p b, sub-band \p s, and polarisation \p p (const overload).
+        T const * spectrumData(unsigned b, unsigned s, unsigned p) const
+        { return ptr(b, s, p)->ptr(); }
+
+
+    protected:
         /// Returns a pointer to the spectrum data for the specified time block
         /// \p b, sub-band \p s, and polarisation \p p.
         Spectrum<T> * ptr(unsigned b, unsigned s, unsigned p)
@@ -131,26 +145,12 @@ class SubbandSpectra : public DataBlob
             return (_data.size() > 0 && idx < _data.size()) ? &_data[idx] : 0;
         }
 
-        /// Returns a pointer to the spectrum data for the specified time block
-        /// \p b, sub-band \p s, and polarisation \p p (const overload).
-        T * spectrum(unsigned b, unsigned s, unsigned p)
-        {
-            return ptr(b, s, p)->ptr();
-        }
-
-        /// Returns a pointer to the spectrum data for the specified time block
-        /// \p b, sub-band \p s, and polarisation \p p (const overload).
-        T const * spectrum(unsigned b, unsigned s, unsigned p) const
-        {
-            return ptr(b, s, p)->ptr();
-        }
-
     private:
         /// Returns the data index for a given time block \b, sub-band \s and
         /// polarisation.
         unsigned long _index(unsigned b, unsigned s, unsigned p) const;
 
-    protected:
+    private:
         std::vector<Spectrum<T> > _data;
 
         unsigned _nTimeBlocks;
@@ -169,7 +169,7 @@ class SubbandSpectra : public DataBlob
 // Inline method/function definitions.
 //
 template <typename T>
-inline void SubbandSpectra<T>::clear()
+inline void SpectrumDataSet<T>::clear()
 {
     _data.clear();
     _nTimeBlocks = _nSubbands = _nPolarisations = 0;
@@ -179,7 +179,7 @@ inline void SubbandSpectra<T>::clear()
 
 
 template <typename T>
-inline void SubbandSpectra<T>::resize(unsigned nTimeBlocks, unsigned nSubbands,
+inline void SpectrumDataSet<T>::resize(unsigned nTimeBlocks, unsigned nSubbands,
         unsigned nPolarisations)
 {
     _nTimeBlocks = nTimeBlocks;
@@ -191,7 +191,7 @@ inline void SubbandSpectra<T>::resize(unsigned nTimeBlocks, unsigned nSubbands,
 
 
 template <typename T>
-inline void SubbandSpectra<T>::resize(unsigned nTimeBlocks, unsigned nSubbands,
+inline void SpectrumDataSet<T>::resize(unsigned nTimeBlocks, unsigned nSubbands,
         unsigned nPolarisations, unsigned nChannels)
 {
     resize(nTimeBlocks, nSubbands, nPolarisations);
@@ -200,7 +200,7 @@ inline void SubbandSpectra<T>::resize(unsigned nTimeBlocks, unsigned nSubbands,
 
 
 template <typename T>
-inline void SubbandSpectra<T>::resize(unsigned nTimeBlocks, unsigned nSubbands,
+inline void SpectrumDataSet<T>::resize(unsigned nTimeBlocks, unsigned nSubbands,
         unsigned nPolarisations, unsigned nChannels, T value)
 {
     resize(nTimeBlocks, nSubbands, nPolarisations);
@@ -214,7 +214,7 @@ inline void SubbandSpectra<T>::resize(unsigned nTimeBlocks, unsigned nSubbands,
 
 
 template <typename T>
-inline unsigned long SubbandSpectra<T>::_index(unsigned b, unsigned s,
+inline unsigned long SpectrumDataSet<T>::_index(unsigned b, unsigned s,
         unsigned p) const
 {
     return _nPolarisations * (b * _nSubbands + s) + p;
@@ -239,15 +239,15 @@ inline unsigned long SubbandSpectra<T>::_index(unsigned b, unsigned s,
  * Inherits from the SubbandSpectra template class.
  */
 
-class SubbandSpectraC32 : public SubbandSpectra<std::complex<float> >
+class SpectrumDataSetC32 : public SpectrumDataSet<std::complex<float> >
 {
     public:
         /// Constructor.
-        SubbandSpectraC32()
-        : SubbandSpectra<std::complex<float> >("SubbandSpectraC32") {}
+        SpectrumDataSetC32()
+        : SpectrumDataSet<std::complex<float> >("SpectrumDataSetC32") {}
 
         /// Destructor.
-        ~SubbandSpectraC32() {}
+        ~SpectrumDataSetC32() {}
 
     public:
         /// Write the spectrum to file.
@@ -271,15 +271,15 @@ class SubbandSpectraC32 : public SubbandSpectra<std::complex<float> >
  * @details
  */
 
-class SubbandSpectraStokes : public SubbandSpectra<float>
+class SpectrumDataSetStokes : public SpectrumDataSet<float>
 {
     public:
         /// Constructor.
-        SubbandSpectraStokes()
-        : SubbandSpectra<float>("SubbandSpectraStokes") {}
+        SpectrumDataSetStokes()
+        : SpectrumDataSet<float>("SpectrumDataSetStokes") {}
 
         /// Destructor.
-        ~SubbandSpectraStokes() {}
+        ~SpectrumDataSetStokes() {}
 
     public:
         quint64 serialisedBytes() const;
@@ -292,12 +292,11 @@ class SubbandSpectraStokes : public SubbandSpectra<float>
 };
 
 
-
-PELICAN_DECLARE_DATABLOB(SubbandSpectraC32)
-PELICAN_DECLARE_DATABLOB(SubbandSpectraStokes)
+PELICAN_DECLARE_DATABLOB(SpectrumDataSetC32)
+PELICAN_DECLARE_DATABLOB(SpectrumDataSetStokes)
 
 
 }// namespace lofar
 }// namespace pelican
 
-#endif // SUBBAND_SPECTRA_H_
+#endif // SPECTRUM_DATA_SET_H_

@@ -5,7 +5,7 @@
 #include "pelican/utility/FactoryGeneric.h"
 
 #include "pelican/utility/ConfigNode.h"
-#include "SubbandTimeSeries.h"
+#include "TimeSeriesDataSet.h"
 #include "LofarUdpHeader.h"
 #include "LofarTypes.h"
 
@@ -79,7 +79,7 @@ void AdapterSubbandTimeSeriesTest::test_checkDataFixedPacket()
     AdapterSubbandTimeSeries adapter(configNode);
 
     // Construct a data blob to adapt into.
-    SubbandTimeSeriesC32 timeSeries;
+    TimeSeriesDataSetC32 timeSeries;
 
     // Set the data blob to be adapted, the input chuck size and associated
     // service data.
@@ -96,9 +96,9 @@ void AdapterSubbandTimeSeriesTest::test_checkDataFixedPacket()
 
        unsigned nTimeBlocks = (nPackets * nSamples) / nSamplesPerTimeBlock;
         CPPUNIT_ASSERT_EQUAL(nTimeBlocks,
-                static_cast<SubbandTimeSeriesC32*>(adapter._timeData)->nTimeBlocks());
+                static_cast<TimeSeriesDataSetC32*>(adapter._timeData)->nTimeBlocks());
         CPPUNIT_ASSERT_EQUAL(nTimeBlocks * nPolarisations * nSubbands,
-                static_cast<SubbandTimeSeriesC32*>(adapter._data)->size());
+                static_cast<TimeSeriesDataSetC32*>(adapter._data)->size());
     }
     catch (QString err) {
         CPPUNIT_FAIL(err.toStdString().data());
@@ -134,7 +134,7 @@ void AdapterSubbandTimeSeriesTest::test_checkDataVariablePacket()
     AdapterSubbandTimeSeries adapter(configNode);
 
     // Construct a data blob to adapt into.
-    SubbandTimeSeriesC32 timeSeries;
+    TimeSeriesDataSetC32 timeSeries;
 
     // Set the data blob to be adapted, the input chuck size and associated
     // service data.
@@ -151,9 +151,9 @@ void AdapterSubbandTimeSeriesTest::test_checkDataVariablePacket()
         adapter._checkData();
         unsigned nTimeBlocks = (nPackets * nSamples) / nSamplesPerTimeBlock;
         CPPUNIT_ASSERT_EQUAL(nTimeBlocks,
-                static_cast<SubbandTimeSeriesC32*>(adapter._timeData)->nTimeBlocks());
+                static_cast<TimeSeriesDataSetC32*>(adapter._timeData)->nTimeBlocks());
         CPPUNIT_ASSERT_EQUAL(nTimeBlocks * nPolarisations * nSubbands,
-                static_cast<SubbandTimeSeriesC32*>(adapter._data)->size());
+                static_cast<TimeSeriesDataSetC32*>(adapter._data)->size());
     }
     catch (QString err) {
         CPPUNIT_FAIL(err.toStdString().data());
@@ -186,7 +186,7 @@ void AdapterSubbandTimeSeriesTest::test_deserialise()
     AdapterSubbandTimeSeries adapter(configNode);
 
     // Construct a data blob to adapt into.
-    SubbandTimeSeriesC32 timeSeries;
+    TimeSeriesDataSetC32 timeSeries;
 
     unsigned packetSize = sizeof(UDPPacket);
     size_t chunkSize = packetSize * nPackets;

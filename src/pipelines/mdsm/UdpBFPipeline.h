@@ -8,9 +8,11 @@
 
 #include "PPFChanneliser.h"
 #include "StokesGenerator.h"
-#include "SubbandSpectra.h"
 #include "StokesIntegrator.h"
-#include "SubbandTimeSeries.h"
+
+#include "TimeSeriesDataSet.h"
+#include "SpectrumDataSet.h"
+
 #include "SigprocStokesWriter.h"
 
 /**
@@ -47,10 +49,10 @@ class UdpBFPipeline : public AbstractPipeline
         StokesIntegrator* stokesIntegrator;
 
         /// Local data blob
-        SubbandSpectraC32* spectra;
-        SubbandTimeSeriesC32* timeSeries;
-        SubbandSpectraStokes* stokes;
-        SubbandSpectraStokes* intStokes;
+        SpectrumDataSetC32* spectra;
+        TimeSeriesDataSetC32* timeSeries;
+        SpectrumDataSetStokes* stokes;
+        SpectrumDataSetStokes* intStokes;
 
         unsigned _iteration;
 };

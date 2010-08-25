@@ -1,4 +1,4 @@
-#include "SubbandSpectra.h"
+#include "SpectrumDataSet.h"
 #include "SigprocStokesWriter.h"
 
 #include <string>
@@ -98,17 +98,17 @@ void SigprocStokesWriter::WriteLong(QString name, long value)
 // Write data blob to disk
 void SigprocStokesWriter::send(const QString& /*streamName*/, const DataBlob* incoming)
 {
-    SubbandSpectraStokes* stokes;
+    SpectrumDataSetStokes* stokes;
     DataBlob* blob = const_cast<DataBlob*>(incoming);
 
-    if (dynamic_cast<SubbandSpectraStokes*>(blob)) {
-        stokes = (SubbandSpectraStokes*) dynamic_cast<SubbandSpectraStokes*>(blob);
+    if (dynamic_cast<SpectrumDataSetStokes*>(blob)) {
+        stokes = (SpectrumDataSetStokes*) dynamic_cast<SpectrumDataSetStokes*>(blob);
 
         unsigned nSamples = stokes->nTimeBlocks();
         unsigned nSubbands = stokes->nSubbands();
-        //        unsigned nPolarisations = stokes->nPolarisations(); // this is now an option.
-        unsigned nChannels = stokes->ptr(0, 0, 0)->nChannels();
-        float* data;
+        //unsigned nPolarisations = stokes->nPolarisations(); // this is now an option.
+        unsigned nChannels = stokes->nChannels(0);
+        float const * data;
         //size_t dataSize = nChannels * sizeof(float);
 
         //	unsigned chunkFloats = nChannels*nSubbands*_nPols;
@@ -117,11 +117,13 @@ void SigprocStokesWriter::send(const QString& /*streamName*/, const DataBlob* in
             //	  unsigned bufferCounter = 0;
             for (unsigned p = 0; p < _nPols; ++p) {
                 for (int s = nSubbands - 1; s >= 0 ; --s) {
-                    data = stokes->ptr(t, s, p)->ptr();
-                    for(int i = nChannels - 1; i >= 0 ; --i )
+
+                    data = stokes->spectrumData(t, s, p);
+
+                    for(int i = nChannels - 1; i >= 0 ; --i)
                     {
                         //_write(reinterpret_cast<char* >(&data[i]), sizeof(float));
-                        _file.write(reinterpret_cast<char* >(&data[i]), sizeof(float));
+                        _file.write(reinterpret_cast<const char*>(&data[i]), sizeof(float));
 
                         //      chunkBuffer[bufferCounter]+=data[i];
                         //      ++bufferCounter;

@@ -1,8 +1,8 @@
 #include "test/PPFChanneliserTest.h"
 
 #include "PPFChanneliser.h"
-#include "SubbandSpectra.h"
-#include "SubbandTimeSeries.h"
+#include "SpectrumDataSet.h"
+#include "TimeSeriesDataSet.h"
 
 #include "pelican/utility/ConfigNode.h"
 
@@ -271,22 +271,21 @@ void PPFChanneliserTest::test_fft()
     ConfigNode config(_configXml(_nChannels, nThreads, _nTaps));
     PPFChanneliser channeliser(config);
 
-    SubbandSpectraC32 spectra;
+    SpectrumDataSetC32 spectra;
     spectra.resize(_nBlocks, _nSubbands, _nPols);
     std::vector<PPFChanneliser::Complex> filteredData(_nChannels);
     const PPFChanneliser::Complex* filteredSamples = &filteredData[0];
 
     QTime timer;
     timer.start();
-    for (unsigned b = 0; b < _nBlocks; ++b) {
+    for (unsigned i = 0, b = 0; b < _nBlocks; ++b) {
         for (unsigned s = 0; s < _nSubbands; ++s) {
             for (unsigned p = 0; p < _nPols; ++p) {
 
-                Spectrum<PPFChanneliser::Complex>* spectrum = spectra.ptr(b, s, p);
+                Spectrum<PPFChanneliser::Complex>* spectrum = spectra.spectrum(i++);
                 spectrum->resize(_nChannels);
                 PPFChanneliser::Complex* spectrumData = spectrum->ptr();
                 channeliser._fft(filteredSamples, spectrumData);
-
             }
         }
     }
@@ -315,13 +314,13 @@ void PPFChanneliserTest::test_fft()
 void PPFChanneliserTest::test_run()
 {
     // Setup the channeliser.
-  unsigned nThreads = 4;
+    unsigned nThreads = 2;
     ConfigNode config(_configXml(_nChannels, nThreads, _nTaps));
     PPFChanneliser channeliser(config);
 
-    SubbandSpectraC32 spectra;
+    SpectrumDataSetC32 spectra;
     spectra.resize(_nBlocks, _nSubbands, _nPols);
-    SubbandTimeSeriesC32 timeSeries;
+    TimeSeriesDataSetC32 timeSeries;
     timeSeries.resize(_nBlocks, _nSubbands, _nPols, _nChannels);
 
     unsigned iter = 1;
@@ -365,7 +364,7 @@ void PPFChanneliserTest::test_makeSpectrum()
     double freq = 10.12; // Hz
     double sampleRate = 50.0; // Hz
 
-    SubbandTimeSeriesC32 data;
+    TimeSeriesDataSetC32 data;
     _nSubbands = 1;
     _nPols = 1;
     data.resize(_nBlocks, _nSubbands, _nPols, _nChannels);
@@ -373,7 +372,7 @@ void PPFChanneliserTest::test_makeSpectrum()
     // Generate signal.
     for (unsigned i = 0, t = 0; t < _nBlocks; ++t) {
 
-        PPFChanneliser::Complex* timeData = data.ptr(t, 0, 0)->ptr();
+        PPFChanneliser::Complex* timeData = data.timeSeriesData(t, 0, 0);
 
         for (unsigned c = 0; c < _nChannels; ++c) {
             double time = double(i) / sampleRate;
@@ -384,7 +383,7 @@ void PPFChanneliserTest::test_makeSpectrum()
         }
     }
 
-    SubbandSpectraC32 spectra;
+    SpectrumDataSetC32 spectra;
     spectra.resize(_nBlocks, _nSubbands, _nPols, _nChannels);
 
     // PPF - have to run enough times for buffer to fill with new signal.
@@ -396,7 +395,7 @@ void PPFChanneliserTest::test_makeSpectrum()
         return;
     }
 
-    PPFChanneliser::Complex* spectrum = spectra.ptr(_nBlocks-1, 0, 0)->ptr();
+    PPFChanneliser::Complex* spectrum = spectra.spectrumData(_nBlocks-1, 0, 0);
     QTextStream out(&file);
     double maxFreq = sampleRate / 2.0;
     double freqInc = sampleRate / _nChannels;
@@ -444,10 +443,10 @@ void PPFChanneliserTest::test_channelProfile()
 
         unsigned _nBlocks = _nTaps;
 
-        SubbandTimeSeriesC32 data;
+        TimeSeriesDataSetC32 data;
         data.resize(_nBlocks, _nSubbands, _nPols, _nChannels);
 
-        SubbandSpectraC32 spectra;
+        SpectrumDataSetC32 spectra;
         spectra.resize(_nBlocks, _nSubbands, _nPols, _nChannels);
 
         std::vector<std::vector<PPFChanneliser::Complex> > channelProfile;
@@ -461,7 +460,7 @@ void PPFChanneliserTest::test_channelProfile()
             double freq = startFreq + k * freqInc;
             freqs[k] = freq;
             for (unsigned i = 0, t = 0; t < _nBlocks; ++t) {
-                PPFChanneliser::Complex* timeData = data.ptr(t, 0, 0)->ptr();
+                PPFChanneliser::Complex* timeData = data.timeSeriesData(t, 0, 0);
                 for (unsigned c = 0; c < _nChannels; ++c) {
                     double time = double(i) / sampleRate;
                     double re = std::cos(2 * math::pi * freq * time);
@@ -474,8 +473,7 @@ void PPFChanneliserTest::test_channelProfile()
             channeliser.run(&data, &spectra);
 
             // Save the amplitude of the specified channel.
-            PPFChanneliser::Complex* spectrum =
-                    spectra.ptr(_nBlocks-1, 0, 0)->ptr();
+            PPFChanneliser::Complex* spectrum = spectra.spectrumData(_nBlocks-1, 0, 0);
             for (unsigned p = 0; p < nProfiles; ++p) {
                 channelProfile[p][k] = spectrum[testIndices[p]];
             }
