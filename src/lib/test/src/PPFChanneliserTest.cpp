@@ -27,8 +27,7 @@ void PPFChanneliserTest::setUp()
 {
     _verbose = false;
 
-    _nChannels = 512;
-
+    _nChannels = 16;
     _nSubbands = 62;
     _nPols = 2;
     _nTaps = 8;
@@ -316,7 +315,7 @@ void PPFChanneliserTest::test_fft()
 void PPFChanneliserTest::test_run()
 {
     // Setup the channeliser.
-    unsigned nThreads = 2;
+  unsigned nThreads = 4;
     ConfigNode config(_configXml(_nChannels, nThreads, _nTaps));
     PPFChanneliser channeliser(config);
 
@@ -325,9 +324,12 @@ void PPFChanneliserTest::test_run()
     SubbandTimeSeriesC32 timeSeries;
     timeSeries.resize(_nBlocks, _nSubbands, _nPols, _nChannels);
 
+    unsigned iter = 1;
+
     QTime timer;
     timer.start();
-    channeliser.run(&timeSeries, &spectra);
+    for (unsigned i = 0; i < iter; ++i)
+      channeliser.run(&timeSeries, &spectra);
     int elapsed = timer.elapsed();
 
     cout << endl;

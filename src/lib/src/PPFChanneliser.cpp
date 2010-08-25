@@ -130,20 +130,19 @@ void PPFChanneliser::run(const SubbandTimeSeriesC32* timeSeries,
     unsigned nTimeBlocks = timeSeries->nTimeBlocks();
 
     // Resize the output spectra blob.
-    spectra->resize(nTimeBlocks, nSubbands, nPolarisations);
+    spectra->resize(nTimeBlocks, nSubbands, nPolarisations, _nChannels);
 
     // Set the timing parameters
     // We only need the timestamp of the first packet for this version of the
     // Channeliser.
-    spectra -> setLofarTimestamp(timeSeries -> getLofarTimestamp());
-    spectra -> setBlockRate(timeSeries -> getBlockRate());
+    spectra->setLofarTimestamp(timeSeries->getLofarTimestamp());
+    spectra->setBlockRate(timeSeries->getBlockRate());
 
     // Set up the buffers if required.
     unsigned nFilterTaps = _ppfCoeffs.nTaps();
-    if (!_buffersInitialised) {
+    if (!_buffersInitialised)
         _setupWorkBuffers(nSubbands, nPolarisations, _nChannels, nFilterTaps);
-    }
-
+    
     const float* coeffs = &_coeffs[0];
 
 #pragma omp parallel
@@ -156,22 +155,23 @@ void PPFChanneliser::run(const SubbandTimeSeriesC32* timeSeries,
         Complex* workBuffer;
         Complex* filteredSamples = &_filteredData[threadId][0];
 
+        Complex* spectrum = 0;
+        Complex const* timeData = 0;
+
         // Loop over sub-bands.
-//        for (unsigned b = start; b < end; ++b) {
-//            for (unsigned s = 0; s < nSubbands; ++s) {
-        for (unsigned s = start; s < end; ++s) {
-            for (unsigned b = 0; b < nTimeBlocks; ++b) {
+        //for (unsigned b = start; b < end; ++b) {
+        //for (unsigned s = 0; s < nSubbands; ++s) {
+        for (unsigned b = 0; b < nTimeBlocks; ++b) {
+            for (unsigned s = start; s < end; ++s) {
                 for (unsigned p = 0; p < nPolarisations; ++p) {
 
                     // Get a pointer to the time series.
-                    const TimeSeries<Complex>* times = timeSeries->ptr(b,s,p);
-                    const Complex* timeData = times->ptr();
-                    unsigned nTimes = times->nTimes();
+                    timeData = timeSeries->timeSeries(b, s, p);
 
-                    if (nTimes != _nChannels) {
-                        std::cout << "nTimes: " << nTimes << " nChannels: " << _nChannels << std::endl;
-                        throw QString("PPFChanneliser::run(): dimension mismatch");
-                    }
+                    //if (nTimes != _nChannels) {
+                    //   std::cout << "nTimes: " << nTimes << " nChannels: " << _nChannels << std::endl;
+                    //   throw QString("PPFChanneliser::run(): dimension mismatch");
+                    //}
 
                     // Get a pointer to the work buffer.
                     workBuffer = &(_workBuffer[s * nPolarisations + p])[0];
@@ -181,12 +181,10 @@ void PPFChanneliser::run(const SubbandTimeSeriesC32* timeSeries,
 
                     // Apply the PPF.
                     _filter(workBuffer, nFilterTaps, _nChannels, coeffs, filteredSamples);
-                    Spectrum<Complex>* spectrum = spectra->ptr(b, s, p);
-                    spectrum->resize(_nChannels);
-                    Complex* spectrumData = spectrum->ptr();
-
+                    
                     // FFT the filtered sub-band data to form a new spectrum.
-                    _fft(filteredSamples, spectrumData);
+                    spectrum = spectra->spectrum(b, s ,p);
+                    _fft(filteredSamples, spectrum);
                 }
             }
         }
@@ -239,14 +237,14 @@ void PPFChanneliser::_updateBuffer(const Complex* samples,
 
 
 /**
-* @details
-* Filter a buffer of time samples.
-*
-* @param samples
-* @param nTaps
-* @param nChannels
-* @param filteredSamples
-*/
+ * @details
+ * Filter a buffer of time samples.
+ *
+ * @param samples
+ * @param nTaps
+ * @param nChannels
+ * @param filteredSamples
+ */
 void PPFChanneliser::_filter(const Complex* sampleBuffer, unsigned nTaps,
         unsigned nChannels, const float* coeffs, Complex* filteredSamples)
 {
