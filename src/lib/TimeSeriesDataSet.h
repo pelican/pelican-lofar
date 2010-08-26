@@ -18,20 +18,8 @@ namespace lofar {
  * @class TimeSeriesDataSet
  *
  * @brief
- * Container class to hold a buffer of blocks of time samples ordered by
- * sub-band and polarisation.
  *
  * @details
- * Data is arranged as a Cube of time series objects (a container class
- * encapsulating a time series vector) ordered by:
- *
- * 	1. time block   (Slowest varying dimension)
- *  2. sub-band
- *  3. polarisation (Fastest varying dimension)
- *
- * The time block dimension is provided so that the PPF channeliser
- * which uses this container can generate a number of spectra (=nTimeBlocks)
- * for a given polarisation and sub-band.
  */
 
 template <class T>
@@ -50,16 +38,17 @@ class TimeSeriesDataSet : public DataBlob
         /// Clears the time stream data.
         void clear();
 
-        /// Assign memory for the cube of time series each of length nTimes.
-        void resize(unsigned nTimeBlocks, unsigned nSubbands, unsigned nPols,
-                unsigned nTimes = 0);
+        /// Assign memory
+        void resize(unsigned nSubbands, unsigned nPols, unsigned nTimeBlocks,
+                unsigned nTimes);
+
+        /// Assign memory
+        void resize(unsigned nSubbands, unsigned nPols, unsigned nTimeBlocks,
+                unsigned nTimes, T value);
 
     public:
         /// Returns the number of entries in the data blob.
         unsigned size() const { return _data.size(); }
-
-        /// Returns the number of blocks of sub-band spectra.
-        unsigned nTimeBlocks() const { return _nTimeBlocks; }
 
         /// Returns the number of sub-bands in the data.
         unsigned nSubbands() const { return _nSubbands; }
@@ -67,10 +56,12 @@ class TimeSeriesDataSet : public DataBlob
         /// Returns the number of polarisations in the data.
         unsigned nPolarisations() const { return _nPolarisations; }
 
+        /// Returns the number of blocks of sub-band spectra.
+        unsigned nTimeBlocks() const { return _nTimeBlocks; }
+
         /// Return the number of times for the time series
         /// at time block \p b, sub-band \p s and polarisation \p p.
-        unsigned nTimes(unsigned b, unsigned s, unsigned p) const
-        { return ptr(b, s, p)->nTimes(); }
+        unsigned nTimes() const { return _nTimes; }
 
         /// Return the block rate (time-span of the entire chunk)
         long getBlockRate() const { return _blockRate; }
@@ -84,54 +75,17 @@ class TimeSeriesDataSet : public DataBlob
         /// Set the lofar time-stamp.
         void setLofarTimestamp(long long timestamp) { _lofarTimestamp = timestamp; }
 
-        /// Returns the time series object pointer for the specified time
-        /// block \p b, sub-band \p s, and polarisation \p p.
-        TimeSeries<T> * timeSeries(unsigned b, unsigned s, unsigned p)
-        { return ptr(b, s, b); }
-
-        /// Returns the time series object pointer for the specified time
-        /// block \p b, sub-band \p s, and polarisation \p p. (const overload).
-        TimeSeries<T> const * timeSeries(unsigned b, unsigned s, unsigned p) const
-        { return ptr(b, s, b); }
+        /// Returns a pointer to start of the time series for the specified
+        /// time block \p b, sub-band \p s, and polarisation \p p.
+        T * timeSeriesData(unsigned s, unsigned p, unsigned b);
 
         /// Returns a pointer to start of the time series for the specified
         /// time block \p b, sub-band \p s, and polarisation \p p.
-        T * timeSeriesData(unsigned b, unsigned s, unsigned p)
-        { return ptr(b, s, p)->data(); }
-
-        /// Returns a pointer to start of the time series for the specified
-        /// time block \p b, sub-band \p s, and polarisation \p p.
-        T const * timeSeriesData(unsigned b, unsigned s, unsigned p) const
-        { return ptr(b, s, p)->data(); }
-
-    protected:
-        /// *********** DO NOT USE ************
-        /// Returns a pointer to the time series data for the specified time block
-        /// \p b, sub-band \p s, and polarisation \p p.
-        /// *********** DO NOT USE ************
-        TimeSeries<T> * ptr(unsigned b, unsigned s, unsigned p)
-        {
-            if (b >= _nTimeBlocks || s >= _nSubbands || p >= _nPolarisations)
-                return 0;
-            unsigned i = _index(b, s, p);
-            return (_data.size() > 0 && i < _data.size()) ? &_data[i] : 0;
-        }
-
-        /// *********** DO NOT USE ************
-        /// Returns a pointer to the time series data for the specified
-        /// time block \p b, sub-band \p s, and polarisation \p p.
-        /// *********** DO NOT USE ************
-        const TimeSeries<T> * ptr(unsigned b, unsigned s, unsigned p) const
-        {
-            if (b >= _nTimeBlocks || s >= _nSubbands || p >= _nPolarisations)
-                return 0;
-            unsigned i = _index(b, s, p);
-            return (_data.size() > 0 && i < _data.size()) ? &_data[i] : 0;
-        }
+        T const * timeSeriesData(unsigned s, unsigned p, unsigned b) const;
 
     private:
         /// Data index for a given time block \b, sub-band \s and polarisation.
-        unsigned long _index(unsigned b, unsigned s, unsigned p) const;
+        unsigned long _index(unsigned s, unsigned p, unsigned b) const;
 
     private:
         std::vector<T> _data;
@@ -158,30 +112,54 @@ template <typename T>
 inline void TimeSeriesDataSet<T>::clear()
 {
     _data.clear();
-    _nTimeBlocks = _nSubbands = _nPolarisations = 0;
+    _nSubbands = _nPolarisations = _nTimeBlocks = _nTimes = 0;
     _blockRate = 0;
     _lofarTimestamp = 0;
 }
 
 template <typename T>
-inline void TimeSeriesDataSet<T>::resize(unsigned nTimeBlocks,
-        unsigned nSubbands, unsigned nPols, unsigned nTimes)
+inline void TimeSeriesDataSet<T>::resize(unsigned nSubbands,
+        unsigned nPols, unsigned nTimeBlocks, unsigned nTimes)
 {
-    _nTimeBlocks = nTimeBlocks;
     _nSubbands = nSubbands;
     _nPolarisations = nPols;
-    _data.resize(_nTimeBlocks * _nSubbands * _nPolarisations);
-    if (nTimes) for (unsigned i = 0; i < _data.size(); ++i)
-        _data[i].resize(nTimes);
+    _nTimeBlocks = nTimeBlocks;
+    _nTimes = nTimes;
+    _data.resize(_nTimeBlocks * _nSubbands * _nPolarisations * _nTimes);
+}
+
+template <typename T>
+inline void TimeSeriesDataSet<T>::resize(unsigned nSubbands,
+        unsigned nPols, unsigned nTimeBlocks, unsigned nTimes, T value)
+{
+    resize(nSubbands, nPols, nTimeBlocks, nTimes);
+    for (unsigned i = 0u; i < _data.size(); ++i) _data[i] = value;
 }
 
 
 template <typename T>
-inline unsigned long TimeSeriesDataSet<T>::_index(unsigned b, unsigned s,
-        unsigned p) const
+inline unsigned long TimeSeriesDataSet<T>::_index(unsigned s, unsigned p,
+        unsigned b) const
 {
-    return _nPolarisations * (b * _nSubbands + s) + p;
+    return _nTimes * (b  + _nTimeBlocks * (p + s * _nPolarisations));
 }
+
+template <typename T>
+inline T * timeSeriesData(unsigned s, unsigned p, unsigned b)
+{
+    if (s >= _nSubbands || p >= _nPolarisations || b >= _nTimeBlocks) return 0;
+    unsigned i = _index(s, p, b);
+    return _data.size() > 0 && i < _data.size() ? &_data[i] : 0;
+}
+
+template <typename T>
+inline T const * timeSeriesData(unsigned s, unsigned p, unsigned b) const
+{
+    if (s >= _nSubbands || p >= _nPolarisations || b >= _nTimeBlocks) return 0;
+    unsigned i = _index(s, p, b);
+    return _data.size() > 0 && i < _data.size() ? &_data[i] : 0;
+}
+
 
 
 // -----------------------------------------------------------------------------
