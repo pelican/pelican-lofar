@@ -40,8 +40,8 @@ class TimeSeriesDataSet : public DataBlob
     public:
         /// Constructs an empty time stream data blob.
         TimeSeriesDataSet(const QString& type = "TimeSeriesDataSet")
-        : DataBlob(type), _nTimeBlocks(0), _nSubbands(0), _nPolarisations(0),
-          _blockRate(0), _lofarTimestamp(0) {}
+        : DataBlob(type), _nSubbands(0), _nPolarisations(0),
+          _nTimeBlocks(0), _nTimes(0), _blockRate(0), _lofarTimestamp(0) {}
 
         /// Destroys the time stream data blob.
         virtual ~TimeSeriesDataSet() {}
@@ -134,10 +134,13 @@ class TimeSeriesDataSet : public DataBlob
         unsigned long _index(unsigned b, unsigned s, unsigned p) const;
 
     private:
-        std::vector<TimeSeries<T> > _data;
-        unsigned _nTimeBlocks;
+        std::vector<T> _data;
+
         unsigned _nSubbands;
         unsigned _nPolarisations;
+        unsigned _nTimeBlocks;
+        unsigned _nTimes;
+
         long _blockRate;
         long long _lofarTimestamp;
 };
