@@ -2,7 +2,7 @@
 <!DOCTYPE pelican>
 
 <configuration version="1.0">
-  
+
   <nodesets>
     <nodeset name="FixedParameters">
       <samplesPerPacket value="16"/>
@@ -10,7 +10,7 @@
       <dataBitSize value="16"/>
       <totalComplexSubbands value="512"/>
     </nodeset>
-    
+
     <nodeset name="ChangeParameters">
       <clock value="200"/> <!-- Could also be 160 -->
       <subbandsPerPacket value="61"/> <!-- 31 or 61 or 62-->
@@ -20,82 +20,82 @@
       <topChannelFrequency value="72.265625"/>
     </nodeset>
   </nodesets>
-  
+
   <pipeline>
-    
+
     <buffers>
-      <SubbandTimeSeriesC32>
+      <TimeSeriesDataSetC32>
         <buffer maxSize="24000000000" maxChunkSize="7000000000"/>
-      </SubbandTimeSeriesC32>
+      </TimeSeriesDataSetC32>
     </buffers>
-    
+
     <chunkers>
       <LofarChunker>
-	<import nodeset="FixedParameters"/>
-	<import nodeset="ChangeParameters"/>
-	  <!--   -->
-        <data type="SubbandTimeSeriesC32"/>
+        <import nodeset="FixedParameters"/>
+        <import nodeset="ChangeParameters"/>
+        <!--   -->
+        <data type="TimeSeriesDataSetC32"/>
         <connection host="127.0.0.1" port="4353"/> <!--Change-->
       </LofarChunker>
     </chunkers>
-    
+
     <clients>
       <LofarStreamDataClient>
-        <data type="SubbandTimeSeriesC32" adapter="AdapterSubbandTimeSeries" />
+        <data type="TimeSeriesDataSetC32" adapter="AdapterTimeSeriesDataSet"/>
       </LofarStreamDataClient>
     </clients>
-    
+
     <adapters>
-      <AdapterSubbandTimeSeries>
-	<import nodeset="FixedParameters"/>
-	<import nodeset="ChangeParameters"/>
-	  <!--   -->
+      <AdapterTimeSeriesDataSet>
+        <import nodeset="FixedParameters"/>
+        <import nodeset="ChangeParameters"/>
+        <!--   -->
         <fixedSizePackets value="false" />
-      </AdapterSubbandTimeSeries>
+      </AdapterTimeSeriesDataSet>
     </adapters>
-    
+
     <modules>
       <PPFChanneliser>
-	<import nodeset="FixedParameters"/>
-	<import nodeset="ChangeParameters"/>
-	  <!--   -->
+        <import nodeset="FixedParameters"/>
+        <import nodeset="ChangeParameters"/>
+        <!--   -->
         <processingThreads value="8" />
         <filter nTaps="8" filterWindow="kaiser"/>
       </PPFChanneliser>
-      
+
       <StokesGenerator>
       </StokesGenerator>
-      
+
       <StokesIntegrator>
-	<import nodeset="FixedParameters"/>
-	<import nodeset="ChangeParameters"/>
+        <import nodeset="FixedParameters"/>
+        <import nodeset="ChangeParameters"/>
       </StokesIntegrator>
-      
+
     </modules>
-    
+
     <output>
-      
+
       <dataStreams>
-        <!-- <stream name="SubbandSpectraStokes" listeners="PelicanTCPBlobServer" />  -->
-        <stream name="SubbandSpectraStokes" listeners="SigprocStokesWriter"/>
+        <!-- <stream name="TimeSeriesDataSetStokes" listeners="PelicanTCPBlobServer" />  -->
+        <stream name="TimeSeriesDataSetStokes" listeners="SigprocStokesWriter"/>
       </dataStreams>
-      
+
       <streamers>
         <!-- <PelicanTCPBlobServer active="true" >
              <connection port="6969" />
         </PelicanTCPBlobServer>
         -->
         <SigprocStokesWriter active="false">
-	  <import nodeset="FixedParameters"/>
-	  <import nodeset="ChangeParameters"/>
-	  <!-- --> 
-	  <file filepath="test.fil" /><!--Change-->
+          <import nodeset="FixedParameters"/>
+            <import nodeset="ChangeParameters"/>
+            <!-- -->
+            <file filepath="test.fil" /><!--Change-->
           <params telescope="LOFAR" nPolsToWrite="1"/><!--Change-->
         </SigprocStokesWriter>
       </streamers>
-      
+
     </output>
-    
+
   </pipeline>
 </configuration>
 

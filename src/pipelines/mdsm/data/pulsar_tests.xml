@@ -31,34 +31,35 @@
 
     <chunkers>
       <LofarChunker>
-    <import nodeset="FixedParameters"/>
-    <import nodeset="ChangeParameters"/>
-      <!--   -->
-        <data type="SubbandTimeSeriesC32"/>
+        <import nodeset="FixedParameters"/>
+        <import nodeset="ChangeParameters"/>
+        <!--   -->
+        <data type="TimeSeriesDataSetC32"/>
         <connection host="127.0.0.1" port="8090"/> <!--Change-->
       </LofarChunker>
     </chunkers>
 
     <clients>
       <LofarStreamDataClient>
-        <data type="SubbandTimeSeriesC32" adapter="AdapterSubbandTimeSeries" />
+        <data type="TimeSeriesDataSetC32" adapter="AdapterTimeSeriesDataSet" />
       </LofarStreamDataClient>
     </clients>
 
     <adapters>
       <AdapterTimeSeriesDataSet>
-    <import nodeset="FixedParameters"/>
-    <import nodeset="ChangeParameters"/>
-      <!--   -->
+        <import nodeset="FixedParameters"/>
+        <import nodeset="ChangeParameters"/>
+        <!--   -->
         <fixedSizePackets value="false" />
       </AdapterTimeSeriesDataSet>
     </adapters>
 
     <modules>
+
       <PPFChanneliser>
-    <import nodeset="FixedParameters"/>
-    <import nodeset="ChangeParameters"/>
-      <!--   -->
+        <import nodeset="FixedParameters"/>
+        <import nodeset="ChangeParameters"/>
+        <!--   -->
         <processingThreads value="1" />
         <filter nTaps="8" filterWindow="kaiser"/>
       </PPFChanneliser>
@@ -67,8 +68,8 @@
       </StokesGenerator>
 
       <StokesIntegrator>
-    <import nodeset="FixedParameters"/>
-    <import nodeset="ChangeParameters"/>
+        <import nodeset="FixedParameters"/>
+        <import nodeset="ChangeParameters"/>
       </StokesIntegrator>
 
     </modules>
@@ -76,8 +77,8 @@
     <output>
 
       <dataStreams>
-        <!-- <stream name="SubbandSpectraStokes" listeners="PelicanTCPBlobServer" />  -->
-        <stream name="SubbandSpectraStokes" listeners="SigprocStokesWriter"/>
+        <!-- <stream name="SpectrumDataSetStokes" listeners="PelicanTCPBlobServer" />  -->
+        <stream name="SpectrumDataSetStokes" listeners="SigprocStokesWriter"/>
       </dataStreams>
 
       <streamers>
@@ -86,10 +87,10 @@
         </PelicanTCPBlobServer>
         -->
         <SigprocStokesWriter>
-      <import nodeset="FixedParameters"/>
-      <import nodeset="ChangeParameters"/>
-      <!-- -->
-      <file filepath="stokes.dat" /><!--Change-->
+        <import nodeset="FixedParameters"/>
+        <import nodeset="ChangeParameters"/>
+        <!-- -->
+        <file filepath="stokes.dat" /><!--Change-->
         <params telescope="LOFAR" nPolsToWrite="1"/><!--Change-->
         </SigprocStokesWriter>
       </streamers>
