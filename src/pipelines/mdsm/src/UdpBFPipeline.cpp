@@ -40,9 +40,9 @@ void UdpBFPipeline::init()
     stokes = (SpectrumDataSetStokes*) createBlob("SpectrumDataSetStokes");
     intStokes = (SpectrumDataSetStokes*) createBlob("SpectrumDataSetStokes");
 
-
     // Request remote data
     requestRemoteData("TimeSeriesDataSetC32");
+
 }
 
 /**
@@ -51,6 +51,8 @@ void UdpBFPipeline::init()
  */
 void UdpBFPipeline::run(QHash<QString, DataBlob*>& remoteData)
 {
+    cout << "pipeline start run" << endl;
+
     // Get pointer to the remote time series data blob.
     // Note: This contains the time series data in blocks of nChannels for
     // a number of subbands, polarisations and blocks.

@@ -14,7 +14,7 @@ LofarStreamDataClient::LofarStreamDataClient(const ConfigNode& configNode,
         const DataTypes& types, const Config* config)
 : DirectStreamDataClient(configNode, types, config)
 {
-    addChunker("SubbandTimeSeriesC32", "LofarChunker");
+    addChunker("TimeSeriesDataSetC32", "LofarChunker");
 }
 
 

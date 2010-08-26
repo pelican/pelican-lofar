@@ -146,7 +146,10 @@ void PPFChanneliser::run(const TimeSeriesDataSetC32* timeSeries,
 
     const float* coeffs = &_coeffs[0];
 
-#pragma omp parallel
+#pragma omp parallel \
+    shared(nTimeBlocks, nPolarisations, nSubbands, nFilterTaps, coeffs)
+//    private(threadId, nThreads, start, end, workBuffer, filteredSamples, \
+//    spectrum, timeData, b, s, p)
     {
         unsigned threadId = omp_get_thread_num();
         int nThreads = omp_get_num_threads();
@@ -160,8 +163,6 @@ void PPFChanneliser::run(const TimeSeriesDataSetC32* timeSeries,
         Complex const* timeData = 0;
 
         // Loop over sub-bands.
-//        for (unsigned b = start; b < end; ++b) {
-//        for (unsigned s = 0; s < nSubbands; ++s) {
         for (unsigned b = 0; b < nTimeBlocks; ++b) {
             for (unsigned s = start; s < end; ++s) {
                 for (unsigned p = 0; p < nPolarisations; ++p) {
@@ -244,9 +245,8 @@ void PPFChanneliser::_updateBuffer(const Complex* samples,
 void PPFChanneliser::_filter(const Complex* sampleBuffer, unsigned nTaps,
         unsigned nChannels, const float* coeffs, Complex* filteredSamples)
 {
-    for (unsigned i = 0; i < nChannels; ++i) {
+    for (unsigned i = 0; i < nChannels; ++i)
         filteredSamples[i] = Complex(0.0, 0.0);
-    }
 
     unsigned iBuffer = 0, idx = 0;
     float re, im, coeff;
