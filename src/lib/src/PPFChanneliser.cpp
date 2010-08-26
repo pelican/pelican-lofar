@@ -133,7 +133,7 @@ void PPFChanneliser::run(const TimeSeriesDataSetC32* timeSeries,
     unsigned nPolarisations = timeSeries->nPolarisations();
     unsigned nTimeBlocks = timeSeries->nTimeBlocks();
 
-    // Resize the output spectra blob.   
+    // Resize the output spectra blob.
     spectra->resize(nTimeBlocks, nSubbands, nPolarisations, _nChannels);
 
     // Set the timing parameters
@@ -172,7 +172,7 @@ void PPFChanneliser::run(const TimeSeriesDataSetC32* timeSeries,
                 for (unsigned p = 0; p < nPolarisations; ++p) {
 
                     // Get a pointer to the time series.
-                    //timeData = timeSeries->timeSeriesData(b, s, p);
+                    timeData = timeSeries->timeSeriesData(b, s, p);
 
                     //if (nTimes != _nChannels) {
                     //   std::cout << "nTimes: " << nTimes << " nChannels: " << _nChannels << std::endl;
@@ -180,10 +180,10 @@ void PPFChanneliser::run(const TimeSeriesDataSetC32* timeSeries,
                     //}
 
                     // Get a pointer to the work buffer.
-                    //workBuffer = &(_workBuffer[s * nPolarisations + p])[threadId];
+                    workBuffer = &(_workBuffer[s * nPolarisations + p])[threadId];
 
                     // Update buffered (lagged) data for the sub-band.
-                    //_updateBuffer(timeData, _nChannels, nFilterTaps,  workBuffer);
+                    _updateBuffer(timeData, _nChannels, nFilterTaps,  workBuffer);
 
                     // Apply the PPF.
                     //_filter(workBuffer, nFilterTaps, _nChannels, coeffs, filteredSamples);
