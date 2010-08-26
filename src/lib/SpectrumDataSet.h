@@ -97,10 +97,10 @@ class SpectrumDataSet : public DataBlob
         /// Return the block rate (time-span of the entire chunk)
         void setBlockRate(long blockRate) { _blockRate = blockRate; }
 
-        // Return the lofar time-stamp
+        /// Return the lofar time-stamp
         long long getLofarTimestamp() const { return _lofarTimestamp; }
 
-        // Set the lofar time-stamp
+        /// Set the lofar time-stamp
         void setLofarTimestamp(long long timestamp) { _lofarTimestamp = timestamp; }
 
         /// Returns a spectrum pointer at index \p i.
