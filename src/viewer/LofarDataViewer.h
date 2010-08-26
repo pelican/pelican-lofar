@@ -30,7 +30,8 @@ class LofarDataViewer : public DataViewer
     Q_OBJECT
 
     public:
-        LofarDataViewer(const Config& config, const Config::TreeAddress& base, QWidget* parent=0);
+        LofarDataViewer(const Config& config, const Config::TreeAddress& base,
+                QWidget* parent=0);
         ~LofarDataViewer();
 
     private:

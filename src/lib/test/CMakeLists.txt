@@ -2,9 +2,7 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR} ..)
 
 # Create test utility library.
 # ------------------------------------------------------------------------------
-set(lofarTestLib_src
-    src/LofarUdpEmulator.cpp
-)
+set(lofarTestLib_src src/LofarUdpEmulator.cpp)
 add_library(lofarTestLib STATIC ${lofarTestLib_src})
 
 
@@ -40,9 +38,7 @@ add_test(lofarTest lofarTest)
 
 # Create the lofar udp emulator binary.
 # ------------------------------------------------------------------------------
-add_executable(lofarEmulator
-    src/lofarEmulatorMain.cpp
-)
+add_executable(lofarEmulator    src/lofarEmulatorMain.cpp)
 target_link_libraries(lofarEmulator
     pelican-lofar_static
     ${PELICAN_LIBRARY}
@@ -52,5 +48,4 @@ target_link_libraries(lofarEmulator
 # Copy files required for testing to the build directory.
 include(${CMAKE_SOURCE_DIR}/cmake/CopyFiles.cmake)
 copy_files(${CMAKE_CURRENT_SOURCE_DIR}/data/*.* . testLibFiles)
-
 

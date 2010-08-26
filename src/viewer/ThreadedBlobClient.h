@@ -16,7 +16,7 @@ namespace lofar {
 
 /**
  * @class ThreadedBlobClient
- *  
+ *
  * @brief
  *   Wraps the PelicanBlobServer in a seperate thread
  * @details
@@ -30,7 +30,6 @@ class ThreadedBlobClient : public QThread
     public:
         ThreadedBlobClient( const QString& host, quint16 port, const QString& stream, QObject* parent  = 0 );
         ~ThreadedBlobClient();
-
 
     protected:
         virtual void run();
@@ -48,4 +47,4 @@ class ThreadedBlobClient : public QThread
 
 } // namespace lofar
 } // namespace pelican
-#endif // THREADEDBLOBCLIENT_H 
+#endif // THREADEDBLOBCLIENT_H

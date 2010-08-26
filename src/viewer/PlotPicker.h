@@ -43,6 +43,4 @@ class PlotPicker : public QwtPlotPicker
 
 } // namespace lofar
 } // namespace pelican
-
 #endif // PLOT_PICKER_H_
-

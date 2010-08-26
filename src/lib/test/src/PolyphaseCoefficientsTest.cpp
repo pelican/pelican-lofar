@@ -178,7 +178,5 @@ void PolyphaseCoefficientsTest::test_generate()
 }
 
 
-
-
 } // namespace lofar
 } // namespace pelican

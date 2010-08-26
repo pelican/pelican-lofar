@@ -18,6 +18,10 @@
 // C++ headers.
 #include <iostream>
 
+using std::cout;
+using std::endl;
+using std::cerr;
+
 namespace pelican {
 namespace lofar {
 
@@ -39,50 +43,52 @@ PelicanBlobClient::~PelicanBlobClient()
 // Read data from the Pelican Lofar pipeline
 void PelicanBlobClient::getData(QHash<QString, DataBlob*>& dataHash)
 {
-//    std::cout << "PelicanBlobClient::getData()" << std::endl;
-
     // Check that we are still connected to server, if not reconnect
     if (_tcpSocket->state() == QAbstractSocket::UnconnectedState) {
-        std::cout << "PelicanBlobClient: Disconnected from server, reconnecting."
-                  << std::endl;
+        cout << "PelicanBlobClient: Disconnected from server, reconnecting." << endl;
         connectToLofarPelican();
     }
 
     // Get a pointer to the data blob from the hash.
-    // FIXME for new stokes data blob.
-    SpectrumDataSetStokes* blob = (SpectrumDataSetStokes*) dataHash["SubbandSpectraStokes"];
-    //ChannelisedStreamData* blob = (ChannelisedStreamData*) dataHash["ChannelisedStreamData"];
+    SpectrumDataSetStokes* blob = (SpectrumDataSetStokes*) dataHash["SpectrumDataSetStokes"];
 
     // Wait for data to be available to socket, and read
     _tcpSocket->waitForReadyRead();
-    boost::shared_ptr<ServerResponse> r = _protocol->receive(*_tcpSocket);
-    //std::cout << "PelicanBlobClient::getData(): type = " << r->type() << std::endl;
+    boost::shared_ptr<ServerResponse> response = _protocol->receive(*_tcpSocket);
 
     // Check what type of response we have
-    switch(r->type()) {
+    switch(response->type())
+    {
         case ServerResponse::Error:  // Error occurred!!
-            std::cerr << "PelicanBlobClient: Server Error: '"
-                      << r->message().toStdString() << "'" << std::endl;
+        {
+            cerr << "PelicanBlobClient: Server Error: '"
+                 << response->message().toStdString() << "'" << endl;
             break;
-        case ServerResponse::Blob:   // We have received a blob
-            {
-                DataBlobResponse* res = static_cast<DataBlobResponse*>(r.get());
-                while (_tcpSocket->bytesAvailable() < (qint64)res->dataSize())
-                   _tcpSocket -> waitForReadyRead(-1);
-                blob->deserialise(*_tcpSocket, res->byteOrder());
-            }
+        }
+        case ServerResponse::Blob: // We have received a blob
+        {
+            DataBlobResponse* res = (DataBlobResponse*)response.get();
+            while (_tcpSocket->bytesAvailable() < (qint64)res->dataSize())
+                _tcpSocket -> waitForReadyRead(-1);
+            blob->deserialise(*_tcpSocket, res->byteOrder());
             break;
-        case ServerResponse::StreamData:   // We have stream data
-            std::cout << "Stream Data" << std::endl;
+        }
+        case ServerResponse::StreamData: // We have stream data
+        {
+            cout << "Stream Data" << endl;
             break;
+        }
         case ServerResponse::ServiceData:  // We have service data
-            std::cout << "Service Data" << std::endl;
+        {
+            cout << "Service Data" << endl;
             break;
+        }
         default:
-            std::cerr << "PelicanBlobClient: Unknown Response" << std::endl;
+            cerr << "PelicanBlobClient: Unknown Response" << endl;
             break;
     }
 }
+
 
 // Connect to Pelican Lofar and register requested data type
 void PelicanBlobClient::connectToLofarPelican()
@@ -91,12 +97,11 @@ void PelicanBlobClient::connectToLofarPelican()
 
         _tcpSocket->connectToHost(_server, _port);
 
-        if (!_tcpSocket -> waitForConnected(5000) ||
-                _tcpSocket -> state() == QAbstractSocket::UnconnectedState)
+        if (!_tcpSocket->waitForConnected(5000) ||
+                _tcpSocket->state() == QAbstractSocket::UnconnectedState)
         {
-            std::cerr << "PelicanBlobClient: Unable to connect to server ("
-                      << _server.toStdString() << ":" << _port << ")"
-                      << std::endl;
+            cerr << "PelicanBlobClient: Unable to connect to server ("
+                 << _server.toStdString() << ":" << _port << ")" << endl;
             sleep(2);
             continue;
         }

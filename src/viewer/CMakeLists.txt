@@ -10,27 +10,23 @@ include_directories(
 )
 
 set(widget_lib_UI
-    forms/SubbandSpectraViewer.ui
+    forms/SpectrumDataSetViewer.ui
 )
 
 
 # --- widget library
 set(widget_lib_src
     src/LofarDataViewer.cpp
-    #    src/DataViewer.cpp
-    #src/DataBlobWidget.cpp
     src/PlotWidget.cpp
     src/PlotPicker.cpp
     src/ThreadedBlobClient.cpp
-    src/SubbandSpectrumWidget.cpp
+    src/SpectrumDataSetWidget.cpp
 )
 
 set(widget_moc_headers
     LofarDataViewer.h
-    #    DataViewer.h
-    #DataBlobWidget.h
     PlotWidget.h
-    SubbandSpectrumWidget.h
+    SpectrumDataSetWidget.h
     ThreadedBlobClient.h
 )
 

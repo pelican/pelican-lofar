@@ -2,7 +2,7 @@
 #define PLOT_WIDGET_TEST_H_
 
 #include "viewer/PlotWidget.h"
-#include "viewer/SubbandSpectrumWidget.h"
+#include "viewer/SpectrumDataSetWidget.h"
 #include "pelican/utility/ConfigNode.h"
 
 #include <QtGui/QApplication>
@@ -21,11 +21,11 @@ class PlotWidgetTest : public QObject
     public:
         PlotWidgetTest() {
             _plotWidget = new PlotWidget;
-            _ssViewer = new SubbandSpectrumWidget(_config);
+            _sViewer = new SpectrumDataSetWidget(_config);
         }
         ~PlotWidgetTest() {
             delete _plotWidget;
-            delete _ssViewer;
+            delete _sViewer;
         }
 
     private slots:
@@ -54,13 +54,13 @@ class PlotWidgetTest : public QObject
 
         void testSubbandSpectrumWidget()
         {
-            _ssViewer->show();
+            _sViewer->show();
         }
 
 
     private:
         PlotWidget* _plotWidget;
-        SubbandSpectrumWidget* _ssViewer;
+        SpectrumDataSetWidget* _sViewer;
         ConfigNode _config;
 };
 

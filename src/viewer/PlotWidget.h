@@ -101,7 +101,6 @@ class PlotWidget : public  QwtPlot
 
     private:
         QwtPlotCurve _curve;
-
         PlotPicker* _picker;
         QwtPlotZoomer* _zoomer;
         QwtPlotGrid* _grid;
@@ -111,6 +110,4 @@ class PlotWidget : public  QwtPlot
 
 } // namespace pelican
 } // namespace lofar
-
-
 #endif // PLOTWIDGET_H_

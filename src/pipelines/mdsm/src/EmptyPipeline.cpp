@@ -1,6 +1,9 @@
 #include "EmptyPipeline.h"
 #include <iostream>
 
+using std::cout;
+using std::endl;
+
 namespace pelican {
 namespace lofar {
 
@@ -8,8 +11,7 @@ namespace lofar {
 /**
  * @details EmptyPipeline
  */
-EmptyPipeline::EmptyPipeline()
-    : AbstractPipeline()
+EmptyPipeline::EmptyPipeline() : AbstractPipeline()
 {
     _iteration = 0;
 }
@@ -20,6 +22,7 @@ EmptyPipeline::EmptyPipeline()
 EmptyPipeline::~EmptyPipeline()
 {
 }
+
 
 /**
  * @details
@@ -36,9 +39,9 @@ void EmptyPipeline::init()
  */
 void EmptyPipeline::run(QHash<QString, DataBlob*>& /*remoteData*/)
 {
-
     if (_iteration % 200 == 0)
-        std::cout << "Finished pipeline, iteration " << _iteration << std::endl;
+        cout << "Finished pipeline, iteration " << _iteration << endl;
+
     _iteration++;
 }
 

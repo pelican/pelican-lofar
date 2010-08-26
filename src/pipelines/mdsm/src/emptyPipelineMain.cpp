@@ -17,8 +17,8 @@ int main(int argc, char* argv[])
     // Create a QCoreApplication.
     QCoreApplication app(argc, argv);
 
-    // Create a PipelineApplication.
     try {
+        // Create a PipelineApplication.
         PipelineApplication pApp(argc, argv);
 
         // Register the pipelines that can run.

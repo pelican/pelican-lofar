@@ -26,8 +26,8 @@ class PolyphaseCoefficientsTest : public CppUnit::TestFixture
     public:
         CPPUNIT_TEST_SUITE(PolyphaseCoefficientsTest);
         CPPUNIT_TEST(test_accessorMethods);
-        CPPUNIT_TEST(test_loadCoeffFile);
-        CPPUNIT_TEST(test_generate);
+        //CPPUNIT_TEST(test_loadCoeffFile);
+        //CPPUNIT_TEST(test_generate);
         CPPUNIT_TEST_SUITE_END();
 
     public:

@@ -8,22 +8,58 @@
  *
  */
 
-#include <iostream>
-#include <cstdlib>
+#include "viewer/LofarDataViewer.h"
+
+#include "pelican/utility/Config.h"
+
 #include <QtGui/QApplication>
 #include <boost/program_options.hpp>
-#include "pelican/utility/Config.h"
-#include "viewer/LofarDataViewer.h"
+
+#include <cstdlib>
 #include <iostream>
 
 namespace opts = boost::program_options;
+using namespace pelican;
+using namespace pelican::lofar;
+using std::cout;
+using std::endl;
 
-pelican::Config createConfig(int argc, char** argv)
+
+// Prototype for function to create a pelican configuration XML object.
+Config createConfig(int argc, char** argv);
+
+
+int main(int argc, char** argv)
+{
+    QApplication app(argc, argv);
+
+    Config config = createConfig(argc, argv);
+
+    Config::TreeAddress address;
+    address << Config::NodeId("DataViewer", "");
+
+    try {
+        LofarDataViewer* ldv = new LofarDataViewer( config, address);
+        ldv->show();
+        cout << "entering exec()" << endl;
+        return app.exec();
+    }
+    catch (const QString err)
+    {
+        cout << "ERROR: " << err.toStdString() << endl;
+    }
+}
+
+
+
+/**
+ * @details
+ * Create a Pelican Configuration XML document for the lofar data viewer.
+ */
+Config createConfig(int argc, char** argv)
 {
     // Check that argc and argv are nonzero
-    if (argc == 0 || argv == NULL) {
-        throw QString("No command line.");
-    }
+    if (argc == 0 || argv == NULL) throw QString("No command line.");
 
     // Declare the supported options.
     opts::options_description desc("Allowed options");
@@ -41,26 +77,24 @@ pelican::Config createConfig(int argc, char** argv)
 
     // Parse the command line arguments.
     opts::variables_map varMap;
-    opts::store(opts::command_line_parser(argc, argv).options(desc).positional(p).run(), varMap);
+    opts::store(opts::command_line_parser(argc, argv).options(desc)
+            .positional(p).run(), varMap);
     opts::notify(varMap);
 
     // Check for help message.
     if (varMap.count("help")) {
-        std::cout << desc << "\n";
+        cout << desc << endl;;
         exit(0);
     }
 
     // Get the configuration file name.
     std::string configFilename = "";
-    if (varMap.count("config")) {
+    if (varMap.count("config"))
         configFilename = varMap["config"].as<std::string>();
-        //std::cout << "--- " << configFilename << std::endl;
-    }
 
     pelican::Config config;
-    if (!configFilename.empty()) {
+    if (!configFilename.empty())
         config = pelican::Config(QString(configFilename.c_str()));
-    }
 
     pelican::Config::TreeAddress baseAddress;
     baseAddress << pelican::Config::NodeId("DataViewer", "");
@@ -85,30 +119,5 @@ pelican::Config createConfig(int argc, char** argv)
     }
 
     return config;
-}
-
-
-
-int main(int argc, char* argv[])
-{
-    QApplication app(argc, argv);
-
-    //    try {
-    pelican::Config config = createConfig(argc, argv);
-    
-    pelican::Config::TreeAddress address;
-    address << pelican::Config::NodeId("DataViewer", "");
-    
-    //        config.save("config.xml");
-    //config.summary();
-    try{
-      pelican::lofar::LofarDataViewer* ldv = new pelican::lofar::LofarDataViewer( config, address);
-      ldv->show();
-      std::cout << "entering exec()" << std::endl;
-      return app.exec();
-    }
-    catch (const QString err) {
-      std::cout << "ERROR: " << err.toStdString() << std::endl;
-    }
 }
 

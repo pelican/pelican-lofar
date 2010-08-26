@@ -9,6 +9,8 @@
 #include <iostream>
 #include <map>
 
+using std::cout;
+using std::endl;
 using namespace pelican;
 using namespace pelican::lofar;
 
@@ -17,8 +19,8 @@ int main(int argc, char* argv[])
     // Create a QCoreApplication.
     QCoreApplication app(argc, argv);
 
-    // Create a PipelineApplication.
     try {
+        // Create a PipelineApplication.
         PipelineApplication pApp(argc, argv);
 
         // Register the pipelines that can run.
@@ -30,8 +32,8 @@ int main(int argc, char* argv[])
         // Start the pipeline driver.
         pApp.start();
     }
-    catch (const QString& error) {
-        std::cout << "Error caught in updBFmain.cpp: " << error.toStdString() << std::endl;
+    catch (const QString& err) {
+        cout << "Error caught in updBFmain.cpp: " << err.toStdString() << endl;
     }
 
     return 0;

@@ -3,7 +3,7 @@
 <configuration version="1.0">
 
 <DataViewer>
-    <dataStream name="SubbandSpectraStokes"/>
+    <dataStream name="SpectrumDataSetStokes"/>
     <server address="1.2.3.4" port="5678"/>
 </DataViewer>
 

@@ -9,13 +9,13 @@ namespace lofar {
 
 
 /**
- * @details UdpBFPipeline
+ * @details
  */
-UdpBFPipeline::UdpBFPipeline()
-    : AbstractPipeline()
+UdpBFPipeline::UdpBFPipeline() : AbstractPipeline()
 {
     _iteration = 0;
 }
+
 
 /**
  * @details
@@ -24,9 +24,12 @@ UdpBFPipeline::~UdpBFPipeline()
 {
 }
 
+
 /**
  * @details
  * Initialises the pipeline.
+ *
+ * This method is run once on construction of the pipeline.
  */
 void UdpBFPipeline::init()
 {
@@ -48,30 +51,31 @@ void UdpBFPipeline::init()
 /**
  * @details
  * Runs the pipeline.
+ *
+ * This method is run repeatedly by the pipeline application every time
+ * data matching the requested remote data is available until either
+ * the pipeline application is killed or the method 'stop()' is called.
  */
 void UdpBFPipeline::run(QHash<QString, DataBlob*>& remoteData)
 {
-    cout << "pipeline start run" << endl;
-
     // Get pointer to the remote time series data blob.
-    // Note: This contains the time series data in blocks of nChannels for
-    // a number of subbands, polarisations and blocks.
+    // This is a block of data containing a number of time series of length
+    // N for each sub-band and polarisation.
     timeSeries = (TimeSeriesDataSetC32*) remoteData["TimeSeriesDataSetC32"];
 
     // Run the polyphase channeliser.
-    // Note: This channelises all of the subbands, and polarisations in the time series for
-    // a number of blocks of spectra.
+    // Generates spectra from a blocks of time series indexed by sub-band
+    // and polarisation.
     ppfChanneliser->run(timeSeries, spectra);
 
+    // Convert spectra in X, Y polarisation into spectra with stokes parameters.
     stokesGenerator->run(spectra, stokes);
 
     // stokesIntegrator->run(stokes, intStokes);
 
-    // Output channelised data blob (which has dimensions: number of spectra x subbands x polarisations)
-    //dataOutput(spectra, "SubbandSpectraC32");
-    // calls output stream managed->send(data, stream)
-    // the output stream manager is configured in the xml
-
+    // Calls output stream managed->send(data, stream) the output stream
+    // manager is configured in the xml.
+    //dataOutput(spectra, "SpectrumDataSetC32");
     dataOutput(stokes, "SpectrumDataSetStokes");
 
 //    stop();
@@ -80,6 +84,7 @@ void UdpBFPipeline::run(QHash<QString, DataBlob*>& remoteData)
         cout << "Finished the UDP beamforming pipeline, iteration " << _iteration << endl;
 
     _iteration++;
+
     if (_iteration > 43000) stop();
 }
 
