@@ -186,7 +186,7 @@ void PPFChanneliser::run(const TimeSeriesDataSetC32* timeSeries,
                     _updateBuffer(timeData, _nChannels, nFilterTaps,  workBuffer);
 
                     // Apply the PPF.
-                    //_filter(workBuffer, nFilterTaps, _nChannels, coeffs, filteredSamples);
+                    _filter(workBuffer, nFilterTaps, _nChannels, coeffs, filteredSamples);
 
                     // FFT the filtered sub-band data to form a new spectrum.
                     //spectrum = spectra->spectrumData(b, s ,p);
