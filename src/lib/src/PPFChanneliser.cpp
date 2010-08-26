@@ -38,11 +38,8 @@ PPFChanneliser::PPFChanneliser(const ConfigNode& config)
     QString window = config.getOption("filter", "filterWindow", "kaiser").toLower();
 
     // Pointers to processing buffers.
-    //    omp_set_num_threads(_nThreads);
-    //    _nThreads = (unsigned) omp_get_num_threads();
-    //    std::cout << "Number of threads = " << _nThreads << std::endl;
-    _nThreads = 2;
-
+    omp_set_num_threads(_nThreads);
+    //_nThreads = 2;
 
 
     // Enforce even number of channels.
@@ -152,10 +149,8 @@ void PPFChanneliser::run(const TimeSeriesDataSetC32* timeSeries,
 #pragma omp parallel
     {
         unsigned threadId = omp_get_thread_num();
-        unsigned start = 0, end = 0;
-
-        //_threadProcessingIndices(start, end, nTimeBlocks, _nThreads, threadId);
         int nThreads = omp_get_num_threads();
+        unsigned start = 0, end = 0;
         _threadProcessingIndices(start, end, nSubbands, nThreads, threadId);
 
         Complex* workBuffer;
