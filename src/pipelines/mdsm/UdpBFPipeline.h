@@ -10,6 +10,7 @@
 #include "StokesGenerator.h"
 #include "StokesIntegrator.h"
 
+#include "AdapterTimeSeriesDataSet.h"
 #include "TimeSeriesDataSet.h"
 #include "SpectrumDataSet.h"
 
