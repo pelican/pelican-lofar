@@ -1,6 +1,5 @@
 #include "StokesGenerator.h"
 #include "SpectrumDataSet.h"
-#include "TimeSeries.h"
 
 #include "pelican/utility/ConfigNode.h"
 
@@ -70,7 +69,7 @@ void StokesGenerator::run(const TimeSeriesDataSetC32* streamData,
     typedef std::complex<float> Complex;
     unsigned nSamples = streamData->nTimeBlocks();
     unsigned nSubbands = streamData->nSubbands();
-    unsigned nSamps = streamData->nTimes(0,0,0);
+    unsigned nSamps = streamData->nTimes();
 
     stokes->setLofarTimestamp(streamData->getLofarTimestamp());
     stokes->setBlockRate(streamData->getBlockRate());
@@ -82,8 +81,8 @@ void StokesGenerator::run(const TimeSeriesDataSetC32* streamData,
 
     for (unsigned t = 0; t < nSamples; ++t) {
         for(unsigned s = 0; s < nSubbands; ++s) {
-            dataPolX = streamData->timeSeriesData(t, s, 0);
-            dataPolY = streamData->timeSeriesData(t, s, 1);
+            dataPolX = streamData->timeSeriesData(s, 0, t);
+            dataPolY = streamData->timeSeriesData(s, 1, t);
             for(unsigned c = 0; c < nSamps; ++c) {
                 I = stokes->spectrumData(t * nSamps + c, s, 0);
                 Q = stokes->spectrumData(t * nSamps + c, s, 1);

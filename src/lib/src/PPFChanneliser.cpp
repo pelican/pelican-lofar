@@ -127,11 +127,11 @@ void PPFChanneliser::run(const TimeSeriesDataSetC32* timeSeries,
 
         filteredSamples = &_filteredData[threadId][0];
 
-        for (unsigned b = 0; b < nTimeBlocks; ++b) {
-            for (unsigned s = start; s < end; ++s) {
-                for (unsigned p = 0; p < nPolarisations; ++p) {
+        for (unsigned s = start; s < end; ++s) {
+            for (unsigned p = 0; p < nPolarisations; ++p) {
+                for (unsigned b = 0; b < nTimeBlocks; ++b) {
                     // Get a pointer to the time series.
-                    timeData = timeSeries->timeSeriesData(b, s, p);
+                    timeData = timeSeries->timeSeriesData(s, p, b);
 
                     // Get a pointer to the work buffer.
                     workBuffer = &(_workBuffer[s * nPolarisations + p])[0];

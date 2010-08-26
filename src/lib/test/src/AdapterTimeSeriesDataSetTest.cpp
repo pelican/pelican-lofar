@@ -96,9 +96,9 @@ void AdapterTimeSeriesDataSetTest::test_checkDataFixedPacket()
 
        unsigned nTimeBlocks = (nPackets * nSamples) / nSamplesPerTimeBlock;
         CPPUNIT_ASSERT_EQUAL(nTimeBlocks,
-                static_cast<TimeSeriesDataSetC32*>(adapter._timeData)->nTimeBlocks());
+                (TimeSeriesDataSetC32*)(adapter._timeData)->nTimeBlocks());
         CPPUNIT_ASSERT_EQUAL(nTimeBlocks * nPolarisations * nSubbands,
-                static_cast<TimeSeriesDataSetC32*>(adapter._data)->size());
+                (TimeSeriesDataSetC32*)(adapter._data)->size());
     }
     catch (QString err) {
         CPPUNIT_FAIL(err.toStdString().data());
@@ -151,9 +151,9 @@ void AdapterTimeSeriesDataSetTest::test_checkDataVariablePacket()
         adapter._checkData();
         unsigned nTimeBlocks = (nPackets * nSamples) / nSamplesPerTimeBlock;
         CPPUNIT_ASSERT_EQUAL(nTimeBlocks,
-                static_cast<TimeSeriesDataSetC32*>(adapter._timeData)->nTimeBlocks());
+                (TimeSeriesDataSetC32*)(adapter._timeData)->nTimeBlocks());
         CPPUNIT_ASSERT_EQUAL(nTimeBlocks * nPolarisations * nSubbands,
-                static_cast<TimeSeriesDataSetC32*>(adapter._data)->size());
+                (TimeSeriesDataSetC32*)(adapter._data)->size());
     }
     catch (QString err) {
         CPPUNIT_FAIL(err.toStdString().data());

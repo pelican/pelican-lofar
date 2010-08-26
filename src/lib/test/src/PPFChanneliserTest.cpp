@@ -59,12 +59,12 @@ void PPFChanneliserTest::test_run()
         // Run once to size up buffers etc.
         {
             TimeSeriesDataSetC32 timeSeries;
-            timeSeries.resize(_nBlocks, _nSubbands, _nPols, _nChannels);
+            timeSeries.resize(_nSubbands, _nPols, _nBlocks ,_nChannels);
             channeliser.run(&timeSeries, &spectra);
         }
 
         TimeSeriesDataSetC32 timeSeries;
-        timeSeries.resize(_nBlocks, _nSubbands, _nPols, _nChannels);
+        timeSeries.resize(_nSubbands, _nPols, _nBlocks ,_nChannels);
 
         QTime timer;
         timer.start();
@@ -385,12 +385,12 @@ void PPFChanneliserTest::test_makeSpectrum()
     TimeSeriesDataSetC32 data;
     _nSubbands = 1;
     _nPols = 1;
-    data.resize(_nBlocks, _nSubbands, _nPols, _nChannels);
+    data.resize(_nSubbands, _nPols, _nBlocks ,_nChannels);
 
     // Generate signal.
     for (unsigned i = 0, t = 0; t < _nBlocks; ++t) {
 
-        PPFChanneliser::Complex* timeData = data.timeSeriesData(t, 0, 0);
+        PPFChanneliser::Complex* timeData = data.timeSeriesData(0, 0, t);
 
         for (unsigned c = 0; c < _nChannels; ++c) {
             double time = double(i) / sampleRate;
@@ -462,7 +462,7 @@ void PPFChanneliserTest::test_channelProfile()
         unsigned _nBlocks = _nTaps;
 
         TimeSeriesDataSetC32 data;
-        data.resize(_nBlocks, _nSubbands, _nPols, _nChannels);
+        data.resize(_nSubbands, _nPols, _nBlocks ,_nChannels);
 
         SpectrumDataSetC32 spectra;
         spectra.resize(_nBlocks, _nSubbands, _nPols, _nChannels);
@@ -478,7 +478,7 @@ void PPFChanneliserTest::test_channelProfile()
             double freq = startFreq + k * freqInc;
             freqs[k] = freq;
             for (unsigned i = 0, t = 0; t < _nBlocks; ++t) {
-                PPFChanneliser::Complex* timeData = data.timeSeriesData(t, 0, 0);
+                PPFChanneliser::Complex* timeData = data.timeSeriesData(0, 0, t);
                 for (unsigned c = 0; c < _nChannels; ++c) {
                     double time = double(i) / sampleRate;
                     double re = std::cos(2 * math::pi * freq * time);

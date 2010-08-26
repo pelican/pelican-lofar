@@ -150,7 +150,7 @@ void AdapterTimeSeriesDataSet::_checkData()
     // Resize the time stream data blob to match the adapter dimensions.
     unsigned nBlocks = nTimesTotal / _nSamplesPerTimeBlock;
     _timeData = (TimeSeriesDataSetC32*)_data;
-    _timeData->resize(nBlocks, _nSubbands, _nPolarisations, _nSamplesPerTimeBlock);
+    _timeData->resize(_nSubbands, _nPolarisations, nBlocks, _nSamplesPerTimeBlock);
 }
 
 
@@ -196,7 +196,7 @@ void AdapterTimeSeriesDataSet::_readData(unsigned packet, char* buffer,
                 for (unsigned t = 0; t < _nSamplesPerPacket; ++t) {
                     iTimeBlock = (tStart + t) / _nSamplesPerTimeBlock;
                     for (unsigned p = 0; p < _nPolarisations; ++p) {
-                        times = data->timeSeriesData(iTimeBlock, c, p);
+                        times = data->timeSeriesData(c, p, iTimeBlock);
                         index = tStart - (iTimeBlock * _nSamplesPerTimeBlock) + t;
                         i8c = *reinterpret_cast<TYPES::i8complex*>(&buffer[iPtr]);
                         times[index] = _makeComplex(i8c);
@@ -213,7 +213,7 @@ void AdapterTimeSeriesDataSet::_readData(unsigned packet, char* buffer,
                 for (unsigned t = 0; t < _nSamplesPerPacket; ++t) {
                     iTimeBlock = (tStart + t) / _nSamplesPerTimeBlock;
                     for (unsigned p = 0; p < _nPolarisations; ++p) {
-                        times = data->timeSeriesData(iTimeBlock, c, p);
+                        times = data->timeSeriesData(c, p, iTimeBlock);
                         index = tStart - (iTimeBlock * _nSamplesPerTimeBlock) + t;
                         i16c = *reinterpret_cast<TYPES::i16complex*>(&buffer[iPtr]);
                         times[index] = _makeComplex(i16c);

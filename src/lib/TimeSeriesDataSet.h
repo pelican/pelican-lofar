@@ -6,7 +6,6 @@
  */
 
 #include "pelican/data/DataBlob.h"
-#include "TimeSeries.h"
 
 #include <vector>
 #include <complex>
@@ -42,9 +41,9 @@ class TimeSeriesDataSet : public DataBlob
         void resize(unsigned nSubbands, unsigned nPols, unsigned nTimeBlocks,
                 unsigned nTimes);
 
-        /// Assign memory
-        void resize(unsigned nSubbands, unsigned nPols, unsigned nTimeBlocks,
-                unsigned nTimes, T value);
+//        /// Assign memory
+//        void resize(unsigned nSubbands, unsigned nPols, unsigned nTimeBlocks,
+//                unsigned nTimes, T value);
 
     public:
         /// Returns the number of entries in the data blob.
@@ -102,8 +101,6 @@ class TimeSeriesDataSet : public DataBlob
 
 
 
-
-
 // -----------------------------------------------------------------------------
 // Inline method/function definitions.
 //
@@ -128,13 +125,13 @@ inline void TimeSeriesDataSet<T>::resize(unsigned nSubbands,
     _data.resize(_nTimeBlocks * _nSubbands * _nPolarisations * _nTimes);
 }
 
-template <typename T>
-inline void TimeSeriesDataSet<T>::resize(unsigned nSubbands,
-        unsigned nPols, unsigned nTimeBlocks, unsigned nTimes, T value)
-{
-    resize(nSubbands, nPols, nTimeBlocks, nTimes);
-    for (unsigned i = 0u; i < _data.size(); ++i) _data[i] = value;
-}
+//template <typename T>
+//inline void TimeSeriesDataSet<T>::resize(unsigned nSubbands,
+//        unsigned nPols, unsigned nTimeBlocks, unsigned nTimes, T value)
+//{
+//    resize(nSubbands, nPols, nTimeBlocks, nTimes);
+//    for (unsigned i = 0u; i < _data.size(); ++i) _data[i] = value;
+//}
 
 
 template <typename T>
@@ -144,16 +141,16 @@ inline unsigned long TimeSeriesDataSet<T>::_index(unsigned s, unsigned p,
     return _nTimes * (b  + _nTimeBlocks * (p + s * _nPolarisations));
 }
 
-template <typename T>
-inline T * timeSeriesData(unsigned s, unsigned p, unsigned b)
+template <typename T> inline T *
+TimeSeriesDataSet<T>::timeSeriesData(unsigned s, unsigned p, unsigned b)
 {
     if (s >= _nSubbands || p >= _nPolarisations || b >= _nTimeBlocks) return 0;
     unsigned i = _index(s, p, b);
     return _data.size() > 0 && i < _data.size() ? &_data[i] : 0;
 }
 
-template <typename T>
-inline T const * timeSeriesData(unsigned s, unsigned p, unsigned b) const
+template <typename T> inline T const *
+TimeSeriesDataSet<T>::timeSeriesData(unsigned s, unsigned p, unsigned b) const
 {
     if (s >= _nSubbands || p >= _nPolarisations || b >= _nTimeBlocks) return 0;
     unsigned i = _index(s, p, b);
