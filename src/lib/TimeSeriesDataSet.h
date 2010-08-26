@@ -41,9 +41,9 @@ class TimeSeriesDataSet : public DataBlob
         void resize(unsigned nSubbands, unsigned nPols, unsigned nTimeBlocks,
                 unsigned nTimes);
 
-//        /// Assign memory
-//        void resize(unsigned nSubbands, unsigned nPols, unsigned nTimeBlocks,
-//                unsigned nTimes, T value);
+        /// Assign memory
+        void resize(unsigned nSubbands, unsigned nPols, unsigned nTimeBlocks,
+                unsigned nTimes, T value);
 
     public:
         /// Returns the number of entries in the data blob.
@@ -125,13 +125,13 @@ inline void TimeSeriesDataSet<T>::resize(unsigned nSubbands,
     _data.resize(_nTimeBlocks * _nSubbands * _nPolarisations * _nTimes);
 }
 
-//template <typename T>
-//inline void TimeSeriesDataSet<T>::resize(unsigned nSubbands,
-//        unsigned nPols, unsigned nTimeBlocks, unsigned nTimes, T value)
-//{
-//    resize(nSubbands, nPols, nTimeBlocks, nTimes);
-//    for (unsigned i = 0u; i < _data.size(); ++i) _data[i] = value;
-//}
+template <typename T>
+inline void TimeSeriesDataSet<T>::resize(unsigned nSubbands,
+        unsigned nPols, unsigned nTimeBlocks, unsigned nTimes, T value)
+{
+    resize(nSubbands, nPols, nTimeBlocks, nTimes);
+    for (unsigned i = 0u; i < _data.size(); ++i) _data[i] = value;
+}
 
 
 template <typename T>
