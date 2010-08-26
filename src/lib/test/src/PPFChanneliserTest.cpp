@@ -315,17 +315,21 @@ void PPFChanneliserTest::test_fft()
 void PPFChanneliserTest::test_run()
 {
     // Setup the channeliser.
-  unsigned nThreads = 4;
+    unsigned nThreads = 2;
     ConfigNode config(_configXml(_nChannels, nThreads, _nTaps));
-    PPFChanneliser channeliser(config);
 
-    SubbandSpectraC32 spectra;
-    spectra.resize(_nBlocks, _nSubbands, _nPols);
-    SubbandTimeSeriesC32 timeSeries;
-    timeSeries.resize(_nBlocks, _nSubbands, _nPols, _nChannels);
+    try{
+        PPFChanneliser channeliser(config);
+
+
+        SubbandSpectraC32 spectra;
+        spectra.resize(_nBlocks, _nSubbands, _nPols);
+        SubbandTimeSeriesC32 timeSeries;
+        timeSeries.resize(_nBlocks, _nSubbands, _nPols, _nChannels);
+        
 
     unsigned iter = 1;
-
+    
     QTime timer;
     timer.start();
     for (unsigned i = 0; i < iter; ++i)
@@ -345,6 +349,11 @@ void PPFChanneliserTest::test_run()
     cout << "* Elapsed = " << elapsed << " ms. [" << nThreads << " threads]";
     cout << " (data time = " << _nBlocks * _nChannels * 5e-3 << " ms.)" << endl;
     cout << "-------------------------------------------------" << endl;
+    }
+    catch (const QString& err)
+        {
+            std::cout << err.toStdString() << std::endl;
+        }
 }
 
 

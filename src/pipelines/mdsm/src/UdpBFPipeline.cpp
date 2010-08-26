@@ -81,18 +81,19 @@ void UdpBFPipeline::run(QHash<QString, DataBlob*>& remoteData)
 
     stokesGenerator->run(spectra, stokes);
 
-    stokesIntegrator->run(stokes, intStokes);
+    //    stokesIntegrator->run(stokes, intStokes);
 
     // Output channelised data blob (which has dimensions: number of spectra x subbands x polarisations)
     //dataOutput(spectra, "SubbandSpectraC32");
     // calls output stream managed->send(data, stream)
     // the output stream manager is configured in the xml
 
-    dataOutput(intStokes, "SubbandSpectraStokes");
+    //    dataOutput(intStokes, "SubbandSpectraStokes");
+    dataOutput(stokes, "SubbandSpectraStokes");
 
 //    stop();
 
-    if (_iteration % 1 == 0) std::cout << "Finished the UDP beamforming pipeline, iteration " << _iteration << std::endl;
+    if (_iteration % 100 == 0) std::cout << "Finished the UDP beamforming pipeline, iteration " << _iteration << std::endl;
     _iteration++;
     if (_iteration > 43000) stop();
 }

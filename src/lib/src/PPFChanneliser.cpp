@@ -39,7 +39,12 @@ PPFChanneliser::PPFChanneliser(const ConfigNode& config)
     QString window = config.getOption("filter", "filterWindow", "kaiser").toLower();
 
     // Pointers to processing buffers.
-    omp_set_num_threads(_nThreads);
+    //    omp_set_num_threads(_nThreads);
+    //    _nThreads = (unsigned) omp_get_num_threads();
+    //    std::cout << "Number of threads = " << _nThreads << std::endl;
+    _nThreads = 2;
+
+
 
     // Enforce even number of channels.
     if (_nChannels % 2 != 0) {
@@ -129,7 +134,7 @@ void PPFChanneliser::run(const SubbandTimeSeriesC32* timeSeries,
     unsigned nPolarisations = timeSeries->nPolarisations();
     unsigned nTimeBlocks = timeSeries->nTimeBlocks();
 
-    // Resize the output spectra blob.
+    // Resize the output spectra blob.   
     spectra->resize(nTimeBlocks, nSubbands, nPolarisations, _nChannels);
 
     // Set the timing parameters
@@ -150,10 +155,11 @@ void PPFChanneliser::run(const SubbandTimeSeriesC32* timeSeries,
         unsigned threadId = omp_get_thread_num();
         unsigned start = 0, end = 0;
         //_threadProcessingIndices(start, end, nTimeBlocks, _nThreads, threadId);
-        _threadProcessingIndices(start, end, nSubbands, _nThreads, threadId);
+        int nThreads = omp_get_num_threads();
+        _threadProcessingIndices(start, end, nSubbands, nThreads, threadId);
 
         Complex* workBuffer;
-        Complex* filteredSamples = &_filteredData[threadId][0];
+        Complex* filteredSamples = &_filteredData[threadId][threadId];
 
         Complex* spectrum = 0;
         Complex const* timeData = 0;
@@ -166,7 +172,7 @@ void PPFChanneliser::run(const SubbandTimeSeriesC32* timeSeries,
                 for (unsigned p = 0; p < nPolarisations; ++p) {
 
                     // Get a pointer to the time series.
-                    timeData = timeSeries->timeSeries(b, s, p);
+                    //timeData = timeSeries->timeSeries(b, s, p);
 
                     //if (nTimes != _nChannels) {
                     //   std::cout << "nTimes: " << nTimes << " nChannels: " << _nChannels << std::endl;
@@ -174,17 +180,17 @@ void PPFChanneliser::run(const SubbandTimeSeriesC32* timeSeries,
                     //}
 
                     // Get a pointer to the work buffer.
-                    workBuffer = &(_workBuffer[s * nPolarisations + p])[0];
+                    //workBuffer = &(_workBuffer[s * nPolarisations + p])[threadId];
 
                     // Update buffered (lagged) data for the sub-band.
-                    _updateBuffer(timeData, _nChannels, nFilterTaps,  workBuffer);
+                    //_updateBuffer(timeData, _nChannels, nFilterTaps,  workBuffer);
 
                     // Apply the PPF.
-                    _filter(workBuffer, nFilterTaps, _nChannels, coeffs, filteredSamples);
+                    //_filter(workBuffer, nFilterTaps, _nChannels, coeffs, filteredSamples);
                     
                     // FFT the filtered sub-band data to form a new spectrum.
-                    spectrum = spectra->spectrum(b, s ,p);
-                    _fft(filteredSamples, spectrum);
+                    //spectrum = spectra->spectrum(b, s ,p);
+                    //_fft(filteredSamples, spectrum);
                 }
             }
         }
