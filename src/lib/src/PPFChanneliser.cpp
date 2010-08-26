@@ -174,11 +174,6 @@ void PPFChanneliser::run(const TimeSeriesDataSetC32* timeSeries,
                     // Get a pointer to the time series.
                     timeData = timeSeries->timeSeriesData(b, s, p);
 
-                    //if (nTimes != _nChannels) {
-                    //   std::cout << "nTimes: " << nTimes << " nChannels: " << _nChannels << std::endl;
-                    //   throw QString("PPFChanneliser::run(): dimension mismatch");
-                    //}
-
                     // Get a pointer to the work buffer.
                     workBuffer = &(_workBuffer[s * nPolarisations + p])[threadId];
 
