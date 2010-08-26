@@ -37,15 +37,69 @@ void PPFChanneliserTest::setUp()
     if (timesPerChunk%_nChannels) CPPUNIT_FAIL("Setup error");
 
     _nBlocks = timesPerChunk / _nChannels;
-
-//    cout << "---------- PPF Channeliser test ---------- " << endl;
-//    cout << "nChunks = " << _nChunks << endl;
-//    cout << "timesPerChunk = " << timesPerChunk << endl;
-//    cout << "- nBlocks = " << _nBlocks << endl;
-//    cout << "- _nSubbands = " << _nSubbands << endl;
-//    cout << "- nPols = " << _nPols << endl;
-//    cout << "- nChannels = " << _nChannels << endl;
 }
+
+
+
+/**
+ * @details
+ * Test the run method.
+ */
+void PPFChanneliserTest::test_run()
+{
+    cout << endl << "***** PPFChanneliserTest::test_run() ***** " << endl;
+    // Setup the channeliser.
+    unsigned nThreads = 2;
+    ConfigNode config(_configXml(_nChannels, nThreads, _nTaps));
+
+    try {
+        PPFChanneliser channeliser(config);
+        SpectrumDataSetC32 spectra;
+        {
+            TimeSeriesDataSetC32 timeSeries;
+            timeSeries.resize(_nBlocks, _nSubbands, _nPols, _nChannels);
+            channeliser.run(&timeSeries, &spectra);
+        }
+
+        TimeSeriesDataSetC32 timeSeries;
+        timeSeries.resize(_nBlocks, _nSubbands, _nPols, _nChannels);
+
+        QTime timer;
+        timer.start();
+        channeliser.run(&timeSeries, &spectra);
+        int elapsed = timer.elapsed();
+
+        cout << endl;
+        cout << "-------------------------------------------------" << endl;
+        cout << "[PPFChanneliser]: run() " << endl;
+        cout << "- nChan = " << _nChannels << endl << endl;
+        if (_verbose) {
+            cout << "- nTaps = " << _nTaps << endl;
+            cout << "- nBlocks = " << _nBlocks << endl;
+            cout << "- nSubbands = " << _nSubbands << endl;
+            cout << "- nPols = " << _nPols << endl;
+        }
+        cout << "* Elapsed = " << elapsed << " ms. [" << nThreads << " threads]";
+        cout << " (data time = " << _nBlocks * _nChannels * 5e-3 << " ms.)" << endl;
+        cout << "-------------------------------------------------" << endl;
+    }
+
+    catch (const QString& err)
+    {
+            std::cout << err.toStdString() << std::endl;
+    }
+    cout << endl << "***** PPFChanneliserTest::test_run() ***** " << endl;
+}
+
+
+
+
+
+
+
+
+
+
 
 
 /**
@@ -307,53 +361,6 @@ void PPFChanneliserTest::test_fft()
 }
 
 
-/**
- * @details
- * Test the run method.
- */
-void PPFChanneliserTest::test_run()
-{
-    // Setup the channeliser.
-    unsigned nThreads = 2;
-    ConfigNode config(_configXml(_nChannels, nThreads, _nTaps));
-
-    try {
-
-        PPFChanneliser channeliser(config);
-
-        SpectrumDataSetC32 spectra;
-        spectra.resize(_nBlocks, _nSubbands, _nPols);
-        TimeSeriesDataSetC32 timeSeries;
-        timeSeries.resize(_nBlocks, _nSubbands, _nPols, _nChannels);
-
-        unsigned iter = 1;
-
-        QTime timer;
-        timer.start();
-        for (unsigned i = 0; i < iter; ++i)
-            channeliser.run(&timeSeries, &spectra);
-        int elapsed = timer.elapsed();
-
-        cout << endl;
-        cout << "-------------------------------------------------" << endl;
-        cout << "[PPFChanneliser]: run() " << endl;
-        cout << "- nChan = " << _nChannels << endl << endl;
-        if (_verbose) {
-            cout << "- nTaps = " << _nTaps << endl;
-            cout << "- nBlocks = " << _nBlocks << endl;
-            cout << "- nSubbands = " << _nSubbands << endl;
-            cout << "- nPols = " << _nPols << endl;
-        }
-        cout << "* Elapsed = " << elapsed << " ms. [" << nThreads << " threads]";
-        cout << " (data time = " << _nBlocks * _nChannels * 5e-3 << " ms.)" << endl;
-        cout << "-------------------------------------------------" << endl;
-    }
-
-    catch (const QString& err)
-    {
-            std::cout << err.toStdString() << std::endl;
-    }
-}
 
 
 

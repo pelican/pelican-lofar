@@ -27,58 +27,27 @@ namespace lofar {
  * @param[in] config XML configuration node.
  */
 PPFChanneliser::PPFChanneliser(const ConfigNode& config)
-: AbstractModule(config)
+: AbstractModule(config), _buffersInitialised(false)
 {
-    _buffersInitialised = false;
-
     // Get options from the XML configuration node.
     _nChannels = config.getOption("outputChannelsPerSubband", "value", "512").toUInt();
     _nThreads = config.getOption("processingThreads", "value", "2").toUInt();
     unsigned nTaps = config.getOption("filter", "nTaps", "8").toUInt();
     QString window = config.getOption("filter", "filterWindow", "kaiser").toLower();
 
-    // Pointers to processing buffers.
+    // Set the number of processing threads.
     omp_set_num_threads(_nThreads);
-    //_nThreads = 2;
-
 
     // Enforce even number of channels.
-    if (_nChannels % 2 != 0) {
-        throw QString("PPFChanneliser: "
-                " Please choose an even number of channels.");
-    }
+    if (_nChannels%2) throw _err("Number of channels needs to be even.");
 
-    // Generate PPF coefficients.
-    _ppfCoeffs.resize(nTaps, _nChannels);
-    PolyphaseCoefficients::FirWindow windowType;
-    if (window == "kaiser") windowType = PolyphaseCoefficients::KAISER;
-    else if (window == "gaussian") {
-        windowType = PolyphaseCoefficients::GAUSSIAN;
-    }
-    else if (window == "blackman") {
-        windowType = PolyphaseCoefficients::BLACKMAN;
-    }
-    else if (window == "hamming") {
-        windowType = PolyphaseCoefficients::HAMMING;
-    }
-    else {
-        throw QString("PPFChanneliser: "
-                "Unknown coefficient window type '%1'.").arg(window);
-    }
-    _ppfCoeffs.genereateFilter(nTaps, _nChannels, windowType);
-
-    // Convert Coefficients to single precision.
-    _coeffs.resize(_ppfCoeffs.size());
-    const double* coeffs = _ppfCoeffs.ptr();
-    for (unsigned i = 0; i < _ppfCoeffs.size(); ++i) {
-        _coeffs[i] = float(coeffs[i]);
-    }
+    // Generate the FIR coefficients;
+    _generateFIRCoefficients(window, nTaps);
 
     // Allocate buffers used for holding the output of the FIR stage.
     _filteredData.resize(_nThreads);
-    for (unsigned i = 0; i < _nThreads; ++i) {
+    for (unsigned i = 0; i < _nThreads; ++i)
         _filteredData[i].resize(_nChannels);
-    }
 
     // Initialise pointer to the current oldest sample set.
     _iOldestSamples = 0;
@@ -110,19 +79,16 @@ PPFChanneliser::~PPFChanneliser()
 * The channeliser performs channelisation of a number of sub-bands containing
 * a complex time series.
 *
-* Paralellisation, by means of openMP threads, is carried out by splitting
-* the subbands as evenly as possible between threads.
+* Parallelisation, by means of openMP threads, is carried out by splitting
+* the sub-bands as evenly as possible between threads.
 *
-*
-*
-* @param[in]  timeData 		Buffer of time samples to be channelised.
-* @param[in]  filterCoeff	Pointer to object containing polyphase filter
-* 						 	coefficients.
+* @param[in]  timeSeries 	Buffer of time samples to be channelised.
 * @param[out] spectrum	 	Set of spectra produced.
 */
 void PPFChanneliser::run(const TimeSeriesDataSetC32* timeSeries,
         SpectrumDataSetC32* spectra)
 {
+    // Perform a number of sanity checks.
     _checkData(timeSeries);
 
     // Get local copies of the data dimensions.
@@ -130,10 +96,10 @@ void PPFChanneliser::run(const TimeSeriesDataSetC32* timeSeries,
     unsigned nPolarisations = timeSeries->nPolarisations();
     unsigned nTimeBlocks = timeSeries->nTimeBlocks();
 
-    // Resize the output spectra blob.
+    // Resize the output spectra blob. (only if the number of channels changes!).
     spectra->resize(nTimeBlocks, nSubbands, nPolarisations, _nChannels);
 
-    // Set the timing parameters
+    // Set the timing parameters.
     // We only need the timestamp of the first packet for this version of the
     // Channeliser.
     spectra->setLofarTimestamp(timeSeries->getLofarTimestamp());
@@ -146,32 +112,29 @@ void PPFChanneliser::run(const TimeSeriesDataSetC32* timeSeries,
 
     const float* coeffs = &_coeffs[0];
 
-#pragma omp parallel \
-    shared(nTimeBlocks, nPolarisations, nSubbands, nFilterTaps, coeffs)
-//    private(threadId, nThreads, start, end, workBuffer, filteredSamples, \
-//    spectrum, timeData, b, s, p)
+    unsigned threadId = 0, nThreads = 0, start = 0, end = 0;
+    Complex *workBuffer = 0, *filteredSamples = 0, *spectrum = 0;
+    Complex const * timeData = 0;
+
+    #pragma omp parallel \
+        shared(nTimeBlocks, nPolarisations, nSubbands, nFilterTaps, coeffs) \
+        private(threadId, nThreads, start, end, workBuffer, filteredSamples, \
+                spectrum, timeData)
     {
-        unsigned threadId = omp_get_thread_num();
-        int nThreads = omp_get_num_threads();
-        unsigned start = 0, end = 0;
+        threadId = omp_get_thread_num();
+        nThreads = omp_get_num_threads();
         _threadProcessingIndices(start, end, nSubbands, nThreads, threadId);
 
-        Complex* workBuffer;
-        Complex* filteredSamples = &_filteredData[threadId][threadId];
+        filteredSamples = &_filteredData[threadId][0];
 
-        Complex* spectrum = 0;
-        Complex const* timeData = 0;
-
-        // Loop over sub-bands.
         for (unsigned b = 0; b < nTimeBlocks; ++b) {
             for (unsigned s = start; s < end; ++s) {
                 for (unsigned p = 0; p < nPolarisations; ++p) {
-
                     // Get a pointer to the time series.
                     timeData = timeSeries->timeSeriesData(b, s, p);
 
                     // Get a pointer to the work buffer.
-                    workBuffer = &(_workBuffer[s * nPolarisations + p])[threadId];
+                    workBuffer = &(_workBuffer[s * nPolarisations + p])[0];
 
                     // Update buffered (lagged) data for the sub-band.
                     _updateBuffer(timeData, _nChannels, nFilterTaps,  workBuffer);
@@ -190,28 +153,50 @@ void PPFChanneliser::run(const TimeSeriesDataSetC32* timeSeries,
 
 
 /**
+ * @details
+ * Generate FIR coefficients for the specified window.
+ */
+void PPFChanneliser::_generateFIRCoefficients(const QString& window, unsigned nTaps)
+{
+    _ppfCoeffs.resize(nTaps, _nChannels);
+
+    PolyphaseCoefficients::FirWindow windowType;
+    if (window == "kaiser")
+        windowType = PolyphaseCoefficients::KAISER;
+    else if (window == "gaussian")
+        windowType = PolyphaseCoefficients::GAUSSIAN;
+    else if (window == "blackman")
+        windowType = PolyphaseCoefficients::BLACKMAN;
+    else if (window == "hamming")
+        windowType = PolyphaseCoefficients::HAMMING;
+    else
+        throw _err("Unknown coefficient window type '%1'.").arg(window);
+
+    _ppfCoeffs.genereateFilter(nTaps, _nChannels, windowType);
+
+    // Convert Coefficients to single precision.
+    _coeffs.resize(_ppfCoeffs.size());
+    double const* coeffs = _ppfCoeffs.ptr();
+    for (unsigned i = 0u; i < _ppfCoeffs.size(); ++i)
+        _coeffs[i] = (float)coeffs[i];
+}
+
+
+/**
 * @details
 */
 void PPFChanneliser::_checkData(const TimeSeriesDataSetC32* timeData)
 {
-    if (!timeData)
-        throw QString("PPFChanneliser: Time stream data blob missing.");
+    if (!timeData) throw _err("Time stream data blob missing.");
 
-    if (timeData->size() == 0)
-        throw QString("PPFChanneliser: Empty time data blob");
-
-    if (timeData->nSubbands() == 0)
-        throw QString("PPFChanneliser: Empty time data blob");
-
-    if (timeData->nPolarisations() == 0)
-        throw QString("PPFChanneliser: Empty time data blob");
-
-    if (timeData->nTimeBlocks() == 0)
-        throw QString("PPFChanneliser: Empty time data blob");
+    if (!timeData->size()) throw _err("Empty time data blob");
+    if (!timeData->nSubbands()) throw _err("Empty time data blob");
+    if (!timeData->nPolarisations()) throw _err("Empty time data blob");
+    if (!timeData->nTimeBlocks()) throw _err("Empty time data blob");
 
     if (_ppfCoeffs.nChannels() != _nChannels)
-        throw QString("PPFChanneliser: Dimension mismatch: "
-                "Number of filter channels %1 != number of output channels %2.")
+        throw _err("Dimension mismatch: Number of FIR coefficient channels %1 "
+                "!= number of output channels %2.")
                 .arg(_ppfCoeffs.nChannels()).arg(_nChannels);
 }
 
@@ -275,11 +260,9 @@ void PPFChanneliser::_threadProcessingIndices(unsigned& start,
         unsigned& end, unsigned nValues, unsigned nThreads,
         unsigned threadId)
 {
-    if (threadId >= nThreads) {
-        throw QString("PPFChanneliser::_threadProcessingIndices(): "
-                "threadId '%1' out of range for nThreads = %2.").arg(threadId).
-                arg(nThreads);
-    }
+    if (threadId >= nThreads)
+        throw _err("threadProcessingIndices(): threadId '%1' out of range for"
+                " nThreads = %2.").arg(threadId).arg(nThreads);
 
     if (threadId >= nValues) {
         start = end = 0;
@@ -288,8 +271,7 @@ void PPFChanneliser::_threadProcessingIndices(unsigned& start,
 
     unsigned number = nValues / nThreads;
     unsigned remainder = nValues % nThreads;
-    if (threadId < remainder)
-        number++;
+    if (threadId < remainder) number++;
 
     start = threadId * number;
     if (threadId >= remainder) start += remainder;
@@ -315,6 +297,16 @@ unsigned PPFChanneliser::_setupWorkBuffers(unsigned nSubbands,
     }
     _buffersInitialised = true;
     return bufferSize;
+}
+
+
+/**
+ * @details
+ * Returns a message use for errors and throws from the channeliser.
+ */
+inline QString PPFChanneliser::_err(const QString& message)
+{
+    return QString("PPFChanneliser: ") + message;
 }
 
 

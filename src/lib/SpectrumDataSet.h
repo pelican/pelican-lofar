@@ -84,12 +84,12 @@ class SpectrumDataSet : public DataBlob
         /// Return the number of channels for the spectrum at time block
         /// \p b, sub-band \p s and polarisation \p.
         unsigned nChannels(unsigned b, unsigned s, unsigned p) const
-        { return ptr(b, s, p)->nChannels(); }
+        { return ptr(b, s, p) ? ptr(b, s, p)->nChannels() : 0; }
 
         /// Return the number of channels for the spectrum specified by
         /// index \p i
         unsigned nChannels(unsigned i) const
-        { return spectrum(i)->nChannels(); }
+        { return _data.size() > 0 && i < _data.size() ? spectrum(i)->nChannels() : 0; }
 
         /// Return the block rate (time-span of the entire chunk)
         long getBlockRate() const { return _blockRate; }
@@ -199,6 +199,7 @@ inline void SpectrumDataSet<T>::resize(unsigned nTimeBlocks, unsigned nSubbands,
         unsigned nPolarisations, unsigned nChannels)
 {
     resize(nTimeBlocks, nSubbands, nPolarisations);
+    if (nChannels != this->nChannels(0)) // TODO hack for testing if this loop is slow...
     for (unsigned i = 0; i < _data.size(); ++i) _data[i].resize(nChannels);
 }
 

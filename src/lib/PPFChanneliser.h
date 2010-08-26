@@ -13,7 +13,10 @@
 
 #include <fftw3.h>
 
-using std::complex;
+using std::vector;
+using std::cout;
+using std::cerr;
+using std::endl;
 
 namespace pelican {
 
@@ -73,6 +76,9 @@ class PPFChanneliser : public AbstractModule
                 SpectrumDataSetC32* spectra);
 
     private:
+        /// Generate the FIR coefficients used by the PPF.
+        void _generateFIRCoefficients(const QString& window, unsigned nTaps);
+
         /// Sanity checking.
         void _checkData(const TimeSeriesDataSetC32* timeData);
 
@@ -97,21 +103,25 @@ class PPFChanneliser : public AbstractModule
         unsigned _setupWorkBuffers(unsigned nSubbands,
                 unsigned nPolariations, unsigned nChannels, unsigned nTaps);
 
+        /// Return an error message.
+        QString _err(const QString& message);
+
     private:
         bool _buffersInitialised;
+
         unsigned _nChannels;
         unsigned _nThreads;
 
         PolyphaseCoefficients _ppfCoeffs;
-        std::vector<float> _coeffs;
+        vector<float> _coeffs;
 
         unsigned _iOldestSamples; // Pointer to the oldest samples.
 
         fftwf_plan _fftPlan;
 
         // Work Buffers (need to have a buffer per thread).
-        std::vector<std::vector<Complex> > _workBuffer;
-        std::vector<std::vector<Complex> > _filteredData;
+        vector<vector<Complex> > _workBuffer;
+        vector<vector<Complex> > _filteredData;
 };
 
 
