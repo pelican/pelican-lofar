@@ -27,8 +27,7 @@ EmptyPipeline::~EmptyPipeline()
  */
 void EmptyPipeline::init()
 {
-    // Request remote data
-    requestRemoteData("SubbandTimeSeriesC32");
+    requestRemoteData("TimeSeriesDataSetC32");
 }
 
 /**
@@ -38,7 +37,8 @@ void EmptyPipeline::init()
 void EmptyPipeline::run(QHash<QString, DataBlob*>& /*remoteData*/)
 {
 
-    if (_iteration % 200 == 0) std::cout << "Finished pipeline, iteration " << _iteration << std::endl;
+    if (_iteration % 200 == 0)
+        std::cout << "Finished pipeline, iteration " << _iteration << std::endl;
     _iteration++;
 }
 
