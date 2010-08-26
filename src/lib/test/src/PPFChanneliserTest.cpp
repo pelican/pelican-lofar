@@ -55,6 +55,8 @@ void PPFChanneliserTest::test_run()
     try {
         PPFChanneliser channeliser(config);
         SpectrumDataSetC32 spectra;
+
+        // Run once to size up buffers etc.
         {
             TimeSeriesDataSetC32 timeSeries;
             timeSeries.resize(_nBlocks, _nSubbands, _nPols, _nChannels);
