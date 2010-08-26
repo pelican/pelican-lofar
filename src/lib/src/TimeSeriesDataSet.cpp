@@ -1,4 +1,4 @@
-#include "SubbandTimeSeries.h"
+#include "TimeSeriesDataSet.h"
 
 #include <QtCore/QIODevice>
 #include <QtCore/QTextStream>
@@ -10,7 +10,7 @@
 namespace pelican {
 namespace lofar {
 
-void SubbandTimeSeriesC32::write(const QString& fileName) const
+void TimeSeriesDataSetC32::write(const QString& fileName) const
 {
     QFile file(fileName);
     if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) return;
@@ -23,7 +23,7 @@ void SubbandTimeSeriesC32::write(const QString& fileName) const
     for (unsigned b = 0; b < nTimeBlocks(); ++b) {
         for (unsigned s = 0; s < nSubbands(); ++s) {
             for (unsigned p = 0; p < nPolarisations(); ++p) {
-                times = timeSeries(b, s, p);
+                times = timeSeriesData(b, s, p);
                 nTimes = this->nTimes(b, s, p);
                 for (unsigned t = 0; t < nTimes; ++t) {
                     out << QString::number(times[t].real(), 'g', 16) << " ";

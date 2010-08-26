@@ -1,5 +1,5 @@
-#ifndef ADAPTER_SUBBAND_TIME_SERIES_H
-#define ADAPTER_SUBBAND_TIME_SERIES_H
+#ifndef ADAPTER_TIME_SERIES_DATA_SET_H
+#define ADAPTER_TIME_SERIES_DATA_SET_H
 
 #include "pelican/core/AbstractStreamAdapter.h"
 #include "LofarUdpHeader.h"
@@ -7,7 +7,7 @@
 #include <complex>
 
 /**
- * @file AdapterSubbandTimeSeries.h
+ * @file AdapterTimeSeriesDataSet.h
  */
 
 namespace pelican {
@@ -16,18 +16,18 @@ class ConfigNode;
 
 namespace lofar {
 
-class SubbandTimeSeriesC32;
+class TimeSeriesDataSetC32;
 
 /**
- * @class AdapterSubbandTimeSeries
+ * @class AdapterTimeSeriesDataSet
  *
  * @ingroup pelican_lofar
  *
  * @brief
- * Adapter to deserialise time stream data chunks from a lofar station.
+ * Adapter to deserialise chunks of UDP packets from a LOFAR station RSP board.
  *
  * @details
- * Stream adapter to deserialise time stream data chunks from a lofar station.
+ * Adapter to deserialise chunks of UDP packets from a LOFAR station RSP board.
  *
  * \section Configuration:
  *
@@ -55,20 +55,20 @@ class SubbandTimeSeriesC32;
  * - polarisations: Number of polarisations per packet.
  */
 
-class AdapterSubbandTimeSeries : public AbstractStreamAdapter
+class AdapterTimeSeriesDataSet : public AbstractStreamAdapter
 {
     private:
-        friend class AdapterSubbandTimeSeriesTest;
+        friend class AdapterTimeSeriesDataSetTest;
 
         typedef float Real;
         typedef std::complex<Real> Complex;
 
     public:
         /// Constructs a new AdapterTimeStream.
-        AdapterSubbandTimeSeries(const ConfigNode& config);
+        AdapterTimeSeriesDataSet(const ConfigNode& config);
 
         /// Destroys the AdapterTimeStream.
-        ~AdapterSubbandTimeSeries() {}
+        ~AdapterTimeSeriesDataSet() {}
 
     protected:
         /// Method to deserialise a LOFAR time stream data.
@@ -79,14 +79,11 @@ class AdapterSubbandTimeSeries : public AbstractStreamAdapter
         void _checkData();
 
         /// Read the udp packet header from a buffer read from the IO device.
-        void _readHeader(UDPPacket::Header& header, char* buffer);
+        void _readHeader(char* buffer, UDPPacket::Header& header);
 
         /// Reads the udp data data section into the data blob data array.
-        void _readData(SubbandTimeSeriesC32* data, char* buffer,
-                unsigned packetIndex);
-
-        /// Updates dimensions of t	he time stream data being de-serialised.
-        void _updateDimensions();
+        void _readData(unsigned packet, char* buffer,
+                TimeSeriesDataSetC32* data);
 
         /// Prints the header to standard out (for debugging).
         void _printHeader(const UDPPacket::Header& header);
@@ -98,7 +95,11 @@ class AdapterSubbandTimeSeries : public AbstractStreamAdapter
         Complex _makeComplex(const TYPES::i16complex& z);
 
     private:
-        SubbandTimeSeriesC32* _timeData;
+        /// Constructs an error message with the class name.
+        QString _err(const QString& message);
+
+    private:
+        TimeSeriesDataSetC32* _timeData;
         bool _fixedPacketSize;
         unsigned _nUDPPacketsPerChunk;
         unsigned _nSamplesPerPacket;
@@ -119,10 +120,8 @@ class AdapterSubbandTimeSeries : public AbstractStreamAdapter
 };
 
 
-
-PELICAN_DECLARE_ADAPTER(AdapterSubbandTimeSeries)
+PELICAN_DECLARE_ADAPTER(AdapterTimeSeriesDataSet)
 
 } // namespace lofar
 } // namespace pelican
-
-#endif // ADAPTER_SUBBAND_TIME_STREAM_H
+#endif // ADAPTER_TIME_SERIES_DATA_SET

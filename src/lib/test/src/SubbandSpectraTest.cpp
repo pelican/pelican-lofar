@@ -1,5 +1,5 @@
 #include "SubbandSpectraTest.h"
-#include "SubbandSpectra.h"
+#include "SpectrumDataSet.h"
 
 #include "pelican/utility/FactoryGeneric.h"
 
@@ -22,34 +22,43 @@ void SubbandSpectraTest::test_accessorMethods()
     // Use Case
     // Construct a sub-band spectra data blob directly
     {
+        try {
+            SpectrumDataSet<float> spectra;
 
-        SubbandSpectra<float> spectra;
+            spectra.resize(10, 62, 2);
+            CPPUNIT_ASSERT_EQUAL(unsigned(10), spectra.nTimeBlocks());
+            CPPUNIT_ASSERT_EQUAL(unsigned(62), spectra.nSubbands());
+            CPPUNIT_ASSERT_EQUAL(unsigned(2), spectra.nPolarisations());
 
-        spectra.resize(10, 62, 2);
-        CPPUNIT_ASSERT_EQUAL(unsigned(10), spectra.nTimeBlocks());
-        CPPUNIT_ASSERT_EQUAL(unsigned(62), spectra.nSubbands());
-        CPPUNIT_ASSERT_EQUAL(unsigned(2), spectra.nPolarisations());
-
-        // Expect to throw as base class methods have not been implemented.
-        CPPUNIT_ASSERT_THROW(spectra.serialisedBytes(), QString);
-        QBuffer buffer;
-        CPPUNIT_ASSERT_THROW(spectra.serialise(buffer), QString);
-        CPPUNIT_ASSERT_THROW(spectra.deserialise(buffer, QSysInfo::ByteOrder),
-                QString);
+            // Expect to throw as base class methods have not been implemented.
+            CPPUNIT_ASSERT_THROW(spectra.serialisedBytes(), QString);
+            QBuffer buffer;
+            CPPUNIT_ASSERT_THROW(spectra.serialise(buffer), QString);
+            CPPUNIT_ASSERT_THROW(spectra.deserialise(buffer, QSysInfo::ByteOrder),
+                    QString);
+        }
+        catch (const QString& err) {
+            std::cout << err.toStdString() << std::endl;
+        }
     }
 
     // Use Case
     // Construct a subband spectra data blob using the factory
     {
-        FactoryGeneric<DataBlob> factory;
-        DataBlob* s = factory.create("SubbandSpectraC32");
+        try {
+            FactoryGeneric<DataBlob> factory;
+            DataBlob* s = factory.create("SpectrumDataSetC32");
 
-        SubbandSpectraC32* spectra = (SubbandSpectraC32*)s;
+            SpectrumDataSetC32* spectra = (SpectrumDataSetC32*)s;
+            spectra->resize(10, 62, 2);
 
-        spectra->resize(10, 62, 2);
-        CPPUNIT_ASSERT_EQUAL(unsigned(10), spectra->nTimeBlocks());
-        CPPUNIT_ASSERT_EQUAL(unsigned(62), spectra->nSubbands());
-        CPPUNIT_ASSERT_EQUAL(unsigned(2), spectra->nPolarisations());
+            CPPUNIT_ASSERT_EQUAL(unsigned(10), spectra->nTimeBlocks());
+            CPPUNIT_ASSERT_EQUAL(unsigned(62), spectra->nSubbands());
+            CPPUNIT_ASSERT_EQUAL(unsigned(2), spectra->nPolarisations());
+        }
+        catch (const QString& err) {
+            std::cout << err.toStdString() << std::endl;
+        }
     }
 
 }
@@ -67,18 +76,18 @@ void SubbandSpectraTest::test_serialise_deserialise()
     unsigned nTimeBlocks = 10;
     unsigned nSubbands = 5;
     unsigned nPolarisations = 2;
-    SubbandSpectraC32 spectra;
+    SpectrumDataSetC32 spectra;
     spectra.resize(nTimeBlocks, nSubbands, nPolarisations);
     CPPUNIT_ASSERT_EQUAL(nTimeBlocks * nSubbands * nPolarisations,
             spectra.nSpectra());
 
     for (unsigned i = 0; i < spectra.nSpectra(); ++i) {
-        Spectrum<std::complex<float> >* spectrum = spectra.ptr(i);
+        Spectrum<std::complex<float> >* spectrum = spectra.spectrum(i);
         CPPUNIT_ASSERT(spectrum != NULL);
 
         spectrum->setStartFrequency(double(i) + 0.1);
         spectrum->setFrequencyIncrement(double(i) + 0.2);
-        unsigned nChannels = 10 + i;
+        unsigned nChannels = 10;
         spectrum->resize(nChannels);
         std::complex<float>* channelAmp = spectrum->ptr();
         for (unsigned c = 0; c < spectrum->nChannels(); ++c) {
@@ -99,7 +108,7 @@ void SubbandSpectraTest::test_serialise_deserialise()
     serialBlob.open(QBuffer::ReadOnly);
 
     // Deserialise into a new spectra data blob.
-    SubbandSpectraC32 spectraNew;
+    SpectrumDataSetC32 spectraNew;
     spectraNew.deserialise(serialBlob, QSysInfo::ByteOrder);
 
     // Check we read everything.
@@ -112,9 +121,9 @@ void SubbandSpectraTest::test_serialise_deserialise()
     CPPUNIT_ASSERT_EQUAL(nPolarisations, spectraNew.nPolarisations());
 
     for (unsigned i = 0; i < spectraNew.nSpectra(); ++i) {
-        const Spectrum<std::complex<float> >* spectrum = spectra.ptr(i);
+        const Spectrum<std::complex<float> >* spectrum = spectra.spectrum(i);
         unsigned nChannels = spectrum->nChannels();
-        CPPUNIT_ASSERT_EQUAL(unsigned(10 + i), nChannels);
+        CPPUNIT_ASSERT_EQUAL(10u, nChannels);
         const std::complex<float>* channelAmp = spectrum->ptr();
         for (unsigned c = 0; c < nChannels; ++c) {
             CPPUNIT_ASSERT_DOUBLES_EQUAL(float(i) + float(c),

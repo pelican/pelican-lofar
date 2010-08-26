@@ -4,7 +4,7 @@
 #include <cppunit/extensions/HelperMacros.h>
 
 /**
- * @file AdapterSubbandTimeSeriesTest.h
+ * @file AdapterTimeSeriesDataSetTest.h
  */
 
 #include <QtCore/QString>
@@ -13,23 +13,20 @@ namespace pelican {
 namespace lofar {
 
 /**
- * @class AdapterSubbandTimeSeriesTest
+ * @class AdapterTimeSeriesDataSetTest
  *
  * @brief
- * Unit tests for the AdapterTimeStreamTest class
- *
  * @details
- *
  */
 
-class AdapterSubbandTimeSeriesTest : public CppUnit::TestFixture
+class AdapterTimeSeriesDataSetTest : public CppUnit::TestFixture
 {
     public:
-        AdapterSubbandTimeSeriesTest() : CppUnit::TestFixture() {}
-        ~AdapterSubbandTimeSeriesTest() {}
+        AdapterTimeSeriesDataSetTest() : CppUnit::TestFixture() {}
+        ~AdapterTimeSeriesDataSetTest() {}
 
     public:
-        CPPUNIT_TEST_SUITE(AdapterSubbandTimeSeriesTest);
+        CPPUNIT_TEST_SUITE(AdapterTimeSeriesDataSetTest);
         CPPUNIT_TEST(test_configuration);
         CPPUNIT_TEST(test_checkDataFixedPacket);
         CPPUNIT_TEST(test_checkDataVariablePacket);

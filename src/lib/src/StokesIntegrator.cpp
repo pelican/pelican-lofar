@@ -1,7 +1,5 @@
 #include "StokesIntegrator.h"
-//#include "StokesGenerator.h"
-#include "SubbandSpectra.h"
-#include "Spectrum.h"
+#include "SpectrumDataSet.h"
 
 #include "pelican/utility/pelicanTimer.h"
 #include "pelican/utility/ConfigNode.h"
@@ -30,12 +28,12 @@ StokesIntegrator::~StokesIntegrator()
 
 
 ///
-void StokesIntegrator::run(const SubbandSpectraStokes* stokesGeneratorOutput,
-        SubbandSpectraStokes* intStokes)
+void StokesIntegrator::run(const SpectrumDataSetStokes* stokesGeneratorOutput,
+        SpectrumDataSetStokes* intStokes)
 {
     unsigned nSamples = stokesGeneratorOutput->nTimeBlocks();
     unsigned nSubbands = stokesGeneratorOutput->nSubbands();
-    unsigned nChannels = stokesGeneratorOutput->ptr(0,0,0)->nChannels();
+    unsigned nChannels = stokesGeneratorOutput->nChannels(0);
     unsigned nPols = stokesGeneratorOutput->nPolarisations();
     //std::cout << "nSamples= " << nSamples << std::endl;
     //std::cout << "nSubbands= " << nSubbands << std::endl;
@@ -63,7 +61,7 @@ void StokesIntegrator::run(const SubbandSpectraStokes* stokesGeneratorOutput,
 
     intStokes->resize(newSamples, nSubbands, nPols, nChannels);
     for (unsigned i = 0; i < newSamples * nSubbands * nPols; ++i) {
-        value2 = intStokes->ptr(i)->ptr();
+        value2 = intStokes->spectrum(i)->ptr();
         for (unsigned c = 0; c < nChannels; ++c) value2[c] = 0.0;
     }
 
@@ -76,8 +74,8 @@ void StokesIntegrator::run(const SubbandSpectraStokes* stokesGeneratorOutput,
         for (unsigned t = timeStart; t < _windowSize+timeStart; ++t) {
             for (unsigned p = 0; p < nPols; ++p) {
                 for (unsigned s = 0; s < nSubbands; ++s) {
-                    value = stokesGeneratorOutput->ptr(t, s, p)->ptr();
-                    float* timeBuffer = intStokes->ptr(u,s,p)->ptr();
+                    value = stokesGeneratorOutput->spectrumData(t, s, p);
+                    float* timeBuffer = intStokes->spectrumData(u,s,p);
                     for (unsigned c = 0; c < nChannels; ++c){
                         timeBuffer[c]+= value[c];
                         bufferCounter++;

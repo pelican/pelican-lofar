@@ -1,4 +1,4 @@
-#include "lib/SubbandSpectra.h"
+#include "lib/SpectrumDataSet.h"
 #include "pelican/output/PelicanTCPBlobServer.h"
 #include "pelican/utility/ConfigNode.h"
 
@@ -26,7 +26,7 @@ int main(int argc, char** argv)
     pelican::ConfigNode config(xml);
     pelican::PelicanTCPBlobServer server(config);
     sleep(1);
-    pelican::lofar::SubbandSpectraStokes spectra;
+    pelican::lofar::SpectrumDataSetStokes spectra;
     spectra.resize(nTimeBlocks, nSubbands, nPolarisations, nChannels);
     unsigned long counter = 0;
 
@@ -39,7 +39,7 @@ int main(int argc, char** argv)
             for (unsigned s = 0; s < nSubbands; ++s) {
                 for (unsigned p = 0; p < nPolarisations; ++p) {
                     for (unsigned c = 0; c < nChannels; ++c) {
-                        data = spectra.ptr(t, s, p)->ptr();
+                        data = spectra.spectrumData(t, s, p);
                         float nPeriods = float(s + 1) * float(p+1);
                         float x = float(c);
                         float arg = 2.0f * float(M_PI) * x * nPeriods / float(nChannels);

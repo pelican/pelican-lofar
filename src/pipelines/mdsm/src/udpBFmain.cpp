@@ -2,7 +2,7 @@
 
 #include "LofarStreamDataClient.h"
 #include "UdpBFPipeline.h"
-#include "AdapterSubbandTimeSeries.h"
+#include "AdapterTimeSeriesDataSet.h"
 
 #include <QtCore/QCoreApplication>
 

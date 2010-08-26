@@ -1,7 +1,8 @@
 #include "viewer/SubbandSpectrumWidget.h"
-#include "lib/SubbandSpectra.h"
+#include "lib/SpectrumDataSet.h"
 
 #include <iostream>
+
 using namespace std;
 
 namespace pelican {
@@ -27,11 +28,11 @@ void SubbandSpectrumWidget::updateData(DataBlob* data)
 
 
     // Extra plot data from the data blob.
-    SubbandSpectraStokes* spectra = (SubbandSpectraStokes*)data;
+    SpectrumDataSetStokes* spectra = (SpectrumDataSetStokes*)data;
     unsigned nTimeBlocks = spectra->nTimeBlocks();
     unsigned nSubbands = spectra->nSubbands();
     unsigned nPolarisations = spectra->nPolarisations();
-    unsigned nChannels = spectra->ptr(0,0,0)->nChannels();
+    unsigned nChannels = spectra->nChannels(0,0,0);
     //     std::cout << "nTimeBlocks    = " << nTimeBlocks << std::endl;
     //     std::cout << "nSubbands      = " << nSubbands << std::endl;
     //     std::cout << "nPolarisations = " << nPolarisations << std::endl;
@@ -51,7 +52,7 @@ void SubbandSpectrumWidget::updateData(DataBlob* data)
         _plot(_spectrumAmp);
         _spectrumAmp.resize(nChannels);
     }
-    float* spectrum = spectra->ptr(timeSample, subband, polarisation)->ptr();
+    float* spectrum = spectra->spectrumData(timeSample, subband, polarisation);
     for (unsigned i = 0; i < nChannels; ++i) {
         _spectrumAmp[i] += double(spectrum[i]);
     }

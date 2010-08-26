@@ -5,14 +5,14 @@
     <pipeline>
 
         <buffers>
-           <SubbandTimeSeriesC32>
+           <TimeSeriesDataSetC32>
                <buffer maxSize="100000000" maxChunkSize="100000000"/>
-           </SubbandTimeSeriesC32>
+           </TimeSeriesDataSetC32>
         </buffers>
 
         <chunkers>
            <LofarChunker>
-               <data type="SubbandTimeSeriesC32"/>
+               <data type="TimeSeriesDataSetC32"/>
                <connection host="127.0.0.1" port="8090"/>
                <params samplesPerPacket="32"
                        nrPolarisation="2"
@@ -25,12 +25,12 @@
 
         <clients>
             <LofarStreamDataClientNew>
-                <data type="SubbandTimeSeriesC32" adapter="AdapterSubbandTimeSeries" />
+                <data type="TimeSeriesDataSetC32" adapter="AdapterTimeSeriesDataSet" />
             </LofarStreamDataClientNew>
         </clients>
 
         <adapters>
-            <AdapterSubbandTimeSeries>
+            <AdapterTimeSeriesDataSet>
                 <fixedSizePackets value="false" />
                 <sampleSize bits="8" />
                 <packetsPerChunk number="16"/>
@@ -38,7 +38,7 @@
                 <samplesPerTimeBlock number="64"/>
                 <subbands number="31"/> <!-- number of subbands -->
                 <polarisations number="2"/>
-            </AdapterSubbandTimeSeries>
+            </AdapterTimeSeriesDataSet>
         </adapters>
 
         <modules>

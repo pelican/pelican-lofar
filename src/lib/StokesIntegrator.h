@@ -6,7 +6,7 @@
  */
 
 #include "pelican/modules/AbstractModule.h"
-#include "SubbandTimeSeries.h"
+#include "TimeSeriesDataSet.h"
 #include "pelican/utility/ConfigNode.h"
 
 #include <vector>
@@ -19,7 +19,7 @@ class ConfigNode;
 namespace lofar {
 
 //class SubbandSpectraC32;
-class SubbandSpectraStokes;
+class SpectrumDataSetStokes;
 
 /**
  * @class StokesIntegrator
@@ -39,7 +39,7 @@ class StokesIntegrator : public AbstractModule
         ~StokesIntegrator();
 
         ///
-        void run(const SubbandSpectraStokes* stokesGeneratorOutput, SubbandSpectraStokes* intStokes);
+        void run(const SpectrumDataSetStokes* stokesGeneratorOutput, SpectrumDataSetStokes* intStokes);
         //	void run(const SubbandTimeSeriesC32* streamData,
         //      	SubbandSpectraStokes* stokes);
 

@@ -2,7 +2,7 @@
 
 #include "LofarStreamDataClient.h"
 #include "EmptyPipeline.h"
-#include "AdapterSubbandTimeSeries.h"
+#include "AdapterTimeSeriesDataSet.h"
 
 #include <QtCore/QCoreApplication>
 

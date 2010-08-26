@@ -1,5 +1,5 @@
-#ifndef SUBBAND_TIME_SERIES_H_
-#define SUBBAND_TIME_SERIES_H_
+#ifndef TIME_SERIES_DATA_SET_H_
+#define TIME_SERIES_DATA_SET_H_
 
 /**
  * @file SubbandTimeSeries.h
@@ -15,7 +15,7 @@ namespace pelican {
 namespace lofar {
 
 /**
- * @class SubbandTimeSeries
+ * @class TimeSeriesDataSet
  *
  * @brief
  * Container class to hold a buffer of blocks of time samples ordered by
@@ -35,16 +35,16 @@ namespace lofar {
  */
 
 template <class T>
-class SubbandTimeSeries : public DataBlob
+class TimeSeriesDataSet : public DataBlob
 {
     public:
         /// Constructs an empty time stream data blob.
-        SubbandTimeSeries(const QString& type = "SubbandTimeSeries")
+        TimeSeriesDataSet(const QString& type = "TimeSeriesDataSet")
         : DataBlob(type), _nTimeBlocks(0), _nSubbands(0), _nPolarisations(0),
           _blockRate(0), _lofarTimestamp(0) {}
 
         /// Destroys the time stream data blob.
-        virtual ~SubbandTimeSeries() {}
+        virtual ~TimeSeriesDataSet() {}
 
     public:
         /// Clears the time stream data.
@@ -84,9 +84,20 @@ class SubbandTimeSeries : public DataBlob
         /// Set the lofar time-stamp.
         void setLofarTimestamp(long long timestamp) { _lofarTimestamp = timestamp; }
 
+        /// Returns a pointer to start of the time series for the specified
+        /// time block \p b, sub-band \p s, and polarisation \p p.
+        T * timeSeriesData(unsigned b, unsigned s, unsigned p)
+        { return ptr(b, s, p)->ptr(); }
+
+        /// Returns a pointer to start of the time series for the specified
+        /// time block \p b, sub-band \p s, and polarisation \p p.
+        T const * timeSeriesData(unsigned b, unsigned s, unsigned p) const
+        { return ptr(b, s, p)->ptr(); }
+
+    protected:
         /// Returns a pointer to the time series data for the specified time block
         /// \p b, sub-band \p s, and polarisation \p p.
-        TimeSeries<T>* ptr(unsigned b, unsigned s, unsigned p)
+        TimeSeries<T> * ptr(unsigned b, unsigned s, unsigned p)
         {
             if (b >= _nTimeBlocks || s >= _nSubbands || p >= _nPolarisations)
                 return 0;
@@ -96,26 +107,12 @@ class SubbandTimeSeries : public DataBlob
 
         /// Returns a pointer to the time series data for the specified
         /// time block \p b, sub-band \p s, and polarisation \p p.
-        const TimeSeries<T>* ptr(unsigned b, unsigned s, unsigned p) const
+        const TimeSeries<T> * ptr(unsigned b, unsigned s, unsigned p) const
         {
             if (b >= _nTimeBlocks || s >= _nSubbands || p >= _nPolarisations)
                 return 0;
             unsigned i = _index(b, s, p);
             return (_data.size() > 0 && i < _data.size()) ? &_data[i] : 0;
-        }
-
-        /// Returns a pointer to start of the time series for the specified
-        /// time block \p b, sub-band \p s, and polarisation \p p.
-        T * timeSeries(unsigned b, unsigned s, unsigned p)
-        {
-            return ptr(b, s, p)->ptr();
-        }
-
-        /// Returns a pointer to start of the time series for the specified
-        /// time block \p b, sub-band \p s, and polarisation \p p.
-        T const * timeSeries(unsigned b, unsigned s, unsigned p) const
-        {
-            return ptr(b, s, p)->ptr();
         }
 
     private:
@@ -141,7 +138,7 @@ class SubbandTimeSeries : public DataBlob
 //
 
 template <typename T>
-inline void SubbandTimeSeries<T>::clear()
+inline void TimeSeriesDataSet<T>::clear()
 {
     _data.clear();
     _nTimeBlocks = _nSubbands = _nPolarisations = 0;
@@ -150,7 +147,7 @@ inline void SubbandTimeSeries<T>::clear()
 }
 
 template <typename T>
-inline void SubbandTimeSeries<T>::resize(unsigned nTimeBlocks,
+inline void TimeSeriesDataSet<T>::resize(unsigned nTimeBlocks,
         unsigned nSubbands, unsigned nPols, unsigned nTimes)
 {
     _nTimeBlocks = nTimeBlocks;
@@ -163,7 +160,7 @@ inline void SubbandTimeSeries<T>::resize(unsigned nTimeBlocks,
 
 
 template <typename T>
-inline unsigned long SubbandTimeSeries<T>::_index(unsigned b, unsigned s,
+inline unsigned long TimeSeriesDataSet<T>::_index(unsigned b, unsigned s,
         unsigned p) const
 {
     return _nPolarisations * (b * _nSubbands + s) + p;
@@ -184,23 +181,23 @@ inline unsigned long SubbandTimeSeries<T>::_index(unsigned b, unsigned s,
  * in the PPF channeliser.
  */
 
-class SubbandTimeSeriesC32 : public SubbandTimeSeries<std::complex<float> >
+class TimeSeriesDataSetC32 : public TimeSeriesDataSet<std::complex<float> >
 {
     public:
         /// Constructs an empty time stream data blob.
-        SubbandTimeSeriesC32()
-        : SubbandTimeSeries<std::complex<float> >("SubbandTimeSeriesC32") {}
+        TimeSeriesDataSetC32()
+        : TimeSeriesDataSet<std::complex<float> >("TimeSeriesDataSetC32") {}
 
         /// Destroys the time stream data blob.
-        ~SubbandTimeSeriesC32() {}
+        ~TimeSeriesDataSetC32() {}
 
     public:
         void write(const QString& fileName) const;
 };
 
 // Declare the data blob with the pelican the data blob factory.
-PELICAN_DECLARE_DATABLOB(SubbandTimeSeriesC32)
+PELICAN_DECLARE_DATABLOB(TimeSeriesDataSetC32)
 
 }// namespace lofar
 }// namespace pelican
-#endif // SUBBAND_TIME_SERIES_H_
+#endif // TIME_SERIES_DATA_SET_H_

@@ -1,22 +1,21 @@
-// Pelican stuff
+// Pelican headers.
 #include "pelican/comms/PelicanClientProtocol.h"
 #include "pelican/comms/StreamDataRequest.h"
 #include "pelican/data/DataRequirements.h"
 #include "pelican/comms/DataBlobResponse.h"
 #include "pelican/comms/ServerResponse.h"
 
-// Pelican-Lofar stuff
+// Pelican-Lofar headers.
 #include "PelicanBlobClient.h"
-//#include "ChannelisedStreamData.h"
-#include "SubbandSpectra.h" // FIXME for new data blob.
+#include "SpectrumDataSet.h"
 
-// QT stuff
+// QT headers.
 #include <QtCore/QByteArray>
 
-// Boost stuff
+// Boost headers.
 #include <boost/shared_ptr.hpp>
 
-// C++ stuff
+// C++ headers.
 #include <iostream>
 
 namespace pelican {
@@ -51,7 +50,7 @@ void PelicanBlobClient::getData(QHash<QString, DataBlob*>& dataHash)
 
     // Get a pointer to the data blob from the hash.
     // FIXME for new stokes data blob.
-    SubbandSpectraStokes* blob = (SubbandSpectraStokes*) dataHash["SubbandSpectraStokes"];
+    SpectrumDataSetStokes* blob = (SpectrumDataSetStokes*) dataHash["SubbandSpectraStokes"];
     //ChannelisedStreamData* blob = (ChannelisedStreamData*) dataHash["ChannelisedStreamData"];
 
     // Wait for data to be available to socket, and read

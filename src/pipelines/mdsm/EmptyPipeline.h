@@ -5,7 +5,7 @@
 #include "pelican/core/AbstractPipeline.h"
 #include "pelican/data/DataBlob.h"
 #include "pelican/output/PelicanTCPBlobServer.h"
-#include "SubbandTimeSeries.h"
+#include "TimeSeriesDataSet.h"
 #include "SigprocStokesWriter.h"
 
 /**
