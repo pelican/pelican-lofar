@@ -34,14 +34,14 @@
         <import nodeset="FixedParameters"/>
         <import nodeset="ChangeParameters"/>
         <!--   -->
-        <data type="TimeSeriesDataSet"/>
+        <data type="TimeSeriesDataSetC32"/>
         <connection host="127.0.0.1" port="4353"/> <!--Change-->
       </LofarChunker>
     </chunkers>
 
     <clients>
       <LofarStreamDataClient>
-        <data type="TimeSeriesDataSet" adapter="AdapterTimeSeriesDataSet"/>
+        <data type="TimeSeriesDataSetC32" adapter="AdapterTimeSeriesDataSet"/>
       </LofarStreamDataClient>
     </clients>
 
