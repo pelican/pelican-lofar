@@ -36,9 +36,9 @@ void UdpBFPipeline::init()
     stokesIntegrator = (StokesIntegrator *) createModule("StokesIntegrator");
 
     // Create local datablobs
-    spectra = (SpectrumDataSetC32*) createBlob("SubbandSpectraC32");
-    stokes = (SpectrumDataSetStokes*) createBlob("SubbandSpectraStokes");
-    intStokes = (SpectrumDataSetStokes*) createBlob("SubbandSpectraStokes");
+    spectra = (SpectrumDataSetC32*) createBlob("SpectrumDataSetC32");
+    stokes = (SpectrumDataSetStokes*) createBlob("SpectrumDataSetStokes");
+    intStokes = (SpectrumDataSetStokes*) createBlob("SpectrumDataSetStokes");
 
 
     // Request remote data
@@ -54,7 +54,7 @@ void UdpBFPipeline::run(QHash<QString, DataBlob*>& remoteData)
     // Get pointer to the remote time series data blob.
     // Note: This contains the time series data in blocks of nChannels for
     // a number of subbands, polarisations and blocks.
-    timeSeries = (TimeSeriesDataSetC32*) remoteData["SubbandSpectraC32"];
+    timeSeries = (TimeSeriesDataSetC32*) remoteData["TimeSeriesDataSetC32"];
 
     // Run the polyphase channeliser.
     // Note: This channelises all of the subbands, and polarisations in the time series for
@@ -63,15 +63,14 @@ void UdpBFPipeline::run(QHash<QString, DataBlob*>& remoteData)
 
     stokesGenerator->run(spectra, stokes);
 
-    //    stokesIntegrator->run(stokes, intStokes);
+    // stokesIntegrator->run(stokes, intStokes);
 
     // Output channelised data blob (which has dimensions: number of spectra x subbands x polarisations)
     //dataOutput(spectra, "SubbandSpectraC32");
     // calls output stream managed->send(data, stream)
     // the output stream manager is configured in the xml
 
-    //    dataOutput(intStokes, "SubbandSpectraStokes");
-    dataOutput(stokes, "SubbandSpectraStokes");
+    dataOutput(stokes, "SpectrumDataSetStokes");
 
 //    stop();
 
