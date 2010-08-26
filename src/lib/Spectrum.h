@@ -68,20 +68,26 @@ template <class T> class Spectrum
         { _frequencyIncrement = value; }
 
         /// Returns a pointer to the spectrum data.
-        T * getData() { return _channels.size() > 0 ? &_channels[0] : 0; }
+        T * data() { return _channels.size() > 0 ? &_channels[0] : 0; }
 
         /// Returns a pointer to the spectrum data (const overload).
-        T const* getData() const
+        T const* data() const
         { return _channels.size() > 0 ? &_channels[0] : 0; }
 
+
+    protected:
+        /// *********** DO NOT USE ************
         /// To be deprecated soon (dont use)
+        /// *********** DO NOT USE ************
         T * ptr() { return _channels.size() > 0 ? &_channels[0] : 0; }
 
+        /// *********** DO NOT USE ************
         /// To be deprecated soon (dont use)
+        /// *********** DO NOT USE ************
         T const * ptr() const
         { return _channels.size() > 0 ? &_channels[0] : 0; }
 
-    protected:
+    private:
         std::vector<T> _channels;
         double _startFreq;
         double _frequencyIncrement;

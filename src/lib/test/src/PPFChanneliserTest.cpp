@@ -284,7 +284,7 @@ void PPFChanneliserTest::test_fft()
 
                 Spectrum<PPFChanneliser::Complex>* spectrum = spectra.spectrum(i++);
                 spectrum->resize(_nChannels);
-                PPFChanneliser::Complex* spectrumData = spectrum->ptr();
+                PPFChanneliser::Complex* spectrumData = spectrum->data();
                 channeliser._fft(filteredSamples, spectrumData);
             }
         }
@@ -327,13 +327,13 @@ void PPFChanneliserTest::test_run()
         timeSeries.resize(_nBlocks, _nSubbands, _nPols, _nChannels);
 
         unsigned iter = 1;
-        
+
         QTime timer;
         timer.start();
         for (unsigned i = 0; i < iter; ++i)
             channeliser.run(&timeSeries, &spectra);
         int elapsed = timer.elapsed();
-        
+
         cout << endl;
         cout << "-------------------------------------------------" << endl;
         cout << "[PPFChanneliser]: run() " << endl;
@@ -348,7 +348,7 @@ void PPFChanneliserTest::test_run()
         cout << " (data time = " << _nBlocks * _nChannels * 5e-3 << " ms.)" << endl;
         cout << "-------------------------------------------------" << endl;
     }
-    
+
     catch (const QString& err)
     {
             std::cout << err.toStdString() << std::endl;

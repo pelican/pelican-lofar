@@ -98,7 +98,7 @@ void SpectrumDataSetC32::serialise(QIODevice& out) const
         out.write((char*)&startFreq, sizeof(double));
         out.write((char*)&deltaFreq, sizeof(double));
         // Spectrum data.
-        out.write((char*)spectrum->ptr(), nChan * sizeof(std::complex<float>));
+        out.write((char*)spectrum->data(), nChan * sizeof(std::complex<float>));
     }
 }
 
@@ -141,7 +141,7 @@ void SpectrumDataSetC32::deserialise(QIODevice& in, QSysInfo::Endian endian)
 
         // Read the spectrum data.
         spectrum->resize(nChannels);
-        in.read((char*)spectrum->ptr(), nChannels * sizeof(std::complex<float>));
+        in.read((char*)spectrum->data(), nChannels * sizeof(std::complex<float>));
     }
 }
 
@@ -197,7 +197,7 @@ void SpectrumDataSetStokes::serialise(QIODevice& out) const
         out.write((char*)&startFreq, sizeof(double));
         out.write((char*)&deltaFreq, sizeof(double));
         // Spectrum data.
-        out.write((char*)spectrum->ptr(), nChan * sizeof(float));
+        out.write((char*)spectrum->data(), nChan * sizeof(float));
     }
 }
 
@@ -235,7 +235,7 @@ void SpectrumDataSetStokes::deserialise(QIODevice& in, QSysInfo::Endian /*endian
 
         // Read the spectrum data.
         spectrum->resize(nChannels);
-        in.read((char*)spectrum->ptr(), nChannels * sizeof(float));
+        in.read((char*)spectrum->data(), nChannels * sizeof(float));
     }
 }
 

@@ -55,11 +55,11 @@ void SpectrumTest::test_accessorMethods()
         nChan = 5;
         spectrum.resize(nChan);
         CPPUNIT_ASSERT_EQUAL(nChan, spectrum.nChannels());
-        float* sIn = spectrum.ptr();
+        float* sIn = spectrum.data();
         for (unsigned i = 0; i < nChan; ++i) {
             sIn[i] = float(i) * 1.1f;
         }
-        const float* sOut = spectrum.ptr();
+        const float* sOut = spectrum.data();
         for (unsigned i = 0; i < nChan; ++i) {
             CPPUNIT_ASSERT_DOUBLES_EQUAL(float(i) * 1.1, sOut[i], err);
         }

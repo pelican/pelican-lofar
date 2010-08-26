@@ -84,19 +84,31 @@ class TimeSeriesDataSet : public DataBlob
         /// Set the lofar time-stamp.
         void setLofarTimestamp(long long timestamp) { _lofarTimestamp = timestamp; }
 
+        /// Returns the time series object pointer for the specified time
+        /// block \p b, sub-band \p s, and polarisation \p p.
+        TimeSeries<T> * timeSeries(unsigned b, unsigned s, unsigned p)
+        { return ptr(b, s, b); }
+
+        /// Returns the time series object pointer for the specified time
+        /// block \p b, sub-band \p s, and polarisation \p p. (const overload).
+        TimeSeries<T> const * timeSeries(unsigned b, unsigned s, unsigned p) const
+        { return ptr(b, s, b); }
+
         /// Returns a pointer to start of the time series for the specified
         /// time block \p b, sub-band \p s, and polarisation \p p.
         T * timeSeriesData(unsigned b, unsigned s, unsigned p)
-        { return ptr(b, s, p)->ptr(); }
+        { return ptr(b, s, p)->data(); }
 
         /// Returns a pointer to start of the time series for the specified
         /// time block \p b, sub-band \p s, and polarisation \p p.
         T const * timeSeriesData(unsigned b, unsigned s, unsigned p) const
-        { return ptr(b, s, p)->ptr(); }
+        { return ptr(b, s, p)->data(); }
 
     protected:
+        /// *********** DO NOT USE ************
         /// Returns a pointer to the time series data for the specified time block
         /// \p b, sub-band \p s, and polarisation \p p.
+        /// *********** DO NOT USE ************
         TimeSeries<T> * ptr(unsigned b, unsigned s, unsigned p)
         {
             if (b >= _nTimeBlocks || s >= _nSubbands || p >= _nPolarisations)
@@ -105,8 +117,10 @@ class TimeSeriesDataSet : public DataBlob
             return (_data.size() > 0 && i < _data.size()) ? &_data[i] : 0;
         }
 
+        /// *********** DO NOT USE ************
         /// Returns a pointer to the time series data for the specified
         /// time block \p b, sub-band \p s, and polarisation \p p.
+        /// *********** DO NOT USE ************
         const TimeSeries<T> * ptr(unsigned b, unsigned s, unsigned p) const
         {
             if (b >= _nTimeBlocks || s >= _nSubbands || p >= _nPolarisations)
@@ -167,9 +181,6 @@ inline unsigned long TimeSeriesDataSet<T>::_index(unsigned b, unsigned s,
 }
 
 
-
-
-
 // -----------------------------------------------------------------------------
 // Template specialisation.
 //
@@ -194,6 +205,7 @@ class TimeSeriesDataSetC32 : public TimeSeriesDataSet<std::complex<float> >
     public:
         void write(const QString& fileName) const;
 };
+
 
 // Declare the data blob with the pelican the data blob factory.
 PELICAN_DECLARE_DATABLOB(TimeSeriesDataSetC32)

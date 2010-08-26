@@ -1,4 +1,4 @@
-#include "SubbandSpectraTest.h"
+#include "SpectrumDataSetTest.h"
 #include "SpectrumDataSet.h"
 
 #include "pelican/utility/FactoryGeneric.h"
@@ -11,13 +11,13 @@
 namespace pelican {
 namespace lofar {
 
-CPPUNIT_TEST_SUITE_REGISTRATION(SubbandSpectraTest);
+CPPUNIT_TEST_SUITE_REGISTRATION(SpectrumDataSetTest);
 
 /**
  * @details
  * Tests the various accessor methods for the time stream data blob
  */
-void SubbandSpectraTest::test_accessorMethods()
+void SpectrumDataSetTest::test_accessorMethods()
 {
     // Use Case
     // Construct a sub-band spectra data blob directly
@@ -67,7 +67,7 @@ void SubbandSpectraTest::test_accessorMethods()
 /**
  *
  */
-void SubbandSpectraTest::test_serialise_deserialise()
+void SpectrumDataSetTest::test_serialise_deserialise()
 {
     // Error tolerance use for double comparisons.
     double err = 1.0e-5;
@@ -89,7 +89,7 @@ void SubbandSpectraTest::test_serialise_deserialise()
         spectrum->setFrequencyIncrement(double(i) + 0.2);
         unsigned nChannels = 10;
         spectrum->resize(nChannels);
-        std::complex<float>* channelAmp = spectrum->ptr();
+        std::complex<float>* channelAmp = spectrum->data();
         for (unsigned c = 0; c < spectrum->nChannels(); ++c) {
             channelAmp[c] = std::complex<float>(float(i) + float(c),
                     float(i) - float(c));
@@ -124,7 +124,7 @@ void SubbandSpectraTest::test_serialise_deserialise()
         const Spectrum<std::complex<float> >* spectrum = spectra.spectrum(i);
         unsigned nChannels = spectrum->nChannels();
         CPPUNIT_ASSERT_EQUAL(10u, nChannels);
-        const std::complex<float>* channelAmp = spectrum->ptr();
+        const std::complex<float>* channelAmp = spectrum->data();
         for (unsigned c = 0; c < nChannels; ++c) {
             CPPUNIT_ASSERT_DOUBLES_EQUAL(float(i) + float(c),
                     channelAmp[c].real(), err);

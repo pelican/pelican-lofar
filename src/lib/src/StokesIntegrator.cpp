@@ -61,7 +61,7 @@ void StokesIntegrator::run(const SpectrumDataSetStokes* stokesGeneratorOutput,
 
     intStokes->resize(newSamples, nSubbands, nPols, nChannels);
     for (unsigned i = 0; i < newSamples * nSubbands * nPols; ++i) {
-        value2 = intStokes->spectrum(i)->ptr();
+        value2 = intStokes->spectrum(i)->data();
         for (unsigned c = 0; c < nChannels; ++c) value2[c] = 0.0;
     }
 

@@ -70,10 +70,10 @@ template <class T> class TimeSeries
         void setTimeIncrement(double value) { _timeIncrement = value; }
 
         /// Returns a pointer to the time stream data.
-        T* getData() { return _times.size() > 0 ? &_times[0] : 0; }
+        T* data() { return _times.size() > 0 ? &_times[0] : 0; }
 
         /// Returns a pointer to the time stream data (const overload).
-        const T* getData() const  { return _times.size() > 0 ? &_times[0] : 0; }
+        const T* data() const  { return _times.size() > 0 ? &_times[0] : 0; }
 
         /// To be deprecated soon (dont use!)
         T* ptr()  { return _times.size() > 0 ? &_times[0] : 0; }

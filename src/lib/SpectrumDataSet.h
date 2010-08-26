@@ -114,17 +114,19 @@ class SpectrumDataSet : public DataBlob
         /// Returns a pointer to the spectrum data for the specified time block
         /// \p b, sub-band \p s, and polarisation \p p (const overload).
         T * spectrumData(unsigned b, unsigned s, unsigned p)
-        { return ptr(b, s, p)->ptr(); }
+        { return ptr(b, s, p)->data(); }
 
         /// Returns a pointer to the spectrum data for the specified time block
         /// \p b, sub-band \p s, and polarisation \p p (const overload).
         T const * spectrumData(unsigned b, unsigned s, unsigned p) const
-        { return ptr(b, s, p)->ptr(); }
+        { return ptr(b, s, p)->data(); }
 
 
     protected:
+        /// *********** DO NOT USE ************
         /// Returns a pointer to the spectrum data for the specified time block
         /// \p b, sub-band \p s, and polarisation \p p.
+        /// *********** DO NOT USE ************
         Spectrum<T> * ptr(unsigned b, unsigned s, unsigned p)
         {
             // Check the specified index exists.
@@ -134,8 +136,10 @@ class SpectrumDataSet : public DataBlob
             return (_data.size() > 0 && i < _data.size()) ? &_data[i] : 0;
         }
 
+        /// *********** DO NOT USE ************
         /// Returns a pointer to the spectrum data for the specified time block
         /// \p b, sub-band \p s, and polarisation \p p (const overload).
+        /// *********** DO NOT USE ************
         Spectrum<T> const * ptr(unsigned b, unsigned s, unsigned p) const
         {
             // Check the specified index exists.

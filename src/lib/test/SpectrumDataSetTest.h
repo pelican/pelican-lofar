@@ -1,5 +1,5 @@
-#ifndef SUBBAND_SPECTRA_TEST_H_
-#define SUBBAND_SPECTRA_TEST_H_
+#ifndef SPECTRUM_DATA_SET_TEST_H_
+#define SPECTRUM_DATA_SET_TEST_H_
 
 #include <cppunit/extensions/HelperMacros.h>
 
@@ -19,11 +19,11 @@
 namespace pelican {
 namespace lofar {
 
-class SubbandSpectraTest : public CppUnit::TestFixture
+class SpectrumDataSetTest : public CppUnit::TestFixture
 {
     public:
-        SubbandSpectraTest() : CppUnit::TestFixture() {}
-        ~SubbandSpectraTest() {}
+        SpectrumDataSetTest() : CppUnit::TestFixture() {}
+        ~SpectrumDataSetTest() {}
 
     public:
         void setUp() {}
@@ -33,7 +33,7 @@ class SubbandSpectraTest : public CppUnit::TestFixture
         void test_accessorMethods();
         void test_serialise_deserialise();
 
-        CPPUNIT_TEST_SUITE(SubbandSpectraTest);
+        CPPUNIT_TEST_SUITE(SpectrumDataSetTest);
         CPPUNIT_TEST(test_accessorMethods);
         CPPUNIT_TEST(test_serialise_deserialise);
         CPPUNIT_TEST_SUITE_END();
@@ -45,4 +45,4 @@ class SubbandSpectraTest : public CppUnit::TestFixture
 } // namespace lofar
 } // namespace pelican
 
-#endif // SUBBAND_SPECTRA_TEST_H_
+#endif // SPECTRUM_DATA_SET_TEST_H_

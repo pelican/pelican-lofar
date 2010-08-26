@@ -31,27 +31,18 @@ template <class T> class TimeSeries
         /// Constructs and assigns memory for the time series.
         TimeSeries(unsigned nTimes)
         : _startTime(0.0), _timeIncrement(0.0)
-        {
-            resize(nTimes);
-        }
+        { resize(nTimes); }
 
         /// Destroys the time stream data blob.
         virtual ~TimeSeries() {}
 
     public:
         /// Clears the time stream data.
-        void clear()
-        {
-            _times.clear();
-            _startTime = 0.0;
-            _timeIncrement = 0.0;
-        }
+        void clear();
 
         /// Assign memory for the time stream data blob.
         void resize(unsigned nTimes)
-        {
-            _times.resize(nTimes);
-        }
+        { _times.resize(nTimes); }
 
     public:
         /// Returns the number of time samples.
@@ -70,22 +61,42 @@ template <class T> class TimeSeries
         void setTimeIncrement(double value) { _timeIncrement = value; }
 
         /// Returns a pointer to the time stream data.
-        T* getData() { return _times.size() > 0 ? &_times[0] : 0; }
+        T* data() { return _times.size() > 0 ? &_times[0] : 0; }
 
         /// Returns a pointer to the time stream data (const overload).
-        const T* getData() const  { return _times.size() > 0 ? &_times[0] : 0; }
-
-        /// To be deprecated soon (dont use!)
-        T* ptr()  { return _times.size() > 0 ? &_times[0] : 0; }
-
-        /// To be deprecated soon (dont use!)
-        const T* ptr() const  { return _times.size() > 0 ? &_times[0] : 0; }
+        const T* data() const  { return _times.size() > 0 ? &_times[0] : 0; }
 
     protected:
+        /// *********** DO NOT USE ************
+        /// To be deprecated soon (dont use!)
+        /// *********** DO NOT USE ************
+        T* ptr()  { return _times.size() > 0 ? &_times[0] : 0; }
+
+        /// *********** DO NOT USE ************
+        /// To be deprecated soon (dont use!)
+        /// *********** DO NOT USE ************
+        const T* ptr() const  { return _times.size() > 0 ? &_times[0] : 0; }
+
+    private:
         std::vector<T> _times;
         double _startTime;
         double _timeIncrement;
 };
+
+
+
+// -----------------------------------------------------------------------------
+// Inline method/function definitions.
+//
+
+template <typename T>
+inline void TimeSeries<T>::clear()
+{
+    _times.clear();
+    _startTime = 0.0;
+    _timeIncrement = 0.0;
+}
+
 
 
 }// namespace lofar

@@ -69,10 +69,10 @@ template <class T> class Spectrum
         }
 
         /// Returns a pointer to the spectrum data.
-        T* getData() { return _channels.size() > 0 ? &_channels[0] : NULL; }
+        T* data() { return _channels.size() > 0 ? &_channels[0] : NULL; }
 
         /// Returns a pointer to the spectrum data (const overload).
-        const T* getData() const {
+        const T* data() const {
             return _channels.size() > 0 ? &_channels[0] : NULL;
         }
 
