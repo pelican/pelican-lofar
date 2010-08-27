@@ -1,11 +1,13 @@
 #ifndef ADAPTER_SUBBAND_TIME_SERIES_TEST_H
 #define ADAPTER_SUBBAND_TIME_SERIES_TEST_H
 
-#include <cppunit/extensions/HelperMacros.h>
-
 /**
  * @file AdapterTimeSeriesDataSetTest.h
  */
+
+#include <cppunit/extensions/HelperMacros.h>
+
+#include "pelican/utility/ConfigNode.h"
 
 #include <QtCore/QString>
 
@@ -31,10 +33,11 @@ class AdapterTimeSeriesDataSetTest : public CppUnit::TestFixture
         CPPUNIT_TEST(test_checkDataFixedPacket);
         CPPUNIT_TEST(test_checkDataVariablePacket);
         CPPUNIT_TEST(test_deserialise);
+        CPPUNIT_TEST(test_deserialise_timing);
         CPPUNIT_TEST_SUITE_END();
 
     public:
-        void setUp() {}
+        void setUp();
         void tearDown() {}
 
         /// Method to test the adapter configuration.
@@ -54,11 +57,24 @@ class AdapterTimeSeriesDataSetTest : public CppUnit::TestFixture
         /// Method to check deserialising a chunk of UDP packets.
         void test_deserialise();
 
+        void test_deserialise_timing();
+
     private:
-        QString _configXml(const QString& fixedSizePackets,
-                unsigned sampleBits, unsigned nPacketsPerChunk,
-                unsigned nSamplesPerPacket, unsigned nSamplesPerBlock,
-                unsigned nSubbands, unsigned nPolarisations);
+        ConfigNode _configXml(const QString& fixedSizePackets,
+                unsigned dataBitSize, unsigned udpPacketsPerIteration,
+                unsigned samplesPerPacket, unsigned outputChannelsPerSubband,
+                unsigned subbandsPerPacket, unsigned nRawPolarisations);
+
+    private:
+        bool _verbose;
+        ConfigNode _config;
+        QString _fixedSizePackets;
+        unsigned _dataBitSize;
+        unsigned _udpPacketsPerIteration;
+        unsigned _samplesPerPacket;
+        unsigned _outputChannelsPerSubband;
+        unsigned _subbandsPerPacket;
+        unsigned _nRawPolarisations;
 };
 
 

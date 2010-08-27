@@ -14,7 +14,7 @@ set(lofarTest_src
     #src/DataStreamingTest.cpp
     ####src/PelicanBlobClientTest.cpp
     #src/PolyphaseCoefficientsTest.cpp
-    #src/AdapterTimeSeriesDataSetTest.cpp
+    src/AdapterTimeSeriesDataSetTest.cpp
     #src/SpectrumTest.cpp
     #src/SpectrumDataSetTest.cpp
     src/PPFChanneliserTest.cpp

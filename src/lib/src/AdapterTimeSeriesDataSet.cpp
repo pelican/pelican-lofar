@@ -95,9 +95,9 @@ void AdapterTimeSeriesDataSet::deserialise(QIODevice* in)
             TYPES::TimeStamp timestamp;
             timestamp.setStationClockSpeed(_clock * 1000000);
             timestamp.setStamp (header.timestamp, header.blockSequenceNumber);
-            _timeData -> setLofarTimestamp(timestamp.itsTime);
+            _timeData->setLofarTimestamp(timestamp.itsTime);
             // Sample rate when condensed in chunk (ie. diff in time between chunks)
-            _timeData -> setBlockRate(_nSamplesPerTimeBlock);
+            _timeData->setBlockRate(_nSamplesPerTimeBlock);
         }
 
         // Read the useful data (depends on configured dimensions).

@@ -1,8 +1,6 @@
 #include "LofarStreamDataClient.h"
 #include "LofarChunker.h"
 
-#include "pelican/utility/memCheck.h"
-
 namespace pelican {
 
 namespace lofar {

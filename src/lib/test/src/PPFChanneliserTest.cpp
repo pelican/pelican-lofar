@@ -25,7 +25,7 @@ CPPUNIT_TEST_SUITE_REGISTRATION(PPFChanneliserTest);
 
 void PPFChanneliserTest::setUp()
 {
-    _verbose = false;
+    _verbose = true;
 
     _nChannels = 16;
     _nSubbands = 62;
