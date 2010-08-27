@@ -74,7 +74,7 @@ class TimeSeriesDataSet : public DataBlob
         unsigned nTimes(unsigned b, unsigned s, unsigned p) const
         { return ptr(b, s, p) ? ptr(b, s, p)->nTimes() : 0; }
 
-        unsigned nTimes(unsigned i) const
+        unsigned nTimes(unsigned i = 0) const
         { return _data.size() > 0 && i < _data.size() ? timeSeries(i)->nTimes() : 0; }
 
         /// Return the block rate (time-span of the entire chunk)

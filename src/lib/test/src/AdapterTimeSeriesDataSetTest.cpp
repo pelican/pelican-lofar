@@ -259,7 +259,6 @@ void AdapterTimeSeriesDataSetTest::test_deserialise_timing()
 
         unsigned nTimes = (_udpPacketsPerIteration * _samplesPerPacket);
         unsigned nTimeBlocks = nTimes / _outputChannelsPerSubband;
-
         unsigned nData = _subbandsPerPacket * _nRawPolarisations * _samplesPerPacket;
         size_t packetSize = sizeof(UDPPacket::Header) + (nData * _dataBitSize * 2) / 8;
         size_t chunkSize = packetSize * _udpPacketsPerIteration;
@@ -267,11 +266,12 @@ void AdapterTimeSeriesDataSetTest::test_deserialise_timing()
         // Configure the adapter setting the data blob, chunk size and service data.
         adapter.config(&timeSeries, chunkSize, QHash<QString, DataBlob*>());
 
-        // Create and fill a UDP packet.
+        // Create and fill UDP packets.
         std::vector<UDPPacket> packets(_udpPacketsPerIteration);
         unsigned index = 0;
-        for (unsigned i = 0; i < _udpPacketsPerIteration; ++i) {
 
+        for (unsigned i = 0; i < _udpPacketsPerIteration; ++i)
+        {
             // Fill in the header
             packets[i].header.version             = uint8_t(0 + i);
             packets[i].header.sourceInfo          = uint8_t(1 + i);
@@ -295,7 +295,7 @@ void AdapterTimeSeriesDataSetTest::test_deserialise_timing()
         }
 
 
-        // Stick the packet into an QIODevice.
+        // Stick the chunk of packets into an QIODevice (buffer).
         {
             QBuffer buffer;
             buffer.setData(reinterpret_cast<char*>(&packets[0]), chunkSize);
@@ -311,6 +311,9 @@ void AdapterTimeSeriesDataSetTest::test_deserialise_timing()
         timer.start();
         adapter.deserialise(&buffer);
         int elapsed = timer.elapsed();
+
+//        std::cout << timeSeries.timeSeries(0) <<
+
         cout << endl;
         cout << "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@" << endl;
         cout << "[AdapterTimeSeriesDataSet]: deserialise() " << endl;

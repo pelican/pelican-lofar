@@ -85,7 +85,7 @@ class SpectrumDataSet : public DataBlob
 
         /// Return the number of channels for the spectrum specified by
         /// index \p i
-        unsigned nChannels(unsigned i) const
+        unsigned nChannels(unsigned i = 0) const
         { return _data.size() > 0 && i < _data.size() ? spectrum(i)->nChannels() : 0; }
 
         /// Return the block rate (time-span of the entire chunk)

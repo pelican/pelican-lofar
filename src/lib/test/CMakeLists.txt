@@ -17,7 +17,7 @@ set(lofarTest_src
     src/AdapterTimeSeriesDataSetTest.cpp
     #src/SpectrumTest.cpp
     #src/SpectrumDataSetTest.cpp
-    src/PPFChanneliserTest.cpp
+    #src/PPFChanneliserTest.cpp
 )
 
 add_executable(lofarTest ${lofarTest_src})
