@@ -65,9 +65,6 @@ class SpectrumDataSet : public DataBlob
         void resize(unsigned nTimeBlocks, unsigned nSubbands,
                 unsigned nPolarisations, unsigned nChannels);
 
-        void resize(unsigned nTimeBlocks, unsigned nSubbands,
-                unsigned nPolarisations, unsigned nChannels, T value);
-
     public:
         /// Returns the number of entries in the data blob.
         unsigned nSpectra() const { return _data.size(); }
@@ -193,28 +190,14 @@ inline void SpectrumDataSet<T>::resize(unsigned nTimeBlocks, unsigned nSubbands,
 }
 
 
-
 template <typename T>
 inline void SpectrumDataSet<T>::resize(unsigned nTimeBlocks, unsigned nSubbands,
         unsigned nPolarisations, unsigned nChannels)
 {
     resize(nTimeBlocks, nSubbands, nPolarisations);
-    if (nChannels != this->nChannels(0)) // TODO hack for testing if this loop is slow...
-    for (unsigned i = 0; i < _data.size(); ++i) _data[i].resize(nChannels);
-}
-
-
-template <typename T>
-inline void SpectrumDataSet<T>::resize(unsigned nTimeBlocks, unsigned nSubbands,
-        unsigned nPolarisations, unsigned nChannels, T value)
-{
-    resize(nTimeBlocks, nSubbands, nPolarisations);
-    T* s = 0;
-    for (unsigned i = 0; i < _data.size(); ++i) {
-        _data[i].resize(nChannels);
-        s = _data[i].ptr();
-        for (unsigned c = 0; c < nChannels; ++c) s[c] = value;
-    }
+    // TODO hack for testing if this loop is slow...
+    if (nChannels != this->nChannels(0))
+        for (unsigned i = 0; i < _data.size(); ++i) _data[i].resize(nChannels);
 }
 
 

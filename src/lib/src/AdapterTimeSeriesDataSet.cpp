@@ -186,17 +186,18 @@ void AdapterTimeSeriesDataSet::_readData(unsigned packet, char* buffer,
     unsigned iTimeBlock, index;
     Complex* times;
     unsigned iPtr = 0;
+//    Real re, im;
 
     switch (_sampleBits)
     {
         case 8:
         {
             TYPES::i8complex i8c;
-            for (unsigned c = 0; c < _nSubbands; ++c) {
+            for (unsigned s = 0; s < _nSubbands; ++s) {
                 for (unsigned t = 0; t < _nSamplesPerPacket; ++t) {
                     iTimeBlock = (tStart + t) / _nSamplesPerTimeBlock;
                     for (unsigned p = 0; p < _nPolarisations; ++p) {
-                        times = data->timeSeriesData(iTimeBlock, c, p);
+                        times = data->timeSeriesData(iTimeBlock, s, p);
                         index = tStart - (iTimeBlock * _nSamplesPerTimeBlock) + t;
                         i8c = *reinterpret_cast<TYPES::i8complex*>(&buffer[iPtr]);
                         times[index] = _makeComplex(i8c);
@@ -209,15 +210,23 @@ void AdapterTimeSeriesDataSet::_readData(unsigned packet, char* buffer,
         case 16:
         {
             TYPES::i16complex i16c;
-            for (unsigned c = 0; c < _nSubbands; ++c) {
-                for (unsigned t = 0; t < _nSamplesPerPacket; ++t) {
+            size_t dataSize = sizeof(i16c);
+            for (unsigned t = 0; t < _nSamplesPerPacket; ++t) { // !!! WAS BAD LOOP ORDER HERE! (see case above)
+                for (unsigned s = 0; s < _nSubbands; ++s) {
                     iTimeBlock = (tStart + t) / _nSamplesPerTimeBlock;
                     for (unsigned p = 0; p < _nPolarisations; ++p) {
-                        times = data->timeSeriesData(iTimeBlock, c, p);
+
+                        times = data->timeSeriesData(iTimeBlock, s, p);
                         index = tStart - (iTimeBlock * _nSamplesPerTimeBlock) + t;
                         i16c = *reinterpret_cast<TYPES::i16complex*>(&buffer[iPtr]);
+//                        re = (Real)real(i16c);
+//                        im = (Real)imag(i16c);
+//                        times[index].real() = re;
+//                        times[index].imag() = im;
+//                        times[index] = Complex(re, im);
+//                        cout << "b = " << iTimeBlock << " s = " << s << " p = " << p << " index = " << index << endl;
                         times[index] = _makeComplex(i16c);
-                        iPtr += sizeof(TYPES::i16complex);
+                        iPtr += dataSize;
                     }
                 }
             }

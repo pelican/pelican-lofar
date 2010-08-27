@@ -259,7 +259,6 @@ void AdapterTimeSeriesDataSetTest::test_deserialise_timing()
 
         unsigned nTimes = (_udpPacketsPerIteration * _samplesPerPacket);
         unsigned nTimeBlocks = nTimes / _outputChannelsPerSubband;
-        unsigned nTimeSeries = nTimeBlocks * _nRawPolarisations * _subbandsPerPacket;
 
         unsigned nData = _subbandsPerPacket * _nRawPolarisations * _samplesPerPacket;
         size_t packetSize = sizeof(UDPPacket::Header) + (nData * _dataBitSize * 2) / 8;
@@ -297,6 +296,13 @@ void AdapterTimeSeriesDataSetTest::test_deserialise_timing()
 
 
         // Stick the packet into an QIODevice.
+        {
+            QBuffer buffer;
+            buffer.setData(reinterpret_cast<char*>(&packets[0]), chunkSize);
+            buffer.open(QBuffer::ReadOnly);
+            adapter.deserialise(&buffer);
+        }
+
         QBuffer buffer;
         buffer.setData(reinterpret_cast<char*>(&packets[0]), chunkSize);
         buffer.open(QBuffer::ReadOnly);

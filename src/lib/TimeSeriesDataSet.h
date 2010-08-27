@@ -51,8 +51,10 @@ class TimeSeriesDataSet : public DataBlob
         void clear();
 
         /// Assign memory for the cube of time series each of length nTimes.
+        void resize(unsigned nTimeBlocks, unsigned nSubbands, unsigned nPols);
+
         void resize(unsigned nTimeBlocks, unsigned nSubbands, unsigned nPols,
-                unsigned nTimes = 0);
+                        unsigned nTimes);
 
     public:
         /// Returns the number of entries in the data blob.
@@ -70,7 +72,10 @@ class TimeSeriesDataSet : public DataBlob
         /// Return the number of times for the time series
         /// at time block \p b, sub-band \p s and polarisation \p p.
         unsigned nTimes(unsigned b, unsigned s, unsigned p) const
-        { return ptr(b, s, p)->nTimes(); }
+        { return ptr(b, s, p) ? ptr(b, s, p)->nTimes() : 0; }
+
+        unsigned nTimes(unsigned i) const
+        { return _data.size() > 0 && i < _data.size() ? timeSeries(i)->nTimes() : 0; }
 
         /// Return the block rate (time-span of the entire chunk)
         long getBlockRate() const { return _blockRate; }
@@ -83,6 +88,16 @@ class TimeSeriesDataSet : public DataBlob
 
         /// Set the lofar time-stamp.
         void setLofarTimestamp(long long timestamp) { _lofarTimestamp = timestamp; }
+
+        /// Returns the time series object pointer for the specified time
+        /// block \p b, sub-band \p s, and polarisation \p p.
+        TimeSeries<T> * timeSeries(unsigned i)
+        { return (_data.size() > 0 && i < _data.size()) ? &_data[i] : 0; }
+
+        /// Returns the time series object pointer for the specified time
+        /// block \p b, sub-band \p s, and polarisation \p p. (const overload).
+        TimeSeries<T> const * timeSeries(unsigned i) const
+        { return (_data.size() > 0 && i < _data.size()) ? &_data[i] : 0; }
 
         /// Returns the time series object pointer for the specified time
         /// block \p b, sub-band \p s, and polarisation \p p.
@@ -162,14 +177,23 @@ inline void TimeSeriesDataSet<T>::clear()
 
 template <typename T>
 inline void TimeSeriesDataSet<T>::resize(unsigned nTimeBlocks,
-        unsigned nSubbands, unsigned nPols, unsigned nTimes)
+        unsigned nSubbands, unsigned nPols)
 {
     _nTimeBlocks = nTimeBlocks;
     _nSubbands = nSubbands;
     _nPolarisations = nPols;
     _data.resize(_nTimeBlocks * _nSubbands * _nPolarisations);
-    if (nTimes) for (unsigned i = 0; i < _data.size(); ++i)
-        _data[i].resize(nTimes);
+}
+
+
+
+template <typename T>
+inline void TimeSeriesDataSet<T>::resize(unsigned nTimeBlocks,
+        unsigned nSubbands, unsigned nPols, unsigned nTimes)
+{
+    resize(nTimeBlocks, nSubbands, nPols);
+    if (nTimes != this->nTimes(0))
+        for (unsigned i = 0; i < _data.size(); ++i) _data[i].resize(nTimes);
 }
 
 
