@@ -193,8 +193,8 @@ void AdapterTimeSeriesDataSet::_readData(unsigned packet, char* buffer,
         case 8:
         {
             TYPES::i8complex i8c;
-            for (unsigned t = 0; t < _nSamplesPerPacket; ++t) {
-                for (unsigned s = 0; s < _nSubbands; ++s) {
+            for (unsigned s = 0; s < _nSubbands; ++s) {
+                for (unsigned t = 0; t < _nSamplesPerPacket; ++t) {
                     iTimeBlock = (tStart + t) / _nSamplesPerTimeBlock;
                     for (unsigned p = 0; p < _nPolarisations; ++p) {
                         times = data->timeSeriesData(iTimeBlock, s, p);
@@ -211,8 +211,8 @@ void AdapterTimeSeriesDataSet::_readData(unsigned packet, char* buffer,
         {
             TYPES::i16complex i16c;
             size_t dataSize = sizeof(i16c);
-            for (unsigned t = 0; t < _nSamplesPerPacket; ++t) {
-                for (unsigned s = 0; s < _nSubbands; ++s) {
+            for (unsigned s = 0; s < _nSubbands; ++s) {
+                for (unsigned t = 0; t < _nSamplesPerPacket; ++t) {
 
                     iTimeBlock = (tStart + t) / _nSamplesPerTimeBlock;
 
