@@ -62,7 +62,6 @@ int main(int /*argc*/, char** /*argv*/)
     {
         PL::TimeSeriesDataSetC32 timeSeries;
         timeSeries.resize(_nBlocks, nSubbands, nPols, nChannels);
-
         QTime timer;
         timer.start();
         channeliser.run(&timeSeries, &spectra);
@@ -73,24 +72,20 @@ int main(int /*argc*/, char** /*argv*/)
     {
         PL::TimeSeriesDataSetC32 timeSeries;
         timeSeries.resize(_nBlocks, nSubbands, nPols, nChannels);
-
         QTime timer;
         timer.start();
         channeliser.run(&timeSeries, &spectra);
         int elapsed = timer.elapsed();
-
         cout << "* Time for 2nd run = " << elapsed << " ms. [" << nThreads << " threads]" << endl;
     }
 
     {
         PL::TimeSeriesDataSetC32 timeSeries;
         timeSeries.resize(_nBlocks, nSubbands, nPols, nChannels);
-
         QTime timer;
         timer.start();
         channeliser.run(&timeSeries, &spectra);
         int elapsed = timer.elapsed();
-
         cout << "* Time for 3rd run = " << elapsed << " ms. [" << nThreads << " threads]" << endl;
     }
 
@@ -98,15 +93,12 @@ int main(int /*argc*/, char** /*argv*/)
     {
         PL::TimeSeriesDataSetC32 timeSeries;
         timeSeries.resize(_nBlocks, nSubbands, nPols, nChannels);
-
         QTime timer;
         timer.start();
         channeliser.run(&timeSeries, &spectra);
         int elapsed = timer.elapsed();
-
         cout << "* Time for 4th run = " << elapsed << " ms. [" << nThreads << " threads]" << endl;
     }
-
 
     cout << endl;
     cout << " (data time = " << _nBlocks * nChannels * 5e-3 << " ms.)" << endl;
