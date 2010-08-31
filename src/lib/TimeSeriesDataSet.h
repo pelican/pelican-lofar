@@ -102,12 +102,12 @@ class TimeSeriesDataSet : public DataBlob
         /// Returns the time series object pointer for the specified time
         /// block \p b, sub-band \p s, and polarisation \p p.
         TimeSeries<T> * timeSeries(unsigned b, unsigned s, unsigned p)
-        { return ptr(b, s, b); }
+        { return ptr(b, s, p); }
 
         /// Returns the time series object pointer for the specified time
         /// block \p b, sub-band \p s, and polarisation \p p. (const overload).
         TimeSeries<T> const * timeSeries(unsigned b, unsigned s, unsigned p) const
-        { return ptr(b, s, b); }
+        { return ptr(b, s, p); }
 
         /// Returns a pointer to start of the time series for the specified
         /// time block \p b, sub-band \p s, and polarisation \p p.
