@@ -16,6 +16,9 @@
 
 using std::cout;
 using std::endl;
+using std::cos;
+using std::sin;
+using std::vector;
 
 namespace pelican {
 namespace lofar {
@@ -458,10 +461,11 @@ void PPFChanneliserTest::test_channelProfile()
     std::vector<unsigned> testIndices(nProfiles);
     testIndices[0] = 45;
     testIndices[1] = 46;
+    ConfigNode config(_configXml(_nChannels, nThreads, _nTaps));
+    PPFChanneliser channeliser(config);
+    typedef PPFChanneliser::Complex Complex;
 
     try {
-        ConfigNode config(_configXml(_nChannels, nThreads, _nTaps));
-        PPFChanneliser channeliser(config);
 
         unsigned _nBlocks = _nTaps;
 
@@ -471,7 +475,7 @@ void PPFChanneliserTest::test_channelProfile()
         SpectrumDataSetC32 spectra;
         spectra.resize(_nBlocks, _nSubbands, _nPols, _nChannels);
 
-        std::vector<std::vector<PPFChanneliser::Complex> > channelProfile;
+        vector<vector<Complex> > channelProfile;
         channelProfile.resize(nProfiles);
         for (unsigned i = 0; i < nProfiles; ++i) channelProfile[i].resize(nSteps);
 
@@ -479,16 +483,14 @@ void PPFChanneliserTest::test_channelProfile()
         for (unsigned k = 0; k < nSteps; ++k) {
 
             // Generate signal.
-            double freq = startFreq + k * freqInc;
-            freqs[k] = freq;
+            freqs[k] = startFreq + k * freqInc;
             for (unsigned i = 0, t = 0; t < _nBlocks; ++t) {
-                PPFChanneliser::Complex* timeData = data.timeSeriesData(t, 0, 0);
+                Complex* timeData = data.timeSeriesData(t, 0, 0);
+                double time, arg;
                 for (unsigned c = 0; c < _nChannels; ++c) {
-                    double time = double(i) / sampleRate;
-                    double re = std::cos(2 * math::pi * freq * time);
-                    double im = std::sin(2 * math::pi * freq * time);
-                    timeData[c] = PPFChanneliser::Complex(re, im);
-                    i++;
+                    time = double(i++) / sampleRate;
+                    arg = 2.0 * math::pi * freqs[k] * time;
+                    timeData[c] = Complex(cos(arg), cos(arg));
                 }
             }
 
