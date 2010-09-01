@@ -437,6 +437,10 @@ void PPFChanneliserTest::test_channelProfile()
     // Options.
     unsigned nThreads = 1;
     QString coeffFile = "";
+    _nChannels = 64;
+    _nTaps = 8;
+    _nSubbands = 1;
+    _nPols = 1;
 
     unsigned nProfiles = 2;
     double sampleRate = 50.0e6; // Hz
@@ -498,7 +502,7 @@ void PPFChanneliserTest::test_channelProfile()
         }
 
         // Write the channel profile to file.
-        QFile file("channelProfileGeneratedCoeffs.dat");
+        QFile file("channelProfile.dat");
         if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
             return;
         }
