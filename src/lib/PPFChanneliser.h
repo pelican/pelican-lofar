@@ -103,6 +103,9 @@ class PPFChanneliser : public AbstractModule
         unsigned _setupWorkBuffers(unsigned nSubbands,
                 unsigned nPolariations, unsigned nChannels, unsigned nTaps);
 
+        /// Create the FFTW plan for use with the channeliser.
+        void _createFFTWPlan(unsigned nChannels, fftwf_plan& plan);
+
         /// Return an error message.
         QString _err(const QString& message);
 
