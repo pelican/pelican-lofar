@@ -48,8 +48,8 @@ class SpectrumDataSet : public DataBlob
     public:
         /// Constructs an empty sub-band spectra data blob.
         SpectrumDataSet(const QString& type = "SpectrumDataSet")
-        : DataBlob(type), _nTimeBlocks(0), _nSubbands(0), _nPolarisations(0),
-          _blockRate(0), _lofarTimestamp(0) {}
+        : DataBlob(type), _nSubbands(0), _nPolarisations(0), _nTimeBlocks(0),
+          _nChannels(0), _blockRate(0), _lofarTimestamp(0) {}
 
         /// Destroys the object.
         virtual ~SpectrumDataSet() {}
@@ -57,10 +57,6 @@ class SpectrumDataSet : public DataBlob
     public:
         /// Clears the data.
         void clear();
-
-        /// Assign memory for the time stream data blob.
-        void resize(unsigned nTimeBlocks, unsigned nSubbands,
-                unsigned nPolarisations);
 
         void resize(unsigned nTimeBlocks, unsigned nSubbands,
                 unsigned nPolarisations, unsigned nChannels);
@@ -78,15 +74,10 @@ class SpectrumDataSet : public DataBlob
         /// Returns the number of polarisations in the data.
         unsigned nPolarisations() const { return _nPolarisations; }
 
-        /// Return the number of channels for the spectrum at time block
-        /// \p b, sub-band \p s and polarisation \p.
-        unsigned nChannels(unsigned b, unsigned s, unsigned p) const
-        { return ptr(b, s, p) ? ptr(b, s, p)->nChannels() : 0; }
-
         /// Return the number of channels for the spectrum specified by
         /// index \p i
-        unsigned nChannels(unsigned i = 0) const
-        { return _data.size() > 0 && i < _data.size() ? spectrum(i)->nChannels() : 0; }
+        unsigned nChannels() const
+        { return _nChannels; }
 
         /// Return the block rate (time-span of the entire chunk)
         long getBlockRate() const { return _blockRate; }
@@ -100,63 +91,50 @@ class SpectrumDataSet : public DataBlob
         /// Set the lofar time-stamp
         void setLofarTimestamp(long long timestamp) { _lofarTimestamp = timestamp; }
 
-        /// Returns a spectrum pointer at index \p i.
-        Spectrum<T> * spectrum(unsigned i)
-        { return (_data.size() > 0 && i < _data.size()) ? &_data[i] : 0; }
+//        /// Returns a spectrum pointer at index \p i.
+//        Spectrum<T> * spectrum(unsigned i)
+//        { return (_data.size() > 0 && i < _data.size()) ? &_data[i] : 0; }
+//
+//        /// Returns a spectrum pointer at index \p i. (const overload).
+//        Spectrum<T> const * spectrum(unsigned i) const
+//        { return (_data.size() > 0 && i < _data.size()) ? &_data[i] : 0; }
 
-        /// Returns a spectrum pointer at index \p i. (const overload).
-        Spectrum<T> const * spectrum(unsigned i) const
-        { return (_data.size() > 0 && i < _data.size()) ? &_data[i] : 0; }
+        T * data() { return &_data[0]; }
+
+        T const * data() const { return &_data[0]; }
+
+        T * spectrumData(unsigned i) {
+            return &_data[i * _nChannels];
+        }
+
+        T const * spectrumData(unsigned i) const {
+            return &_data[i * _nChannels];
+        }
 
         /// Returns a pointer to the spectrum data for the specified time block
         /// \p b, sub-band \p s, and polarisation \p p (const overload).
         T * spectrumData(unsigned b, unsigned s, unsigned p)
-        { return ptr(b, s, p)->data(); }
+        { return &_data[_index(s, p, b)]; }
 
         /// Returns a pointer to the spectrum data for the specified time block
         /// \p b, sub-band \p s, and polarisation \p p (const overload).
         T const * spectrumData(unsigned b, unsigned s, unsigned p) const
-        { return ptr(b, s, p)->data(); }
+        { return &_data[_index(s, p, b)]; }
 
-
-    protected:
-        /// *********** DO NOT USE ************
-        /// Returns a pointer to the spectrum data for the specified time block
-        /// \p b, sub-band \p s, and polarisation \p p.
-        /// *********** DO NOT USE ************
-        Spectrum<T> * ptr(unsigned b, unsigned s, unsigned p)
-        {
-            // Check the specified index exists.
-            if (b >= _nTimeBlocks || s >= _nSubbands || p >= _nPolarisations)
-                return 0;
-            unsigned i = _index(b, s, p);
-            return (_data.size() > 0 && i < _data.size()) ? &_data[i] : 0;
-        }
-
-        /// *********** DO NOT USE ************
-        /// Returns a pointer to the spectrum data for the specified time block
-        /// \p b, sub-band \p s, and polarisation \p p (const overload).
-        /// *********** DO NOT USE ************
-        Spectrum<T> const * ptr(unsigned b, unsigned s, unsigned p) const
-        {
-            // Check the specified index exists.
-            if (b >= _nTimeBlocks || s >= _nSubbands || p >= _nPolarisations)
-                return 0;
-            unsigned idx = _index(b, s, p);
-            return (_data.size() > 0 && idx < _data.size()) ? &_data[idx] : 0;
-        }
 
     private:
         /// Returns the data index for a given time block \b, sub-band \s and
         /// polarisation.
-        unsigned long _index(unsigned b, unsigned s, unsigned p) const;
+        unsigned long _index(unsigned s, unsigned p, unsigned b) const;
 
     private:
-        std::vector<Spectrum<T> > _data;
+        std::vector<T> _data;
 
-        unsigned _nTimeBlocks;
         unsigned _nSubbands;
         unsigned _nPolarisations;
+        unsigned _nTimeBlocks;
+        unsigned _nChannels;
+
         long     _blockRate;
         long long _lofarTimestamp;
 };
@@ -173,7 +151,7 @@ template <typename T>
 inline void SpectrumDataSet<T>::clear()
 {
     _data.clear();
-    _nTimeBlocks = _nSubbands = _nPolarisations = 0;
+    _nTimeBlocks = _nSubbands = _nPolarisations = _nChannels = 0;
     _blockRate = 0;
     _lofarTimestamp = 0;
 }
@@ -181,31 +159,21 @@ inline void SpectrumDataSet<T>::clear()
 
 template <typename T>
 inline void SpectrumDataSet<T>::resize(unsigned nTimeBlocks, unsigned nSubbands,
-        unsigned nPolarisations)
-{
-    _nTimeBlocks = nTimeBlocks;
-    _nSubbands = nSubbands;
-    _nPolarisations = nPolarisations;
-    _data.resize(_nTimeBlocks * _nSubbands * _nPolarisations);
-}
-
-
-template <typename T>
-inline void SpectrumDataSet<T>::resize(unsigned nTimeBlocks, unsigned nSubbands,
         unsigned nPolarisations, unsigned nChannels)
 {
-    resize(nTimeBlocks, nSubbands, nPolarisations);
-    // TODO hack for testing if this loop is slow...
-    if (nChannels != this->nChannels(0))
-        for (unsigned i = 0; i < _data.size(); ++i) _data[i].resize(nChannels);
+    _nSubbands = nSubbands;
+    _nPolarisations = nPolarisations;
+    _nTimeBlocks = nTimeBlocks;
+    _nChannels = nChannels;
+    _data.resize(nSubbands * nPolarisations * nTimeBlocks * nChannels);
 }
 
 
 template <typename T>
-inline unsigned long SpectrumDataSet<T>::_index(unsigned b, unsigned s,
-        unsigned p) const
+inline unsigned long SpectrumDataSet<T>::_index(unsigned s, unsigned p,
+        unsigned b) const
 {
-    return _nPolarisations * (b * _nSubbands + s) + p;
+    return _nChannels * ( _nTimeBlocks * (s * _nPolarisations + p) + b);
 }
 
 

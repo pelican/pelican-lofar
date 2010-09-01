@@ -22,7 +22,7 @@ void SpectrumDataSetC32::write(const QString& fileName) const
     if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) return;
 
     const std::complex<float>* data;
-    unsigned nChan = nChannels(0, 0, 0);
+    unsigned nChan = nChannels();
 
     QTextStream out(&file);
     for (unsigned b = 0; b < nTimeBlocks(); ++b) {
@@ -58,11 +58,12 @@ quint64 SpectrumDataSetC32::serialisedBytes() const
     // Sub-band spectra dimensions.
     quint64 size = 3 * sizeof(unsigned);
 
+    unsigned nChan = nChannels();
     for (unsigned i = 0; i < nSpectra(); ++i) {
         // Spectrum header.
         size += sizeof(unsigned) + 2 * sizeof(double);
         // Spectrum data.
-        size += nChannels(i) * sizeof(std::complex<float>);
+        size += nChan * sizeof(std::complex<float>);
     }
     return size;
 }
@@ -74,32 +75,32 @@ quint64 SpectrumDataSetC32::serialisedBytes() const
  */
 void SpectrumDataSetC32::serialise(QIODevice& out) const
 {
-    unsigned nBlocks = nTimeBlocks();
-    unsigned nSubs = nSubbands();
-    unsigned nPols = nPolarisations();
-
-    // Sub-band spectrum dimensions.
-    out.write((char*)&nBlocks, sizeof(unsigned));
-    out.write((char*)&nSubs, sizeof(unsigned));
-    out.write((char*)&nPols, sizeof(unsigned));
-
-    Spectrum<std::complex<float> > const * spectrum;
-
-    double startFreq, deltaFreq;
-    unsigned nChan = nChannels(0);
-
-    // Loop over and write each spectrum.
-    for (unsigned i = 0; i < nSpectra(); ++i) {
-        spectrum = this->spectrum(i);
-        startFreq = spectrum->startFrequency();
-        deltaFreq = spectrum->frequencyIncrement();
-        // Spectrum header.
-        out.write((char*)&nChan, sizeof(unsigned));
-        out.write((char*)&startFreq, sizeof(double));
-        out.write((char*)&deltaFreq, sizeof(double));
-        // Spectrum data.
-        out.write((char*)spectrum->data(), nChan * sizeof(std::complex<float>));
-    }
+//    unsigned nBlocks = nTimeBlocks();
+//    unsigned nSubs = nSubbands();
+//    unsigned nPols = nPolarisations();
+//
+//    // Sub-band spectrum dimensions.
+//    out.write((char*)&nBlocks, sizeof(unsigned));
+//    out.write((char*)&nSubs, sizeof(unsigned));
+//    out.write((char*)&nPols, sizeof(unsigned));
+//
+//    Spectrum<std::complex<float> > const * spectrum;
+//
+//    double startFreq, deltaFreq;
+//    unsigned nChan = nChannels();
+//
+//    // Loop over and write each spectrum.
+//    for (unsigned i = 0; i < nSpectra(); ++i) {
+//        spectrum = this->spectrum(i);
+//        startFreq = spectrum->startFrequency();
+//        deltaFreq = spectrum->frequencyIncrement();
+//        // Spectrum header.
+//        out.write((char*)&nChan, sizeof(unsigned));
+//        out.write((char*)&startFreq, sizeof(double));
+//        out.write((char*)&deltaFreq, sizeof(double));
+//        // Spectrum data.
+//        out.write((char*)spectrum->data(), nChan * sizeof(std::complex<float>));
+//    }
 }
 
 
@@ -109,40 +110,40 @@ void SpectrumDataSetC32::serialise(QIODevice& out) const
  */
 void SpectrumDataSetC32::deserialise(QIODevice& in, QSysInfo::Endian endian)
 {
-    if (endian != QSysInfo::ByteOrder) {
-        throw QString("SubbandSpectraC32::deserialise(): Endianness "
-                "of serial data not supported.");
-    }
-
-    unsigned nBlocks, nSubs, nPols;
-
-    // Read spectrum dimensions.
-    in.read((char*)&nBlocks, sizeof(unsigned));
-    in.read((char*)&nSubs, sizeof(unsigned));
-    in.read((char*)&nPols, sizeof(unsigned));
-
-    resize(nBlocks, nSubs, nPols);
-
-    unsigned nChannels;
-    double startFreq, deltaFreq;
-    Spectrum<std::complex<float> >* spectrum;
-
-    // Loop over and write each spectrum.
-    for (unsigned i = 0; i < nSpectra(); ++i) {
-
-        spectrum = this->spectrum(i);
-
-        // Read the spectrum header.
-        in.read((char*)&nChannels, sizeof(unsigned));
-        in.read((char*)&startFreq, sizeof(double));
-        in.read((char*)&deltaFreq, sizeof(double));
-        spectrum->setStartFrequency(startFreq);
-        spectrum->setFrequencyIncrement(deltaFreq);
-
-        // Read the spectrum data.
-        spectrum->resize(nChannels);
-        in.read((char*)spectrum->data(), nChannels * sizeof(std::complex<float>));
-    }
+//    if (endian != QSysInfo::ByteOrder) {
+//        throw QString("SubbandSpectraC32::deserialise(): Endianness "
+//                "of serial data not supported.");
+//    }
+//
+//    unsigned nBlocks, nSubs, nPols;
+//
+//    // Read spectrum dimensions.
+//    in.read((char*)&nBlocks, sizeof(unsigned));
+//    in.read((char*)&nSubs, sizeof(unsigned));
+//    in.read((char*)&nPols, sizeof(unsigned));
+//
+//    resize(nBlocks, nSubs, nPols);
+//
+//    unsigned nChannels;
+//    double startFreq, deltaFreq;
+//    Spectrum<std::complex<float> >* spectrum;
+//
+//    // Loop over and write each spectrum.
+//    for (unsigned i = 0; i < nSpectra(); ++i) {
+//
+//        spectrum = this->spectrum(i);
+//
+//        // Read the spectrum header.
+//        in.read((char*)&nChannels, sizeof(unsigned));
+//        in.read((char*)&startFreq, sizeof(double));
+//        in.read((char*)&deltaFreq, sizeof(double));
+//        spectrum->setStartFrequency(startFreq);
+//        spectrum->setFrequencyIncrement(deltaFreq);
+//
+//        // Read the spectrum data.
+//        spectrum->resize(nChannels);
+//        in.read((char*)spectrum->data(), nChannels * sizeof(std::complex<float>));
+//    }
 }
 
 //------------------------------------------------------------------------------
@@ -158,11 +159,12 @@ quint64 SpectrumDataSetStokes::serialisedBytes() const
     // Sub-band spactra dimensions.
     quint64 size = 3 * sizeof(unsigned);
 
+    unsigned nChan = nChannels();
     for (unsigned i = 0; i < nSpectra(); ++i) {
         // Spectrum header.
         size += sizeof(unsigned) + 2 * sizeof(double);
         // Spectrum data.
-        size += nChannels(i) * sizeof(float);
+        size += nChan * sizeof(float);
     }
     return size;
 }
@@ -174,31 +176,31 @@ quint64 SpectrumDataSetStokes::serialisedBytes() const
  */
 void SpectrumDataSetStokes::serialise(QIODevice& out) const
 {
-    unsigned nBlocks = nTimeBlocks();
-    unsigned nSubs = nSubbands();
-    unsigned nPols = nPolarisations();
-
-    // Sub-band spectrum dimensions.
-    out.write((char*)&nBlocks, sizeof(unsigned));
-    out.write((char*)&nSubs, sizeof(unsigned));
-    out.write((char*)&nPols, sizeof(unsigned));
-
-    Spectrum<float> const * spectrum;
-    double startFreq, deltaFreq;
-    unsigned nChan = nChannels(0);
-
-    // Loop over and write each spectrum.
-    for (unsigned i = 0; i < nSpectra(); ++i) {
-        spectrum = this->spectrum(i);
-        startFreq = spectrum->startFrequency();
-        deltaFreq = spectrum->frequencyIncrement();
-        // Spectrum header.
-        out.write((char*)&nChan, sizeof(unsigned));
-        out.write((char*)&startFreq, sizeof(double));
-        out.write((char*)&deltaFreq, sizeof(double));
-        // Spectrum data.
-        out.write((char*)spectrum->data(), nChan * sizeof(float));
-    }
+//    unsigned nBlocks = nTimeBlocks();
+//    unsigned nSubs = nSubbands();
+//    unsigned nPols = nPolarisations();
+//
+//    // Sub-band spectrum dimensions.
+//    out.write((char*)&nBlocks, sizeof(unsigned));
+//    out.write((char*)&nSubs, sizeof(unsigned));
+//    out.write((char*)&nPols, sizeof(unsigned));
+//
+//    Spectrum<float> const * spectrum;
+//    double startFreq, deltaFreq;
+//    unsigned nChan = nChannels();
+//
+//    // Loop over and write each spectrum.
+//    for (unsigned i = 0; i < nSpectra(); ++i) {
+//        spectrum = this->spectrum(i);
+//        startFreq = spectrum->startFrequency();
+//        deltaFreq = spectrum->frequencyIncrement();
+//        // Spectrum header.
+//        out.write((char*)&nChan, sizeof(unsigned));
+//        out.write((char*)&startFreq, sizeof(double));
+//        out.write((char*)&deltaFreq, sizeof(double));
+//        // Spectrum data.
+//        out.write((char*)spectrum->data(), nChan * sizeof(float));
+//    }
 }
 
 
@@ -208,35 +210,35 @@ void SpectrumDataSetStokes::serialise(QIODevice& out) const
  */
 void SpectrumDataSetStokes::deserialise(QIODevice& in, QSysInfo::Endian /*endian*/)
 {
-    unsigned nBlocks, nSubs, nPols;
-
-    // Read spectrum dimensions.
-    in.read((char*)&nBlocks, sizeof(unsigned));
-    in.read((char*)&nSubs, sizeof(unsigned));
-    in.read((char*)&nPols, sizeof(unsigned));
-
-    resize(nBlocks, nSubs, nPols);
-
-    unsigned nChannels;
-    double startFreq, deltaFreq;
-    Spectrum<float>* spectrum;
-
-    // Loop over and write each spectrum.
-    for (unsigned i = 0; i < nSpectra(); ++i) {
-
-        spectrum = this->spectrum(i);
-
-        // Read the spectrum header.
-        in.read((char*)&nChannels, sizeof(unsigned));
-        in.read((char*)&startFreq, sizeof(double));
-        in.read((char*)&deltaFreq, sizeof(double));
-        spectrum->setStartFrequency(startFreq);
-        spectrum->setFrequencyIncrement(deltaFreq);
-
-        // Read the spectrum data.
-        spectrum->resize(nChannels);
-        in.read((char*)spectrum->data(), nChannels * sizeof(float));
-    }
+//    unsigned nBlocks, nSubs, nPols;
+//
+//    // Read spectrum dimensions.
+//    in.read((char*)&nBlocks, sizeof(unsigned));
+//    in.read((char*)&nSubs, sizeof(unsigned));
+//    in.read((char*)&nPols, sizeof(unsigned));
+//
+//    resize(nBlocks, nSubs, nPols, nChannels);
+//
+//    unsigned nChannels;
+//    double startFreq, deltaFreq;
+//    Spectrum<float>* spectrum;
+//
+//    // Loop over and write each spectrum.
+//    for (unsigned i = 0; i < nSpectra(); ++i) {
+//
+//        spectrum = this->spectrum(i);
+//
+//        // Read the spectrum header.
+//        in.read((char*)&nChannels, sizeof(unsigned));
+//        in.read((char*)&startFreq, sizeof(double));
+//        in.read((char*)&deltaFreq, sizeof(double));
+//        spectrum->setStartFrequency(startFreq);
+//        spectrum->setFrequencyIncrement(deltaFreq);
+//
+//        // Read the spectrum data.
+//        spectrum->resize(nChannels);
+//        in.read((char*)spectrum->data(), nChannels * sizeof(float));
+//    }
 }
 
 

@@ -27,7 +27,7 @@ class PPFChanneliserTest : public CppUnit::TestFixture
     public:
         /// Register test methods.
         CPPUNIT_TEST_SUITE(PPFChanneliserTest);
-        //CPPUNIT_TEST(test_run);
+        CPPUNIT_TEST(test_run);
         CPPUNIT_TEST(test_channelProfile);
         CPPUNIT_TEST(test_makeSpectrum);
 

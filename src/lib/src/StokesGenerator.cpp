@@ -32,7 +32,7 @@ void StokesGenerator::run(const SpectrumDataSetC32* channeliserOutput,
     typedef std::complex<float> Complex;
     unsigned nSamples = channeliserOutput->nTimeBlocks();
     unsigned nSubbands = channeliserOutput->nSubbands();
-    unsigned nChannels = channeliserOutput->nChannels(0, 0, 0);
+    unsigned nChannels = channeliserOutput->nChannels();
 
     stokes->setLofarTimestamp(channeliserOutput->getLofarTimestamp());
     stokes->setBlockRate(channeliserOutput->getBlockRate());

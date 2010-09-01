@@ -40,7 +40,7 @@ class TimeSeriesDataSet : public DataBlob
 
         /// Resize the data blob.
         void resize(unsigned nTimeBlocks, unsigned nSubbands, unsigned nPols,
-                        unsigned nTimes);
+                unsigned nTimes);
 
     public:
         /// Returns the number of samples in the data blob.
@@ -84,7 +84,7 @@ class TimeSeriesDataSet : public DataBlob
 
     private:
         /// Time block index.
-        unsigned long _index(unsigned s, unsigned p, unsigned tb) const;
+        unsigned long _index(unsigned s, unsigned p, unsigned b) const;
 
     private:
         std::vector<T> _data;
@@ -111,7 +111,7 @@ template <typename T>
 inline void TimeSeriesDataSet<T>::clear()
 {
     _data.clear();
-    _nTimeBlocks = _nSubbands = _nPolarisations = 0;
+    _nTimeBlocks = _nSubbands = _nPolarisations = _nTimesPerBlock = 0;
     _blockRate = 0;
     _lofarTimestamp = 0;
 }
@@ -131,9 +131,9 @@ inline void TimeSeriesDataSet<T>::resize(unsigned nTimeBlocks,
 
 template <typename T>
 inline unsigned long TimeSeriesDataSet<T>::_index(unsigned s, unsigned p,
-        unsigned tb) const
+        unsigned b) const
 {
-    return _nTimesPerBlock * ( _nTimeBlocks * (s * _nPolarisations + p)) + tb;
+    return _nTimesPerBlock * ( _nTimeBlocks * (s * _nPolarisations + p) + b);
 }
 
 

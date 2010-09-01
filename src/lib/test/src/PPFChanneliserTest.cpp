@@ -109,7 +109,7 @@ void PPFChanneliserTest::test_channelProfile()
     unsigned nSubbands = 1;
     unsigned nPols = 1;
     unsigned nThreads = 1;
-    unsigned nTaps = 32;
+    unsigned nTaps = 8;
     unsigned nChannels = 64;
     ConfigNode config(_configXml(nChannels, nThreads, nTaps, "kaiser"));
     PPFChanneliser channeliser(config);
@@ -500,21 +500,20 @@ void PPFChanneliserTest::test_fft()
     unsigned nThreads = 1;
     ConfigNode config(_configXml(_nChannels, nThreads, _nTaps));
     PPFChanneliser channeliser(config);
+    typedef PPFChanneliser::Complex Complex;
 
     SpectrumDataSetC32 spectra;
-    spectra.resize(_nBlocks, _nSubbands, _nPols);
+    spectra.resize(_nBlocks, _nSubbands, _nPols, _nChannels);
+
     std::vector<PPFChanneliser::Complex> filteredData(_nChannels);
     const PPFChanneliser::Complex* filteredSamples = &filteredData[0];
 
     QTime timer;
     timer.start();
-    for (unsigned i = 0, b = 0; b < _nBlocks; ++b) {
+    for (unsigned b = 0; b < _nBlocks; ++b) {
         for (unsigned s = 0; s < _nSubbands; ++s) {
             for (unsigned p = 0; p < _nPols; ++p) {
-
-                Spectrum<PPFChanneliser::Complex>* spectrum = spectra.spectrum(i++);
-                spectrum->resize(_nChannels);
-                PPFChanneliser::Complex* spectrumData = spectrum->data();
+                Complex* spectrumData = spectra.spectrumData(b, s, p);
                 channeliser._fft(filteredSamples, spectrumData);
             }
         }
