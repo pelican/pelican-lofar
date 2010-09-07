@@ -184,7 +184,7 @@ void AdapterTimeSeriesDataSet::_readData(unsigned packet, char* buffer,
 
     // Loop over dimensions in the packet and write into the data blob.
     unsigned iTimeBlock, index;
-    Complex* times;
+    Complex* times, *times0, *times1;
     unsigned iPtr = 0;
 //    Real re, im;
 
@@ -211,23 +211,42 @@ void AdapterTimeSeriesDataSet::_readData(unsigned packet, char* buffer,
         {
             TYPES::i16complex i16c;
             size_t dataSize = sizeof(i16c);
+            //Complex temp = Complex(1.0, 2.0);
+//            TYPES::i16complex temp = TYPES::i16complex(1, 2);
             for (unsigned s = 0; s < _nSubbands; ++s) {
                 for (unsigned t = 0; t < _nSamplesPerPacket; ++t) {
 
                     iTimeBlock = (tStart + t) / _nSamplesPerTimeBlock;
 
-                    for (unsigned p = 0; p < _nPolarisations; ++p) {
+//                    for (unsigned p = 0; p < _nPolarisations; ++p) {
+//
+//                        times = data->timeSeriesData(iTimeBlock, s, p);
+//
+//                        // Index into time vector at cube location (iTimeBlock, s, p)
+//                        index = tStart - (iTimeBlock * _nSamplesPerTimeBlock) + t;
+//
+//                        i16c = *reinterpret_cast<TYPES::i16complex*>(&buffer[iPtr]);
+//                        times[index] = _makeComplex(i16c);
+//                        //times[index] = temp;
+//                        iPtr += dataSize;
+//
+//                    }
 
-                        times = data->timeSeriesData(iTimeBlock, s, p);
-
-                        // Index into time vector at cube location (iTimeBlock, s, p)
-                        index = tStart - (iTimeBlock * _nSamplesPerTimeBlock) + t;
-
-                        i16c = *reinterpret_cast<TYPES::i16complex*>(&buffer[iPtr]);
 //                        cout << "b = " << iTimeBlock << " s = " << s << " p = " << p << " index = " << index << endl;
-                        times[index] = _makeComplex(i16c);
-                        iPtr += dataSize;
-                    }
+                    index = tStart - (iTimeBlock * _nSamplesPerTimeBlock) + t;
+                    times0 = data->timeSeriesData(iTimeBlock, s, 0);
+                    times1 = data->timeSeriesData(iTimeBlock, s, 1);
+                    //cout << "times0 ptr = " << (void*)&times0[index] << endl;
+                    //cout << "times1 ptr = " << (void*)&times1[index] << endl;
+
+                    i16c = *reinterpret_cast<TYPES::i16complex*>(&buffer[iPtr]);
+                    times0[index] = _makeComplex(i16c);
+
+                    iPtr += dataSize;
+                    i16c = *reinterpret_cast<TYPES::i16complex*>(&buffer[iPtr]);
+                    times1[index] = _makeComplex(i16c);
+
+                    iPtr += dataSize;
                 }
             }
             break;
