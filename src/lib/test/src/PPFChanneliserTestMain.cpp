@@ -35,7 +35,11 @@ int main(int /*argc*/, char** /*argv*/)
 
     unsigned timesPerChunk =  512 * 1000;
 
-    if (timesPerChunk%nChannels) CPPUNIT_FAIL("Setup error");
+    if (timesPerChunk%nChannels)
+    {
+        cout << "Setup error" << endl;
+        return 1;
+    }
 
     unsigned _nBlocks = timesPerChunk / nChannels;
 
