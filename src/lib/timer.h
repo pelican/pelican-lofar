@@ -56,6 +56,7 @@ static inline void timerUpdate(TimerData* data)
 	data->timeElapsed = elapsed;
 	if (elapsed < data->timeMin) data->timeMin = elapsed;
 	if (elapsed > data->timeMax) data->timeMax = elapsed;
+	int counter = data->counter;
 	data->timeAverage = (elapsed + counter * data->timeAverage) / (counter + 1);
 	data->counter++;
 }
