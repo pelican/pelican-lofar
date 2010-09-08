@@ -15,6 +15,7 @@
 #include "SpectrumDataSet.h"
 
 #include "SigprocStokesWriter.h"
+#include "timer.h"
 
 /**
  * @file UdpBFPipeline.h
@@ -55,7 +56,14 @@ class UdpBFPipeline : public AbstractPipeline
         SpectrumDataSetStokes* stokes;
         SpectrumDataSetStokes* intStokes;
 
+        unsigned _totalSamplesPerChunk;
         unsigned _iteration;
+
+        // Timers.
+        TimerData _ppfTime;
+        TimerData _stokesTime;
+        TimerData _integratorTime;
+        TimerData _outputTime;
 };
 
 } // namespace lofar
