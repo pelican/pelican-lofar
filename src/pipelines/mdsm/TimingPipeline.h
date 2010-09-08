@@ -32,11 +32,11 @@ namespace lofar {
  * @details
  *
  */
-class UdpBFPipeline : public AbstractPipeline
+class TimingPipeline : public AbstractPipeline
 {
     public:
-        UdpBFPipeline();
-        ~UdpBFPipeline();
+        TimingPipeline();
+        ~TimingPipeline();
 
         /// Initialises the pipeline.
         void init();

@@ -1,4 +1,4 @@
-#include "UdpBFPipeline.h"
+#include "TimingPipeline.h"
 #include "AdapterTimeSeriesDataSet.h"
 #include <iostream>
 
@@ -12,7 +12,7 @@ namespace lofar {
 /**
  * @details
  */
-UdpBFPipeline::UdpBFPipeline() : AbstractPipeline()
+TimingPipeline::TimingPipeline() : AbstractPipeline()
 {
     _iteration = 0;
 
@@ -28,7 +28,7 @@ UdpBFPipeline::UdpBFPipeline() : AbstractPipeline()
 /**
  * @details
  */
-UdpBFPipeline::~UdpBFPipeline()
+TimingPipeline::~TimingPipeline()
 {
 }
 
@@ -39,7 +39,7 @@ UdpBFPipeline::~UdpBFPipeline()
  *
  * This method is run once on construction of the pipeline.
  */
-void UdpBFPipeline::init()
+void TimingPipeline::init()
 {
     // Create modules
     ppfChanneliser = (PPFChanneliser *) createModule("PPFChanneliser");
@@ -63,10 +63,10 @@ void UdpBFPipeline::init()
  * data matching the requested remote data is available until either
  * the pipeline application is killed or the method 'stop()' is called.
  */
-void UdpBFPipeline::run(QHash<QString, DataBlob*>& remoteData)
+void TimingPipeline::run(QHash<QString, DataBlob*>& remoteData)
 {
   timerStart(&_totalTime);
-  
+
     // Get pointer to the remote time series data blob.
     // This is a block of data containing a number of time series of length
     // N for each sub-band and polarisation.
@@ -74,7 +74,7 @@ void UdpBFPipeline::run(QHash<QString, DataBlob*>& remoteData)
 
     // Get the total number of samples per chunk.
     _totalSamplesPerChunk =
-    		timeSeries->nTimesPerBlock() * timeSeries->nTimeBlocks();
+            timeSeries->nTimesPerBlock() * timeSeries->nTimeBlocks();
 
     // Run the polyphase channeliser.
     // Generates spectra from a blocks of time series indexed by sub-band
@@ -108,23 +108,23 @@ void UdpBFPipeline::run(QHash<QString, DataBlob*>& remoteData)
 
 //    if (_iteration > 43000) stop();
     if (_iteration * _totalSamplesPerChunk >= 16*16384*5) {
-    	stop();
-	timerReport(&adapterTime, "Adapter Time");
-    	timerReport(&_ppfTime, "Polyphase Filter");
-    	timerReport(&_stokesTime, "Stokes Generator");
-	//    	timerReport(&_integratorTime, "Stokes Integrator");
-	//    	timerReport(&_outputTime, "Output");
-	timerReport(&_totalTime, "Pipeline Time (excluding adapter)");
-	cout << endl;
-	cout << "Total (average) allowed time per iteration = " 
-	     << _totalSamplesPerChunk * 5.0e-6 << " sec" << endl;
-	cout << "Total (average) actual time per iteration = " 
-	     << adapterTime.timeAverage + _totalTime.timeAverage << " sec" << endl;
-	cout << "nSubbands = " << timeSeries->nSubbands() << endl;
-	cout << "nPols = " << timeSeries->nPolarisations() << endl;
-	cout << "nBlocks = " << timeSeries->nTimeBlocks() << endl;
-	cout << "nChannels = " << timeSeries->nTimesPerBlock() << endl;
-	cout << endl;
+        stop();
+    timerReport(&adapterTime, "Adapter Time");
+        timerReport(&_ppfTime, "Polyphase Filter");
+        timerReport(&_stokesTime, "Stokes Generator");
+    //    	timerReport(&_integratorTime, "Stokes Integrator");
+    //    	timerReport(&_outputTime, "Output");
+    timerReport(&_totalTime, "Pipeline Time (excluding adapter)");
+    cout << endl;
+    cout << "Total (average) allowed time per iteration = "
+         << _totalSamplesPerChunk * 5.0e-6 << " sec" << endl;
+    cout << "Total (average) actual time per iteration = "
+         << adapterTime.timeAverage + _totalTime.timeAverage << " sec" << endl;
+    cout << "nSubbands = " << timeSeries->nSubbands() << endl;
+    cout << "nPols = " << timeSeries->nPolarisations() << endl;
+    cout << "nBlocks = " << timeSeries->nTimeBlocks() << endl;
+    cout << "nChannels = " << timeSeries->nTimesPerBlock() << endl;
+    cout << endl;
     }
 }
 
