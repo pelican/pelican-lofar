@@ -23,13 +23,12 @@ namespace lofar {
 
 class PPFChanneliserTest : public CppUnit::TestFixture
 {
-
     public:
         /// Register test methods.
         CPPUNIT_TEST_SUITE(PPFChanneliserTest);
         CPPUNIT_TEST(test_run);
-        CPPUNIT_TEST(test_channelProfile);
-        CPPUNIT_TEST(test_makeSpectrum);
+        //CPPUNIT_TEST(test_channelProfile);
+        //CPPUNIT_TEST(test_makeSpectrum);
 
         //CPPUNIT_TEST(test_configuration);
         //CPPUNIT_TEST(test_threadAssign);
@@ -84,7 +83,7 @@ class PPFChanneliserTest : public CppUnit::TestFixture
         unsigned _nTaps;
 };
 
+
 } // namespace lofar
 } // namespace pelican
-
 #endif // PPF_CHANNELISER_TEST_H_

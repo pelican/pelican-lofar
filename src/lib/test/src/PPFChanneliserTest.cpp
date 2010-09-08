@@ -71,7 +71,9 @@ void PPFChanneliserTest::test_run()
 
         QTime timer;
         timer.start();
-        channeliser.run(&timeSeries, &spectra);
+        for (unsigned i = 0; i < 4; ++i) {
+            channeliser.run(&timeSeries, &spectra);
+        }
         int elapsed = timer.elapsed();
 
         cout << endl;
