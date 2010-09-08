@@ -6,15 +6,21 @@
 #include "LofarTypes.h"
 #include <complex>
 
+#include "timer.h"
+
 /**
  * @file AdapterTimeSeriesDataSet.h
  */
+
+extern TimerData adapterTime;
 
 namespace pelican {
 
 class ConfigNode;
 
 namespace lofar {
+
+
 
 class TimeSeriesDataSetC32;
 

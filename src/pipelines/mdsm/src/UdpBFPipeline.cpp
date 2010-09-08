@@ -1,4 +1,5 @@
 #include "UdpBFPipeline.h"
+#include "AdapterTimeSeriesDataSet.h"
 #include <iostream>
 
 using std::cout;
@@ -20,6 +21,7 @@ UdpBFPipeline::UdpBFPipeline() : AbstractPipeline()
     timerInit(&_stokesTime);
     timerInit(&_integratorTime);
     timerInit(&_outputTime);
+    timerInit(&_totalTime);
 }
 
 
@@ -51,7 +53,6 @@ void UdpBFPipeline::init()
 
     // Request remote data
     requestRemoteData("TimeSeriesDataSetC32");
-
 }
 
 /**
@@ -64,6 +65,8 @@ void UdpBFPipeline::init()
  */
 void UdpBFPipeline::run(QHash<QString, DataBlob*>& remoteData)
 {
+  timerStart(&_totalTime);
+  
     // Get pointer to the remote time series data blob.
     // This is a block of data containing a number of time series of length
     // N for each sub-band and polarisation.
@@ -98,18 +101,30 @@ void UdpBFPipeline::run(QHash<QString, DataBlob*>& remoteData)
 
 //    stop();
 
-    if (_iteration % 1 == 0)
+    if (_iteration % 10 == 0)
         cout << "Finished the UDP beamforming pipeline, iteration " << _iteration << endl;
-
+  timerUpdate(&_totalTime);
     _iteration++;
 
 //    if (_iteration > 43000) stop();
-    if (_iteration * _totalSamplesPerChunk > 20e6) {
+    if (_iteration * _totalSamplesPerChunk >= 16*16384*5) {
     	stop();
+	timerReport(&adapterTime, "Adapter Time");
     	timerReport(&_ppfTime, "Polyphase Filter");
     	timerReport(&_stokesTime, "Stokes Generator");
-    	timerReport(&_integratorTime, "Stokes Integrator");
-    	timerReport(&_outputTime, "Output");
+	//    	timerReport(&_integratorTime, "Stokes Integrator");
+	//    	timerReport(&_outputTime, "Output");
+	timerReport(&_totalTime, "Pipeline Time (excluding adapter)");
+	cout << endl;
+	cout << "Total (average) allowed time per iteration = " 
+	     << _totalSamplesPerChunk * 5.0e-6 << " sec" << endl;
+	cout << "Total (average) actual time per iteration = " 
+	     << adapterTime.timeAverage + _totalTime.timeAverage << " sec" << endl;
+	cout << "nSubbands = " << timeSeries->nSubbands() << endl;
+	cout << "nPols = " << timeSeries->nPolarisations() << endl;
+	cout << "nBlocks = " << timeSeries->nTimeBlocks() << endl;
+	cout << "nChannels = " << timeSeries->nTimesPerBlock() << endl;
+	cout << endl;
     }
 }
 

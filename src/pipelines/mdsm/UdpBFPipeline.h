@@ -64,6 +64,7 @@ class UdpBFPipeline : public AbstractPipeline
         TimerData _stokesTime;
         TimerData _integratorTime;
         TimerData _outputTime;
+	TimerData _totalTime;
 };
 
 } // namespace lofar

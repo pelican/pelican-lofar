@@ -3,7 +3,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-
+#include <cfloat>
 #include <sys/time.h>
 
 typedef struct
@@ -21,8 +21,8 @@ static inline void timerInit(TimerData* data)
 	data->counter = 0;
 	data->timeStart = 0.0;
 	data->timeElapsed = 0.0;
-	data->timeMin = 0.0;
-	data->timeMax = 0.0;
+	data->timeMin = DBL_MAX;
+	data->timeMax = -DBL_MAX;
 	data->timeAverage = 0.0;
 }
 

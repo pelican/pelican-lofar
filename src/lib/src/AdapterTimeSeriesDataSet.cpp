@@ -17,8 +17,13 @@
 using std::cout;
 using std::endl;
 
+TimerData adapterTime;
+
 namespace pelican {
 namespace lofar {
+
+
+
 
 /**
  * @details
@@ -56,6 +61,8 @@ AdapterTimeSeriesDataSet::AdapterTimeSeriesDataSet(const ConfigNode& config)
     _headerTemp.resize(_headerSize);
     _dataTemp.resize(_dataSize);
     _paddingTemp.resize(_paddingSize + 1);
+
+    timerInit(&adapterTime);
 }
 
 
@@ -73,6 +80,7 @@ AdapterTimeSeriesDataSet::AdapterTimeSeriesDataSet(const ConfigNode& config)
  */
 void AdapterTimeSeriesDataSet::deserialise(QIODevice* in)
 {
+  timerStart(&adapterTime);
     // Sanity check on data blob dimensions and chunk size.
     _checkData();
 
@@ -107,6 +115,7 @@ void AdapterTimeSeriesDataSet::deserialise(QIODevice* in)
         // Read off padding (from word alignment of the packet).
         in->read(paddingTemp, _paddingSize);
     }
+  timerUpdate(&adapterTime);
 }
 
 
