@@ -56,12 +56,10 @@ void LofarEmulatorDataSim::getPacketData(char*& ptr, unsigned long& size)
     // integer value for the integer. Each interval consists of a number of
     // blocks no_blocks, which is defined in the header.
     // The total number of blocks is clockspeed / no_blocks.
-    _packet.header.timestamp = _timestamp;
-    _packet.header.blockSequenceNumber = _blockid;
-    _timestamp = 1 + (_blockid + _samplesPerPacket)
-            / (_clock == 160 ? 156250 : (_timestamp % 2 == 0 ? 195313 : 195212));
-    _blockid = (_blockid + _samplesPerPacket) % (_clock == 160 ?
-            156250 : (_timestamp % 2 == 0 ? 195313 : 195212));
+    _packet.header.timestamp = 1 + (_blockid + _samplesPerPacket) / (_clock == 160 ? 156250 : (_timestamp % 2 == 0 ? 195313 : 195212));
+    _packet.header.blockSequenceNumber = (_blockid + _samplesPerPacket) % (_clock == 160 ? 156250 : (_timestamp % 2 == 0 ? 195313 : 195212));
+    _timestamp = _packet.header.timestamp;
+    _blockid = _packet.header.blockSequenceNumber;
 
     // Return values.
     ptr = (char*)(&_packet);
@@ -111,6 +109,7 @@ void LofarEmulatorDataSim::_setPacketData()
 
     unsigned i;
     int16 re, im;
+    unsigned long time =  _packetCounter * _samplesPerPacket;
 
     Complex16 *data = reinterpret_cast<Complex16*>(_packet.data);
     for (int t = 0; t < _samplesPerPacket; t++)
@@ -119,7 +118,9 @@ void LofarEmulatorDataSim::_setPacketData()
         {
             i = t * _nSubbands * _nPolarisations + s * _nPolarisations;
 
-            re = _packetCounter + s + t;
+            time += t;
+
+            re = time;
             im = 0;
 
             // polarisation 1

@@ -10,7 +10,7 @@ int main(int argc, char** argv)
 {
     QCoreApplication app(argc, argv);
 
-    unsigned interval = 100; // microseconds
+    unsigned interval = 500; // microseconds
     unsigned startDelay = 1; // seconds
 
     unsigned nPols = 2;
