@@ -19,13 +19,13 @@
 
 #include "timer.h"
 
-#ifdef PPF_TIMER
-    unsigned counter;
-    double tMin[12];
-    double tMax[12];
-    double tSum[12];
-    double tAve[12];
-#endif
+//#ifdef PPF_TIMER
+unsigned counter;
+double tMin[12];
+double tMax[12];
+double tSum[12];
+double tAve[12];
+//#endif
 
 namespace pelican {
 namespace lofar {

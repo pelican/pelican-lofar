@@ -35,7 +35,7 @@ void PPFChanneliserTest::setUp()
     _nPols = 2;
     _nTaps = 8;
 
-    unsigned timesPerChunk =  512 * 1000;
+    unsigned timesPerChunk =  16 * 16384;
 
     if (timesPerChunk%_nChannels) CPPUNIT_FAIL("Setup error");
 
@@ -71,9 +71,7 @@ void PPFChanneliserTest::test_run()
 
         QTime timer;
         timer.start();
-        for (unsigned i = 0; i < 4; ++i) {
-            channeliser.run(&timeSeries, &spectra);
-        }
+        channeliser.run(&timeSeries, &spectra);
         int elapsed = timer.elapsed();
 
         cout << endl;
