@@ -134,27 +134,24 @@ void PPFChanneliser::run(const TimeSeriesDataSetC32* timeSeries,
 
     double elapsed, tStart, tEnd;
 
-    #pragma omp parallel \
-        shared(nTimeBlocks, nPolarisations, nSubbands, nFilterTaps, coeffs,\
-                tSum, tMin, tMax, tAve) \
-        private(threadId, nThreads, start, end, workBuffer, filteredSamples, \
-                spectrum, timeData, elapsed, tStart)
+//    #pragma omp parallel \
+//        shared(nTimeBlocks, nPolarisations, nSubbands, nFilterTaps, coeffs,\
+//                tSum, tMin, tMax, tAve) \
+//        private(threadId, nThreads, start, end, workBuffer, filteredSamples, \
+//                spectrum, timeData, elapsed, tStart)
+    for (threadId = 0; threadId < _nThreads; threadId++)
     {
-        threadId = omp_get_thread_num();
+
+//        threadId = omp_get_thread_num();
 
 #ifdef PPF_TIMER
         tStart = timerSec();
 #endif
 
-        nThreads = omp_get_num_threads();
-        _threadProcessingIndices(start, end, nSubbands, nThreads, threadId);
+//        nThreads = omp_get_num_threads();
+        _threadProcessingIndices(start, end, nSubbands, _nThreads, threadId);
 
         filteredSamples = &_filteredData[threadId][0];
-
-        #pragma omp critical
-        {
-        cout << "[" << threadId << "] start = " << start << " end = " << end << std::flush << endl;
-        }
 
         for (unsigned s = start; s < end; ++s) {
             for (unsigned p = 0; p < nPolarisations; ++p) {
