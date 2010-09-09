@@ -91,6 +91,8 @@ void PPFChanneliserTest::test_run()
         cout << "* Elapsed = " << elapsed << " ms. [" << nThreads << " threads]";
         cout << " (data time = " << _nBlocks * _nChannels * 5e-3 << " ms.)" << endl;
         cout << "-------------------------------------------------" << endl;
+
+//        spectra.write("spectraTest000.dat", 0, 0, 0);
     }
 
     catch (const QString& err)

@@ -173,8 +173,12 @@ template <typename T>
 inline unsigned long SpectrumDataSet<T>::_index(unsigned s, unsigned p,
         unsigned b) const
 {
+    // Returns the index for the data with the order:
+    // Subband, s (slowest) -> polarisation -> block (fastest).
     return _nChannels * ( _nTimeBlocks * (s * _nPolarisations + p) + b);
 }
+
+
 
 
 // -----------------------------------------------------------------------------
@@ -207,7 +211,8 @@ class SpectrumDataSetC32 : public SpectrumDataSet<std::complex<float> >
 
     public:
         /// Write the spectrum to file.
-        void write(const QString& fileName) const;
+        void write(const QString& fileName,
+                int s = -1, int p = -1, int b = -1) const;
 
         /// Returns the number of serialised bytes.
         quint64 serialisedBytes() const;
