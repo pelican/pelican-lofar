@@ -151,9 +151,9 @@ void PPFChanneliser::run(const TimeSeriesDataSetC32* timeSeries,
 
         filteredSamples = &_filteredData[threadId][0];
 
-        #pragma omp critial
+        #pragma omp critical
         {
-        cout << "[" << threadId << "] start = " << start << " end = " << end << endl;
+        cout << "[" << threadId << "] start = " << start << " end = " << end << std::flush << endl;
         }
 
         for (unsigned s = start; s < end; ++s) {
