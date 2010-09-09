@@ -88,7 +88,7 @@ void PPFChanneliserTest::test_run()
             cout << "- nSubbands = " << _nSubbands << endl;
             cout << "- nPols = " << _nPols << endl;
         }
-        cout << "* ElapsedInit = " << elapsedInit << " ms. [" << nThreads << " threads]";
+        cout << "* ElapsedInit = " << elapsedInit << " ms. [" << nThreads << " threads]" << endl;
         cout << "* Elapsed = " << elapsed << " ms. [" << nThreads << " threads]";
         cout << " (data time = " << _nBlocks * _nChannels * 5e-3 << " ms.)" << endl;
         cout << "-------------------------------------------------" << endl;
