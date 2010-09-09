@@ -16,8 +16,13 @@
 #include <fftw3.h>
 #include <omp.h>
 #include <cfloat>
+#include <iostream>
+using std::cout;
+using std::endl;
 
 #include "timer.h"
+
+
 
 //#ifdef PPF_TIMER
 unsigned counter;
@@ -145,6 +150,8 @@ void PPFChanneliser::run(const TimeSeriesDataSetC32* timeSeries,
         _threadProcessingIndices(start, end, nSubbands, nThreads, threadId);
 
         filteredSamples = &_filteredData[threadId][0];
+
+        cout << "[" << threadId << "] start = " << start << " end = " << end << endl;
 
         for (unsigned s = start; s < end; ++s) {
             for (unsigned p = 0; p < nPolarisations; ++p) {
