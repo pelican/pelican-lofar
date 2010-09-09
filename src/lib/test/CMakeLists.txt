@@ -2,7 +2,10 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR} ..)
 
 # Create test utility library.
 # ------------------------------------------------------------------------------
-set(lofarTestLib_src src/LofarUdpEmulator.cpp)
+set(lofarTestLib_src
+    src/LofarUdpEmulator.cpp
+    src/LofarEmulatorDataSim.cpp
+)
 add_library(lofarTestLib STATIC ${lofarTestLib_src})
 
 
@@ -36,6 +39,7 @@ target_link_libraries(lofarTest
 
 add_test(lofarTest lofarTest)
 
+
 # Create the lofar udp emulator binary.
 # ------------------------------------------------------------------------------
 add_executable(lofarEmulator src/lofarEmulatorMain.cpp)
@@ -44,6 +48,17 @@ target_link_libraries(lofarEmulator
     ${PELICAN_LIBRARY}
     lofarTestLib
 )
+
+# Create the lofar binary which sends simulated data.
+# ------------------------------------------------------------------------------
+add_executable(lofarEmulatorDataSim src/lofarEmulatorDataSimMain.cpp)
+target_link_libraries(lofarEmulatorDataSim
+    pelican-lofar_static
+    ${PELICAN_LIBRARY}
+    lofarTestLib
+)
+
+
 
 # Create a non cppunit PPF test binary
 # ------------------------------------------------------------------------------
