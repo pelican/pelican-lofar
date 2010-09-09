@@ -60,10 +60,14 @@ void PPFChanneliserTest::test_run()
         SpectrumDataSetC32 spectra;
 
         // Run once to size up buffers etc.
+        QTime timerInit;
+        int elapsedInit = 0;
         {
+            timerInit.start();
             TimeSeriesDataSetC32 timeSeries;
             timeSeries.resize(_nBlocks, _nSubbands, _nPols, _nChannels);
             channeliser.run(&timeSeries, &spectra);
+            elapsedInit = timerInit.elapsed();
         }
 
         TimeSeriesDataSetC32 timeSeries;
@@ -84,6 +88,7 @@ void PPFChanneliserTest::test_run()
             cout << "- nSubbands = " << _nSubbands << endl;
             cout << "- nPols = " << _nPols << endl;
         }
+        cout << "* ElapsedInit = " << elapsedInit << " ms. [" << nThreads << " threads]";
         cout << "* Elapsed = " << elapsed << " ms. [" << nThreads << " threads]";
         cout << " (data time = " << _nBlocks * _nChannels * 5e-3 << " ms.)" << endl;
         cout << "-------------------------------------------------" << endl;
