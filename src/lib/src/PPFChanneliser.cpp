@@ -134,24 +134,26 @@ void PPFChanneliser::run(const TimeSeriesDataSetC32* timeSeries,
 
     double elapsed, tStart, tEnd;
 
-    #pragma omp parallel \
-        shared(nTimeBlocks, nPolarisations, nSubbands, nFilterTaps, coeffs,\
-                tSum, tMin, tMax, tAve) \
-        private(threadId, nThreads, start, end, workBuffer, filteredSamples, \
-                spectrum, timeData, elapsed, tStart)
+//    #pragma omp parallel \
+//        shared(nTimeBlocks, nPolarisations, nSubbands, nFilterTaps, coeffs,\
+//                tSum, tMin, tMax, tAve) \
+//        private(threadId, nThreads, start, end, workBuffer, filteredSamples, \
+//                spectrum, timeData, elapsed, tStart)
+    for (unsigned threaId = 0; threadId < _nThreads; threaId++)
     {
-        threadId = omp_get_thread_num();
+//        threadId = omp_get_thread_num();
 
 #ifdef PPF_TIMER
         tStart = timerSec();
 #endif
 
-        nThreads = omp_get_num_threads();
-        _threadProcessingIndices(start, end, nSubbands, nThreads, threadId);
+//        nThreads = omp_get_num_threads();
+        _threadProcessingIndices(start, end, nSubbands, _nThreads, threadId);
 
         filteredSamples = &_filteredData[threadId][0];
 
-        for (unsigned s = start; s < end; ++s) {
+        for (unsigned s = start; s < end; s+=2)
+        {
             for (unsigned p = 0; p < nPolarisations; ++p) {
                 for (unsigned b = 0; b < nTimeBlocks; ++b) {
 
@@ -169,6 +171,27 @@ void PPFChanneliser::run(const TimeSeriesDataSetC32* timeSeries,
 
                     // FFT the filtered sub-band data to form a new spectrum.
                     spectrum = spectra->spectrumData(b, s ,p);
+                    _fft(filteredSamples, spectrum);
+                }
+            }
+
+            for (unsigned p = 0; p < nPolarisations; ++p) {
+                for (unsigned b = 0; b < nTimeBlocks; ++b) {
+
+                    // Get a pointer to the time series.
+                    timeData = timeSeries->timeSeriesData(b, s+1, p);
+
+                    // Get a pointer to the work buffer.
+                    workBuffer = &(_workBuffer[(s+1) * nPolarisations + p])[0];
+
+                    // Update buffered (lagged) data for the sub-band.
+                    _updateBuffer(timeData, _nChannels, nFilterTaps,  workBuffer);
+
+                    // Apply the PPF.
+                    _filter(workBuffer, nFilterTaps, _nChannels, coeffs, filteredSamples);
+
+                    // FFT the filtered sub-band data to form a new spectrum.
+                    spectrum = spectra->spectrumData(b, s+1 ,p);
                     _fft(filteredSamples, spectrum);
                 }
             }
