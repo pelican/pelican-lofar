@@ -16,8 +16,10 @@
 
 using std::cout;
 using std::endl;
+
 using std::cos;
 using std::sin;
+
 using std::vector;
 
 namespace pelican {
@@ -51,6 +53,8 @@ void PPFChanneliserTest::setUp()
 void PPFChanneliserTest::test_run()
 {
     cout << endl << "***** PPFChanneliserTest::test_run() ***** " << endl;
+    typedef PPFChanneliser::Complex Complex;
+
     // Setup the channeliser.
     unsigned nThreads = 2;
     ConfigNode config(_configXml(_nChannels, nThreads, _nTaps));
@@ -60,14 +64,10 @@ void PPFChanneliserTest::test_run()
         SpectrumDataSetC32 spectra;
 
         // Run once to size up buffers etc.
-        QTime timerInit;
-        int elapsedInit = 0;
         {
-            timerInit.start();
             TimeSeriesDataSetC32 timeSeries;
             timeSeries.resize(_nBlocks, _nSubbands, _nPols, _nChannels);
             channeliser.run(&timeSeries, &spectra);
-            elapsedInit = timerInit.elapsed();
         }
 
         TimeSeriesDataSetC32 timeSeries;
@@ -88,7 +88,6 @@ void PPFChanneliserTest::test_run()
             cout << "- nSubbands = " << _nSubbands << endl;
             cout << "- nPols = " << _nPols << endl;
         }
-        cout << "* ElapsedInit = " << elapsedInit << " ms. [" << nThreads << " threads]" << endl;
         cout << "* Elapsed = " << elapsed << " ms. [" << nThreads << " threads]";
         cout << " (data time = " << _nBlocks * _nChannels * 5e-3 << " ms.)" << endl;
         cout << "-------------------------------------------------" << endl;
@@ -96,7 +95,7 @@ void PPFChanneliserTest::test_run()
 
     catch (const QString& err)
     {
-            std::cout << err.toStdString() << std::endl;
+        std::cout << err.toStdString() << std::endl;
     }
     cout << endl << "***** PPFChanneliserTest::test_run() ***** " << endl;
 }
@@ -126,8 +125,9 @@ void PPFChanneliserTest::test_channelProfile()
     double freqInc = 0.01e6;    // Frequency increment of profile steps.
     float endFreq = startFreq + freqInc * nSteps;
     float midTestFreq = startFreq + (endFreq - startFreq) / 2.0;
+
     cout << "Scanning freqs " << startFreq << " -> " << endFreq << " ("
-              << midTestFreq << ")" << endl;
+         << midTestFreq << ")" << endl;
 
     unsigned nProfiles = 2;
     vector<unsigned> testIndices(nProfiles);
@@ -149,7 +149,7 @@ void PPFChanneliserTest::test_channelProfile()
 
     // Generate channel profile by scanning though frequencies.
     // ========================================================================
-    std::vector<double> freqs(nSteps);
+    vector<double> freqs(nSteps);
 
     for (unsigned k = 0; k < nSteps; ++k)
     {
@@ -258,18 +258,6 @@ void PPFChanneliserTest::test_makeSpectrum()
     file.close();
     cout << endl << "*** PPFChanneliserTest::test_makeSpectrum() ***" << endl;
 }
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
