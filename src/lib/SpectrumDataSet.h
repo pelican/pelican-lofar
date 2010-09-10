@@ -173,7 +173,15 @@ template <typename T>
 inline unsigned long SpectrumDataSet<T>::_index(unsigned s, unsigned p,
         unsigned b) const
 {
-    return _nChannels * ( _nTimeBlocks * (s * _nPolarisations + p) + b);
+  //  times, polarizations, subbands
+  //  return _nChannels * ( _nTimeBlocks * (s * _nPolarisations + p) + b);
+
+  // Polarisation, subbands, times     
+  return _nChannels * ( _nPolarisations * ( _nSubbands * b + s ) + p);
+
+
+
+
 }
 
 

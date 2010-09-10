@@ -70,9 +70,9 @@ void StokesIntegrator::run(const SpectrumDataSetStokes* stokesGeneratorOutput,
     //TIMER_START;
 
     for (unsigned u = 0; u < newSamples; ++u) {
-        for (unsigned t = timeStart; t < _windowSize+timeStart; ++t) {
-            for (unsigned p = 0; p < nPols; ++p) {
-                for (unsigned s = 0; s < nSubbands; ++s) {
+      for (unsigned t = timeStart; t < _windowSize+timeStart; ++t) {
+	for (unsigned s = 0; s < nSubbands; ++s) {
+	  for (unsigned p = 0; p < nPols; ++p) {
                     value = stokesGeneratorOutput->spectrumData(t, s, p);
                     float* timeBuffer = intStokes->spectrumData(u,s,p);
                     for (unsigned c = 0; c < nChannels; ++c){
