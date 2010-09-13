@@ -16,14 +16,21 @@
 #include <fftw3.h>
 #include <omp.h>
 #include <cfloat>
+#include <iostream>
+using std::cout;
+using std::endl;
 
 #include "timer.h"
 
-static unsigned counter;
-static double tMin[12];
-static double tMax[12];
-static double tSum[12];
-static double tAve[12];
+
+
+//#ifdef PPF_TIMER
+unsigned counter;
+double tMin[12];
+double tMax[12];
+double tSum[12];
+double tAve[12];
+//#endif
 
 namespace pelican {
 namespace lofar {
@@ -144,7 +151,8 @@ void PPFChanneliser::run(const TimeSeriesDataSetC32* timeSeries,
 
         filteredSamples = &_filteredData[threadId][0];
 
-        for (unsigned s = start; s < end; ++s) {
+        for (unsigned s = start; s < end; ++s)
+        {
             for (unsigned p = 0; p < nPolarisations; ++p) {
                 for (unsigned b = 0; b < nTimeBlocks; ++b) {
 
@@ -173,6 +181,7 @@ void PPFChanneliser::run(const TimeSeriesDataSetC32* timeSeries,
         tSum[threadId] += elapsed;
         if (elapsed > tMax[threadId]) tMax[threadId] = elapsed;
         if (elapsed < tMin[threadId]) tMin[threadId] = elapsed;
+        tAve[threadId] = (elapsed + counter * tAve[threadId]) / (counter + 1);
 #endif
 
     } // end of parallel region.
@@ -185,6 +194,7 @@ void PPFChanneliser::run(const TimeSeriesDataSetC32* timeSeries,
         cout << "    Sum = " << tSum[i] << endl;
         cout << "    Min = " << tMin[i] << endl;
         cout << "    Max = " << tMax[i] << endl;
+        cout << "    Ave = " << tAve[i] << endl;
     }
     cout << endl;
     ++counter;

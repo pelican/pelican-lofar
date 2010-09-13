@@ -88,9 +88,9 @@ void TimingPipeline::run(QHash<QString, DataBlob*>& remoteData)
     stokesGenerator->run(spectra, stokes);
     timerUpdate(&_stokesTime);
 
-    // timerStart(&_integratorTime);
-    // stokesIntegrator->run(stokes, intStokes);
-    // timerUpdate(&_integratorTime);
+    //    timerStart(&_integratorTime);
+    //    stokesIntegrator->run(stokes, intStokes);
+    //    timerUpdate(&_integratorTime);
 
     // Calls output stream managed->send(data, stream) the output stream
     // manager is configured in the xml.

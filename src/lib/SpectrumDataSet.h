@@ -178,11 +178,9 @@ inline unsigned long SpectrumDataSet<T>::_index(unsigned s, unsigned p,
 
   // Polarisation, subbands, times     
   return _nChannels * ( _nPolarisations * ( _nSubbands * b + s ) + p);
-
-
-
-
 }
+
+
 
 
 // -----------------------------------------------------------------------------
@@ -215,7 +213,8 @@ class SpectrumDataSetC32 : public SpectrumDataSet<std::complex<float> >
 
     public:
         /// Write the spectrum to file.
-        void write(const QString& fileName) const;
+        void write(const QString& fileName,
+                int s = -1, int p = -1, int b = -1) const;
 
         /// Returns the number of serialised bytes.
         quint64 serialisedBytes() const;

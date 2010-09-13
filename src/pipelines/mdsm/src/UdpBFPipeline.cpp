@@ -75,8 +75,7 @@ void UdpBFPipeline::run(QHash<QString, DataBlob*>& remoteData)
 
     // Calls output stream managed->send(data, stream) the output stream
     // manager is configured in the xml.
-    //dataOutput(spectra, "SpectrumDataSetC32");
-    dataOutput(intStokes, "SpectrumDataSetStokes");
+     dataOutput(intStokes, "SpectrumDataSetStokes");
 
 //    stop();
 

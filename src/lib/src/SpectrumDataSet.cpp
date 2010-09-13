@@ -16,26 +16,34 @@ namespace lofar {
  *
  * @param fileName The name of the file to write to.
  */
-void SpectrumDataSetC32::write(const QString& fileName) const
+void SpectrumDataSetC32::write(const QString& fileName, int s, int p, int b) const
 {
     QFile file(fileName);
+    if (QFile::exists(fileName)) QFile::remove(fileName);
     if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) return;
 
     const std::complex<float>* data;
+
     unsigned nChan = nChannels();
+    unsigned bStart = (b == -1) ? 0 : b;
+    unsigned bEnd = (b == -1) ? nTimeBlocks() : b + 1;
+    unsigned sStart = (s == -1) ? 0 : s;
+    unsigned sEnd = (s == -1) ? this->nSubbands() : s + 1;
+    unsigned pStart = (p == -1) ? 0 : p;
+    unsigned pEnd = (p == -1) ? nPolarisations() : p + 1;
 
     QTextStream out(&file);
-    for (unsigned b = 0; b < nTimeBlocks(); ++b) {
-        for (unsigned s = 0; s < nSubbands(); ++s) {
-            for (unsigned p = 0; p < nPolarisations(); ++p) {
+    for (unsigned s = sStart; s < sEnd; ++s) {
+        for (unsigned p = pStart; p < pEnd; ++p) {
+            for (unsigned b = bStart; b < bEnd; ++b) {
 
                 // Get a pointer the the spectrum.
                 data = spectrumData(b, s, p);
 
                 for (unsigned c = 0; c < nChan; ++c)
                 {
-                    out << QString::number(data[c].real(), 'g', 16) << " ";
-                    out << QString::number(data[c].imag(), 'g', 16) << endl;
+                    out << QString::number(data[c].real(), 'g', 8) << " ";
+                    out << QString::number(data[c].imag(), 'g', 8) << endl;
                 }
 
                 out << endl;

@@ -33,7 +33,7 @@ void AdapterTimeSeriesDataSetTest::setUp()
 
     _fixedSizePackets = "true";
     _dataBitSize = 16;
-    _udpPacketsPerIteration = 32000;
+    _udpPacketsPerIteration = 16384;
     _samplesPerPacket = 16;
     _outputChannelsPerSubband = 16;
     _subbandsPerPacket = 61;
