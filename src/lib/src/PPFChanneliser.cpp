@@ -27,7 +27,7 @@ namespace lofar {
  * @param[in] config XML configuration node.
  */
 PPFChanneliser::PPFChanneliser(const ConfigNode& config)
-: AbstractModule(config), _buffersInitialised(false)
+: AbstractModule(config), _buffersInitialised(false), _iOldestSamples(0)
 {
     // Get options from the XML configuration node.
     _nChannels = config.getOption("outputChannelsPerSubband", "value", "512").toUInt();
@@ -46,19 +46,10 @@ PPFChanneliser::PPFChanneliser(const ConfigNode& config)
 
     // Allocate buffers used for holding the output of the FIR stage.
     _filteredData.resize(_nThreads);
-    for (unsigned i = 0; i < _nThreads; ++i)
-        _filteredData[i].resize(_nChannels);
-
-    // Initialise pointer to the current oldest sample set.
-    _iOldestSamples = 0;
+    for (unsigned i = 0; i < _nThreads; ++i) _filteredData[i].resize(_nChannels);
 
     // Create the FFTW plan.
-    size_t fftSize = _nChannels * sizeof(fftwf_complex);
-    fftwf_complex* in = (fftwf_complex*) fftwf_malloc(fftSize);
-    fftwf_complex* out = (fftwf_complex*) fftwf_malloc(fftSize);
-    _fftPlan = fftwf_plan_dft_1d(_nChannels, in, out, FFTW_FORWARD, FFTW_MEASURE);
-    fftwf_free(in);
-    fftwf_free(out);
+    _createFFTWPlan(_nChannels, _fftPlan);
 }
 
 
@@ -130,6 +121,7 @@ void PPFChanneliser::run(const TimeSeriesDataSetC32* timeSeries,
         for (unsigned b = 0; b < nTimeBlocks; ++b) {
             for (unsigned s = start; s < end; ++s) {
                 for (unsigned p = 0; p < nPolarisations; ++p) {
+
                     // Get a pointer to the time series.
                     timeData = timeSeries->timeSeriesData(b, s, p);
 
@@ -297,6 +289,18 @@ unsigned PPFChanneliser::_setupWorkBuffers(unsigned nSubbands,
     }
     _buffersInitialised = true;
     return bufferSize;
+}
+
+
+
+void PPFChanneliser::_createFFTWPlan(unsigned nChannels, fftwf_plan& plan)
+{
+    size_t fftSize = nChannels * sizeof(fftwf_complex);
+    fftwf_complex* in = (fftwf_complex*) fftwf_malloc(fftSize);
+    fftwf_complex* out = (fftwf_complex*) fftwf_malloc(fftSize);
+    plan = fftwf_plan_dft_1d(_nChannels, in, out, FFTW_FORWARD, FFTW_MEASURE);
+    fftwf_free(in);
+    fftwf_free(out);
 }
 
 

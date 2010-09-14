@@ -70,7 +70,7 @@ void StokesGenerator::run(const TimeSeriesDataSetC32* streamData,
     typedef std::complex<float> Complex;
     unsigned nSamples = streamData->nTimeBlocks();
     unsigned nSubbands = streamData->nSubbands();
-    unsigned nSamps = streamData->nTimes(0,0,0);
+    unsigned nSamps = streamData->nTimesPerBlock();
 
     stokes->setLofarTimestamp(streamData->getLofarTimestamp());
     stokes->setBlockRate(streamData->getBlockRate());
