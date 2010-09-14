@@ -36,7 +36,7 @@ void StokesGenerator::run(const SpectrumDataSetC32* channeliserOutput,
 
     stokes->setLofarTimestamp(channeliserOutput->getLofarTimestamp());
     stokes->setBlockRate(channeliserOutput->getBlockRate());
-    stokes->resize(nSamples, nSubbands, 3, nChannels);
+    stokes->resize(nSamples, nSubbands, 1, nChannels);
 
     const Complex* dataPolX, *dataPolY;
     float *I, *Q, *U, *V;
@@ -48,20 +48,20 @@ void StokesGenerator::run(const SpectrumDataSetC32* channeliserOutput,
             dataPolX = channeliserOutput->spectrumData(t, s, 0);
             dataPolY = channeliserOutput->spectrumData(t, s, 1);
             I = stokes->spectrumData(t, s, 0);
-            Q = stokes->spectrumData(t, s, 1);
-            U = stokes->spectrumData(t, s, 2);
-            V = stokes->spectrumData(t, s, 3);
+	    //            Q = stokes->spectrumData(t, s, 1);
+	    //            U = stokes->spectrumData(t, s, 2);
+	    //            V = stokes->spectrumData(t, s, 3);
 	    //	    std::cout << nSamples << " " << t << " " << s  <<std::endl;
 	    //	    std::cout << dataPolX << " " << dataPolY << std::endl;
 	    //	    std::cout << I << " "<< Q <<" "<< U << " "<< V <<std::endl;
             for (unsigned c = 0; c < nChannels; ++c) {
-	        XxYstar=dataPolX[c]*conj(dataPolY[c]);
+	      //	        XxYstar=dataPolX[c]*conj(dataPolY[c]);
                 powerX = _sqr(dataPolX[c].real()) + _sqr(dataPolX[c].imag());
                 powerY = _sqr(dataPolY[c].real()) + _sqr(dataPolY[c].imag());
                 I[c] = powerX + powerY;
-                Q[c] = powerX - powerY;
-                U[c] = 2.0f * real(XxYstar);
-                V[c] = 2.0f * imag(XxYstar);
+		//                Q[c] = powerX - powerY;
+		//                U[c] = 2.0f * real(XxYstar);
+		//                V[c] = 2.0f * imag(XxYstar);
             }
         }
     }
