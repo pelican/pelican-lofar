@@ -105,7 +105,7 @@ void PumaOutput::_convertToPuma( const SpectrumDataSetStokes* data )
         for (unsigned s = 0; s < nSubbands; ++s) {
             const float* spectrum = data->spectrumData(t, s, polarisation );
             for (unsigned int c = 0; c < nChannels ; ++c) {
-                puma[c] += spectrum[c];
+                puma[t] += spectrum[c];
             }
         }
     }
