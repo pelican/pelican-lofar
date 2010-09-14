@@ -96,7 +96,7 @@ void PumaOutput::_convertToPuma( const SpectrumDataSetStokes* data )
     //
     // unwrap the datablob and munge channels and subbands together
     //
-    QVector<float> puma;
+    QVector<float> puma(data->nTimeBlocks());
     unsigned int polarisation = 0; // only do one polarisation
     
     unsigned int nSubbands = data->nSubbands();
