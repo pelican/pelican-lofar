@@ -3,6 +3,7 @@
 #include "LofarStreamDataClient.h"
 #include "UdpBFPipeline.h"
 #include "AdapterTimeSeriesDataSet.h"
+#include "PumaOutput.h"
 
 #include <QtCore/QCoreApplication>
 

@@ -12,6 +12,7 @@ set(lib_src
     src/LofarStationConfiguration.cpp
     src/LofarStationConfigurationAdapter.cpp
     src/PelicanBlobClient.cpp
+    src/PumaOutput.cpp
     src/PolyphaseCoefficients.cpp
     src/SpectrumDataSet.cpp
     src/TimeSeriesDataSet.cpp
