@@ -10,6 +10,11 @@ class QIODevice;
 
 /**
  * @file PumaOutput.h
+ * @configuration
+ * <PumaOutput>
+ *   <connection host="somehost" port="someport" />
+ *  <file name="somefilename" />
+ * </PumaOutput>
  */
 
 namespace pelican {
