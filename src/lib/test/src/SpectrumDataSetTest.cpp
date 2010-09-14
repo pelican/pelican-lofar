@@ -8,6 +8,12 @@
 #include <iostream>
 #include <complex>
 
+using std::cout;
+using std::cerr;
+using std::endl;
+using std::vector;
+typedef std::complex<float> Complex;
+
 namespace pelican {
 namespace lofar {
 
@@ -25,10 +31,11 @@ void SpectrumDataSetTest::test_accessorMethods()
         try {
             SpectrumDataSet<float> spectra;
 
-            spectra.resize(10, 62, 2, 1);
-            CPPUNIT_ASSERT_EQUAL(unsigned(10), spectra.nTimeBlocks());
-            CPPUNIT_ASSERT_EQUAL(unsigned(62), spectra.nSubbands());
-            CPPUNIT_ASSERT_EQUAL(unsigned(2), spectra.nPolarisations());
+            spectra.resize(10, 62, 2, 10);
+            CPPUNIT_ASSERT_EQUAL(10u, spectra.nTimeBlocks());
+            CPPUNIT_ASSERT_EQUAL(62u, spectra.nSubbands());
+            CPPUNIT_ASSERT_EQUAL(2u, spectra.nPolarisations());
+            CPPUNIT_ASSERT_EQUAL(10u, spectra.nChannels());
 
             // Expect to throw as base class methods have not been implemented.
             CPPUNIT_ASSERT_THROW(spectra.serialisedBytes(), QString);
@@ -37,8 +44,9 @@ void SpectrumDataSetTest::test_accessorMethods()
             CPPUNIT_ASSERT_THROW(spectra.deserialise(buffer, QSysInfo::ByteOrder),
                     QString);
         }
-        catch (const QString& err) {
-            std::cout << err.toStdString() << std::endl;
+        catch (const QString& err)
+        {
+            cout << err.toStdString() << endl;
         }
     }
 
@@ -50,14 +58,16 @@ void SpectrumDataSetTest::test_accessorMethods()
             DataBlob* s = factory.create("SpectrumDataSetC32");
 
             SpectrumDataSetC32* spectra = (SpectrumDataSetC32*)s;
-            spectra->resize(10, 62, 2, 1);
+            spectra->resize(10, 62, 2, 10);
 
-            CPPUNIT_ASSERT_EQUAL(unsigned(10), spectra->nTimeBlocks());
-            CPPUNIT_ASSERT_EQUAL(unsigned(62), spectra->nSubbands());
-            CPPUNIT_ASSERT_EQUAL(unsigned(2), spectra->nPolarisations());
+            CPPUNIT_ASSERT_EQUAL(10u, spectra->nTimeBlocks());
+            CPPUNIT_ASSERT_EQUAL(62u, spectra->nSubbands());
+            CPPUNIT_ASSERT_EQUAL(2u, spectra->nPolarisations());
+            CPPUNIT_ASSERT_EQUAL(10u, spectra->nChannels());
         }
-        catch (const QString& err) {
-            std::cout << err.toStdString() << std::endl;
+        catch (const QString& err)
+        {
+            cout << err.toStdString() << std::endl;
         }
     }
 
@@ -69,69 +79,68 @@ void SpectrumDataSetTest::test_accessorMethods()
  */
 void SpectrumDataSetTest::test_serialise_deserialise()
 {
-//     // Error tolerance use for double comparisons.
-//     double err = 1.0e-5;
+     // Error tolerance use for double comparisons.
+     double err = 1.0e-5;
 
-//     // Create a spectra blob.
-//     unsigned nTimeBlocks = 10;
-//     unsigned nSubbands = 5;
-//     unsigned nPolarisations = 2;
-//     SpectrumDataSetC32 spectra;
-//     spectra.resize(nTimeBlocks, nSubbands, nPolarisations, 1);
-//     CPPUNIT_ASSERT_EQUAL(nTimeBlocks * nSubbands * nPolarisations,
-//             spectra.nSpectra());
+     // Create a spectra blob.
+     unsigned nTimeBlocks = 10;
+     unsigned nSubbands = 5;
+     unsigned nPolarisations = 2;
+     unsigned nChannels = 10;
+     SpectrumDataSetC32 spectra;
 
-//     for (unsigned i = 0; i < spectra.nSpectra(); ++i) {
-//         Spectrum<std::complex<float> >* spectrum = spectra.spectrum(i);
-//         CPPUNIT_ASSERT(spectrum != NULL);
+     spectra.resize(nTimeBlocks, nSubbands, nPolarisations, nChannels);
 
-//         spectrum->setStartFrequency(double(i) + 0.1);
-//         spectrum->setFrequencyIncrement(double(i) + 0.2);
-//         unsigned nChannels = 10;
-//         spectrum->resize(nChannels);
-//         std::complex<float>* channelAmp = spectrum->data();
-//         for (unsigned c = 0; c < spectrum->nChannels(); ++c) {
-//             channelAmp[c] = std::complex<float>(float(i) + float(c),
-//                     float(i) - float(c));
-//         }
-//     }
+     CPPUNIT_ASSERT_EQUAL(nTimeBlocks * nSubbands * nPolarisations,
+             spectra.nSpectra());
 
-//     // Serialise to a QBuffer.
-//     QBuffer serialBlob;
-//     serialBlob.open(QBuffer::WriteOnly);
-//     spectra.serialise(serialBlob);
+     Complex* data;
+     for (unsigned i = 0; i < spectra.nSpectra(); ++i)
+     {
+         data = spectra.spectrumData(i);
+         CPPUNIT_ASSERT(data);
+         for (unsigned c = 0; c < nChannels; ++c)
+         {
+             data[c] = Complex(float(i) + float(c), float(i) - float(c));
+         }
+     }
 
-//     // Check the size of the byte array is the same as reported.
-//     CPPUNIT_ASSERT_EQUAL((qint64)spectra.serialisedBytes(), serialBlob.size());
-//     serialBlob.close();
+     // Serialise to a QBuffer.
+     QBuffer serialBlob;
+     serialBlob.open(QBuffer::WriteOnly);
+     spectra.serialise(serialBlob);
 
-//     serialBlob.open(QBuffer::ReadOnly);
+     // Check the size of the byte array is the same as reported.
+     CPPUNIT_ASSERT_EQUAL((qint64)spectra.serialisedBytes(), serialBlob.size());
+     serialBlob.close();
 
-//     // Deserialise into a new spectra data blob.
-//     SpectrumDataSetC32 spectraNew;
-//     spectraNew.deserialise(serialBlob, QSysInfo::ByteOrder);
+     serialBlob.open(QBuffer::ReadOnly);
 
-//     // Check we read everything.
-//     CPPUNIT_ASSERT(serialBlob.bytesAvailable() == 0);
-//     serialBlob.close();
+     // Deserialise into a new spectra data blob.
+     SpectrumDataSetC32 spectraNew;
+     spectraNew.deserialise(serialBlob, QSysInfo::ByteOrder);
 
-//     // Check the blob deserialised correctly.
-//     CPPUNIT_ASSERT_EQUAL(nTimeBlocks, spectraNew.nTimeBlocks());
-//     CPPUNIT_ASSERT_EQUAL(nSubbands, spectraNew.nSubbands());
-//     CPPUNIT_ASSERT_EQUAL(nPolarisations, spectraNew.nPolarisations());
+     // Check we read everything.
+     CPPUNIT_ASSERT(serialBlob.bytesAvailable() == 0);
+     serialBlob.close();
 
-//     for (unsigned i = 0; i < spectraNew.nSpectra(); ++i) {
-//         const Spectrum<std::complex<float> >* spectrum = spectra.spectrum(i);
-//         unsigned nChannels = spectrum->nChannels();
-//         CPPUNIT_ASSERT_EQUAL(10u, nChannels);
-//         const std::complex<float>* channelAmp = spectrum->data();
-//         for (unsigned c = 0; c < nChannels; ++c) {
-//             CPPUNIT_ASSERT_DOUBLES_EQUAL(float(i) + float(c),
-//                     channelAmp[c].real(), err);
-//             CPPUNIT_ASSERT_DOUBLES_EQUAL(float(i) - float(c),
-//                     channelAmp[c].imag(), err);
-//         }
-//     }
+     // Check the blob deserialised correctly.
+     CPPUNIT_ASSERT_EQUAL(nTimeBlocks, spectraNew.nTimeBlocks());
+     CPPUNIT_ASSERT_EQUAL(nSubbands, spectraNew.nSubbands());
+     CPPUNIT_ASSERT_EQUAL(nPolarisations, spectraNew.nPolarisations());
+     CPPUNIT_ASSERT_EQUAL(nChannels, spectraNew.nChannels());
+
+     const Complex* dataNew;
+     for (unsigned i = 0; i < spectraNew.nSpectra(); ++i)
+     {
+         dataNew = spectraNew.spectrumData(i);
+
+         for (unsigned c = 0; c < nChannels; ++c)
+         {
+             CPPUNIT_ASSERT_DOUBLES_EQUAL(float(i) + float(c), dataNew[c].real(), err);
+             CPPUNIT_ASSERT_DOUBLES_EQUAL(float(i) - float(c), dataNew[c].imag(), err);
+         }
+     }
 }
 
 } // namespace lofar

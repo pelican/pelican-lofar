@@ -63,16 +63,10 @@ void SpectrumDataSetC32::write(const QString& fileName, int s, int p, int b) con
  */
 quint64 SpectrumDataSetC32::serialisedBytes() const
 {
-    // Sub-band spectra dimensions.
-    quint64 size = 3 * sizeof(unsigned);
-
-    unsigned nChan = nChannels();
-    for (unsigned i = 0; i < nSpectra(); ++i) {
-        // Spectrum header.
-        size += sizeof(unsigned) + 2 * sizeof(double);
-        // Spectrum data.
-        size += nChan * sizeof(std::complex<float>);
-    }
+    quint64 size = 4 * sizeof(unsigned);
+    size += sizeof(long);
+    size += sizeof(long long);
+    size += _data.size() * sizeof(std::complex<float>);
     return size;
 }
 
@@ -83,32 +77,25 @@ quint64 SpectrumDataSetC32::serialisedBytes() const
  */
 void SpectrumDataSetC32::serialise(QIODevice& out) const
 {
-//    unsigned nBlocks = nTimeBlocks();
-//    unsigned nSubs = nSubbands();
-//    unsigned nPols = nPolarisations();
-//
-//    // Sub-band spectrum dimensions.
-//    out.write((char*)&nBlocks, sizeof(unsigned));
-//    out.write((char*)&nSubs, sizeof(unsigned));
-//    out.write((char*)&nPols, sizeof(unsigned));
-//
-//    Spectrum<std::complex<float> > const * spectrum;
-//
-//    double startFreq, deltaFreq;
-//    unsigned nChan = nChannels();
-//
-//    // Loop over and write each spectrum.
-//    for (unsigned i = 0; i < nSpectra(); ++i) {
-//        spectrum = this->spectrum(i);
-//        startFreq = spectrum->startFrequency();
-//        deltaFreq = spectrum->frequencyIncrement();
-//        // Spectrum header.
-//        out.write((char*)&nChan, sizeof(unsigned));
-//        out.write((char*)&startFreq, sizeof(double));
-//        out.write((char*)&deltaFreq, sizeof(double));
-//        // Spectrum data.
-//        out.write((char*)spectrum->data(), nChan * sizeof(std::complex<float>));
-//    }
+    unsigned nBlocks = nTimeBlocks();
+    unsigned nSubs = nSubbands();
+    unsigned nPols = nPolarisations();
+    unsigned nChan = nChannels();
+
+    // Sub-band spectrum dimensions.
+    out.write((char*)&nBlocks, sizeof(unsigned));
+    out.write((char*)&nSubs, sizeof(unsigned));
+    out.write((char*)&nPols, sizeof(unsigned));
+    out.write((char*)&nChan, sizeof(unsigned));
+
+    // Write the lofar meta-data.
+    long blockRate = getBlockRate();
+    long long timeStamp = getLofarTimestamp();
+    out.write((char*)&blockRate, sizeof(long));
+    out.write((char*)&timeStamp, sizeof(long long));
+
+    // Write the data.
+    out.write((char*)&_data[0], sizeof(std::complex<float>) * _data.size());
 }
 
 
@@ -118,41 +105,36 @@ void SpectrumDataSetC32::serialise(QIODevice& out) const
  */
 void SpectrumDataSetC32::deserialise(QIODevice& in, QSysInfo::Endian endian)
 {
-//    if (endian != QSysInfo::ByteOrder) {
-//        throw QString("SubbandSpectraC32::deserialise(): Endianness "
-//                "of serial data not supported.");
-//    }
-//
-//    unsigned nBlocks, nSubs, nPols;
-//
-//    // Read spectrum dimensions.
-//    in.read((char*)&nBlocks, sizeof(unsigned));
-//    in.read((char*)&nSubs, sizeof(unsigned));
-//    in.read((char*)&nPols, sizeof(unsigned));
-//
-//    resize(nBlocks, nSubs, nPols);
-//
-//    unsigned nChannels;
-//    double startFreq, deltaFreq;
-//    Spectrum<std::complex<float> >* spectrum;
-//
-//    // Loop over and write each spectrum.
-//    for (unsigned i = 0; i < nSpectra(); ++i) {
-//
-//        spectrum = this->spectrum(i);
-//
-//        // Read the spectrum header.
-//        in.read((char*)&nChannels, sizeof(unsigned));
-//        in.read((char*)&startFreq, sizeof(double));
-//        in.read((char*)&deltaFreq, sizeof(double));
-//        spectrum->setStartFrequency(startFreq);
-//        spectrum->setFrequencyIncrement(deltaFreq);
-//
-//        // Read the spectrum data.
-//        spectrum->resize(nChannels);
-//        in.read((char*)spectrum->data(), nChannels * sizeof(std::complex<float>));
-//    }
+    if (endian != QSysInfo::ByteOrder) {
+        throw QString("SubbandSpectraC32::deserialise(): Endianness "
+                "of serial data not supported.");
+    }
+
+    unsigned nBlocks, nSubs, nPols, nChan;
+
+    // Read spectrum dimensions.
+    in.read((char*)&nBlocks, sizeof(unsigned));
+    in.read((char*)&nSubs, sizeof(unsigned));
+    in.read((char*)&nPols, sizeof(unsigned));
+    in.read((char*)&nChan, sizeof(unsigned));
+
+    // Read lofar meta-data
+    long blockRate;
+    long long timeStamp;
+    in.read((char*)&blockRate, sizeof(long));
+    in.read((char*)&timeStamp, sizeof(long long));
+    setBlockRate(blockRate);
+    setLofarTimestamp(timeStamp);
+
+    // read the data
+    resize(nBlocks, nSubs, nPols, nChan);
+    in.read((char*)&_data[0], sizeof(std::complex<float>) * _data.size());
 }
+
+
+
+
+
 
 //------------------------------------------------------------------------------
 
@@ -165,15 +147,10 @@ void SpectrumDataSetC32::deserialise(QIODevice& in, QSysInfo::Endian endian)
 quint64 SpectrumDataSetStokes::serialisedBytes() const
 {
     // Sub-band spactra dimensions.
-    quint64 size = 3 * sizeof(unsigned);
-
-    unsigned nChan = nChannels();
-    for (unsigned i = 0; i < nSpectra(); ++i) {
-        // Spectrum header.
-        size += sizeof(unsigned) + 2 * sizeof(double);
-        // Spectrum data.
-        size += nChan * sizeof(float);
-    }
+    quint64 size = 4 * sizeof(unsigned);
+    size += sizeof(long);
+    size += sizeof(long long);
+    size += _data.size() * sizeof(float);
     return size;
 }
 
@@ -184,31 +161,25 @@ quint64 SpectrumDataSetStokes::serialisedBytes() const
  */
 void SpectrumDataSetStokes::serialise(QIODevice& out) const
 {
-//    unsigned nBlocks = nTimeBlocks();
-//    unsigned nSubs = nSubbands();
-//    unsigned nPols = nPolarisations();
-//
-//    // Sub-band spectrum dimensions.
-//    out.write((char*)&nBlocks, sizeof(unsigned));
-//    out.write((char*)&nSubs, sizeof(unsigned));
-//    out.write((char*)&nPols, sizeof(unsigned));
-//
-//    Spectrum<float> const * spectrum;
-//    double startFreq, deltaFreq;
-//    unsigned nChan = nChannels();
-//
-//    // Loop over and write each spectrum.
-//    for (unsigned i = 0; i < nSpectra(); ++i) {
-//        spectrum = this->spectrum(i);
-//        startFreq = spectrum->startFrequency();
-//        deltaFreq = spectrum->frequencyIncrement();
-//        // Spectrum header.
-//        out.write((char*)&nChan, sizeof(unsigned));
-//        out.write((char*)&startFreq, sizeof(double));
-//        out.write((char*)&deltaFreq, sizeof(double));
-//        // Spectrum data.
-//        out.write((char*)spectrum->data(), nChan * sizeof(float));
-//    }
+    unsigned nBlocks = nTimeBlocks();
+    unsigned nSubs = nSubbands();
+    unsigned nPols = nPolarisations();
+    unsigned nChan = nChannels();
+
+    // Sub-band spectrum dimensions.
+    out.write((char*)&nBlocks, sizeof(unsigned));
+    out.write((char*)&nSubs, sizeof(unsigned));
+    out.write((char*)&nPols, sizeof(unsigned));
+    out.write((char*)&nChan, sizeof(unsigned));
+
+    // Write the lofar meta-data.
+    long blockRate = getBlockRate();
+    long long timeStamp = getLofarTimestamp();
+    out.write((char*)&blockRate, sizeof(long));
+    out.write((char*)&timeStamp, sizeof(long long));
+
+    // Write the data.
+    out.write((char*)&_data[0], sizeof(float) * _data.size());
 }
 
 
@@ -218,35 +189,25 @@ void SpectrumDataSetStokes::serialise(QIODevice& out) const
  */
 void SpectrumDataSetStokes::deserialise(QIODevice& in, QSysInfo::Endian /*endian*/)
 {
-//    unsigned nBlocks, nSubs, nPols;
-//
-//    // Read spectrum dimensions.
-//    in.read((char*)&nBlocks, sizeof(unsigned));
-//    in.read((char*)&nSubs, sizeof(unsigned));
-//    in.read((char*)&nPols, sizeof(unsigned));
-//
-//    resize(nBlocks, nSubs, nPols, nChannels);
-//
-//    unsigned nChannels;
-//    double startFreq, deltaFreq;
-//    Spectrum<float>* spectrum;
-//
-//    // Loop over and write each spectrum.
-//    for (unsigned i = 0; i < nSpectra(); ++i) {
-//
-//        spectrum = this->spectrum(i);
-//
-//        // Read the spectrum header.
-//        in.read((char*)&nChannels, sizeof(unsigned));
-//        in.read((char*)&startFreq, sizeof(double));
-//        in.read((char*)&deltaFreq, sizeof(double));
-//        spectrum->setStartFrequency(startFreq);
-//        spectrum->setFrequencyIncrement(deltaFreq);
-//
-//        // Read the spectrum data.
-//        spectrum->resize(nChannels);
-//        in.read((char*)spectrum->data(), nChannels * sizeof(float));
-//    }
+    unsigned nBlocks, nSubs, nPols, nChan;
+
+    // Read spectrum dimensions.
+    in.read((char*)&nBlocks, sizeof(unsigned));
+    in.read((char*)&nSubs, sizeof(unsigned));
+    in.read((char*)&nPols, sizeof(unsigned));
+    in.read((char*)&nChan, sizeof(unsigned));
+
+    // Read lofar meta-data
+    long blockRate;
+    long long timeStamp;
+    in.read((char*)&blockRate, sizeof(long));
+    in.read((char*)&timeStamp, sizeof(long long));
+    setBlockRate(blockRate);
+    setLofarTimestamp(timeStamp);
+
+    // read the data
+    resize(nBlocks, nSubs, nPols, nChan);
+    in.read((char*)&_data[0], sizeof(float) * _data.size());
 }
 
 

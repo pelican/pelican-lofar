@@ -62,8 +62,9 @@ class SpectrumDataSet : public DataBlob
                 unsigned nPolarisations, unsigned nChannels);
 
     public:
-        /// Returns the number of entries in the data blob.
-        unsigned nSpectra() const { return _data.size(); }
+        /// Returns the number of spectra in the data blob.
+        unsigned nSpectra() const
+        { return _nTimeBlocks * _nSubbands * _nPolarisations; }
 
         /// Returns the number of blocks of sub-band spectra.
         unsigned nTimeBlocks() const { return _nTimeBlocks; }
@@ -91,25 +92,19 @@ class SpectrumDataSet : public DataBlob
         /// Set the lofar time-stamp
         void setLofarTimestamp(long long timestamp) { _lofarTimestamp = timestamp; }
 
-//        /// Returns a spectrum pointer at index \p i.
-//        Spectrum<T> * spectrum(unsigned i)
-//        { return (_data.size() > 0 && i < _data.size()) ? &_data[i] : 0; }
-//
-//        /// Returns a spectrum pointer at index \p i. (const overload).
-//        Spectrum<T> const * spectrum(unsigned i) const
-//        { return (_data.size() > 0 && i < _data.size()) ? &_data[i] : 0; }
-
+        /// Returns a pointer to the data.
         T * data() { return &_data[0]; }
 
+        /// Returns a pointer to the data (const overload).
         T const * data() const { return &_data[0]; }
 
-        T * spectrumData(unsigned i) {
-            return &_data[i * _nChannels];
-        }
+        /// Returns a pointer to the spectrum data at index i.
+        T * spectrumData(unsigned i)
+        { return &_data[i * _nChannels]; }
 
-        T const * spectrumData(unsigned i) const {
-            return &_data[i * _nChannels];
-        }
+        /// Returns a pointer to the spectrum data at index i (const overload).
+        T const * spectrumData(unsigned i) const
+        { return &_data[i * _nChannels]; }
 
         /// Returns a pointer to the spectrum data for the specified time block
         /// \p b, sub-band \p s, and polarisation \p p (const overload).
@@ -121,15 +116,15 @@ class SpectrumDataSet : public DataBlob
         T const * spectrumData(unsigned b, unsigned s, unsigned p) const
         { return &_data[_index(s, p, b)]; }
 
-
     private:
         /// Returns the data index for a given time block \b, sub-band \s and
         /// polarisation.
         unsigned long _index(unsigned s, unsigned p, unsigned b) const;
 
-    private:
+    protected:
         std::vector<T> _data;
 
+    private:
         unsigned _nSubbands;
         unsigned _nPolarisations;
         unsigned _nTimeBlocks;
@@ -176,7 +171,7 @@ inline unsigned long SpectrumDataSet<T>::_index(unsigned s, unsigned p,
   //  times, polarizations, subbands
   //  return _nChannels * ( _nTimeBlocks * (s * _nPolarisations + p) + b);
 
-  // Polarisation, subbands, times     
+  // Polarisation, subbands, times
   return _nChannels * ( _nPolarisations * ( _nSubbands * b + s ) + p);
 }
 

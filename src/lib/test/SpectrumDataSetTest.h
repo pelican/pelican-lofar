@@ -31,11 +31,11 @@ class SpectrumDataSetTest : public CppUnit::TestFixture
 
         /// Test accessor methods.
         void test_accessorMethods();
-	void test_serialise_deserialise();
+    void test_serialise_deserialise();
 
         CPPUNIT_TEST_SUITE(SpectrumDataSetTest);
-        //CPPUNIT_TEST(test_accessorMethods);
-	//CPPUNIT_TEST(test_serialise_deserialise);
+        CPPUNIT_TEST(test_accessorMethods);
+        CPPUNIT_TEST(test_serialise_deserialise);
         CPPUNIT_TEST_SUITE_END();
 
     private:
