@@ -15,6 +15,22 @@
 
 #include <fftw3.h>
 #include <omp.h>
+#include <cfloat>
+#include <iostream>
+using std::cout;
+using std::endl;
+
+#include "timer.h"
+
+
+
+//#ifdef PPF_TIMER
+unsigned counter;
+double tMin[12];
+double tMax[12];
+double tSum[12];
+double tAve[12];
+//#endif
 
 namespace pelican {
 namespace lofar {
@@ -50,6 +66,15 @@ PPFChanneliser::PPFChanneliser(const ConfigNode& config)
 
     // Create the FFTW plan.
     _createFFTWPlan(_nChannels, _fftPlan);
+
+#ifdef PPF_TIMER
+    counter = 0;
+    for (unsigned i = 0; i < _nThreads; ++i) {
+        tMin[i] = DBL_MAX;
+        tMax[i] = -DBL_MAX;
+        tSum[i] = 0.0;
+    }
+#endif
 }
 
 
@@ -107,20 +132,29 @@ void PPFChanneliser::run(const TimeSeriesDataSetC32* timeSeries,
     Complex *workBuffer = 0, *filteredSamples = 0, *spectrum = 0;
     Complex const * timeData = 0;
 
+    double elapsed, tStart, tEnd;
+
     #pragma omp parallel \
-        shared(nTimeBlocks, nPolarisations, nSubbands, nFilterTaps, coeffs) \
+        shared(nTimeBlocks, nPolarisations, nSubbands, nFilterTaps, coeffs,\
+                tSum, tMin, tMax, tAve) \
         private(threadId, nThreads, start, end, workBuffer, filteredSamples, \
-                spectrum, timeData)
+                spectrum, timeData, elapsed, tStart)
     {
         threadId = omp_get_thread_num();
+
+#ifdef PPF_TIMER
+        tStart = timerSec();
+#endif
+
         nThreads = omp_get_num_threads();
         _threadProcessingIndices(start, end, nSubbands, nThreads, threadId);
 
         filteredSamples = &_filteredData[threadId][0];
 
-        for (unsigned b = 0; b < nTimeBlocks; ++b) {
-            for (unsigned s = start; s < end; ++s) {
-                for (unsigned p = 0; p < nPolarisations; ++p) {
+        for (unsigned s = start; s < end; ++s)
+        {
+            for (unsigned p = 0; p < nPolarisations; ++p) {
+                for (unsigned b = 0; b < nTimeBlocks; ++b) {
 
                     // Get a pointer to the time series.
                     timeData = timeSeries->timeSeriesData(b, s, p);
@@ -140,7 +174,32 @@ void PPFChanneliser::run(const TimeSeriesDataSetC32* timeSeries,
                 }
             }
         }
+
+#ifdef PPF_TIMER
+        tEnd = timerSec();
+        elapsed = tEnd - tStart;
+        tSum[threadId] += elapsed;
+        if (elapsed > tMax[threadId]) tMax[threadId] = elapsed;
+        if (elapsed < tMin[threadId]) tMin[threadId] = elapsed;
+        tAve[threadId] = (elapsed + counter * tAve[threadId]) / (counter + 1);
+#endif
+
     } // end of parallel region.
+
+#ifdef PPF_TIMER
+    cout << "-------------------------------------------------" << endl;
+    cout << "Iteration " << counter << endl;
+    for (unsigned i = 0; i < _nThreads; ++i) {
+        cout << "  Thread " << i << endl;
+        cout << "    Sum = " << tSum[i] << endl;
+        cout << "    Min = " << tMin[i] << endl;
+        cout << "    Max = " << tMax[i] << endl;
+        cout << "    Ave = " << tAve[i] << endl;
+    }
+    cout << endl;
+    ++counter;
+#endif
+
 }
 
 

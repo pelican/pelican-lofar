@@ -71,21 +71,20 @@ void UdpBFPipeline::run(QHash<QString, DataBlob*>& remoteData)
     // Convert spectra in X, Y polarisation into spectra with stokes parameters.
     stokesGenerator->run(spectra, stokes);
 
-    // stokesIntegrator->run(stokes, intStokes);
+    stokesIntegrator->run(stokes, intStokes);
 
     // Calls output stream managed->send(data, stream) the output stream
     // manager is configured in the xml.
-    //dataOutput(spectra, "SpectrumDataSetC32");
-    dataOutput(stokes, "SpectrumDataSetStokes");
+     dataOutput(intStokes, "SpectrumDataSetStokes");
 
 //    stop();
 
-    if (_iteration % 1 == 0)
+    if (_iteration % 100 == 0)
         cout << "Finished the UDP beamforming pipeline, iteration " << _iteration << endl;
 
     _iteration++;
 
-    if (_iteration > 43000) stop();
+    //    if (_iteration > 43000) stop();
 }
 
 } // namespace lofar

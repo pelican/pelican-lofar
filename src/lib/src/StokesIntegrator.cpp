@@ -33,7 +33,7 @@ void StokesIntegrator::run(const SpectrumDataSetStokes* stokesGeneratorOutput,
 {
     unsigned nSamples = stokesGeneratorOutput->nTimeBlocks();
     unsigned nSubbands = stokesGeneratorOutput->nSubbands();
-    unsigned nChannels = stokesGeneratorOutput->nChannels(0);
+    unsigned nChannels = stokesGeneratorOutput->nChannels();
     unsigned nPols = stokesGeneratorOutput->nPolarisations();
     //std::cout << "nSamples= " << nSamples << std::endl;
     //std::cout << "nSubbands= " << nSubbands << std::endl;
@@ -60,10 +60,9 @@ void StokesIntegrator::run(const SpectrumDataSetStokes* stokesGeneratorOutput,
     //    unsigned timeFloats = nPols*nSubbands*nChannels;
 
     intStokes->resize(newSamples, nSubbands, nPols, nChannels);
-    for (unsigned i = 0; i < newSamples * nSubbands * nPols; ++i) {
-        value2 = intStokes->spectrum(i)->data();
-        for (unsigned c = 0; c < nChannels; ++c) value2[c] = 0.0;
-    }
+    value2 = intStokes->data();
+    for (unsigned i = 0; i < newSamples * nSubbands * nPols * nChannels; ++i)
+        value2[i] = 0.0;
 
     unsigned timeStart=0;
     unsigned bufferCounter;
@@ -71,9 +70,9 @@ void StokesIntegrator::run(const SpectrumDataSetStokes* stokesGeneratorOutput,
     //TIMER_START;
 
     for (unsigned u = 0; u < newSamples; ++u) {
-        for (unsigned t = timeStart; t < _windowSize+timeStart; ++t) {
-            for (unsigned p = 0; p < nPols; ++p) {
-                for (unsigned s = 0; s < nSubbands; ++s) {
+      for (unsigned t = timeStart; t < _windowSize+timeStart; ++t) {
+	for (unsigned s = 0; s < nSubbands; ++s) {
+	  for (unsigned p = 0; p < nPols; ++p) {
                     value = stokesGeneratorOutput->spectrumData(t, s, p);
                     float* timeBuffer = intStokes->spectrumData(u,s,p);
                     for (unsigned c = 0; c < nChannels; ++c){

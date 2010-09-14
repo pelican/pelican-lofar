@@ -35,7 +35,7 @@ void SpectrumDataSetWidget::updateData(DataBlob* data)
     unsigned nTimeBlocks = spectra->nTimeBlocks();
     unsigned nSubbands = spectra->nSubbands();
     unsigned nPolarisations = spectra->nPolarisations();
-    unsigned nChannels = spectra->nChannels(0);
+    unsigned nChannels = spectra->nChannels();
 
     if (subband >= nSubbands || polarisation >= nPolarisations || timeSample >= nTimeBlocks) {
         plot->clear();

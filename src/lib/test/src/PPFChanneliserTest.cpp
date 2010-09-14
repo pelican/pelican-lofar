@@ -16,8 +16,10 @@
 
 using std::cout;
 using std::endl;
+
 using std::cos;
 using std::sin;
+
 using std::vector;
 
 namespace pelican {
@@ -35,7 +37,7 @@ void PPFChanneliserTest::setUp()
     _nPols = 2;
     _nTaps = 8;
 
-    unsigned timesPerChunk =  512 * 1000;
+    unsigned timesPerChunk =  16 * 16384;
 
     if (timesPerChunk%_nChannels) CPPUNIT_FAIL("Setup error");
 
@@ -51,6 +53,8 @@ void PPFChanneliserTest::setUp()
 void PPFChanneliserTest::test_run()
 {
     cout << endl << "***** PPFChanneliserTest::test_run() ***** " << endl;
+    typedef PPFChanneliser::Complex Complex;
+
     // Setup the channeliser.
     unsigned nThreads = 2;
     ConfigNode config(_configXml(_nChannels, nThreads, _nTaps));
@@ -87,11 +91,13 @@ void PPFChanneliserTest::test_run()
         cout << "* Elapsed = " << elapsed << " ms. [" << nThreads << " threads]";
         cout << " (data time = " << _nBlocks * _nChannels * 5e-3 << " ms.)" << endl;
         cout << "-------------------------------------------------" << endl;
+
+//        spectra.write("spectraTest000.dat", 0, 0, 0);
     }
 
     catch (const QString& err)
     {
-            std::cout << err.toStdString() << std::endl;
+        std::cout << err.toStdString() << std::endl;
     }
     cout << endl << "***** PPFChanneliserTest::test_run() ***** " << endl;
 }
@@ -109,7 +115,7 @@ void PPFChanneliserTest::test_channelProfile()
     unsigned nSubbands = 1;
     unsigned nPols = 1;
     unsigned nThreads = 1;
-    unsigned nTaps = 32;
+    unsigned nTaps = 8;
     unsigned nChannels = 64;
     ConfigNode config(_configXml(nChannels, nThreads, nTaps, "kaiser"));
     PPFChanneliser channeliser(config);
@@ -121,8 +127,9 @@ void PPFChanneliserTest::test_channelProfile()
     double freqInc = 0.01e6;    // Frequency increment of profile steps.
     float endFreq = startFreq + freqInc * nSteps;
     float midTestFreq = startFreq + (endFreq - startFreq) / 2.0;
+
     cout << "Scanning freqs " << startFreq << " -> " << endFreq << " ("
-              << midTestFreq << ")" << endl;
+         << midTestFreq << ")" << endl;
 
     unsigned nProfiles = 2;
     vector<unsigned> testIndices(nProfiles);
@@ -144,7 +151,7 @@ void PPFChanneliserTest::test_channelProfile()
 
     // Generate channel profile by scanning though frequencies.
     // ========================================================================
-    std::vector<double> freqs(nSteps);
+    vector<double> freqs(nSteps);
 
     for (unsigned k = 0; k < nSteps; ++k)
     {
@@ -253,18 +260,6 @@ void PPFChanneliserTest::test_makeSpectrum()
     file.close();
     cout << endl << "*** PPFChanneliserTest::test_makeSpectrum() ***" << endl;
 }
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -500,21 +495,20 @@ void PPFChanneliserTest::test_fft()
     unsigned nThreads = 1;
     ConfigNode config(_configXml(_nChannels, nThreads, _nTaps));
     PPFChanneliser channeliser(config);
+    typedef PPFChanneliser::Complex Complex;
 
     SpectrumDataSetC32 spectra;
-    spectra.resize(_nBlocks, _nSubbands, _nPols);
+    spectra.resize(_nBlocks, _nSubbands, _nPols, _nChannels);
+
     std::vector<PPFChanneliser::Complex> filteredData(_nChannels);
     const PPFChanneliser::Complex* filteredSamples = &filteredData[0];
 
     QTime timer;
     timer.start();
-    for (unsigned i = 0, b = 0; b < _nBlocks; ++b) {
+    for (unsigned b = 0; b < _nBlocks; ++b) {
         for (unsigned s = 0; s < _nSubbands; ++s) {
             for (unsigned p = 0; p < _nPols; ++p) {
-
-                Spectrum<PPFChanneliser::Complex>* spectrum = spectra.spectrum(i++);
-                spectrum->resize(_nChannels);
-                PPFChanneliser::Complex* spectrumData = spectrum->data();
+                Complex* spectrumData = spectra.spectrumData(b, s, p);
                 channeliser._fft(filteredSamples, spectrumData);
             }
         }

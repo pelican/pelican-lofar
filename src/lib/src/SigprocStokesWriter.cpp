@@ -107,7 +107,7 @@ void SigprocStokesWriter::send(const QString& /*streamName*/, const DataBlob* in
         unsigned nSamples = stokes->nTimeBlocks();
         unsigned nSubbands = stokes->nSubbands();
         //unsigned nPolarisations = stokes->nPolarisations(); // this is now an option.
-        unsigned nChannels = stokes->nChannels(0);
+        unsigned nChannels = stokes->nChannels();
         float const * data;
         //size_t dataSize = nChannels * sizeof(float);
 

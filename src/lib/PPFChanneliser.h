@@ -18,6 +18,8 @@ using std::cout;
 using std::cerr;
 using std::endl;
 
+//#define PPF_TIMER
+
 namespace pelican {
 
 class ConfigNode;

@@ -23,7 +23,6 @@ namespace lofar {
 
 class PPFChanneliserTest : public CppUnit::TestFixture
 {
-
     public:
         /// Register test methods.
         CPPUNIT_TEST_SUITE(PPFChanneliserTest);
@@ -84,7 +83,7 @@ class PPFChanneliserTest : public CppUnit::TestFixture
         unsigned _nTaps;
 };
 
+
 } // namespace lofar
 } // namespace pelican
-
 #endif // PPF_CHANNELISER_TEST_H_

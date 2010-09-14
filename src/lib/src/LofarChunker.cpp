@@ -142,7 +142,8 @@ void LofarChunker::next(QIODevice* device)
             }
 
             // Generate lostPackets empty packets, if any
-            for (unsigned packetCounter = 0; packetCounter < lostPackets &&
+	    unsigned packetCounter = 0;
+            for (packetCounter = 0; packetCounter < lostPackets &&
                         i + packetCounter < unsigned(_nPackets); packetCounter++) {
 
                 // Generate empty packet with correct seqid and blockid
@@ -152,10 +153,9 @@ void LofarChunker::next(QIODevice* device)
                 offset = writePacket(&writableData, emptyPacket, offset);
 
                 // Check if the number of required packets is reached
-                i += 1;
-                if (i == _nPackets) break;
             }
-
+	    i += packetCounter;
+	    
             // Write received packet
             // FIXME: Packet will be lost if we fill up the buffer with sufficient empty packets...
             if (i != _nPackets) {
