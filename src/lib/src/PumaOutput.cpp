@@ -1,14 +1,17 @@
 #include "PumaOutput.h"
-#include <QtNetwork/QTcpSocket>
-#include <QIODevice>
-#include <QVector>
-#include <QFile>
-#include <iostream>
 
 #include "pelican/utility/ConfigNode.h"
 #include "pelican/data/DataBlob.h"
 
 #include "SpectrumDataSet.h"
+
+#include <QtNetwork/QTcpSocket>
+#include <QtCore/QIODevice>
+#include <QtCore/QVector>
+#include <QtCore/QFile>
+#include <QtCore/QTimer>
+
+#include <iostream>
 
 
 namespace pelican {
@@ -17,7 +20,7 @@ namespace lofar {
 
 
 /**
- *@details PumaOutput 
+ *@details PumaOutput
  */
 PumaOutput::PumaOutput(const ConfigNode& configNode)
     : AbstractOutputStream( configNode )
@@ -33,7 +36,7 @@ PumaOutput::PumaOutput(const ConfigNode& configNode)
     // initialise file connections
     if( filename != "" )
     {
-        addFile( filename );        
+        addFile( filename );
     }
 }
 
@@ -99,7 +102,7 @@ void PumaOutput::_convertToPuma( const SpectrumDataSetStokes* data )
     QVector<float> puma(data->nTimeBlocks());
     puma.fill(0);
     unsigned int polarisation = 0; // only do one polarisation
-    
+
     unsigned int nSubbands = data->nSubbands();
     unsigned int nChannels = data->nChannels();
     for (unsigned t = 0; t < data->nTimeBlocks(); ++t) {

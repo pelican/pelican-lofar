@@ -4,16 +4,14 @@
 #include <cppunit/extensions/HelperMacros.h>
 
 /**
- * @file SubbandSpectraTest.h
+ * @file SpectrumDataSetTest.h
  */
 
 /**
- * @class SubbandSpectraTest
+ * @class SpectrumDataSetTest
  *
  * @brief
- * Unit testing class for the sub-band spectra data blob.
- *
- * @details
+ * Unit tests of the spectrum data set blob.
  */
 
 namespace pelican {
@@ -31,18 +29,17 @@ class SpectrumDataSetTest : public CppUnit::TestFixture
 
         /// Test accessor methods.
         void test_accessorMethods();
-    void test_serialise_deserialise();
+        void test_serialise_deserialise();
+        void test_access_performance();
 
         CPPUNIT_TEST_SUITE(SpectrumDataSetTest);
         CPPUNIT_TEST(test_accessorMethods);
         CPPUNIT_TEST(test_serialise_deserialise);
+        CPPUNIT_TEST(test_access_performance);
         CPPUNIT_TEST_SUITE_END();
-
-    private:
-
 };
+
 
 } // namespace lofar
 } // namespace pelican
-
 #endif // SPECTRUM_DATA_SET_TEST_H_

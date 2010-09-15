@@ -25,17 +25,8 @@ namespace lofar {
  * sub-band and polarisation.
  *
  * @details
- * Data is arranged as a Cube of spectrum objects (a container class
- * encapsulating a spectrum vector) ordered by:
- *
- *  - time-block (slowest varying dimension)
- *  - sub-band
- *  - polarisation (fastest varying dimension)
- *
- *  The time block dimension is provided for the convenience of being able to
- *  call the PPF channeliser once to generate a number of spectra from each
- *  sub-band and polarisation.
- *
+ * WARNING (15/09/2010): this object is in a little bit of flux with respect
+ * to the data order. The interface should remain fixed.
  *
  * @details
  */
@@ -56,6 +47,7 @@ class SpectrumDataSet : public DataBlob
         /// Clears the data.
         void clear();
 
+        /// Resizes the spectrum data blob to the specified dimensions.
         void resize(unsigned nTimeBlocks, unsigned nSubbands,
                 unsigned nPolarisations, unsigned nChannels);
 
@@ -85,10 +77,12 @@ class SpectrumDataSet : public DataBlob
         void setBlockRate(long blockRate) { _blockRate = blockRate; }
 
         /// Return the lofar time-stamp
-        long long getLofarTimestamp() const { return _lofarTimestamp; }
+        long long getLofarTimestamp() const
+        { return _lofarTimestamp; }
 
         /// Set the lofar time-stamp
-        void setLofarTimestamp(long long timestamp) { _lofarTimestamp = timestamp; }
+        void setLofarTimestamp(long long timestamp)
+        { _lofarTimestamp = timestamp; }
 
         /// return the overall size of the data
         int size() const;
@@ -172,15 +166,20 @@ inline int SpectrumDataSet<T>::size() const
 
 
 template <typename T>
-inline unsigned long SpectrumDataSet<T>::_index(unsigned s, unsigned p,
-        unsigned b) const
+inline
+unsigned long SpectrumDataSet<T>::_index(unsigned s, unsigned p, unsigned b) const
 {
-  //  times, polarizations, subbands
-  //  return _nChannels * ( _nTimeBlocks * (s * _nPolarisations + p) + b);
+    //  times, polarizations, subbands
+    //  return _nChannels * ( _nTimeBlocks * (s * _nPolarisations + p) + b);
 
-  // Polarisation, subbands, times
-  return _nChannels * ( _nPolarisations * ( _nSubbands * b + s ) + p);
+
+    // Polarisation, subbands, times.
+    // CHECK: this looks like
+    // block [slowest] -> subband -> pol [fastest] (ben - 15/09).
+    // NOT what is written above.
+    return _nChannels * ( _nPolarisations * ( _nSubbands * b + s ) + p);
 }
+
 
 
 
@@ -188,8 +187,6 @@ inline unsigned long SpectrumDataSet<T>::_index(unsigned s, unsigned p,
 // -----------------------------------------------------------------------------
 // Template specialisation.
 //
-
-
 
 
 /**

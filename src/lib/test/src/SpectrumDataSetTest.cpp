@@ -2,6 +2,7 @@
 #include "SpectrumDataSet.h"
 
 #include "pelican/utility/FactoryGeneric.h"
+#include "timer.h"
 
 #include <QtCore/QBuffer>
 
@@ -25,17 +26,25 @@ CPPUNIT_TEST_SUITE_REGISTRATION(SpectrumDataSetTest);
  */
 void SpectrumDataSetTest::test_accessorMethods()
 {
+    unsigned nTimeBlocks = 10;
+    unsigned nSubbands = 62;
+    unsigned nPols = 2;
+    unsigned nChan = 10;
+
     // Use Case
-    // Construct a sub-band spectra data blob directly
+    // Construct a sub-band spectra data blob directly.
     {
         try {
             SpectrumDataSet<float> spectra;
 
-            spectra.resize(10, 62, 2, 10);
-            CPPUNIT_ASSERT_EQUAL(10u, spectra.nTimeBlocks());
-            CPPUNIT_ASSERT_EQUAL(62u, spectra.nSubbands());
-            CPPUNIT_ASSERT_EQUAL(2u, spectra.nPolarisations());
-            CPPUNIT_ASSERT_EQUAL(10u, spectra.nChannels());
+            // Resize the data blob.
+            spectra.resize(nTimeBlocks, nSubbands, nPols, nChan);
+
+            // Check the dimension accessor methods.
+            CPPUNIT_ASSERT_EQUAL(nTimeBlocks, spectra.nTimeBlocks());
+            CPPUNIT_ASSERT_EQUAL(nSubbands, spectra.nSubbands());
+            CPPUNIT_ASSERT_EQUAL(nPols, spectra.nPolarisations());
+            CPPUNIT_ASSERT_EQUAL(nChan, spectra.nChannels());
 
             // Expect to throw as base class methods have not been implemented.
             CPPUNIT_ASSERT_THROW(spectra.serialisedBytes(), QString);
@@ -60,10 +69,10 @@ void SpectrumDataSetTest::test_accessorMethods()
             SpectrumDataSetC32* spectra = (SpectrumDataSetC32*)s;
             spectra->resize(10, 62, 2, 10);
 
-            CPPUNIT_ASSERT_EQUAL(10u, spectra->nTimeBlocks());
-            CPPUNIT_ASSERT_EQUAL(62u, spectra->nSubbands());
-            CPPUNIT_ASSERT_EQUAL(2u, spectra->nPolarisations());
-            CPPUNIT_ASSERT_EQUAL(10u, spectra->nChannels());
+            CPPUNIT_ASSERT_EQUAL(nTimeBlocks, spectra->nTimeBlocks());
+            CPPUNIT_ASSERT_EQUAL(nSubbands, spectra->nSubbands());
+            CPPUNIT_ASSERT_EQUAL(nPols, spectra->nPolarisations());
+            CPPUNIT_ASSERT_EQUAL(nChan, spectra->nChannels());
         }
         catch (const QString& err)
         {
@@ -105,6 +114,11 @@ void SpectrumDataSetTest::test_serialise_deserialise()
          }
      }
 
+     long blockRate = 1010;
+     long long timeStamp = 919191;
+     spectra.setBlockRate(blockRate);
+     spectra.setLofarTimestamp(timeStamp);
+
      // Serialise to a QBuffer.
      QBuffer serialBlob;
      serialBlob.open(QBuffer::WriteOnly);
@@ -141,7 +155,24 @@ void SpectrumDataSetTest::test_serialise_deserialise()
              CPPUNIT_ASSERT_DOUBLES_EQUAL(float(i) - float(c), dataNew[c].imag(), err);
          }
      }
+
+     CPPUNIT_ASSERT_EQUAL(blockRate, spectraNew.getBlockRate());
+     CPPUNIT_ASSERT_EQUAL(timeStamp, spectraNew.getLofarTimestamp());
 }
+
+
+void SpectrumDataSetTest::test_access_performance()
+{
+//    unsigned nTimeBlocks = 16384;
+//    unsigned nSubbands = 62;
+//    unsigned nPolarisations = 2;
+//    unsigned nChannels = 16;
+//
+//    SpectrumDataSetC32 * spectra = new SpectrumDataSetC32;
+//    spectra->resize(nTimeBlocks, nSubbands, nPolarisations, nChannels);
+
+}
+
 
 } // namespace lofar
 } // namespace pelican
