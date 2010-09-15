@@ -14,6 +14,7 @@ set(lib_src
     src/PelicanBlobClient.cpp
     src/PumaOutput.cpp
     src/PolyphaseCoefficients.cpp
+    src/RFI_Clipper.cpp
     src/SpectrumDataSet.cpp
     src/TimeSeriesDataSet.cpp
     src/PPFChanneliser.cpp
