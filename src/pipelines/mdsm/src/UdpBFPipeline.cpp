@@ -36,6 +36,7 @@ void UdpBFPipeline::init()
     // Create modules
     ppfChanneliser = (PPFChanneliser *) createModule("PPFChanneliser");
     stokesGenerator = (StokesGenerator *) createModule("StokesGenerator");
+    rfiClipper = (RFI_Clipper *) createModule("RFI_Clipper");
     stokesIntegrator = (StokesIntegrator *) createModule("StokesIntegrator");
 
     // Create local datablobs
@@ -70,6 +71,8 @@ void UdpBFPipeline::run(QHash<QString, DataBlob*>& remoteData)
 
     // Convert spectra in X, Y polarisation into spectra with stokes parameters.
     stokesGenerator->run(spectra, stokes);
+    // Clips RFI and modifies blob in place
+    rfiClipper->run(stokes);
 
     stokesIntegrator->run(stokes, intStokes);
 

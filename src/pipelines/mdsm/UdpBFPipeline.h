@@ -8,6 +8,7 @@
 
 #include "PPFChanneliser.h"
 #include "StokesGenerator.h"
+#include "RFI_Clipper.h"
 #include "StokesIntegrator.h"
 
 #include "AdapterTimeSeriesDataSet.h"
@@ -48,6 +49,7 @@ class UdpBFPipeline : public AbstractPipeline
         PPFChanneliser* ppfChanneliser;
         StokesGenerator* stokesGenerator;
         StokesIntegrator* stokesIntegrator;
+        RFI_Clipper* rfiClipper;
 
         /// Local data blob
         SpectrumDataSetC32* spectra;
