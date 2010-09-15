@@ -7,8 +7,6 @@
 
 #include "pelican/data/DataBlob.h"
 
-#include "Spectrum.h"
-
 #include <QtCore/QIODevice>
 #include <QtCore/QSysInfo>
 

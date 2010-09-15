@@ -6,7 +6,6 @@
  */
 
 #include "pelican/data/DataBlob.h"
-#include "TimeSeries.h"
 
 #include <vector>
 #include <complex>
