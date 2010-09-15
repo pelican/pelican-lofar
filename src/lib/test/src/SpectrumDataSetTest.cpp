@@ -158,18 +158,66 @@ void SpectrumDataSetTest::test_serialise_deserialise()
 
      CPPUNIT_ASSERT_EQUAL(blockRate, spectraNew.getBlockRate());
      CPPUNIT_ASSERT_EQUAL(timeStamp, spectraNew.getLofarTimestamp());
+
+
+     // Check copy constructor.
+     SpectrumDataSetC32 s2(spectraNew);
+
+     // Check the blob deserialised correctly.
+     CPPUNIT_ASSERT_EQUAL(nTimeBlocks, s2.nTimeBlocks());
+     CPPUNIT_ASSERT_EQUAL(nSubbands, s2.nSubbands());
+     CPPUNIT_ASSERT_EQUAL(nPolarisations, s2.nPolarisations());
+     CPPUNIT_ASSERT_EQUAL(nChannels, s2.nChannels());
+
+     const Complex* s2Data;
+     for (unsigned i = 0; i < s2.nSpectra(); ++i)
+     {
+         s2Data = s2.spectrumData(i);
+
+         for (unsigned c = 0; c < nChannels; ++c)
+         {
+             CPPUNIT_ASSERT_DOUBLES_EQUAL(float(i) + float(c), s2Data[c].real(), err);
+             CPPUNIT_ASSERT_DOUBLES_EQUAL(float(i) - float(c), s2Data[c].imag(), err);
+         }
+     }
+
+     CPPUNIT_ASSERT_EQUAL(blockRate, s2.getBlockRate());
+     CPPUNIT_ASSERT_EQUAL(timeStamp, s2.getLofarTimestamp());
 }
 
 
 void SpectrumDataSetTest::test_access_performance()
 {
-//    unsigned nTimeBlocks = 16384;
-//    unsigned nSubbands = 62;
-//    unsigned nPolarisations = 2;
-//    unsigned nChannels = 16;
-//
-//    SpectrumDataSetC32 * spectra = new SpectrumDataSetC32;
-//    spectra->resize(nTimeBlocks, nSubbands, nPolarisations, nChannels);
+    unsigned nTimeBlocks = 16384;
+    unsigned nSubbands = 62;
+    unsigned nPolarisations = 2;
+    unsigned nChannels = 16;
+
+    SpectrumDataSetC32 * spectra = new SpectrumDataSetC32;
+    spectra->resize(nTimeBlocks, nSubbands, nPolarisations, nChannels);
+
+    std::complex<float> value(1.0, 2.0);
+    std::complex<float> * spectrum;
+
+    double start = timerSec();
+    for (unsigned b = 0; b < nTimeBlocks; ++b) {
+        for (unsigned s = 0; s < nSubbands; ++s) {
+            for (unsigned p = 0; p < nPolarisations; ++p)
+            {
+                spectrum = spectra->spectrumData(b, s, p);
+
+                for (unsigned c = 0; c < nChannels; ++c)
+                {
+                    spectrum[c] = value;
+                }
+            }
+        }
+    }
+    double end = timerSec();
+    cout << endl << "----------------------------" << endl;
+    cout << "SpectrumDataSetTest::test_access_performance()" << endl;
+    cout << "Elapsed = " << end - start << " s."<< endl;
+    cout << "----------------------------" << endl;
 
 }
 
