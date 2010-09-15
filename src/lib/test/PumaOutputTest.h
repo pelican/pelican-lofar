@@ -2,6 +2,7 @@
 #define PUMAOUTPUTTEST_H
 #include <QString>
 #include "SpectrumDataSet.h"
+class QCoreApplication;
 
 #include <cppunit/extensions/HelperMacros.h>
 
@@ -43,6 +44,7 @@ class PumaOutputTest : public CppUnit::TestFixture
     private:
       QString _filename;
       SpectrumDataSetStokes _dummyData;
+      QCoreApplication* _app;
 };
 
 } // namespace lofar

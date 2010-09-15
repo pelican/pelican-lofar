@@ -3,6 +3,7 @@
 #include <QDir>
 #include <QCoreApplication>
 #include "PumaOutput.h"
+#include "pelican/utility/ClientTestServer.h"
 #include "pelican/utility/ConfigNode.h"
 
 
@@ -30,6 +31,9 @@ void PumaOutputTest::setUp()
 {
     _filename = QDir::tempPath() + "/_PumaOutputTest_" 
               + QString().setNum( QCoreApplication::applicationPid() );
+    int argc = 1;
+    char *argv[] = {(char*)"lofartest"};
+    _app = new QCoreApplication(argc,argv);
 }
 
 void PumaOutputTest::tearDown()
@@ -37,6 +41,7 @@ void PumaOutputTest::tearDown()
     QFile f(_filename);
     if( f.exists() )
         f.remove();
+    delete _app;
 }
 
 void PumaOutputTest::test_configuration()
@@ -54,7 +59,6 @@ void PumaOutputTest::test_configuration()
       // Configuration with a file
       // Expect:
       // File to be generated
-/*
       QString xml = "<PumaOutput>\n" 
                     "<file name=\"" + _filename + "\" />\n"
                     "</PumaOutput>";
@@ -66,7 +70,22 @@ void PumaOutputTest::test_configuration()
       }
       QFile f(_filename);
       CPPUNIT_ASSERT( f.exists() );
-    */
+      CPPUNIT_ASSERT_EQUAL( _dummyData.size(), (int)f.size() );
+    }
+    { // Use Case:
+      // Configuration with a host
+      // Expect:
+      // Attempt to connect to host
+      ClientTestServer testHost;
+      QString xml = "<PumaOutput>\n" 
+                    "<conncetion host=\"" + testHost.hostname() + "\" port=\"" 
+                    + testHost.port() + "\" />\n"
+                    "</PumaOutput>";
+      ConfigNode c;
+      c.setFromString(xml);
+      PumaOutput out( c );
+      out.send("data", &_dummyData );
+      CPPUNIT_ASSERT_EQUAL( _dummyData.size(), (int)testHost.dataReceived().size() );
     }
     }
     catch( QString& s )

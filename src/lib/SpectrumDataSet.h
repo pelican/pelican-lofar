@@ -92,6 +92,9 @@ class SpectrumDataSet : public DataBlob
         /// Set the lofar time-stamp
         void setLofarTimestamp(long long timestamp) { _lofarTimestamp = timestamp; }
 
+        /// return the overall size of the data
+        int size() const;
+
         /// Returns a pointer to the data.
         T * data() { return &_data[0]; }
 
@@ -161,6 +164,12 @@ inline void SpectrumDataSet<T>::resize(unsigned nTimeBlocks, unsigned nSubbands,
     _nTimeBlocks = nTimeBlocks;
     _nChannels = nChannels;
     _data.resize(nSubbands * nPolarisations * nTimeBlocks * nChannels);
+}
+
+template <typename T>
+inline int SpectrumDataSet<T>::size() const
+{
+    return _data.size();
 }
 
 
