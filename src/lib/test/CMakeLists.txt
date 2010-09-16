@@ -13,6 +13,7 @@ add_library(lofarTestLib STATIC ${lofarTestLib_src})
 # ------------------------------------------------------------------------------
 set(lofarTest_src
     src/libTest.cpp
+    src/RFI_ClipperTest.cpp
     src/PumaOutputTest.cpp
     src/LofarChunkerTest.cpp
     src/DataStreamingTest.cpp

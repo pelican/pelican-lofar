@@ -162,6 +162,7 @@ void SpectrumDataSetTest::test_serialise_deserialise()
 
      // Check copy constructor.
      SpectrumDataSetC32 s2(spectraNew);
+     CPPUNIT_ASSERT_EQUAL( spectraNew.size(), s2.size());
 
      // Check the blob deserialised correctly.
      CPPUNIT_ASSERT_EQUAL(nTimeBlocks, s2.nTimeBlocks());

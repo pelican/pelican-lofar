@@ -33,6 +33,7 @@ namespace lofar {
         std::vector<float> subbandMedian(nSubbands);
         std::vector<float> copySM(nSubbands);
         std::vector<float> subbandRMS(nSubbands);
+        std::vector<float> copySubbandRMS(nSubbands);
         float medianOfMedians, medianOfRMS, sumI, sumI2 ;
 
         for (unsigned t = 0; t < nSamples; ++t) {
@@ -47,24 +48,25 @@ namespace lofar {
                     sumI2 += pow(I[c],2);
                 }
                 std::nth_element(copyI.begin(), copyI.begin()+copyI.size()/2, copyI.end());
-                subbandMedian[s]=*(copyI.begin()+copyI.size()/2);
+                subbandMedian[s]=(float)*(copyI.begin()+copyI.size()/2);
 
                 copySM[s] = subbandMedian[s];
                 subbandMean[s] = sumI/nChannels;
                 subbandRMS[s] = sqrt(sumI2/nChannels - pow(subbandMean[s],2));
 
+                copySubbandRMS[s] = subbandRMS[s];
             }
 
             std::nth_element(copySM.begin(), copySM.begin()+copySM.size()/2, copySM.end());
             medianOfMedians=*(copySM.begin()+copySM.size()/2);
 
-            std::nth_element(subbandRMS.begin(), subbandRMS.begin()+subbandRMS.size()/2, subbandRMS.end());
-            medianOfRMS=*(subbandRMS.begin()+subbandRMS.size()/2);
+            std::nth_element(copySubbandRMS.begin(), copySubbandRMS.begin()+copySubbandRMS.size()/2, copySubbandRMS.end());
+            medianOfRMS=*(copySubbandRMS.begin()+copySubbandRMS.size()/2);
             
             for (unsigned s = 0; s < nSubbands; ++s) {
                 I = stokesI -> spectrumData(t, s, 0);
-                //                if (subbandMedian[s] > 2.0 * medianOfMedians){
-                if (subbandRMS[s] > 2.0 * medianOfRMS){
+                if (subbandMedian[s] > 2.0 * medianOfMedians){
+                //if (subbandRMS[s] > 2.0 * medianOfRMS){
                     for (unsigned c = 0; c < nChannels; ++c) {
                         I[c]=0.0;
                     }
@@ -72,7 +74,7 @@ namespace lofar {
                 else{
                     for (unsigned c = 0; c < nChannels; ++c) {
                         //                        if (fabs(I[c]) >= 5.0 * subbandRMS[s]){
-                        if (fabs(I[c]-subbandMedian[s]) > 10.0 * subbandRMS[s]){
+                        if (fabs(I[c]-subbandMedian[s]) > 10.0 * medianOfRMS){
                             //std::cout << s << " " << c << std::endl;
                             //std::cout << subbandMedian[s] << " " << subbandRMS[s] << std::endl;
                             //std::cout << medianOfMedians << " " << medianOfRMS << std::endl;
