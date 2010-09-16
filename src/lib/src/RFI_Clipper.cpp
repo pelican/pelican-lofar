@@ -63,21 +63,19 @@ namespace lofar {
             
             for (unsigned s = 0; s < nSubbands; ++s) {
                 I = stokesI -> spectrumData(t, s, 0);
-                
-                if (subbandMedian[s] > 2.0 * medianOfMedians){
-                    //                    std::cout << s << std::endl;
+                //                if (subbandMedian[s] > 2.0 * medianOfMedians){
+                if (subbandRMS[s] > 2.0 * medianOfRMS){
                     for (unsigned c = 0; c < nChannels; ++c) {
                         I[c]=0.0;
                     }
                 }
                 else{
                     for (unsigned c = 0; c < nChannels; ++c) {
-                        I[c] -= subbandMedian[s];
                         //                        if (fabs(I[c]) >= 5.0 * subbandRMS[s]){
-                        if (fabs(I[c]) >= 5.0 * medianOfRMS){
-                            //                            if (s == 9){
-                                //                            std::cout << s << " " << c << std::endl;
-                                //                            std::cout << fabs(I[c]) << " " << subbandRMS[s] << std::endl;}
+                        if (fabs(I[c]-subbandMedian[s]) > 10.0 * subbandRMS[s]){
+                            //std::cout << s << " " << c << std::endl;
+                            //std::cout << subbandMedian[s] << " " << subbandRMS[s] << std::endl;
+                            //std::cout << medianOfMedians << " " << medianOfRMS << std::endl;
                             I[c]=0.0;
                         }
                     }
