@@ -87,7 +87,7 @@ void UdpBFPipeline::run(QHash<QString, DataBlob*>& remoteData)
 
     _iteration++;
 
-    //    if (_iteration > 43000) stop();
+    if (_iteration > 750000) stop();
 }
 
 } // namespace lofar
