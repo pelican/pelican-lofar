@@ -3,6 +3,7 @@
 #include "pelican/utility/ConfigNode.h"
 #include "pelican/data/DataBlob.h"
 
+#include "DedispersedTimeSeries.h"
 #include "SpectrumDataSet.h"
 
 #include <QtNetwork/QTcpSocket>
@@ -37,6 +38,15 @@ PumaOutput::PumaOutput(const ConfigNode& configNode)
     if( filename != "" )
     {
         addFile( filename );
+    }
+
+    // specify dms values to write out
+    QString dms = configNode.getOption("DMs", "values", "0");
+
+    // TODO: Process DMs string to extract proper values;
+    QStringList dmList = dms.split(",", QString::SkipEmptyParts);
+    foreach(QString val, dmList) {
+        _dmValues.insert(_dmValues.end(), val.toFloat());
     }
 }
 
@@ -92,6 +102,10 @@ void PumaOutput::send(const QString& /*streamName*/, const DataBlob* dataBlob)
     {
         _convertToPuma( static_cast<const SpectrumDataSetStokes*>(dataBlob) );
     }
+    else if( dataBlob->type() == "DedispersedTimeSeriesF32" )
+    {
+        _convertToPuma( static_cast<const DedispersedTimeSeriesF32*>(dataBlob) );
+    }
 }
 
 void PumaOutput::_convertToPuma( const SpectrumDataSetStokes* data )
@@ -123,6 +137,35 @@ void PumaOutput::_convertToPuma( const SpectrumDataSetStokes* data )
     foreach( QIODevice* device, _devices )
     {
         device->write( (char*)&puma[0], puma.size()*sizeof(float) );
+    }
+}
+
+void PumaOutput::_convertToPuma( const DedispersedTimeSeriesF32* timeData )
+{
+    if (timeData->nDMs() == 0)
+        return;
+
+    for(unsigned i = 0; i < _dmValues.size(); i++) {
+	    for(unsigned j = 0; j < timeData->nDMs(); j++) {
+		    if (fabs(timeData->samples(j)->dmValue() - _dmValues[i])  < 0.00001) {
+			    const DedispersedSeries<float>* series = timeData->samples(j);
+			    _send(reinterpret_cast<const char *>(series -> ptr()), series->nSamples() * sizeof(float));
+		    }
+	    }
+    }
+}
+
+void PumaOutput::_send(const char* puma, size_t size)
+{
+    // send out the data to all required devices
+    foreach( QTcpSocket* sock, _sockets.keys() )
+    {
+        _connect( sock, _sockets[sock].first, _sockets[sock].second );
+        sock->write( puma, size );
+    }
+    foreach( QIODevice* device, _devices )
+    {
+        device->write( puma, size );
     }
 }
 

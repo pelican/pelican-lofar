@@ -3,6 +3,7 @@
 #include <QString>
 #include <QMap>
 #include <QPair>
+#include <vector>
 
 #include "pelican/output/AbstractOutputStream.h"
 class QTcpSocket;
@@ -22,6 +23,7 @@ class DataBlob;
 
 namespace lofar {
 class SpectrumDataSetStokes;
+class DedispersedTimeSeriesF32;
 
 /**
  * @class PumaOutput
@@ -49,11 +51,15 @@ class PumaOutput : public AbstractOutputStream
 
     private:
         void _convertToPuma( const SpectrumDataSetStokes* );
+        void _convertToPuma( const DedispersedTimeSeriesF32* );
         void _connect(QTcpSocket*, const QString&, quint16 port);
+	void _send(const char* puma, size_t size);
 
     private:
         QMap<QTcpSocket*, QPair<QString,quint16> > _sockets;
         QList<QIODevice*> _devices;
+	
+	std::vector<float>  _dmValues;
 };
 
 PELICAN_DECLARE(AbstractOutputStream, PumaOutput )
