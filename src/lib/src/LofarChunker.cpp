@@ -1,9 +1,15 @@
 #include "LofarChunker.h"
 #include "LofarUdpHeader.h"
 #include "LofarTypes.h"
+
 #include <QtNetwork/QUdpSocket>
-#include <stdio.h>
+
+#include <cstdio>
 #include <iostream>
+using std::cerr;
+using std::cout;
+using std::endl;
+
 #include "pelican/utility/memCheck.h"
 
 namespace pelican {
@@ -39,25 +45,35 @@ LofarChunker::LofarChunker(const ConfigNode& config) : AbstractChunker(config)
 
     _packetSize = _subbandsPerPacket * _samplesPerPacket * _nrPolarisations;
 
-    switch (_sampleType) {
-        case 4:  { _packetSize = _packetSize * sizeof(TYPES::i4complex)  + sizeof(struct UDPPacket::Header);  break; }
-        case 8:  { _packetSize = _packetSize * sizeof(TYPES::i8complex)  + sizeof(struct UDPPacket::Header);  break; }
-        case 16: { _packetSize = _packetSize * sizeof(TYPES::i16complex) + sizeof(struct UDPPacket::Header);  break; }
+    size_t headerSize = sizeof(struct UDPPacket::Header);
+
+    switch (_sampleType)
+    {
+        case 4:
+            _packetSize = _packetSize * sizeof(TYPES::i4complex) + headerSize;
+            break;
+        case 8:
+            _packetSize = _packetSize * sizeof(TYPES::i8complex) + headerSize;
+            break;
+        case 16:
+            _packetSize = _packetSize * sizeof(TYPES::i16complex) + headerSize;
+            break;
     }
 }
 
 /**
  * @details
- * Constructs a new device.
+ * Constructs a new QIODevice (in this case a QUdpSocket) and returns it
+ * after binding the socket to the port specified in the XML node and read by
+ * the constructor of the abstract chunker.
  */
 QIODevice* LofarChunker::newDevice()
 {
     QUdpSocket* socket = new QUdpSocket;
-    QHostAddress hostAddress(host());
-    //socket -> bind( hostAddress, port() );
-    if (!socket->bind(port())) {
-        std::cerr << "LofarChunker::newDevice(): Unabled to bind to UDP port!" << std::endl;
-    }
+
+    if (!socket->bind(port()))
+        cerr << "LofarChunker::newDevice(): Unable to bind to UDP port!" << endl;
+
     return socket;
 }
 
@@ -67,7 +83,7 @@ QIODevice* LofarChunker::newDevice()
  */
 void LofarChunker::next(QIODevice* device)
 {
-    QUdpSocket *socket = static_cast<QUdpSocket*>(device);
+    QUdpSocket* socket = static_cast<QUdpSocket*>(device);
 
     unsigned offset = 0;
     unsigned prevSeqid = _startTime;
@@ -76,10 +92,11 @@ void LofarChunker::next(QIODevice* device)
 
     WritableData writableData = getDataStorage(_nPackets * _packetSize);
 
+
     if (writableData.isValid()) {
 
         // Loop over UDP packets.
-        for (unsigned i = 0; i < _nPackets; i++) {
+        for (unsigned i = 0; i < _nPackets; ++i) {
 
             // Chunker sanity check.
             if (!isActive()) return;
@@ -89,7 +106,7 @@ void LofarChunker::next(QIODevice* device)
                 socket -> waitForReadyRead(100);
 
             if (socket->readDatagram(reinterpret_cast<char*>(&currPacket), _packetSize) <= 0) {
-                std::cout << "LofarChunker::next(): Error while receiving UDP Packet!" << std::endl;
+                cout << "LofarChunker::next(): Error while receiving UDP Packet!" << endl;
                 i--;
                 continue;
             }
@@ -128,12 +145,12 @@ void LofarChunker::next(QIODevice* device)
 
             diff =  (blockid >= prevBlockid) ? (blockid - prevBlockid) : (blockid + totBlocks - prevBlockid);
 
-            if (diff < _samplesPerPacket) {      // Duplicated packets... ignore
+            if (diff < _samplesPerPacket) { // Duplicated packets... ignore
                 ++_packetsRejected;
                 i -= 1;
                 continue;
             }
-            else if (diff > _samplesPerPacket)    // Missing packets
+            else if (diff > _samplesPerPacket) // Missing packets
                 lostPackets = (diff / _samplesPerPacket) - 1; // -1 since it includes this includes the received packet as well
 
             if (lostPackets > 0) {
@@ -142,10 +159,9 @@ void LofarChunker::next(QIODevice* device)
             }
 
             // Generate lostPackets empty packets, if any
-	    unsigned packetCounter = 0;
-            for (packetCounter = 0; packetCounter < lostPackets &&
-                        i + packetCounter < unsigned(_nPackets); packetCounter++) {
-
+            unsigned packetCounter = 0;
+            for (packetCounter = 0; packetCounter < lostPackets && i + packetCounter < _nPackets; ++packetCounter)
+            {
                 // Generate empty packet with correct seqid and blockid
                 prevSeqid = (prevBlockid + _samplesPerPacket < totBlocks) ? prevSeqid : prevSeqid + 1;
                 prevBlockid = (prevBlockid + _samplesPerPacket) % totBlocks;
@@ -154,8 +170,9 @@ void LofarChunker::next(QIODevice* device)
 
                 // Check if the number of required packets is reached
             }
-	    i += packetCounter;
-	    
+
+            i += packetCounter;
+
             // Write received packet
             // FIXME: Packet will be lost if we fill up the buffer with sufficient empty packets...
             if (i != _nPackets) {
@@ -169,8 +186,8 @@ void LofarChunker::next(QIODevice* device)
     else {
         // Must discard the datagram if there is no available space.
         socket->readDatagram(0, 0);
-        std::cout << "LofarChunker::LofarChunker(): "
-                "Writable data not valid, discarding packets." << std::endl;
+        cout << "LofarChunker::LofarChunker(): "
+                "Writable data not valid, discarding packets." << endl;
     }
 
     // Update _startTime
@@ -178,10 +195,11 @@ void LofarChunker::next(QIODevice* device)
     _startBlockid = prevBlockid;
 }
 
+
 /**
  * @details
  * Generates an empty UDP packet with no time stamp.
- * TODO: packet data generation can be done once
+ * TODO: packet data generation can be done once!
  */
 void LofarChunker::generateEmptyPacket(UDPPacket& packet, unsigned int seqid, unsigned int blockid)
 {
@@ -193,20 +211,23 @@ void LofarChunker::generateEmptyPacket(UDPPacket& packet, unsigned int seqid, un
     packet.header.blockSequenceNumber    = blockid;
 }
 
+
 /**
  * @details
  * Write packet to WritableData object
  */
 int LofarChunker::writePacket(WritableData *writer, UDPPacket& packet, unsigned offset)
 {
-    if (writer -> isValid()) {
-        writer -> write(reinterpret_cast<void*>(&packet), _packetSize, offset);
+    if (writer->isValid()) {
+        writer->write(reinterpret_cast<void*>(&packet), _packetSize, offset);
         return offset + _packetSize;
-    } else {
-        std::cerr << "LofarChunker::writePacket(): WritableData is not valid!" << std::endl;
+    }
+    else {
+        cerr << "LofarChunker::writePacket(): WritableData is not valid!" << endl;
         return -1;
     }
 }
+
 
 } // namespace lofar
 } // namespace pelican
