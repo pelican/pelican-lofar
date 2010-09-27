@@ -47,24 +47,48 @@ LofarDataSplittingChunker::LofarDataSplittingChunker(const ConfigNode& config)
     // -------------------------------------------------------------------------
     // Packet dimensions.
     _nSamples = config.getOption("samplesPerPacket", "value").toUInt();
+    // Total number of subbands per incoming packet
     _nSubbands = config.getOption("subbandsPerPacket", "value").toUInt();
+    // Details of two streams to process, split into subband ranges
+    _stream1SubbandStart = config.getOption("Stream1", "subbandStart").toUInt();
+    _stream1SubbandEnd = config.getOption("Stream1", "subbandEnd").toUInt();
+    _stream2SubbandStart = config.getOption("Stream2", "subbandStart").toUInt();
+    _stream2SubbandEnd = config.getOption("Stream2", "subbandEnd").toUInt();
+
     _nPolarisations = config.getOption("nRawPolarisations", "value").toUInt();
     // Number of UDP packets collected into one chunk (iteration of the pipeline).
     _nPackets = config.getOption("udpPacketsPerIteration", "value").toUInt();
     // Clock => sample rate.
     _clock = config.getOption("clock", "value").toUInt();
 
-    // Calculate the packet data size.
+    // Calculate the packet data size and the size of the packets for
+    // two output streams
+    _stream1Subbands = _stream1SubbandEnd - _stream1SubbandStart + 1;
+    _stream2Subbands = _stream2SubbandEnd - _stream2SubbandStart + 1;
+    if (_stream1SubbandEnd > _nSubbands !! _stream2SubbandEnd > nSubbands)
+      throw _err("Subband ranges exceed number of subbands");
+
     size_t headerSize = sizeof(struct UDPPacket::Header);
     _packetSize = _nSubbands * _nSamples * _nPolarisations;
+    // And the output streams
+    _packetSizeStream1 = _stream1Subbands * _nSamples * _nPolarisations;
+    _packetSizeStream2 = _stream2Subbands * _nSamples * _nPolarisations;
     unsigned sampleBits = config.getOption("dataBitSize", "value").toUInt();
     switch (sampleBits)
     {
         case 8:
             _packetSize = _packetSize * sizeof(TYPES::i8complex) + headerSize;
+            _packetSizeStream1 = _packetSizeStream1 * sizeof(TYPES::i8complex) + headerSize;
+            _packetSizeStream2 = _packetSizeStream2 * sizeof(TYPES::i8complex) + headerSize;
+	    _bytesStream1 = _packetSizeStream1 * sizeof(TYPES::i8complex)
+	    _bytesStream2 = _packetSizeStream2 * sizeof(TYPES::i8complex)
             break;
         case 16:
             _packetSize = _packetSize * sizeof(TYPES::i16complex) + headerSize;
+            _packetSizeStream1 = _packetSizeStream1 * sizeof(TYPES::i16complex) + headerSize;
+            _packetSizeStream2 = _packetSizeStream2 * sizeof(TYPES::i16complex) + headerSize;
+	    _bytesStream1 = _packetSizeStream1 * sizeof(TYPES::i16complex)
+	    _bytesStream2 = _packetSizeStream2 * sizeof(TYPES::i16complex)
             break;
         default:
             throw _err("LofarDataSplittingChunker(): "
@@ -85,11 +109,22 @@ LofarDataSplittingChunker::LofarDataSplittingChunker(const ConfigNode& config)
         throw _err("LofarDataSplittingChunker(): "
                 "Chunk types missing, expecting 2.");
 
-    // Set the empty packet data.
+    /*Set the empty packet data, single stream
     size_t size = _packetSize - sizeof(struct UDPPacket::Header);
     memset((void*)_emptyPacket.data, 0, size);
     _emptyPacket.header.nrBeamlets = _nSubbands;
-    _emptyPacket.header.nrBlocks = _nSamples;
+    _emptyPacket.header.nrBlocks = _nSamples; */ 
+
+    // Set the empty packet data for stream 1
+    size_t size = _packetSizeStream1 - sizeof(struct UDPPacket::Header);
+    memset((void*)_emptyPacket1.data, 0, size);
+    _emptyPacket1.header.nrBeamlets = _stream1Subbands;
+    _emptyPacket1.header.nrBlocks = _nSamples;
+    // Set the empty packet data for stream 2
+    size_t size = _packetSizeStream2 - sizeof(struct UDPPacket::Header);
+    memset((void*)_emptyPacket2.data, 0, size);
+    _emptyPacket2.header.nrBeamlets = _stream2Subbands;
+    _emptyPacket2.header.nrBlocks = _nSamples;
 }
 
 
@@ -123,13 +158,15 @@ void LofarDataSplittingChunker::next(QIODevice* device)
     unsigned prevSeqid = _startTime;
     unsigned prevBlockid = _startBlockid;
     UDPPacket currPacket;
+    UDPPacket outputPacket1;
+    UDPPacket outputPacket2;
     UDPPacket emptyPacket;
-//    UDPPacket tempPacket1;
-//    UDPPacket tempPacket2;
+    UDPPacket _emptyPacket1;
+    UDPPacket _emptyPacket2;
 
-    WritableData writableData1 = getDataStorage(_nPackets * _packetSize,
+    WritableData writableData1 = getDataStorage(_nPackets * _packetSizeStream1,
             "LofarChunkData1");
-    WritableData writableData2 = getDataStorage(_nPackets * _packetSize,
+    WritableData writableData2 = getDataStorage(_nPackets * _packetSizeStream2,
             "LofarChunkData2");
 
     unsigned seqid, blockid;
@@ -228,8 +265,10 @@ void LofarDataSplittingChunker::next(QIODevice* device)
                         prevSeqid : prevSeqid + 1;
                 prevBlockid = (prevBlockid + _nSamples) % totBlocks;
                 // TODO: probably a cost saving here.
-                updateEmptyPacket(emptyPacket, prevSeqid, prevBlockid);
-                offset = writePacket(&writableData1, emptyPacket, offset);
+                updateEmptyPacket(_emptyPacket1, prevSeqid, prevBlockid);
+                updateEmptyPacket(_emptyPacket2, prevSeqid, prevBlockid);
+                offset = writePacket(&writableData1, emptyPacket1, offset);
+                offset = writePacket(&writableData2, emptyPacket2, offset);
                 // Check if the number of required packets is reached
 
                 // TODO writePacket(&writableData2, emptyPacket, offset);
@@ -237,13 +276,22 @@ void LofarDataSplittingChunker::next(QIODevice* device)
 
             i += packetCounter;
 
-            // Write received packet.
+            // Write received packet to 2 streams after updating header and data 
             if (i != _nPackets) {
-                ++_packetsAccepted;
-                offset = writePacket(&writableData1, currPacket, offset);
-                prevSeqid = seqid;
-                prevBlockid = blockid;
-                // TODO writePacket(&writableData2, currPacket, offset);
+	      ++_packetsAccepted;
+	      // Generate Stream 1 packet
+	      memcpy((void*)outputPacket1.data, currPacket.data, _bytesStream1); 
+	      outputPacket1.header = currPacket.header;
+	      outputPacket1.header.nrBeamlets = _stream2Subbands;
+	      offset = writePacket(&writableData1, outputPacket1, offset);
+	      // Generate Stream 2 packet
+	      memcpy((void*)outputPacket2.data, &currPacket.data[_bytesStream1+1], _bytesStream2); 
+	      outputPacket2.header = currPacket.header;
+	      outputPacket2.header.nrBeamlets = _stream2Subbands;
+	      offset = writePacket(&writableData2, outputPacket2, offset);
+	      
+	      prevSeqid = seqid;
+	      prevBlockid = blockid;
             }
         }
     }

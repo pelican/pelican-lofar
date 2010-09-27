@@ -66,14 +66,25 @@ class LofarDataSplittingChunker : public AbstractChunker
         // Packet dimensions.
         unsigned _nSamples;
         unsigned _nSubbands;
+        unsigned _stream1SubbandStart;
+        unsigned _stream1SubbandEnd;
+        unsigned _stream2SubbandStart;
+        unsigned _stream2SubbandEnd;
+
         unsigned _nPolarisations;
 
         unsigned _packetSize;
+        unsigned _packetSizeStream1;
+        unsigned _packetSizeStream2;
+        unsigned _bytesStream1;
+        unsigned _bytesStream2;
         unsigned _startTime;
         unsigned _startBlockid;
         unsigned _clock;
 
         UDPPacket _emptyPacket;
+        UDPPacket _emptyPacket1;
+        UDPPacket _emptyPacket2;
 
         friend class LofarDataSplittingChunkerTest;
 };
