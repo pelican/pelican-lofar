@@ -13,15 +13,16 @@ add_library(lofarTestLib STATIC ${lofarTestLib_src})
 # ------------------------------------------------------------------------------
 set(lofarTest_src
     src/libTest.cpp
-    src/RFI_ClipperTest.cpp
-    src/PumaOutputTest.cpp
-    src/LofarChunkerTest.cpp
-    src/DataStreamingTest.cpp
+    #src/RFI_ClipperTest.cpp
+    #src/PumaOutputTest.cpp
+    #src/DataStreamingTest.cpp
     ####src/PelicanBlobClientTest.cpp
-    src/PolyphaseCoefficientsTest.cpp
-    src/AdapterTimeSeriesDataSetTest.cpp
-    src/SpectrumDataSetTest.cpp
-    src/PPFChanneliserTest.cpp
+    #src/PolyphaseCoefficientsTest.cpp
+    #src/AdapterTimeSeriesDataSetTest.cpp
+    #src/SpectrumDataSetTest.cpp
+    #src/PPFChanneliserTest.cpp
+    src/LofarChunkerTest.cpp
+    src/LofarDataSplittingChunkerTest.cpp
 )
 
 add_executable(lofarTest ${lofarTest_src})

@@ -26,7 +26,7 @@ class LofarUdpEmulator : public AbstractUdpEmulator
 {
     public:
         /// Enum used to specify the sample type to use
-        enum SampleType { i4complex = 4, i8complex = 8, i16complex = 16 };
+        enum SampleType { i8complex = 8, i16complex = 16 };
 
         /// Constructor.
         LofarUdpEmulator(const ConfigNode& configNode);

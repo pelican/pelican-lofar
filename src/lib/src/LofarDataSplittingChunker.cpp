@@ -17,29 +17,48 @@ namespace lofar {
 /**
  * @details
  * Constructor
+ *
+ * XML options.
+ * ================================
+ *
+ * Read from base class:
+ *  - data (type)  LIST.
+ *  - connection (host, port)
+ *
+ * Class Specific options:
+ *  - samplesPerPacket (value)
+ *  - subbandsPerPacket (value)
+ *  - nRawPolarisations (value)
+ *
+ *  - udpPacketsPerIteration (value)
+ *  - clock (value)
+ *  - dataBitSize (value)
+ *
  */
 LofarDataSplittingChunker::LofarDataSplittingChunker(const ConfigNode& config)
 : AbstractChunker(config)
 {
     // Check the configuration type matches the class name.
     if (config.type() != "LofarDataSplittingChunker")
-        throw _err("LofarDataSplittingChunker(): Invalid configuration");
+        throw _err("LofarDataSplittingChunker(): "
+                "Invalid or missing XML configuration.");
 
     // Retrieve configuration options.
-    // TODO: Extract some of these from the packet header...
-    int _sampleType = config.getOption("dataBitSize", "value").toInt();
-    _samplesPerPacket = config.getOption("samplesPerPacket", "value").toInt();
-    _subbandsPerPacket = config.getOption("subbandsPerPacket", "value").toInt();
-    _nrPolarisations = config.getOption("nRawPolarisations", "value").toInt();
-    _clock = config.getOption("clock", "value").toInt();
-
-    // Number of UDP packets collected into one chunk.
+    // -------------------------------------------------------------------------
+    // Packet dimensions.
+    _nSamples = config.getOption("samplesPerPacket", "value").toUInt();
+    _nSubbands = config.getOption("subbandsPerPacket", "value").toUInt();
+    _nPolarisations = config.getOption("nRawPolarisations", "value").toUInt();
+    // Number of UDP packets collected into one chunk (iteration of the pipeline).
     _nPackets = config.getOption("udpPacketsPerIteration", "value").toUInt();
+    // Clock => sample rate.
+    _clock = config.getOption("clock", "value").toUInt();
 
     // Calculate the packet data size.
     size_t headerSize = sizeof(struct UDPPacket::Header);
-    _packetSize = _subbandsPerPacket * _samplesPerPacket * _nrPolarisations;
-    switch (_sampleType)
+    _packetSize = _nSubbands * _nSamples * _nPolarisations;
+    unsigned sampleBits = config.getOption("dataBitSize", "value").toUInt();
+    switch (sampleBits)
     {
         case 8:
             _packetSize = _packetSize * sizeof(TYPES::i8complex) + headerSize;
@@ -95,9 +114,12 @@ void LofarDataSplittingChunker::next(QIODevice* device)
     unsigned prevBlockid = _startBlockid;
     UDPPacket currPacket, emptyPacket;
 
-    WritableData writableData = getDataStorage(_nPackets * _packetSize);
+    WritableData writableData1 = getDataStorage(_nPackets * _packetSize,
+            "LofarChunkData1");
+    WritableData writableData2 = getDataStorage(_nPackets * _packetSize,
+            "LofarChunkData2");
 
-    if (writableData.isValid()) {
+    if (writableData1.isValid() && writableData2.isValid()) {
 
         // Loop over UDP packets.
         for (unsigned i = 0; i < _nPackets; ++i) {
@@ -106,8 +128,8 @@ void LofarDataSplittingChunker::next(QIODevice* device)
             if (!isActive()) return;
 
             // Wait for datagram to be available.
-            while (!socket -> hasPendingDatagrams())
-                socket -> waitForReadyRead(100);
+            while (!socket->hasPendingDatagrams())
+                socket->waitForReadyRead(100);
 
             if (socket->readDatagram(reinterpret_cast<char*>(&currPacket), _packetSize) <= 0) {
                 cout << "LofarDataSplittingChunker::next(): "
@@ -150,13 +172,13 @@ void LofarDataSplittingChunker::next(QIODevice* device)
 
             diff =  (blockid >= prevBlockid) ? (blockid - prevBlockid) : (blockid + totBlocks - prevBlockid);
 
-            if (diff < _samplesPerPacket) { // Duplicated packets... ignore
+            if (diff < _nSamples) { // Duplicated packets... ignore
                 ++_packetsRejected;
                 i -= 1;
                 continue;
             }
-            else if (diff > _samplesPerPacket) // Missing packets
-                lostPackets = (diff / _samplesPerPacket) - 1; // -1 since it includes this includes the received packet as well
+            else if (diff > _nSamples) // Missing packets
+                lostPackets = (diff / _nSamples) - 1; // -1 since it includes this includes the received packet as well
 
             if (lostPackets > 0) {
                 printf("Generate %u empty packets, prevSeq: %u, new Seq: %u, prevBlock: %u, newBlock: %u\n",
@@ -168,10 +190,10 @@ void LofarDataSplittingChunker::next(QIODevice* device)
             for (packetCounter = 0; packetCounter < lostPackets && i + packetCounter < _nPackets; ++packetCounter)
             {
                 // Generate empty packet with correct seqid and blockid
-                prevSeqid = (prevBlockid + _samplesPerPacket < totBlocks) ? prevSeqid : prevSeqid + 1;
-                prevBlockid = (prevBlockid + _samplesPerPacket) % totBlocks;
+                prevSeqid = (prevBlockid + _nSamples < totBlocks) ? prevSeqid : prevSeqid + 1;
+                prevBlockid = (prevBlockid + _nSamples) % totBlocks;
                 generateEmptyPacket(emptyPacket, prevSeqid, prevBlockid);
-                offset = writePacket(&writableData, emptyPacket, offset);
+                offset = writePacket(&writableData1, emptyPacket, offset);
 
                 // Check if the number of required packets is reached
             }
@@ -182,7 +204,7 @@ void LofarDataSplittingChunker::next(QIODevice* device)
             // FIXME: Packet will be lost if we fill up the buffer with sufficient empty packets...
             if (i != _nPackets) {
                 ++_packetsAccepted;
-                offset = writePacket(&writableData, currPacket, offset);
+                offset = writePacket(&writableData1, currPacket, offset);
                 prevSeqid = seqid;
                 prevBlockid = blockid;
             }
@@ -195,9 +217,9 @@ void LofarDataSplittingChunker::next(QIODevice* device)
                 "Writable data not valid, discarding packets." << endl;
     }
 
-    // Update _startTime
-    _startTime = prevSeqid;
-    _startBlockid = prevBlockid;
+//    // Update _startTime
+//    _startTime = prevSeqid;
+//    _startBlockid = prevBlockid;
 }
 
 
@@ -210,8 +232,8 @@ void LofarDataSplittingChunker::generateEmptyPacket(UDPPacket& packet, unsigned 
 {
     size_t size = _packetSize - sizeof(struct UDPPacket::Header);
     memset((void*) packet.data, 0, size);
-    packet.header.nrBeamlets = _subbandsPerPacket;
-    packet.header.nrBlocks   = _samplesPerPacket;
+    packet.header.nrBeamlets = _nSubbands;
+    packet.header.nrBlocks   = _nSamples;
     packet.header.timestamp  = seqid;
     packet.header.blockSequenceNumber    = blockid;
 }

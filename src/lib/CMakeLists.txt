@@ -21,6 +21,7 @@ set(lib_src
     src/StokesGenerator.cpp
     src/StokesIntegrator.cpp
     src/SigprocStokesWriter.cpp
+    src/LofarDataSplittingChunker.cpp
 )
 
 # Create pelican-lofar library.
