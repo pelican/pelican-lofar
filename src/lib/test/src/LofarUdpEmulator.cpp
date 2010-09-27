@@ -104,7 +104,7 @@ void LofarUdpEmulator::fillPacket()
                 {
                     idx = _nrPolarisations * (j + i * _subbandsPerPacket);
                     s[idx] = i16c(i + j, i);
-                    s[idx + 1] = i16c(i - j, j);
+                    s[idx + 1] = i16c(i + j, j);
                 }
             }
             break;

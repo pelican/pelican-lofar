@@ -48,7 +48,7 @@ class LofarDataSplittingChunker : public AbstractChunker
 
     private:
         /// Generates an empty UDP packet.
-        void generateEmptyPacket(UDPPacket& packet, unsigned seqid,
+        void updateEmptyPacket(UDPPacket& packet, unsigned seqid,
                 unsigned blockid);
 
         /// Write UDPPacket to writeableData object
@@ -72,6 +72,8 @@ class LofarDataSplittingChunker : public AbstractChunker
         unsigned _startTime;
         unsigned _startBlockid;
         unsigned _clock;
+
+        UDPPacket _emptyPacket;
 
         friend class LofarDataSplittingChunkerTest;
 };

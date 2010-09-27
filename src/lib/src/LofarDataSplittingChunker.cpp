@@ -76,10 +76,20 @@ LofarDataSplittingChunker::LofarDataSplittingChunker(const ConfigNode& config)
     _packetsAccepted = 0;
     _packetsRejected = 0;
 
-    // Check a number of data chunk types are registerd to be written.
+    // Check a number of data chunk types are registered to be written.
     // These are set in the XML.
     if (type().isEmpty())
         throw _err("LofarDataSplittingChunker(): Data type unspecified.");
+
+    if (chunkTypes().size() != 2)
+        throw _err("LofarDataSplittingChunker(): "
+                "Chunk types missing, expecting 2.");
+
+    // Set the empty packet data.
+    size_t size = _packetSize - sizeof(struct UDPPacket::Header);
+    memset((void*)_emptyPacket.data, 0, size);
+    _emptyPacket.header.nrBeamlets = _nSubbands;
+    _emptyPacket.header.nrBlocks = _nSamples;
 }
 
 
@@ -112,16 +122,23 @@ void LofarDataSplittingChunker::next(QIODevice* device)
     unsigned offset = 0;
     unsigned prevSeqid = _startTime;
     unsigned prevBlockid = _startBlockid;
-    UDPPacket currPacket, emptyPacket;
+    UDPPacket currPacket;
+    UDPPacket emptyPacket;
+//    UDPPacket tempPacket1;
+//    UDPPacket tempPacket2;
 
     WritableData writableData1 = getDataStorage(_nPackets * _packetSize,
             "LofarChunkData1");
     WritableData writableData2 = getDataStorage(_nPackets * _packetSize,
             "LofarChunkData2");
 
-    if (writableData1.isValid() && writableData2.isValid()) {
+    unsigned seqid, blockid;
+    unsigned totBlocks, lostPackets, diff;
+    unsigned packetCounter;
 
-        // Loop over UDP packets.
+    if (writableData1.isValid() && writableData2.isValid())
+    {
+        // Loop over the number of UDP packets to put in a chunk.
         for (unsigned i = 0; i < _nPackets; ++i) {
 
             // Chunker sanity check.
@@ -131,18 +148,19 @@ void LofarDataSplittingChunker::next(QIODevice* device)
             while (!socket->hasPendingDatagrams())
                 socket->waitForReadyRead(100);
 
-            if (socket->readDatagram(reinterpret_cast<char*>(&currPacket), _packetSize) <= 0) {
+            // Read the current packet from the socket.
+            if (socket->readDatagram(reinterpret_cast<char*>(&currPacket), _packetSize) <= 0)
+            {
                 cout << "LofarDataSplittingChunker::next(): "
                         "Error while receiving UDP Packet!" << endl;
                 i--;
                 continue;
             }
 
-            // Check for endianness. Packet data is in little endian format.
-            unsigned seqid, blockid;
-
+            // Check for endianness (Packet data is in little endian format).
 #if Q_BYTE_ORDER == Q_BIG_ENDIAN
             // TODO: Convert from little endian to big endian.
+            throw QString("LofarDataSplittingChunker: Endianness not supported.");
             seqid   = currPacket.header.timestamp;
             blockid = currPacket.header.blockSequenceNumber;
 #elif Q_BYTE_ORDER == Q_LITTLE_ENDIAN
@@ -150,7 +168,7 @@ void LofarDataSplittingChunker::next(QIODevice* device)
             blockid = currPacket.header.blockSequenceNumber;
 #endif
 
-            // First time next has been run, initialise startTime and startBlockId
+            // First time next has been run, initialise startTime and startBlockId.
             if (i == 0 && _startTime == 0) {
                 prevSeqid = _startTime = _startTime == 0 ? seqid : _startTime;
                 prevBlockid = _startBlockid = _startBlockid == 0 ? blockid : _startBlockid;
@@ -159,54 +177,73 @@ void LofarDataSplittingChunker::next(QIODevice* device)
             // Sanity check in seqid. If the seconds counter is 0xFFFFFFFF,
             // the data cannot be trusted (ignore)
             if (seqid == ~0U || prevSeqid + 10 < seqid) {
+                _packetsRejected++;
+                i--;
+                continue;
+            }
+
+            // Check that the packets are contiguous.
+            // Block id increments by nrblocks which is defined in the header.
+            // Blockid is reset every interval (although it might not start
+            // from 0 as the previous frame might contain data from this one).
+            totBlocks = (_clock == 160) ?
+                    156250 : (prevSeqid % 2 == 0 ? 195313 : 195312);
+            lostPackets = 0;
+            diff = (blockid >= prevBlockid) ?
+                    (blockid - prevBlockid) : (blockid + totBlocks - prevBlockid);
+
+            // Duplicated packets... ignore
+            if (diff < _nSamples)
+            {
                 ++_packetsRejected;
                 i -= 1;
                 continue;
             }
-
-            // Check that the packets are contiguous. Block id increments by no_blocks
-            // which is defined in the header. Blockid is reset every interval (although
-            // it might not start from 0 as the previous frame might contain data from this one)
-            unsigned totBlocks = _clock == 160 ? 156250 : (prevSeqid % 2 == 0 ? 195313 : 195312);
-            unsigned lostPackets = 0, diff = 0;
-
-            diff =  (blockid >= prevBlockid) ? (blockid - prevBlockid) : (blockid + totBlocks - prevBlockid);
-
-            if (diff < _nSamples) { // Duplicated packets... ignore
-                ++_packetsRejected;
-                i -= 1;
-                continue;
+            // Missing packets
+            else if (diff > _nSamples)
+            {
+                // -1 since it includes this includes the received packet as well
+                lostPackets = (diff / _nSamples) - 1;
             }
-            else if (diff > _nSamples) // Missing packets
-                lostPackets = (diff / _nSamples) - 1; // -1 since it includes this includes the received packet as well
 
-            if (lostPackets > 0) {
+
+            if (lostPackets > 0)
+            {
                 printf("Generate %u empty packets, prevSeq: %u, new Seq: %u, prevBlock: %u, newBlock: %u\n",
                         lostPackets, prevSeqid, seqid, prevBlockid, blockid);
             }
 
-            // Generate lostPackets empty packets, if any
-            unsigned packetCounter = 0;
+            // TODO
+            // BELOW HERE WRITE INTO WRITABLE DATA 1 and 2 correctly.
+            //   = Missing packets -> write pair of empty data packets.
+            //   = Full packets -> split the packet into the two buffers.
+            // =================================================================
+
+            // Generate lostPackets (empty packets) if needed.
+            packetCounter = 0;
             for (packetCounter = 0; packetCounter < lostPackets && i + packetCounter < _nPackets; ++packetCounter)
             {
                 // Generate empty packet with correct seqid and blockid
-                prevSeqid = (prevBlockid + _nSamples < totBlocks) ? prevSeqid : prevSeqid + 1;
+                prevSeqid = (prevBlockid + _nSamples < totBlocks) ?
+                        prevSeqid : prevSeqid + 1;
                 prevBlockid = (prevBlockid + _nSamples) % totBlocks;
-                generateEmptyPacket(emptyPacket, prevSeqid, prevBlockid);
+                // TODO: probably a cost saving here.
+                updateEmptyPacket(emptyPacket, prevSeqid, prevBlockid);
                 offset = writePacket(&writableData1, emptyPacket, offset);
-
                 // Check if the number of required packets is reached
+
+                // TODO writePacket(&writableData2, emptyPacket, offset);
             }
 
             i += packetCounter;
 
-            // Write received packet
-            // FIXME: Packet will be lost if we fill up the buffer with sufficient empty packets...
+            // Write received packet.
             if (i != _nPackets) {
                 ++_packetsAccepted;
                 offset = writePacket(&writableData1, currPacket, offset);
                 prevSeqid = seqid;
                 prevBlockid = blockid;
+                // TODO writePacket(&writableData2, currPacket, offset);
             }
         }
     }
@@ -217,23 +254,18 @@ void LofarDataSplittingChunker::next(QIODevice* device)
                 "Writable data not valid, discarding packets." << endl;
     }
 
-//    // Update _startTime
-//    _startTime = prevSeqid;
-//    _startBlockid = prevBlockid;
+    // Update _startTime
+    _startTime = prevSeqid;
+    _startBlockid = prevBlockid;
 }
 
 
 /**
  * @details
  * Generates an empty UDP packet with no time stamp.
- * TODO: packet data generation can be done once!
  */
-void LofarDataSplittingChunker::generateEmptyPacket(UDPPacket& packet, unsigned int seqid, unsigned int blockid)
+void LofarDataSplittingChunker::updateEmptyPacket(UDPPacket& packet, unsigned int seqid, unsigned int blockid)
 {
-    size_t size = _packetSize - sizeof(struct UDPPacket::Header);
-    memset((void*) packet.data, 0, size);
-    packet.header.nrBeamlets = _nSubbands;
-    packet.header.nrBlocks   = _nSamples;
     packet.header.timestamp  = seqid;
     packet.header.blockSequenceNumber    = blockid;
 }

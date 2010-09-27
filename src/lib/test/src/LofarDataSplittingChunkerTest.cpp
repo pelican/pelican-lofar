@@ -156,7 +156,7 @@ void LofarDataSplittingChunkerTest::test_normal_packets()
 {
     try {
         cout << endl;
-        cout << "[STARTING] LofarDataSplittingChunkerTest::test_normal_packets()";
+        cout << "[START] LofarDataSplittingChunkerTest::test_normal_packets()";
         cout << endl;
 
         // Get chunker configuration.
@@ -186,14 +186,15 @@ void LofarDataSplittingChunkerTest::test_normal_packets()
 
 
         // Read through the data in the chunks and check that it is correct.
+        typedef TYPES::i8complex i8c;
 
         // Chunk 1.
+        cout << "- Checking chunk 1." << endl;
         LockedData d = dataManager.getNext("LofarChunkData1");
         char* data = (char*)reinterpret_cast<AbstractLockableData*>
                                                 (d.object())->data()->data();
         CPPUNIT_ASSERT(d.isValid());
 
-        typedef TYPES::i8complex i8c;
         UDPPacket* packet;
         size_t packetSize = sizeof(struct UDPPacket::Header)
                 + _nSubbands * _nSamples * _nPols * sizeof(i8c);
@@ -217,7 +218,17 @@ void LofarDataSplittingChunkerTest::test_normal_packets()
                 }
             }
         }
-        cout << "[FINISHED] LofarDataSplittingChunkerTest::test_normal_packets()";
+
+
+        // Chunk 2.
+        cout << "- Checking chunk 2 (TODO)." << endl;
+        d = dataManager.getNext("LofarChunkData2");
+        data = (char*)reinterpret_cast<AbstractLockableData*>
+                                    (d.object())->data()->data();
+        CPPUNIT_ASSERT(d.isValid());
+
+
+        cout << "[DONE] LofarDataSplittingChunkerTest::test_normal_packets()";
         cout << endl;
     }
 
