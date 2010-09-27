@@ -28,10 +28,10 @@ LofarChunker::LofarChunker(const ConfigNode& config) : AbstractChunker(config)
 
     // Get configuration options
     int _sampleType = config.getOption("dataBitSize", "value").toInt();
-    _samplesPerPacket = config.getOption("samplesPerPacket","value").toInt();
-    _subbandsPerPacket = config.getOption("subbandsPerPacket","value").toInt();
-    _nrPolarisations = config.getOption("nRawPolarisations","value").toInt();
-    _clock = config.getOption("clock","value").toInt();
+    _samplesPerPacket = config.getOption("samplesPerPacket", "value").toInt();
+    _subbandsPerPacket = config.getOption("subbandsPerPacket", "value").toInt();
+    _nrPolarisations = config.getOption("nRawPolarisations", "value").toInt();
+    _clock = config.getOption("clock", "value").toInt();
     _startTime = _startBlockid = 0;
     _packetsAccepted = 0;
     _packetsRejected = 0;
@@ -61,6 +61,7 @@ LofarChunker::LofarChunker(const ConfigNode& config) : AbstractChunker(config)
     }
 }
 
+
 /**
  * @details
  * Constructs a new QIODevice (in this case a QUdpSocket) and returns it
@@ -77,6 +78,7 @@ QIODevice* LofarChunker::newDevice()
     return socket;
 }
 
+
 /**
  * @details
  * Gets the next chunk of data from the UDP socket (if it exists).
@@ -91,7 +93,6 @@ void LofarChunker::next(QIODevice* device)
     UDPPacket currPacket, emptyPacket;
 
     WritableData writableData = getDataStorage(_nPackets * _packetSize);
-
 
     if (writableData.isValid()) {
 
