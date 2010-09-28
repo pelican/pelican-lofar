@@ -3,6 +3,8 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 # === Create library of pipelines.
 set(pipeline_lib_src
     src/UdpBFPipeline.cpp
+    src/UdpBFPipelineStream1.cpp
+    src/UdpBFPipelineStream2.cpp
     src/TimingPipeline.cpp
     src/EmptyPipeline.cpp
 )
@@ -23,6 +25,34 @@ set_target_properties(udpBFPipeline PROPERTIES
     LINK_FLAGS "${OpenMP_CXX_FLAGS}"
 )
 target_link_libraries(udpBFPipeline
+    pelicanMdsm
+    pelican-lofar_static
+    ${PELICAN_LIBRARY}
+    ${FFTW3_FFTW_LIBRARY}
+    ${FFTW3_FFTWF_LIBRARY}
+)
+
+# === Build the UDP Beamforming pipeline binary for stream 1.
+add_executable(udpBFPipelineStream1 src/udpBFmainStream1.cpp)
+set_target_properties(udpBFPipelineStream1 PROPERTIES
+    COMPILE_FLAGS "${OpenMP_CXX_FLAGS}"
+    LINK_FLAGS "${OpenMP_CXX_FLAGS}"
+)
+target_link_libraries(udpBFPipelineStream1
+    pelicanMdsm
+    pelican-lofar_static
+    ${PELICAN_LIBRARY}
+    ${FFTW3_FFTW_LIBRARY}
+    ${FFTW3_FFTWF_LIBRARY}
+)
+
+# === Build the UDP Beamforming pipeline binary for stream 2.
+add_executable(udpBFPipelineStream2 src/udpBFmainStream2.cpp)
+set_target_properties(udpBFPipelineStream2 PROPERTIES
+    COMPILE_FLAGS "${OpenMP_CXX_FLAGS}"
+    LINK_FLAGS "${OpenMP_CXX_FLAGS}"
+)
+target_link_libraries(udpBFPipelineStream2
     pelicanMdsm
     pelican-lofar_static
     ${PELICAN_LIBRARY}

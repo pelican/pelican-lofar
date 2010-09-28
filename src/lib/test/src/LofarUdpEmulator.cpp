@@ -76,6 +76,7 @@ void LofarUdpEmulator::fillPacket()
 
 
     // Create test data in packet.
+    // LOFAR packet oder
     unsigned idx;
     switch (_sampleType)
     {
@@ -83,14 +84,15 @@ void LofarUdpEmulator::fillPacket()
         {
             i8c* samples = reinterpret_cast<i8c*>(_packet.data);
 
-            for (int i = 0; i < _samplesPerPacket; i++)
+            for (int sb = 0; sb < _subbandsPerPacket; sb++)
             {
-                for (int j = 0; j < _subbandsPerPacket; j++)
+                for (int t = 0; t < _samplesPerPacket; t++)
                 {
-                    idx = _nrPolarisations * (j + i * _subbandsPerPacket);
+                    //idx = _nrPolarisations * (sb + t * _subbandsPerPacket);
+                    idx = _nrPolarisations * (t + sb * _samplesPerPacket);
 
-                    samples[idx] = i8c(i + j, i);
-                    samples[idx + 1] = i8c(i + j, j);
+                    samples[idx] = i8c(sb, 0);      // pol1
+                    samples[idx + 1] = i8c(t, 1);   // pol2
                 }
             }
             break;

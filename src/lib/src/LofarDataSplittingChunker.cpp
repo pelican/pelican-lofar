@@ -11,6 +11,8 @@ using std::cerr;
 using std::cout;
 using std::endl;
 
+#include "pelican/utility/memCheck.h"
+
 namespace pelican {
 namespace lofar {
 
@@ -65,8 +67,8 @@ LofarDataSplittingChunker::LofarDataSplittingChunker(const ConfigNode& config)
     // two output streams
     _stream1Subbands = _stream1SubbandEnd - _stream1SubbandStart + 1;
     _stream2Subbands = _stream2SubbandEnd - _stream2SubbandStart + 1;
-    if (_stream1SubbandEnd > _nSubbands !! _stream2SubbandEnd > nSubbands)
-      throw _err("Subband ranges exceed number of subbands");
+    if (_stream1SubbandEnd > _nSubbands || _stream2SubbandEnd > _nSubbands)
+        throw _err("Subband ranges exceed number of subbands");
 
     size_t headerSize = sizeof(struct UDPPacket::Header);
     _packetSize = _nSubbands * _nSamples * _nPolarisations;
@@ -80,19 +82,19 @@ LofarDataSplittingChunker::LofarDataSplittingChunker(const ConfigNode& config)
             _packetSize = _packetSize * sizeof(TYPES::i8complex) + headerSize;
             _packetSizeStream1 = _packetSizeStream1 * sizeof(TYPES::i8complex) + headerSize;
             _packetSizeStream2 = _packetSizeStream2 * sizeof(TYPES::i8complex) + headerSize;
-	    _bytesStream1 = _packetSizeStream1 * sizeof(TYPES::i8complex);
-	    _bytesStream2 = _packetSizeStream2 * sizeof(TYPES::i8complex);
-	    _byte1OfStream1 = _stream1SubbandStart * _nSamples * _nPolarisations * sizeof(TYPES::i8complex);
-	    _byte1OfStream2 = _stream2SubbandStart * _nSamples * _nPolarisations * sizeof(TYPES::i8complex);
+            _bytesStream1 = _packetSizeStream1 * sizeof(TYPES::i8complex);
+            _bytesStream2 = _packetSizeStream2 * sizeof(TYPES::i8complex);
+            _byte1OfStream1 = _stream1SubbandStart * _nSamples * _nPolarisations * sizeof(TYPES::i8complex);
+            _byte1OfStream2 = _stream2SubbandStart * _nSamples * _nPolarisations * sizeof(TYPES::i8complex);
             break;
         case 16:
             _packetSize = _packetSize * sizeof(TYPES::i16complex) + headerSize;
             _packetSizeStream1 = _packetSizeStream1 * sizeof(TYPES::i16complex) + headerSize;
             _packetSizeStream2 = _packetSizeStream2 * sizeof(TYPES::i16complex) + headerSize;
-	    _bytesStream1 = _packetSizeStream1 * sizeof(TYPES::i16complex);
-	    _bytesStream2 = _packetSizeStream2 * sizeof(TYPES::i16complex);
-	    _byte1OfStream1 = _stream1SubbandStart * _nSamples * _nPolarisations * sizeof(TYPES::i16complex);
-	    _byte1OfStream2 = _stream2SubbandStart * _nSamples * _nPolarisations * sizeof(TYPES::i16complex);
+            _bytesStream1 = _packetSizeStream1 * sizeof(TYPES::i16complex);
+            _bytesStream2 = _packetSizeStream2 * sizeof(TYPES::i16complex);
+            _byte1OfStream1 = _stream1SubbandStart * _nSamples * _nPolarisations * sizeof(TYPES::i16complex);
+            _byte1OfStream2 = _stream2SubbandStart * _nSamples * _nPolarisations * sizeof(TYPES::i16complex);
             break;
         default:
             throw _err("LofarDataSplittingChunker(): "
@@ -117,7 +119,7 @@ LofarDataSplittingChunker::LofarDataSplittingChunker(const ConfigNode& config)
     size_t size = _packetSize - sizeof(struct UDPPacket::Header);
     memset((void*)_emptyPacket.data, 0, size);
     _emptyPacket.header.nrBeamlets = _nSubbands;
-    _emptyPacket.header.nrBlocks = _nSamples; */ 
+    _emptyPacket.header.nrBlocks = _nSamples; */
 
     // Set the empty packet data for stream 1
     //size_t size = _packetSizeStream1 - sizeof(struct UDPPacket::Header);
@@ -144,7 +146,7 @@ QIODevice* LofarDataSplittingChunker::newDevice()
 
     if (!socket->bind(port()))
         cerr << "LofarDataSplittingChunker::newDevice(): "
-                "Unable to bind to UDP port!" << endl;
+        "Unable to bind to UDP port!" << endl;
 
     return socket;
 }
@@ -158,20 +160,20 @@ void LofarDataSplittingChunker::next(QIODevice* device)
 {
     QUdpSocket* socket = static_cast<QUdpSocket*>(device);
 
-    unsigned offset = 0;
+    unsigned offsetStream1 = 0;
+    unsigned offsetStream2 = 0;
     unsigned prevSeqid = _startTime;
     unsigned prevBlockid = _startBlockid;
     UDPPacket currPacket;
     UDPPacket outputPacket1;
     UDPPacket outputPacket2;
-    UDPPacket emptyPacket;
     UDPPacket _emptyPacket1;
     UDPPacket _emptyPacket2;
 
     WritableData writableData1 = getDataStorage(_nPackets * _packetSizeStream1,
-            "LofarChunkData1");
+            chunkTypes().at(0));
     WritableData writableData2 = getDataStorage(_nPackets * _packetSizeStream2,
-            "LofarChunkData2");
+            chunkTypes().at(1));
 
     unsigned seqid, blockid;
     unsigned totBlocks, lostPackets, diff;
@@ -271,8 +273,8 @@ void LofarDataSplittingChunker::next(QIODevice* device)
                 // TODO: probably a cost saving here.
                 updateEmptyPacket(_emptyPacket1, prevSeqid, prevBlockid);
                 updateEmptyPacket(_emptyPacket2, prevSeqid, prevBlockid);
-                offset = writePacket(&writableData1, _emptyPacket1, offset);
-                offset = writePacket(&writableData2, _emptyPacket2, offset);
+                offsetStream1 = writePacket(&writableData1, _emptyPacket1, _packetSizeStream1, offsetStream1);
+                offsetStream2 = writePacket(&writableData2, _emptyPacket2, _packetSizeStream2, offsetStream2);
                 // Check if the number of required packets is reached
 
                 // TODO writePacket(&writableData2, emptyPacket, offset);
@@ -280,22 +282,22 @@ void LofarDataSplittingChunker::next(QIODevice* device)
 
             i += packetCounter;
 
-            // Write received packet to 2 streams after updating header and data 
+            // Write received packet to 2 streams after updating header and data
             if (i != _nPackets) {
-	      ++_packetsAccepted;
-	      // Generate Stream 1 packet
-	      memcpy((void*)outputPacket1.data, &currPacket.data[_byte1OfStream1], _bytesStream1); 
-	      outputPacket1.header = currPacket.header;
-	      outputPacket1.header.nrBeamlets = _stream2Subbands;
-	      offset = writePacket(&writableData1, outputPacket1, offset);
-	      // Generate Stream 2 packet
-	      memcpy((void*)outputPacket2.data, &currPacket.data[_byte1OfStream2], _bytesStream2); 
-	      outputPacket2.header = currPacket.header;
-	      outputPacket2.header.nrBeamlets = _stream2Subbands;
-	      offset = writePacket(&writableData2, outputPacket2, offset);
-	      
-	      prevSeqid = seqid;
-	      prevBlockid = blockid;
+                ++_packetsAccepted;
+                // Generate Stream 1 packet
+                memcpy((void*)outputPacket1.data, &currPacket.data[_byte1OfStream1], _bytesStream1);
+                outputPacket1.header = currPacket.header;
+                outputPacket1.header.nrBeamlets = _stream1Subbands;
+                offsetStream1 = writePacket(&writableData1, outputPacket1, _packetSizeStream1, offsetStream1);
+                // Generate Stream 2 packet
+                memcpy((void*)outputPacket2.data, &currPacket.data[_byte1OfStream2], _bytesStream2);
+                outputPacket2.header = currPacket.header;
+                outputPacket2.header.nrBeamlets = _stream2Subbands;
+                offsetStream2 = writePacket(&writableData2, outputPacket2, _packetSizeStream2, offsetStream2);
+
+                prevSeqid = seqid;
+                prevBlockid = blockid;
             }
         }
     }
@@ -327,11 +329,12 @@ void LofarDataSplittingChunker::updateEmptyPacket(UDPPacket& packet, unsigned in
  * @details
  * Write packet to WritableData object
  */
-int LofarDataSplittingChunker::writePacket(WritableData *writer, UDPPacket& packet, unsigned offset)
+int LofarDataSplittingChunker::writePacket(WritableData *writer,
+        UDPPacket& packet, unsigned packetSize, unsigned offset)
 {
     if (writer->isValid()) {
-        writer->write(reinterpret_cast<void*>(&packet), _packetSize, offset);
-        return offset + _packetSize;
+        writer->write(reinterpret_cast<void*>(&packet), packetSize, offset);
+        return offset + packetSize;
     }
     else {
         cerr << "LofarDataSplittingChunker::writePacket(): "

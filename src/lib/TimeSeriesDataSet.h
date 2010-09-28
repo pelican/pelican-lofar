@@ -162,8 +162,13 @@ class TimeSeriesDataSetC32 : public TimeSeriesDataSet<std::complex<float> >
 };
 
 
+typedef TimeSeriesDataSetC32 LofarTimeStream1;
+typedef TimeSeriesDataSetC32 LofarTimeStream2;
+
 // Declare the data blob with the pelican the data blob factory.
 PELICAN_DECLARE_DATABLOB(TimeSeriesDataSetC32)
+PELICAN_DECLARE_DATABLOB(LofarTimeStream1)
+PELICAN_DECLARE_DATABLOB(LofarTimeStream2)
 
 }// namespace lofar
 }// namespace pelican

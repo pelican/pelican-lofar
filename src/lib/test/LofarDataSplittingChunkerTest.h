@@ -53,6 +53,12 @@ class LofarDataSplittingChunkerTest : public CppUnit::TestFixture
         // Packet dimensions.
         unsigned _nSamples;
         unsigned _nSubbands;
+        unsigned _nSubbandsStream1;
+        unsigned _nSubbandsStream2;
+        unsigned _subbandStartStream1;
+        unsigned _subbandEndStream1;
+        unsigned _subbandStartStream2;
+        unsigned _subbandEndStream2;
         unsigned _nPols;
 
         unsigned _nPackets;

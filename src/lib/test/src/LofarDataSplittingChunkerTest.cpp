@@ -33,13 +33,19 @@ LofarDataSplittingChunkerTest::LofarDataSplittingChunkerTest()
     _nSamples = 16;
     _nPols = 2;
     _nSubbands = 61;//(_clock == 200) ? 42 : 54;
+    _subbandStartStream1 = 0;
+    _subbandEndStream1 = 30;
+    _subbandStartStream2 = 31;
+    _subbandEndStream2 = 60;
+    _nSubbandsStream1 = _subbandEndStream1 - _subbandStartStream1 + 1;
+    _nSubbandsStream2 = _subbandEndStream2 - _subbandStartStream2 + 1;
 
     _nPackets = 1000;
 
     _host = "127.0.0.1";
     _port = 8090;
-    _chunkType1 = "LofarChunkData1";
-    _chunkType2 = "LofarChunkData2";
+    _chunkType1 = "LofarTimeStream1";
+    _chunkType2 = "LofarTimeStream2";
 
     // Setup the Chunker configuration.
     QString chunkerConfig =
@@ -48,30 +54,36 @@ LofarDataSplittingChunkerTest::LofarDataSplittingChunkerTest()
             "   <LofarDataSplittingChunker>"
             ""
             "       <connection host=\"%1\" port=\"%2\"/>"
-            "       <data type=\"%3\"/>"
-            "       <data type=\"%4\"/>"
+            "       <Stream1 subbandStart=\"%3\" subbandEnd=\"%4\"/>"
+            "       <Stream2 subbandStart=\"%5\" subbandEnd=\"%6\"/>"
+            "       <data type=\"%7\"/>"
+            "       <data type=\"%8\"/>"
             ""
-            "       <dataBitSize            value=\"%5\" />"
-            "       <samplesPerPacket       value=\"%6\" />"
-            "       <subbandsPerPacket      value=\"%7\" />"
-            "       <nRawPolarisations      value=\"%8\" />"
-            "       <clock                  value=\"%9\" />"
-            "       <udpPacketsPerIteration value=\"%10\" />"
+            "       <dataBitSize            value=\"%9\" />"
+            "       <samplesPerPacket       value=\"%10\" />"
+            "       <subbandsPerPacket      value=\"%11\" />"
+            "       <nRawPolarisations      value=\"%12\" />"
+            "       <clock                  value=\"%13\" />"
+            "       <udpPacketsPerIteration value=\"%14\" />"
             ""
             "   </LofarDataSplittingChunker>"
             ""
             "</chunkers>";
     chunkerConfig = chunkerConfig.arg(_host);       // 1
     chunkerConfig = chunkerConfig.arg(_port);       // 2
-    chunkerConfig = chunkerConfig.arg(_chunkType1); // 3
-    chunkerConfig = chunkerConfig.arg(_chunkType2); // 4
+    chunkerConfig = chunkerConfig.arg(_subbandStartStream1);  // 3
+    chunkerConfig = chunkerConfig.arg(_subbandEndStream1);    // 4
+    chunkerConfig = chunkerConfig.arg(_subbandStartStream2);  // 5
+    chunkerConfig = chunkerConfig.arg(_subbandEndStream2);    // 6
 
-    chunkerConfig = chunkerConfig.arg(_sampleBits); // 5
-    chunkerConfig = chunkerConfig.arg(_nSamples);   // 6
-    chunkerConfig = chunkerConfig.arg(_nSubbands);  // 7
-    chunkerConfig = chunkerConfig.arg(_nPols);      // 8
-    chunkerConfig = chunkerConfig.arg(_clock);      // 9
-    chunkerConfig = chunkerConfig.arg(_nPackets);   // 10
+    chunkerConfig = chunkerConfig.arg(_chunkType1); // 7
+    chunkerConfig = chunkerConfig.arg(_chunkType2); // 8
+    chunkerConfig = chunkerConfig.arg(_sampleBits); // 9
+    chunkerConfig = chunkerConfig.arg(_nSamples);   // 10
+    chunkerConfig = chunkerConfig.arg(_nSubbands);  // 11
+    chunkerConfig = chunkerConfig.arg(_nPols);      // 12
+    chunkerConfig = chunkerConfig.arg(_clock);      // 13
+    chunkerConfig = chunkerConfig.arg(_nPackets);   // 14
 
     // Configuration of buffers the chunker is writing to.
     QString bufferConfig =
@@ -174,8 +186,8 @@ void LofarDataSplittingChunkerTest::test_normal_packets()
 
         // Create Data Manager.
         pelican::DataManager dataManager(&_config);
-        dataManager.getStreamBuffer("LofarChunkData1");
-        dataManager.getStreamBuffer("LofarChunkData2");
+        dataManager.getStreamBuffer(_chunkType1);
+        dataManager.getStreamBuffer(_chunkType2);
         chunker.setDataManager(&dataManager);
 
         // Start Lofar Data Generator.
@@ -184,20 +196,19 @@ void LofarDataSplittingChunkerTest::test_normal_packets()
         // Acquire data through chunker.
         chunker.next(device);
 
-
         // Read through the data in the chunks and check that it is correct.
         typedef TYPES::i8complex i8c;
 
         // Chunk 1.
         cout << "- Checking chunk 1." << endl;
-        LockedData d = dataManager.getNext("LofarChunkData1");
+        LockedData d = dataManager.getNext(_chunkType1);
         char* data = (char*)reinterpret_cast<AbstractLockableData*>
                                                 (d.object())->data()->data();
         CPPUNIT_ASSERT(d.isValid());
 
         UDPPacket* packet;
         size_t packetSize = sizeof(struct UDPPacket::Header)
-                + _nSubbands * _nSamples * _nPols * sizeof(i8c);
+                + _nSubbandsStream1 * _nSamples * _nPols * sizeof(i8c);
 
         for (unsigned p = 0; p < _nPackets; ++p)
         {
@@ -205,28 +216,50 @@ void LofarDataSplittingChunkerTest::test_normal_packets()
             i8c* s = reinterpret_cast<i8c*>(&packet->data);
 
             unsigned idx;
-            for (unsigned i = 0; i < _nSamples; ++i)
+            for (unsigned sb = 0; sb < _nSubbandsStream1; ++sb)
             {
-                for (unsigned j = 0; j < _nSubbands; ++j)
+                for (unsigned t = 0; t < _nSamples; ++t)
                 {
-                    idx = _nPols * (j + i * _nSubbands);
-                    CPPUNIT_ASSERT_EQUAL(float(i + j), (float)s[idx].real());
-                    CPPUNIT_ASSERT_EQUAL(float(i), (float)s[idx].imag());
+                    idx = _nPols * (t + sb * _nSamples);
+                    CPPUNIT_ASSERT_EQUAL(float(sb + _subbandStartStream1), (float)s[idx].real());
+                    CPPUNIT_ASSERT_EQUAL(float(0.0), (float)s[idx].imag());
 
-                    CPPUNIT_ASSERT_EQUAL(float(i + j), (float)s[idx + 1].real());
-                    CPPUNIT_ASSERT_EQUAL(float(j), (float)s[idx + 1].imag());
+                    CPPUNIT_ASSERT_EQUAL(float(t), (float)s[idx + 1].real());
+                    CPPUNIT_ASSERT_EQUAL(float(1.0), (float)s[idx + 1].imag());
                 }
             }
         }
 
 
         // Chunk 2.
-        cout << "- Checking chunk 2 (TODO)." << endl;
-        d = dataManager.getNext("LofarChunkData2");
+        cout << "- Checking chunk 2." << endl;
+        d = dataManager.getNext(_chunkType2);
         data = (char*)reinterpret_cast<AbstractLockableData*>
                                     (d.object())->data()->data();
         CPPUNIT_ASSERT(d.isValid());
 
+        packetSize = sizeof(struct UDPPacket::Header)
+                + _nSubbandsStream2 * _nSamples * _nPols * sizeof(i8c);
+
+        for (unsigned p = 0; p < _nPackets; ++p)
+        {
+            packet = (UDPPacket*)(data + packetSize * p);
+            i8c* s = reinterpret_cast<i8c*>(&packet->data);
+
+            unsigned idx;
+            for (unsigned sb = 0; sb < _nSubbandsStream2; ++sb)
+            {
+                for (unsigned t = 0; t < _nSamples; ++t)
+                {
+                    idx = _nPols * (t + sb * _nSamples);
+                    CPPUNIT_ASSERT_EQUAL(float(sb + _subbandStartStream2), (float)s[idx].real());
+                    CPPUNIT_ASSERT_EQUAL(float(0.0), (float)s[idx].imag());
+
+                    CPPUNIT_ASSERT_EQUAL(float(t), (float)s[idx + 1].real());
+                    CPPUNIT_ASSERT_EQUAL(float(1.0), (float)s[idx + 1].imag());
+                }
+            }
+        }
 
         cout << "[DONE] LofarDataSplittingChunkerTest::test_normal_packets()";
         cout << endl;

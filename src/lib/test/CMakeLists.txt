@@ -21,7 +21,7 @@ set(lofarTest_src
     #src/AdapterTimeSeriesDataSetTest.cpp
     #src/SpectrumDataSetTest.cpp
     #src/PPFChanneliserTest.cpp
-    src/LofarChunkerTest.cpp
+    #src/LofarChunkerTest.cpp
     src/LofarDataSplittingChunkerTest.cpp
 )
 

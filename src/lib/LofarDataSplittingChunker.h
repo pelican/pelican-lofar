@@ -52,7 +52,8 @@ class LofarDataSplittingChunker : public AbstractChunker
                 unsigned blockid);
 
         /// Write UDPPacket to writeableData object
-        int writePacket(WritableData* writer, UDPPacket& packet, unsigned offset);
+        int writePacket(WritableData* writer, UDPPacket& packet,
+                unsigned packetSize, unsigned offset);
 
         /// Returns an error message suitable for throwing.
         QString _err(QString message)
@@ -66,6 +67,8 @@ class LofarDataSplittingChunker : public AbstractChunker
         // Packet dimensions.
         unsigned _nSamples;
         unsigned _nSubbands;
+        unsigned _stream1Subbands;
+        unsigned _stream2Subbands;
         unsigned _stream1SubbandStart;
         unsigned _stream1SubbandEnd;
         unsigned _stream2SubbandStart;
