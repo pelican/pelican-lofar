@@ -27,13 +27,13 @@ int main(int argc, char** argv)
         pelican::PelicanServer server(&config);
         server.addStreamChunker("LofarDataSplittingChunker");
 
-//        // Add the protocol.
-//        pelican::AbstractProtocol* protocol = new pelican::PelicanProtocol;
-//        server.addProtocol(protocol, 2000);
+        // Add the protocol.
+        pelican::AbstractProtocol* protocol = new pelican::PelicanProtocol;
+        server.addProtocol(protocol, 2000);
 
-//        // Start the server.
-//        server.start();
-//        while (!server.isReady()) {}
+        // Start the server.
+        server.start();
+        while (!server.isReady()) {}
         return app.exec();
     }
     catch (const QString& err)
@@ -63,7 +63,7 @@ pelican::Config createConfig(int argc, char** argv)
 
 
     // Configuration option without a selection flag in the first argument
-    // position is assumed to be a fits file
+    // position is assumed to be a config file
     opts::positional_options_description p;
     p.add("config", -1);
 
