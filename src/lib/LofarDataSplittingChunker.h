@@ -70,6 +70,8 @@ class LofarDataSplittingChunker : public AbstractChunker
         unsigned _stream1SubbandEnd;
         unsigned _stream2SubbandStart;
         unsigned _stream2SubbandEnd;
+        unsigned _byte1OfStream1;
+        unsigned _byte1OfStream2;
 
         unsigned _nPolarisations;
 

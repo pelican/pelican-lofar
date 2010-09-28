@@ -80,15 +80,19 @@ LofarDataSplittingChunker::LofarDataSplittingChunker(const ConfigNode& config)
             _packetSize = _packetSize * sizeof(TYPES::i8complex) + headerSize;
             _packetSizeStream1 = _packetSizeStream1 * sizeof(TYPES::i8complex) + headerSize;
             _packetSizeStream2 = _packetSizeStream2 * sizeof(TYPES::i8complex) + headerSize;
-	    _bytesStream1 = _packetSizeStream1 * sizeof(TYPES::i8complex)
-	    _bytesStream2 = _packetSizeStream2 * sizeof(TYPES::i8complex)
+	    _bytesStream1 = _packetSizeStream1 * sizeof(TYPES::i8complex);
+	    _bytesStream2 = _packetSizeStream2 * sizeof(TYPES::i8complex);
+	    _byte1OfStream1 = _stream1SubbandStart * _nSamples * _nPolarisations * sizeof(TYPES::i8complex);
+	    _byte1OfStream2 = _stream2SubbandStart * _nSamples * _nPolarisations * sizeof(TYPES::i8complex);
             break;
         case 16:
             _packetSize = _packetSize * sizeof(TYPES::i16complex) + headerSize;
             _packetSizeStream1 = _packetSizeStream1 * sizeof(TYPES::i16complex) + headerSize;
             _packetSizeStream2 = _packetSizeStream2 * sizeof(TYPES::i16complex) + headerSize;
-	    _bytesStream1 = _packetSizeStream1 * sizeof(TYPES::i16complex)
-	    _bytesStream2 = _packetSizeStream2 * sizeof(TYPES::i16complex)
+	    _bytesStream1 = _packetSizeStream1 * sizeof(TYPES::i16complex);
+	    _bytesStream2 = _packetSizeStream2 * sizeof(TYPES::i16complex);
+	    _byte1OfStream1 = _stream1SubbandStart * _nSamples * _nPolarisations * sizeof(TYPES::i16complex);
+	    _byte1OfStream2 = _stream2SubbandStart * _nSamples * _nPolarisations * sizeof(TYPES::i16complex);
             break;
         default:
             throw _err("LofarDataSplittingChunker(): "
@@ -116,13 +120,13 @@ LofarDataSplittingChunker::LofarDataSplittingChunker(const ConfigNode& config)
     _emptyPacket.header.nrBlocks = _nSamples; */ 
 
     // Set the empty packet data for stream 1
-    size_t size = _packetSizeStream1 - sizeof(struct UDPPacket::Header);
-    memset((void*)_emptyPacket1.data, 0, size);
+    //size_t size = _packetSizeStream1 - sizeof(struct UDPPacket::Header);
+    memset((void*)_emptyPacket1.data, 0, _bytesStream1);
     _emptyPacket1.header.nrBeamlets = _stream1Subbands;
     _emptyPacket1.header.nrBlocks = _nSamples;
     // Set the empty packet data for stream 2
-    size_t size = _packetSizeStream2 - sizeof(struct UDPPacket::Header);
-    memset((void*)_emptyPacket2.data, 0, size);
+    //size_t size = _packetSizeStream2 - sizeof(struct UDPPacket::Header);
+    memset((void*)_emptyPacket2.data, 0, _bytesStream2);
     _emptyPacket2.header.nrBeamlets = _stream2Subbands;
     _emptyPacket2.header.nrBlocks = _nSamples;
 }
@@ -267,8 +271,8 @@ void LofarDataSplittingChunker::next(QIODevice* device)
                 // TODO: probably a cost saving here.
                 updateEmptyPacket(_emptyPacket1, prevSeqid, prevBlockid);
                 updateEmptyPacket(_emptyPacket2, prevSeqid, prevBlockid);
-                offset = writePacket(&writableData1, emptyPacket1, offset);
-                offset = writePacket(&writableData2, emptyPacket2, offset);
+                offset = writePacket(&writableData1, _emptyPacket1, offset);
+                offset = writePacket(&writableData2, _emptyPacket2, offset);
                 // Check if the number of required packets is reached
 
                 // TODO writePacket(&writableData2, emptyPacket, offset);
@@ -280,12 +284,12 @@ void LofarDataSplittingChunker::next(QIODevice* device)
             if (i != _nPackets) {
 	      ++_packetsAccepted;
 	      // Generate Stream 1 packet
-	      memcpy((void*)outputPacket1.data, currPacket.data, _bytesStream1); 
+	      memcpy((void*)outputPacket1.data, &currPacket.data[_byte1OfStream1], _bytesStream1); 
 	      outputPacket1.header = currPacket.header;
 	      outputPacket1.header.nrBeamlets = _stream2Subbands;
 	      offset = writePacket(&writableData1, outputPacket1, offset);
 	      // Generate Stream 2 packet
-	      memcpy((void*)outputPacket2.data, &currPacket.data[_bytesStream1+1], _bytesStream2); 
+	      memcpy((void*)outputPacket2.data, &currPacket.data[_byte1OfStream2], _bytesStream2); 
 	      outputPacket2.header = currPacket.header;
 	      outputPacket2.header.nrBeamlets = _stream2Subbands;
 	      offset = writePacket(&writableData2, outputPacket2, offset);
