@@ -40,6 +40,7 @@ namespace lofar {
 LofarDataSplittingChunker::LofarDataSplittingChunker(const ConfigNode& config)
 : AbstractChunker(config)
 {
+    std::cout << "LofarDataSplittingChunker constructor" << std::endl;
     // Check the configuration type matches the class name.
     if (config.type() != "LofarDataSplittingChunker")
         throw _err("LofarDataSplittingChunker(): "
@@ -131,6 +132,7 @@ LofarDataSplittingChunker::LofarDataSplittingChunker(const ConfigNode& config)
     memset((void*)_emptyPacket2.data, 0, _bytesStream2);
     _emptyPacket2.header.nrBeamlets = _stream2Subbands;
     _emptyPacket2.header.nrBlocks = _nSamples;
+    std::cout << "LofarDataSplittingChunker constructor done" << std::endl;
 }
 
 

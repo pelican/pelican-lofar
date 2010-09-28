@@ -2,7 +2,7 @@
 #include "pelican/comms/PelicanProtocol.h"
 #include "pelican/utility/Config.h"
 
-//#include "LofarDataSplittingChunker.h"
+#include "LofarDataSplittingChunker.h"
 //#include "LofarChunker.h"
 
 #include <QtGui/QApplication>
@@ -26,7 +26,6 @@ int main(int argc, char** argv)
         pelican::Config config = createConfig(argc, argv);
         pelican::PelicanServer server(&config);
         server.addStreamChunker("LofarDataSplittingChunker");
-        //server.addStreamChunker("LofarChunker");
 
 //        // Add the protocol.
 //        pelican::AbstractProtocol* protocol = new pelican::PelicanProtocol;
@@ -35,13 +34,13 @@ int main(int argc, char** argv)
 //        // Start the server.
 //        server.start();
 //        while (!server.isReady()) {}
+        return app.exec();
     }
     catch (const QString& err)
     {
         cerr << "ERROR: " << err.toStdString() << endl;
     }
 
-    return app.exec();
 }
 
 
