@@ -20,7 +20,7 @@ set(lofarTest_src
     #src/PolyphaseCoefficientsTest.cpp
     #src/AdapterTimeSeriesDataSetTest.cpp
     #src/SpectrumDataSetTest.cpp
-    #src/PPFChanneliserTest.cpp
+    src/PPFChanneliserTest.cpp
     #src/LofarChunkerTest.cpp
     src/LofarDataSplittingChunkerTest.cpp
 )

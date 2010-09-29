@@ -43,7 +43,7 @@ namespace lofar {
  * @param[in] config XML configuration node.
  */
 PPFChanneliser::PPFChanneliser(const ConfigNode& config)
-: AbstractModule(config), _buffersInitialised(false), _iOldestSamples(0)
+: AbstractModule(config), _buffersInitialised(false)
 {
     // Get options from the XML configuration node.
     _nChannels = config.getOption("outputChannelsPerSubband", "value", "512").toUInt();
@@ -53,6 +53,7 @@ PPFChanneliser::PPFChanneliser(const ConfigNode& config)
 
     // Set the number of processing threads.
     omp_set_num_threads(_nThreads);
+    _iOldestSamples.resize(_nThreads, 0);
 
     // Enforce even number of channels.
     if (_nChannels%2) throw _err("Number of channels needs to be even.");
@@ -263,9 +264,10 @@ void PPFChanneliser::_checkData(const TimeSeriesDataSetC32* timeData)
 void PPFChanneliser::_updateBuffer(const Complex* samples,
         unsigned nSamples, unsigned nTaps, Complex* buffer)
 {
+    unsigned tId = omp_get_thread_num();
     size_t blockSize = nSamples * sizeof(Complex);
-    memcpy(&buffer[_iOldestSamples * nSamples], samples, blockSize);
-    _iOldestSamples = (_iOldestSamples + 1) % nTaps;
+    memcpy(&buffer[_iOldestSamples[tId] * nSamples], samples, blockSize);
+    _iOldestSamples[tId] = (_iOldestSamples[tId] + 1) % nTaps;
 }
 
 
@@ -286,9 +288,10 @@ void PPFChanneliser::_filter(const Complex* sampleBuffer, unsigned nTaps,
 
     unsigned iBuffer = 0, idx = 0;
     float re, im, coeff;
+    unsigned tId = omp_get_thread_num();
 
     for (unsigned i = 0, t = 0; t < nTaps; ++t) {
-        iBuffer = ((_iOldestSamples + t) % nTaps) * nChannels;
+        iBuffer = ((_iOldestSamples[tId] + t) % nTaps) * nChannels;
         for (unsigned c = 0; c < nChannels; ++c) {
             idx = iBuffer + c;
             coeff = coeffs[i];
