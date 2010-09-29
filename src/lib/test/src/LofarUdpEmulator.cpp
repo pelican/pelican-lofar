@@ -67,12 +67,10 @@ void LofarUdpEmulator::fillPacket()
     }
     _packetSize += sizeof(struct UDPPacket::Header);
 
-
     // Check that packet size is not too large.
     if (_packetSize > sizeof(_packet.data))
         throw QString("LofarUdpEmulator: Packet size (%1) too large (max %2).")
             .arg(_packetSize).arg(sizeof(_packet.data));
-
 
 
     // Create test data in packet.
@@ -88,9 +86,7 @@ void LofarUdpEmulator::fillPacket()
             {
                 for (int t = 0; t < _samplesPerPacket; t++)
                 {
-                    //idx = _nrPolarisations * (sb + t * _subbandsPerPacket);
                     idx = _nrPolarisations * (t + sb * _samplesPerPacket);
-
                     samples[idx] = i8c(sb, 0);      // pol1
                     samples[idx + 1] = i8c(t, 1);   // pol2
                 }
@@ -99,14 +95,15 @@ void LofarUdpEmulator::fillPacket()
         }
         case i16complex:
         {
-            i16c *s = reinterpret_cast<i16c*>(_packet.data);
-            for (int i = 0; i < _samplesPerPacket; i++)
+            i16c *samples = reinterpret_cast<i16c*>(_packet.data);
+
+            for (int sb = 0; sb < _subbandsPerPacket; sb++)
             {
-                for (int j = 0; j < _subbandsPerPacket; j++)
+                for (int t = 0; t < _samplesPerPacket; t++)
                 {
-                    idx = _nrPolarisations * (j + i * _subbandsPerPacket);
-                    s[idx] = i16c(i + j, i);
-                    s[idx + 1] = i16c(i + j, j);
+                    idx = _nrPolarisations * (t + sb * _samplesPerPacket);
+                    samples[idx] = i16c(sb, 0);     // pol 1
+                    samples[idx + 1] = i16c(t, 1);  // pol 2
                 }
             }
             break;

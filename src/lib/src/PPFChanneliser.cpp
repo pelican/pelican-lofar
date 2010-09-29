@@ -63,7 +63,8 @@ PPFChanneliser::PPFChanneliser(const ConfigNode& config)
 
     // Allocate buffers used for holding the output of the FIR stage.
     _filteredData.resize(_nThreads);
-    for (unsigned i = 0; i < _nThreads; ++i) _filteredData[i].resize(_nChannels);
+    for (unsigned i = 0; i < _nThreads; ++i)
+        _filteredData[i].resize(_nChannels);
 
     // Create the FFTW plan.
     _createFFTWPlan(_nChannels, _fftPlan);

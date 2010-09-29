@@ -24,6 +24,7 @@ class SpectrumDataSetStokes;
  * @class StokesGenerator
  *
  * @brief
+ * Module for converting polarisations from X,Y to stokes parameters.
  *
  * @details
  *
@@ -32,15 +33,18 @@ class SpectrumDataSetStokes;
 class StokesGenerator : public AbstractModule
 {
     public:
-        ///
+        /// Constructor.
         StokesGenerator(const ConfigNode& config);
 
-        ///
+        /// Destructor.
         ~StokesGenerator();
 
+    public:
         ///
         void run(const SpectrumDataSetC32* channeliserOutput,
                 SpectrumDataSetStokes* stokes);
+
+        ///
         void run(const TimeSeriesDataSetC32* streamData,
                 SpectrumDataSetStokes* stokes);
 

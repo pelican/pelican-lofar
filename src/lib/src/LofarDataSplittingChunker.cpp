@@ -269,6 +269,7 @@ void LofarDataSplittingChunker::next(QIODevice* device)
                 updateEmptyPacket(_emptyPacket2, prevSeqid, prevBlockid);
                 offsetStream1 = writePacket(&writableData1, _emptyPacket1, _packetSizeStream1, offsetStream1);
                 offsetStream2 = writePacket(&writableData2, _emptyPacket2, _packetSizeStream2, offsetStream2);
+
                 // Check if the number of required packets is reached
 
                 // TODO writePacket(&writableData2, emptyPacket, offset);

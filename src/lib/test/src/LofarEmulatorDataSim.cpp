@@ -112,11 +112,11 @@ void LofarEmulatorDataSim::_setPacketData()
     unsigned long time =  _packetCounter * _samplesPerPacket;
 
     Complex16 *data = reinterpret_cast<Complex16*>(_packet.data);
-    for (int t = 0; t < _samplesPerPacket; t++)
+    for (int s = 0; s < _nSubbands; s++)
     {
-        for (int s = 0; s < _nSubbands; s++)
+        for (int t = 0; t < _samplesPerPacket; t++)
         {
-            i = t * _nSubbands * _nPolarisations + s * _nPolarisations;
+            i = _nPolarisations * (t + s * _samplesPerPacket);
 
             time += t;
 

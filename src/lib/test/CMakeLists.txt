@@ -14,14 +14,14 @@ add_library(lofarTestLib STATIC ${lofarTestLib_src})
 set(lofarTest_src
     src/libTest.cpp
     #src/RFI_ClipperTest.cpp
-    #src/PumaOutputTest.cpp
-    #src/DataStreamingTest.cpp
+    src/PumaOutputTest.cpp
+    src/DataStreamingTest.cpp
     ####src/PelicanBlobClientTest.cpp
-    #src/PolyphaseCoefficientsTest.cpp
-    #src/AdapterTimeSeriesDataSetTest.cpp
-    #src/SpectrumDataSetTest.cpp
+    src/PolyphaseCoefficientsTest.cpp
+    src/AdapterTimeSeriesDataSetTest.cpp
+    src/SpectrumDataSetTest.cpp
     src/PPFChanneliserTest.cpp
-    #src/LofarChunkerTest.cpp
+    src/LofarChunkerTest.cpp
     src/LofarDataSplittingChunkerTest.cpp
 )
 
