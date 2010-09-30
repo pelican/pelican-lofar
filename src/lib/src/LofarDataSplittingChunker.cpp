@@ -281,17 +281,48 @@ void LofarDataSplittingChunker::next(QIODevice* device)
             if (i != _nPackets) {
                 ++_packetsAccepted;
 
+//                cout << endl;
+//                cout << "packet = " << i << endl;
+//                cout << "----------------------" << endl;
+//                char* wd = currPacket.data;
+//                TYPES::i16complex *d = reinterpret_cast<TYPES::i16complex*>(wd);
+//                for (unsigned jj = 0; jj < 3; ++jj)
+//                {
+//                    cout << "Current Packet [" << jj << "] " << d[jj].real()
+//                         << " " << d[jj].imag() << endl;
+//                }
+//                for (unsigned jj = 31*16*2; jj < 31*16*2+3; ++jj)
+//                {
+//                    cout << "Current Packet [" << jj << "] " << d[jj].real()
+//                         << " " << d[jj].imag() << endl;
+//                }
+
                 // Generate Stream 1 packet
                 outputPacket1.header = currPacket.header;
                 outputPacket1.header.nrBeamlets = _stream1Subbands;
                 memcpy((void*)outputPacket1.data, &currPacket.data[_byte1OfStream1], _bytesStream1);
                 offsetStream1 = writePacket(&writableData1, outputPacket1, _packetSizeStream1, offsetStream1);
 
+//                //wd = outputPacket1.data;
+//                wd = (char*)writableData1.ptr() + (offsetStream1 - _packetSizeStream1 + sizeof(struct UDPPacket::Header));
+//                d = reinterpret_cast<TYPES::i16complex*>(wd);
+//                for (unsigned jj = 0; jj < 3; ++jj) {
+//                    cout << "Stream1 [" << jj << "] " << d[jj].real() << " " << d[jj].imag() << endl;
+//                }
+
                 // Generate Stream 2 packet
+                //--------------------------------------------------------------
                 outputPacket2.header = currPacket.header;
                 outputPacket2.header.nrBeamlets = _stream2Subbands;
                 memcpy((void*)outputPacket2.data, &currPacket.data[_byte1OfStream2], _bytesStream2);
                 offsetStream2 = writePacket(&writableData2, outputPacket2, _packetSizeStream2, offsetStream2);
+
+//                //wd = outputPacket2.data;
+//                wd = (char*)writableData2.ptr() + (offsetStream2 - _packetSizeStream2  + sizeof(struct UDPPacket::Header));
+//                d = reinterpret_cast<TYPES::i16complex*>(wd);
+//                for (unsigned jj = 0; jj < 3; ++jj) {
+//                    cout << "Stream2 [" << jj << "] " << d[jj].real() << " " << d[jj].imag() << endl;
+//                }
 
                 prevSeqid = seqid;
                 prevBlockid = blockid;

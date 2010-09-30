@@ -64,10 +64,25 @@ void UdpBFPipelineStream1::run(QHash<QString, DataBlob*>& remoteData)
     // N for each sub-band and polarisation.
     timeSeries = (TimeSeriesDataSetC32*) remoteData["LofarTimeStream1"];
 
+    timeSeries->write("timeStream1-s0-p0.dat", 0, 0, -1);
+    timeSeries->write("timeStream1-s1-p0.dat", 1, 0, -1);
+    timeSeries->write("timeStream1-s2-p0.dat", 2, 0, -1);
+    timeSeries->write("timeStream1-s3-p0.dat", 3, 0, -1);
+    timeSeries->write("timeStream1-s0-p1.dat", 0, 1, -1);
+    timeSeries->write("timeStream1-s1-p1.dat", 1, 1, -1);
+    timeSeries->write("timeStream1-s2-p1.dat", 2, 1, -1);
+    timeSeries->write("timeStream1-s3-p1.dat", 3, 1, -1);
+
+    //    timeSeries->write("timeStream1-all.dat");
+
     // Run the polyphase channeliser.
     // Generates spectra from a blocks of time series indexed by sub-band
     // and polarisation.
     ppfChanneliser->run(timeSeries, spectra);
+
+    spectra->write("stream1-s0-p0-b0.dat", 0, 0, 0);
+    spectra->write("stream1-s10-p0-b0.dat", 10, 0, 0);
+    spectra->write("stream1-s10-p1-b0.dat", 10, 1, 0);
 
     // Convert spectra in X, Y polarisation into spectra with stokes parameters.
     stokesGenerator->run(spectra, stokes);
@@ -80,7 +95,8 @@ void UdpBFPipelineStream1::run(QHash<QString, DataBlob*>& remoteData)
     // manager is configured in the xml.
      dataOutput(intStokes, "SpectrumDataSetStokes");
 
-//    stop();
+     //if (_iteration == 5) stop();
+    stop();
 
     if (_iteration % 100 == 0)
         cout << "Finished the UDP beamforming pipeline, iteration " << _iteration << endl;

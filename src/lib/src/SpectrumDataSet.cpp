@@ -22,7 +22,7 @@ void SpectrumDataSetC32::write(const QString& fileName, int s, int p, int b) con
     if (QFile::exists(fileName)) QFile::remove(fileName);
     if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) return;
 
-    const std::complex<float>* data;
+    const std::complex<float>* data = 0;
 
     unsigned nChan = nChannels();
     unsigned bStart = (b == -1) ? 0 : b;
@@ -33,9 +33,9 @@ void SpectrumDataSetC32::write(const QString& fileName, int s, int p, int b) con
     unsigned pEnd = (p == -1) ? nPolarisations() : p + 1;
 
     QTextStream out(&file);
-    for (unsigned s = sStart; s < sEnd; ++s) {
-        for (unsigned p = pStart; p < pEnd; ++p) {
-            for (unsigned b = bStart; b < bEnd; ++b) {
+    for (unsigned b = bStart; b < bEnd; ++b) {
+        for (unsigned s = sStart; s < sEnd; ++s) {
+            for (unsigned p = pStart; p < pEnd; ++p) {
 
                 // Get a pointer the the spectrum.
                 data = spectrumData(b, s, p);

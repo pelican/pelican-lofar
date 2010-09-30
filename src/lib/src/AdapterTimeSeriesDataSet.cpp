@@ -15,6 +15,7 @@
 #include <vector>
 
 using std::cout;
+using std::cerr;
 using std::endl;
 
 TimerData adapterTime;
@@ -80,6 +81,8 @@ AdapterTimeSeriesDataSet::AdapterTimeSeriesDataSet(const ConfigNode& config)
  */
 void AdapterTimeSeriesDataSet::deserialise(QIODevice* in)
 {
+//    cout << endl;
+//    cout << "AdapterTimeSeriesDataSet::deserialise()" << endl;
     timerStart(&adapterTime);
     // Sanity check on data blob dimensions and chunk size.
     _checkData();
@@ -160,6 +163,12 @@ void AdapterTimeSeriesDataSet::_checkData()
     unsigned nBlocks = nTimesTotal / _nSamplesPerTimeBlock;
     _timeData = (TimeSeriesDataSetC32*)_data;
     _timeData->resize(nBlocks, _nSubbands, _nPolarisations, _nSamplesPerTimeBlock);
+
+//    cout << "*** sb = " << _nSubbands << endl;
+//    cout << "*** p = " << _nPolarisations << endl;
+//    cout << "*** t = " << _nSamplesPerTimeBlock << endl;
+//    cout << "*** b = " << nBlocks << endl;
+
 }
 
 
@@ -174,7 +183,7 @@ inline
 void AdapterTimeSeriesDataSet::_readHeader(char* buffer, UDPPacket::Header& header)
 {
     header = *reinterpret_cast<UDPPacket::Header*>(buffer);
-//    _printHeader(header);
+    //_printHeader(header);
 }
 
 
@@ -224,16 +233,24 @@ void AdapterTimeSeriesDataSet::_readData(unsigned packet, char* buffer,
 
                     iTimeBlock = (tStart + t) / _nSamplesPerTimeBlock;
 
+//                    cout << "sb = " << s
+//                         << " t = " << t
+//                         << " block = " << iTimeBlock << endl;
+
                     index = tStart - (iTimeBlock * _nSamplesPerTimeBlock) + t;
                     times0 = data->timeSeriesData(iTimeBlock, s, 0);
                     times1 = data->timeSeriesData(iTimeBlock, s, 1);
 
                     i16c = *reinterpret_cast<TYPES::i16complex*>(&buffer[iPtr]);
                     times0[index] = _makeComplex(i16c);
+//                    cout << "times0 [" << index << "] "
+//                          << times0[index].real() << " " << times0[index].imag() << endl;
 
                     iPtr += dataSize;
                     i16c = *reinterpret_cast<TYPES::i16complex*>(&buffer[iPtr]);
                     times1[index] = _makeComplex(i16c);
+//                    cout << "times1 [" << index << "] "
+//                         << times1[index].real() << " " << times1[index].imag() << endl;
 
                     iPtr += dataSize;
                 }
@@ -262,7 +279,7 @@ void AdapterTimeSeriesDataSet::_printHeader(const UDPPacket::Header& header)
     cout << "* sourceInfo          = " << (unsigned)header.sourceInfo << endl;
     cout << "* configuration       = " << (unsigned)header.configuration << endl;
     cout << "* station             = " << (unsigned)header.station << endl;
-    cout << "* nrBeamlees          = " << (unsigned)header.nrBeamlets << endl;
+    cout << "* nrBeamlets          = " << (unsigned)header.nrBeamlets << endl;
     cout << "* nrBlocks            = " << (unsigned)header.nrBlocks << endl;
     cout << "* timestamp           = " << (unsigned)header.timestamp << endl;
     cout << "* blockSequenceNumber = " << (unsigned)header.blockSequenceNumber << endl;

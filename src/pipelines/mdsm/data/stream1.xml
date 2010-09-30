@@ -43,7 +43,7 @@
 
       <dataStreams>
         <!-- <stream name="SpectrumDataSetStokes" listeners="PelicanTCPBlobServer" />  -->
-        <stream name="SpectrumDataSetStokes" listeners="SigprocStokesWriter"/>
+        <!--  <stream name="SpectrumDataSetStokes" listeners="SigprocStokesWriter"/> -->
       </dataStreams>
 
       <streamers>
@@ -51,13 +51,14 @@
              <connection port="6969" />
         </PelicanTCPBlobServer>
         -->
-        <SigprocStokesWriter>
+        <!--
+         <SigprocStokesWriter>
             <import file="data/CommonParameters.xml"/>
             <subbandsPerPacket value="31"/>
-            <!-- -->
-            <file filepath="stokesStream1.dat" /><!--Change-->
-            <params telescope="LOFAR" nPolsToWrite="1"/><!--Change-->
-        </SigprocStokesWriter>
+            <file filepath="stokesStream1.dat" />
+            <params telescope="LOFAR" nPolsToWrite="1"/>
+         </SigprocStokesWriter>
+         -->
       </streamers>
 
     </output>

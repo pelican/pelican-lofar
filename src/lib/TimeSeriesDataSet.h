@@ -132,6 +132,7 @@ template <typename T>
 inline unsigned long TimeSeriesDataSet<T>::_index(unsigned s, unsigned p,
         unsigned b) const
 {
+    // subband (outer) -> pol -> timeBlock -> time (inner)
     return _nTimesPerBlock * ( _nTimeBlocks * (s * _nPolarisations + p) + b);
 }
 
@@ -158,7 +159,8 @@ class TimeSeriesDataSetC32 : public TimeSeriesDataSet<std::complex<float> >
         ~TimeSeriesDataSetC32() {}
 
     public:
-        void write(const QString& fileName) const;
+        void write(const QString& fileName,
+                int s = -1, int p = -1, int b = -1) const;
 };
 
 
