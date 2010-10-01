@@ -7,6 +7,10 @@
 #include "pelican/core/AbstractStreamAdapter.h"
 
 #include <QtCore/QString>
+#include <QtCore/QTextStream>
+#include <QtCore/QFile>
+#include <QtCore/QString>
+#include <QtCore/QIODevice>
 
 #include <boost/cstdint.hpp>
 #include <cmath>
@@ -22,8 +26,6 @@ TimerData adapterTime;
 
 namespace pelican {
 namespace lofar {
-
-
 
 
 /**
@@ -64,6 +66,10 @@ AdapterTimeSeriesDataSet::AdapterTimeSeriesDataSet(const ConfigNode& config)
     _paddingTemp.resize(_paddingSize + 1);
 
     timerInit(&adapterTime);
+
+    QString fileName = "adapterRaw.dat";
+    if (QFile::exists(fileName)) QFile::remove(fileName);
+
 }
 
 
@@ -81,6 +87,12 @@ AdapterTimeSeriesDataSet::AdapterTimeSeriesDataSet(const ConfigNode& config)
  */
 void AdapterTimeSeriesDataSet::deserialise(QIODevice* in)
 {
+    QString fileName = "adapterRaw.dat";
+    QFile file(fileName);
+    if (!file.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Append))
+        return;
+    QTextStream out(&file);
+
 //    cout << endl;
 //    cout << "AdapterTimeSeriesDataSet::deserialise()" << endl;
     timerStart(&adapterTime);
@@ -107,16 +119,34 @@ void AdapterTimeSeriesDataSet::deserialise(QIODevice* in)
             timestamp.setStationClockSpeed(_clock * 1000000);
             timestamp.setStamp (header.timestamp, header.blockSequenceNumber);
             _timeData->setLofarTimestamp(timestamp.itsTime);
-            // Sample rate when condensed in chunk (ie. diff in time between chunks)
+            // Sample rate when condensed in chunk (i.e. diff in time between chunks)
             _timeData->setBlockRate(_nSamplesPerTimeBlock);
         }
 
         // Read the useful data (depends on configured dimensions).
         in->read(dataTemp, _dataSize);
+        //######################################################################
+        TYPES::i16complex *d = reinterpret_cast<TYPES::i16complex*>(dataTemp);
+        unsigned iSB = 1;
+        unsigned iP = 0;
+        unsigned iStart = iSB * _nSamplesPerPacket * _nPolarisations + iP * _nSamplesPerPacket;
+        unsigned iEnd = iStart + _nSamplesPerPacket * _nPolarisations;
+        for (unsigned jj = iStart; jj < iEnd; jj+=2)
+        {
+            out << QString::number(p) << " ";
+            out << QString::number(jj) << " ";
+            out << QString::number(d[jj].real()) << " ";
+            out << QString::number(d[jj].imag()) << endl;
+        }
+        //######################################################################
         _readData(p, dataTemp, _timeData);
 
         // Read off padding (from word alignment of the packet).
         in->read(paddingTemp, _paddingSize);
+        cout << "header size = " << _headerSize << endl;
+        cout << "data size = " << _dataSize << endl;
+        cout << "pad size = " << _paddingSize << endl;
+
     }
     timerUpdate(&adapterTime);
 }
@@ -168,7 +198,6 @@ void AdapterTimeSeriesDataSet::_checkData()
 //    cout << "*** p = " << _nPolarisations << endl;
 //    cout << "*** t = " << _nSamplesPerTimeBlock << endl;
 //    cout << "*** b = " << nBlocks << endl;
-
 }
 
 
@@ -198,7 +227,7 @@ void AdapterTimeSeriesDataSet::_readHeader(char* buffer, UDPPacket::Header& head
 void AdapterTimeSeriesDataSet::_readData(unsigned packet, char* buffer,
         TimeSeriesDataSetC32* data)
 {
-    unsigned tStart = packet * _nSamplesPerPacket;
+    unsigned time0 = packet * _nSamplesPerPacket;
 
     // Loop over dimensions in the packet and write into the data blob.
     unsigned iTimeBlock, index;
@@ -212,10 +241,10 @@ void AdapterTimeSeriesDataSet::_readData(unsigned packet, char* buffer,
             TYPES::i8complex i8c;
             for (unsigned s = 0; s < _nSubbands; ++s) {
                 for (unsigned t = 0; t < _nSamplesPerPacket; ++t) {
-                    iTimeBlock = (tStart + t) / _nSamplesPerTimeBlock;
+                    iTimeBlock = (time0 + t) / _nSamplesPerTimeBlock;
                     for (unsigned p = 0; p < _nPolarisations; ++p) {
                         times = data->timeSeriesData(iTimeBlock, s, p);
-                        index = tStart - (iTimeBlock * _nSamplesPerTimeBlock) + t;
+                        index = time0 - (iTimeBlock * _nSamplesPerTimeBlock) + t;
                         i8c = *reinterpret_cast<TYPES::i8complex*>(&buffer[iPtr]);
                         times[index] = _makeComplex(i8c);
                         iPtr += sizeof(TYPES::i8complex);
@@ -228,29 +257,36 @@ void AdapterTimeSeriesDataSet::_readData(unsigned packet, char* buffer,
         {
             TYPES::i16complex i16c;
             size_t dataSize = sizeof(i16c);
+
             for (unsigned s = 0; s < _nSubbands; ++s) {
                 for (unsigned t = 0; t < _nSamplesPerPacket; ++t) {
 
-                    iTimeBlock = (tStart + t) / _nSamplesPerTimeBlock;
+                    // OK
+                    iTimeBlock = (time0 + t) / _nSamplesPerTimeBlock;
 
 //                    cout << "sb = " << s
 //                         << " t = " << t
 //                         << " block = " << iTimeBlock << endl;
+                    // OK
+                    index = time0 - (iTimeBlock * _nSamplesPerTimeBlock) + t;
 
-                    index = tStart - (iTimeBlock * _nSamplesPerTimeBlock) + t;
+//                  cout << "p=" << packet << " s=" << s
+//                       << " b=" << iTimeBlock << " t=" << t
+//                       << " i=" << index << endl;
+
                     times0 = data->timeSeriesData(iTimeBlock, s, 0);
                     times1 = data->timeSeriesData(iTimeBlock, s, 1);
 
                     i16c = *reinterpret_cast<TYPES::i16complex*>(&buffer[iPtr]);
                     times0[index] = _makeComplex(i16c);
-//                    cout << "times0 [" << index << "] "
-//                          << times0[index].real() << " " << times0[index].imag() << endl;
+//                  cout << "times0 [" << index << "] "
+//                       << times0[index].real() << " " << times0[index].imag() << endl;
 
                     iPtr += dataSize;
                     i16c = *reinterpret_cast<TYPES::i16complex*>(&buffer[iPtr]);
                     times1[index] = _makeComplex(i16c);
-//                    cout << "times1 [" << index << "] "
-//                         << times1[index].real() << " " << times1[index].imag() << endl;
+//                  cout << "times1 [" << index << "] "
+//                       << times1[index].real() << " " << times1[index].imag() << endl;
 
                     iPtr += dataSize;
                 }

@@ -4,9 +4,14 @@
 #include "LofarTypes.h"
 
 #include <QtNetwork/QUdpSocket>
+#include <QtCore/QTextStream>
+#include <QtCore/QFile>
+#include <QtCore/QString>
+#include <QtCore/QIODevice>
 
 #include <cstdio>
 #include <iostream>
+
 using std::cerr;
 using std::cout;
 using std::endl;
@@ -125,6 +130,10 @@ LofarDataSplittingChunker::LofarDataSplittingChunker(const ConfigNode& config)
     memset((void*)_emptyPacket2.data, 0, _bytesStream2);
     _emptyPacket2.header.nrBeamlets = _stream2Subbands;
     _emptyPacket2.header.nrBlocks = _nSamples;
+
+//    QString fileName = "chunker.dat";
+//    if (QFile::exists(fileName)) QFile::remove(fileName);
+    _chunkCount = 0;
 }
 
 
@@ -152,6 +161,11 @@ QIODevice* LofarDataSplittingChunker::newDevice()
  */
 void LofarDataSplittingChunker::next(QIODevice* device)
 {
+    QString fileName = QString("chunker-c%1.dat").arg(_chunkCount);
+    QFile file(fileName);
+    if (!file.open(QIODevice::WriteOnly | QIODevice::Text))
+        return;
+    QTextStream out(&file);
     QUdpSocket* socket = static_cast<QUdpSocket*>(device);
 
     unsigned offsetStream1 = 0;
@@ -212,7 +226,7 @@ void LofarDataSplittingChunker::next(QIODevice* device)
             }
 
             // Sanity check in seqid. If the seconds counter is 0xFFFFFFFF,
-            // the data cannot be trusted (ignore)
+            // the data cannot be trusted (ignore).
             if (seqid == ~0U || prevSeqid + 10 < seqid) {
                 _packetsRejected++;
                 i--;
@@ -303,9 +317,20 @@ void LofarDataSplittingChunker::next(QIODevice* device)
                 memcpy((void*)outputPacket1.data, &currPacket.data[_byte1OfStream1], _bytesStream1);
                 offsetStream1 = writePacket(&writableData1, outputPacket1, _packetSizeStream1, offsetStream1);
 
-//                //wd = outputPacket1.data;
-//                wd = (char*)writableData1.ptr() + (offsetStream1 - _packetSizeStream1 + sizeof(struct UDPPacket::Header));
-//                d = reinterpret_cast<TYPES::i16complex*>(wd);
+//                wd = outputPacket1.data;
+                char* wd = (char*)writableData1.ptr() + (offsetStream1 - _packetSizeStream1 + sizeof(struct UDPPacket::Header));
+                TYPES::i16complex *d = reinterpret_cast<TYPES::i16complex*>(wd);
+                unsigned iSB = 1;
+                unsigned iP = 0;
+                unsigned iStart = iSB * _nSamples * _nPolarisations + iP * _nSamples;
+                unsigned iEnd = iStart + _nSamples * _nPolarisations;
+                for (unsigned jj = iStart; jj < iEnd; jj+=2)
+                {
+                    out << QString::number(jj) << " ";
+                    out << QString::number(d[jj].real()) << " ";
+                    out << QString::number(d[jj].imag()) << endl;
+                }
+                //
 //                for (unsigned jj = 0; jj < 3; ++jj) {
 //                    cout << "Stream1 [" << jj << "] " << d[jj].real() << " " << d[jj].imag() << endl;
 //                }
@@ -317,7 +342,7 @@ void LofarDataSplittingChunker::next(QIODevice* device)
                 memcpy((void*)outputPacket2.data, &currPacket.data[_byte1OfStream2], _bytesStream2);
                 offsetStream2 = writePacket(&writableData2, outputPacket2, _packetSizeStream2, offsetStream2);
 
-//                //wd = outputPacket2.data;
+//                wd = outputPacket2.data;
 //                wd = (char*)writableData2.ptr() + (offsetStream2 - _packetSizeStream2  + sizeof(struct UDPPacket::Header));
 //                d = reinterpret_cast<TYPES::i16complex*>(wd);
 //                for (unsigned jj = 0; jj < 3; ++jj) {
@@ -329,6 +354,7 @@ void LofarDataSplittingChunker::next(QIODevice* device)
             }
         }
     }
+
     else {
         // Must discard the datagram if there is no available space.
         socket->readDatagram(0, 0);
@@ -339,6 +365,8 @@ void LofarDataSplittingChunker::next(QIODevice* device)
     // Update _startTime
     _startTime = prevSeqid;
     _startBlockid = prevBlockid;
+
+    _chunkCount++;
 }
 
 

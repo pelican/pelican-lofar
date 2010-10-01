@@ -4,6 +4,11 @@
 
 #include "pelican/utility/ConfigNode.h"
 
+//#include <QtCore/QTextStream>
+//#include <QtCore/QFile>
+//#include <QtCore/QString>
+//#include <QtCore/QIODevice>
+
 #include <iostream>
 using std::cout;
 using std::endl;
@@ -37,6 +42,10 @@ LofarEmulatorDataSim::LofarEmulatorDataSim(const ConfigNode& configNode)
     _packetSize = sizeof(UDPPacket);
 
     _setPacketHeader();
+
+
+//    QString fileName = "emulator-s1.dat";
+//    if (QFile::exists(fileName)) QFile::remove(fileName);
 }
 
 
@@ -119,6 +128,11 @@ void LofarEmulatorDataSim::_setPacketData()
     float arg;
     float twoPi = 3.14159265358979323846264338327950 * 2.0f;
 
+//    QString fileName = "emulator-s1.dat";
+//    QFile file(fileName);
+//    if (!file.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Append))
+//        return;
+//    QTextStream out(&file);
 
     Complex16 *data = reinterpret_cast<Complex16*>(_packet.data);
     for (int s = 0; s < _nSubbands; s++)
@@ -133,15 +147,28 @@ void LofarEmulatorDataSim::_setPacketData()
             freq = f0 + float(s*2);
             arg = twoPi * freq * time;
             re = 20.0f * cos(arg);
-            im = freq; // 20.0f * sin(arg);
+            im = time0 + t;//freq; // 20.0f * sin(arg);
             data[i + 0] = Complex16(re, im);
+
+//            if (s == 1)
+//            {
+//                out << QString::number(_packetCounter) << " ";
+//                out << QString::number(time0 + t) << " ";
+//                out << QString::number(re) << " ";
+//                out << QString::number(im) << " ";
+//                out << QString::number(i) << " ";
+//                out << QString::number(data[i].real()) << " ";
+//                out << QString::number(data[i].imag()) << endl;
+//            }
 
             // polarisation 2.
             freq = f0 + float(s*2) + 1.0f;
             arg = twoPi * freq * time;
             re = (time0 + t); //30.0f * cos(arg);
             im = 30.0f * sin(arg);
-            if (s == 0 && (time0 + t) >= 12912 && (time0 + t) <= 13183) cout << (time0 + t) << " " << im << endl;
+
+//            if (s == 0 && (time0 + t) >= 12912 && (time0 + t) <= 13183)
+//                cout << (time0 + t) << " " << im << endl;
             data[i + 1] = Complex16(re, im);
         }
     }
