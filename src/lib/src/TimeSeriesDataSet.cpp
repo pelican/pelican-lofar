@@ -25,7 +25,6 @@ void TimeSeriesDataSetC32::write(const QString& fileName,
     unsigned bStart = (b == -1) ? 0 : b;
     unsigned bEnd = (b == -1) ? nTimeBlocks() : b + 1;
 
-
     QTextStream out(&file);
     for (unsigned s = sStart; s < sEnd; ++s) {
         for (unsigned p = pStart; p < pEnd; ++p) {
