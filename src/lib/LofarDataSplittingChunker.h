@@ -93,8 +93,6 @@ class LofarDataSplittingChunker : public AbstractChunker
         UDPPacket _emptyPacket1;
         UDPPacket _emptyPacket2;
 
-        unsigned long _chunkCount;
-
         friend class LofarDataSplittingChunkerTest;
 };
 

@@ -7,10 +7,6 @@
 #include "pelican/core/AbstractStreamAdapter.h"
 
 #include <QtCore/QString>
-#include <QtCore/QTextStream>
-#include <QtCore/QFile>
-#include <QtCore/QString>
-#include <QtCore/QIODevice>
 
 #include <boost/cstdint.hpp>
 #include <cmath>
@@ -66,9 +62,6 @@ AdapterTimeSeriesDataSet::AdapterTimeSeriesDataSet(const ConfigNode& config)
     _paddingTemp.resize(_paddingSize + 1);
 
     timerInit(&adapterTime);
-
-    QString fileName = "adapterRaw.dat";
-    if (QFile::exists(fileName)) QFile::remove(fileName);
 }
 
 
@@ -86,14 +79,6 @@ AdapterTimeSeriesDataSet::AdapterTimeSeriesDataSet(const ConfigNode& config)
  */
 void AdapterTimeSeriesDataSet::deserialise(QIODevice* in)
 {
-    QString fileName = "adapterRaw.dat";
-    QFile file(fileName);
-    if (!file.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Append))
-        return;
-    QTextStream out(&file);
-
-//    cout << endl;
-//    cout << "AdapterTimeSeriesDataSet::deserialise()" << endl;
     timerStart(&adapterTime);
     // Sanity check on data blob dimensions and chunk size.
     _checkData();
@@ -127,31 +112,11 @@ void AdapterTimeSeriesDataSet::deserialise(QIODevice* in)
         // Read the useful data (depends on configured dimensions).
         in->waitForReadyRead(-1);
         bytesRead += in->read(dataTemp, _dataSize);
-
-        //######################################################################
-        TYPES::i16complex *d = reinterpret_cast<TYPES::i16complex*>(dataTemp);
-        unsigned iSB = 1;
-        unsigned iP = 0;
-        unsigned iStart = iSB * _nSamplesPerPacket * _nPolarisations + iP * _nSamplesPerPacket;
-        unsigned iEnd = iStart + _nSamplesPerPacket * _nPolarisations;
-        for (unsigned jj = iStart; jj < iEnd; jj+=2)
-        {
-            out << QString::number(p) << " ";
-            out << QString::number(jj) << " ";
-            out << QString::number(d[jj].real()) << " ";
-            out << QString::number(d[jj].imag()) << endl;
-        }
-        //######################################################################
         _readData(p, dataTemp, _timeData);
 
         // Read off padding (from word alignment of the packet).
         in->waitForReadyRead(-1);
         bytesRead += in->read(paddingTemp, _paddingSize);
-
-//        cout << "header size = " << _headerSize << endl;
-//        cout << "data size = " << _dataSize << endl;
-//        cout << "pad size = " << _paddingSize << endl;
-
     }
     if (bytesRead != _chunkSize)
     {
@@ -172,7 +137,8 @@ void AdapterTimeSeriesDataSet::_checkData()
         throw _err("Sample size (%1 bits) not supported.").arg(_sampleBits);
 
     // Check that there is something of to adapt.
-    if (_chunkSize == 0) throw _err("Chunk size zero!");
+    if (_chunkSize == 0)
+        cerr << "WARNING: " << _err("Chunk size zero!").toStdString() << endl;
 
     // Check the data blob passed to the adapter is allocated.
     if (!_data) throw _err("Cannot deserialise into an unallocated blob!.");
@@ -203,11 +169,6 @@ void AdapterTimeSeriesDataSet::_checkData()
     unsigned nBlocks = nTimesTotal / _nSamplesPerTimeBlock;
     _timeData = (TimeSeriesDataSetC32*)_data;
     _timeData->resize(nBlocks, _nSubbands, _nPolarisations, _nSamplesPerTimeBlock);
-
-//    cout << "*** sb = " << _nSubbands << endl;
-//    cout << "*** p = " << _nPolarisations << endl;
-//    cout << "*** t = " << _nSamplesPerTimeBlock << endl;
-//    cout << "*** b = " << nBlocks << endl;
 }
 
 
@@ -271,32 +232,19 @@ void AdapterTimeSeriesDataSet::_readData(unsigned packet, char* buffer,
             for (unsigned s = 0; s < _nSubbands; ++s) {
                 for (unsigned t = 0; t < _nSamplesPerPacket; ++t) {
 
-                    // OK
                     iTimeBlock = (time0 + t) / _nSamplesPerTimeBlock;
 
-//                    cout << "sb = " << s
-//                         << " t = " << t
-//                         << " block = " << iTimeBlock << endl;
-                    // OK
                     index = time0 - (iTimeBlock * _nSamplesPerTimeBlock) + t;
-
-//                  cout << "p=" << packet << " s=" << s
-//                       << " b=" << iTimeBlock << " t=" << t
-//                       << " i=" << index << endl;
 
                     times0 = data->timeSeriesData(iTimeBlock, s, 0);
                     times1 = data->timeSeriesData(iTimeBlock, s, 1);
 
                     i16c = *reinterpret_cast<TYPES::i16complex*>(&buffer[iPtr]);
                     times0[index] = _makeComplex(i16c);
-//                  cout << "times0 [" << index << "] "
-//                       << times0[index].real() << " " << times0[index].imag() << endl;
 
                     iPtr += dataSize;
                     i16c = *reinterpret_cast<TYPES::i16complex*>(&buffer[iPtr]);
                     times1[index] = _makeComplex(i16c);
-//                  cout << "times1 [" << index << "] "
-//                       << times1[index].real() << " " << times1[index].imag() << endl;
 
                     iPtr += dataSize;
                 }

@@ -4,6 +4,7 @@
 #include "LofarTypes.h"
 
 #include <QtNetwork/QUdpSocket>
+
 #include <QtCore/QTextStream>
 #include <QtCore/QFile>
 #include <QtCore/QString>
@@ -132,10 +133,6 @@ LofarDataSplittingChunker::LofarDataSplittingChunker(const ConfigNode& config)
     memset((void*)_emptyPacket2.data, 0, _bytesStream2);
     _emptyPacket2.header.nrBeamlets = _stream2Subbands;
     _emptyPacket2.header.nrBlocks = _nSamples;
-
-    //    QString fileName = "chunker.dat";
-    //    if (QFile::exists(fileName)) QFile::remove(fileName);
-    _chunkCount = 0;
 }
 
 
@@ -163,13 +160,6 @@ QIODevice* LofarDataSplittingChunker::newDevice()
  */
 void LofarDataSplittingChunker::next(QIODevice* device)
 {
-    //QMutexLocker Lock(&_mutex);
-
-    QString fileName = QString("chunker-c%1.dat").arg(_chunkCount);
-    QFile file(fileName);
-    if (!file.open(QIODevice::WriteOnly | QIODevice::Text))
-        return;
-    QTextStream out(&file);
     QUdpSocket* socket = static_cast<QUdpSocket*>(device);
 
     unsigned offsetStream1 = 0;
@@ -196,7 +186,6 @@ void LofarDataSplittingChunker::next(QIODevice* device)
         // Loop over the number of UDP packets to put in a chunk.
         for (unsigned i = 0; i < _nPackets; ++i)
         {
-
             // Chunker sanity check.
             if (!isActive()) return;
 
@@ -207,7 +196,7 @@ void LofarDataSplittingChunker::next(QIODevice* device)
             // Read the current packet from the socket.
             if (socket->readDatagram(reinterpret_cast<char*>(&currPacket), _packetSize) <= 0)
             {
-                cout << "LofarDataSplittingChunker::next(): "
+                cerr << "LofarDataSplittingChunker::next(): "
                         "Error while receiving UDP Packet!" << endl;
                 i--;
                 continue;
@@ -232,7 +221,8 @@ void LofarDataSplittingChunker::next(QIODevice* device)
 
             // Sanity check in seqid. If the seconds counter is 0xFFFFFFFF,
             // the data cannot be trusted (ignore).
-            if (seqid == ~0U || prevSeqid + 10 < seqid) {
+            if (seqid == ~0U || prevSeqid + 10 < seqid)
+            {
                 _packetsRejected++;
                 i--;
                 continue;
@@ -297,24 +287,9 @@ void LofarDataSplittingChunker::next(QIODevice* device)
             i += packetCounter;
 
             // Write received packet to 2 streams after updating header and data
-            if (i != _nPackets) {
+            if (i != _nPackets)
+            {
                 ++_packetsAccepted;
-
-                //                cout << endl;
-                //                cout << "packet = " << i << endl;
-                //                cout << "----------------------" << endl;
-                //                char* wd = currPacket.data;
-                //                TYPES::i16complex *d = reinterpret_cast<TYPES::i16complex*>(wd);
-                //                for (unsigned jj = 0; jj < 3; ++jj)
-                //                {
-                //                    cout << "Current Packet [" << jj << "] " << d[jj].real()
-                //                         << " " << d[jj].imag() << endl;
-                //                }
-                //                for (unsigned jj = 31*16*2; jj < 31*16*2+3; ++jj)
-                //                {
-                //                    cout << "Current Packet [" << jj << "] " << d[jj].real()
-                //                         << " " << d[jj].imag() << endl;
-                //                }
 
                 // Generate Stream 1 packet
                 outputPacket1.header = currPacket.header;
@@ -322,25 +297,12 @@ void LofarDataSplittingChunker::next(QIODevice* device)
                 memcpy((void*)outputPacket1.data, &currPacket.data[_byte1OfStream1], _bytesStream1);
                 offsetStream1 = writePacket(&writableData1, outputPacket1, _packetSizeStream1, offsetStream1);
 
-
                 // Generate Stream 2 packet
                 //--------------------------------------------------------------
                 outputPacket2.header = currPacket.header;
                 outputPacket2.header.nrBeamlets = _stream2Subbands;
                 memcpy((void*)outputPacket2.data, &currPacket.data[_byte1OfStream2], _bytesStream2);
                 offsetStream2 = writePacket(&writableData2, outputPacket2, _packetSizeStream2, offsetStream2);
-
-                //                wd = outputPacket2.data;
-                //                wd = (char*)writableData2.ptr() + (offsetStream2 - _packetSizeStream2  + sizeof(struct UDPPacket::Header));
-                //                d = reinterpret_cast<TYPES::i16complex*>(wd);
-                //                for (unsigned jj = 0; jj < 3; ++jj) {
-                //                    cout << "Stream2 [" << jj << "] " << d[jj].real() << " " << d[jj].imag() << endl;
-                //                }
-
-
-                //wd = outputPacket1.data;
-//                cout << "header size = " << sizeof(struct UDPPacket::Header) << endl;
-//                cout << "_packetSizeStream1 = " << _packetSizeStream1 << endl;
 
                 prevSeqid = seqid;
                 prevBlockid = blockid;
@@ -358,26 +320,6 @@ void LofarDataSplittingChunker::next(QIODevice* device)
     // Update _startTime
     _startTime = prevSeqid;
     _startBlockid = prevBlockid;
-
-    _chunkCount++;
-
-    for (unsigned p = 0; p < _nPackets; ++p)
-    {
-        unsigned o1 = p * _packetSizeStream1;
-        char* wd = (char*)writableData1.ptr() + o1 + sizeof(struct UDPPacket::Header);
-        TYPES::i16complex *d = reinterpret_cast<TYPES::i16complex*>(wd);
-        unsigned iSB = 1;
-        unsigned iP = 0;
-        unsigned iStart = iSB * _nSamples * _nPolarisations + iP * _nSamples;
-        unsigned iEnd = iStart + _nSamples * _nPolarisations;
-        for (unsigned jj = iStart; jj < iEnd; jj+=2)
-        {
-            out << QString::number(p) << " ";
-            out << QString::number(jj) << " ";
-            out << QString::number(d[jj].real()) << " ";
-            out << QString::number(d[jj].imag()) << endl;
-        }
-    }
 }
 
 
@@ -385,10 +327,11 @@ void LofarDataSplittingChunker::next(QIODevice* device)
  * @details
  * Generates an empty UDP packet with no time stamp.
  */
-void LofarDataSplittingChunker::updateEmptyPacket(UDPPacket& packet, unsigned int seqid, unsigned int blockid)
+void LofarDataSplittingChunker::updateEmptyPacket(UDPPacket& packet,
+        unsigned int seqid, unsigned int blockid)
 {
-    packet.header.timestamp  = seqid;
-    packet.header.blockSequenceNumber    = blockid;
+    packet.header.timestamp = seqid;
+    packet.header.blockSequenceNumber = blockid;
 }
 
 
