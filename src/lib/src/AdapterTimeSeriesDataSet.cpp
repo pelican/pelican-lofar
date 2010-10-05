@@ -69,7 +69,6 @@ AdapterTimeSeriesDataSet::AdapterTimeSeriesDataSet(const ConfigNode& config)
 
     QString fileName = "adapterRaw.dat";
     if (QFile::exists(fileName)) QFile::remove(fileName);
-
 }
 
 
@@ -105,12 +104,14 @@ void AdapterTimeSeriesDataSet::deserialise(QIODevice* in)
     char* headerTemp = &_headerTemp[0];
     char* dataTemp = &_dataTemp[0];
     char* paddingTemp = &_paddingTemp[0];
+    unsigned bytesRead = 0;
 
     // Loop over UDP packets
     for (unsigned p = 0u; p < _nUDPPacketsPerChunk; ++p) {
 
         // Read the header from the IO device.
-        in->read(headerTemp, _headerSize);
+        in->waitForReadyRead(-1);
+        bytesRead += in->read(headerTemp, _headerSize);
         _readHeader(headerTemp, header);
 
         // First packet, extract time-stamp.
@@ -124,7 +125,9 @@ void AdapterTimeSeriesDataSet::deserialise(QIODevice* in)
         }
 
         // Read the useful data (depends on configured dimensions).
-        in->read(dataTemp, _dataSize);
+        in->waitForReadyRead(-1);
+        bytesRead += in->read(dataTemp, _dataSize);
+
         //######################################################################
         TYPES::i16complex *d = reinterpret_cast<TYPES::i16complex*>(dataTemp);
         unsigned iSB = 1;
@@ -142,11 +145,18 @@ void AdapterTimeSeriesDataSet::deserialise(QIODevice* in)
         _readData(p, dataTemp, _timeData);
 
         // Read off padding (from word alignment of the packet).
-        in->read(paddingTemp, _paddingSize);
-        cout << "header size = " << _headerSize << endl;
-        cout << "data size = " << _dataSize << endl;
-        cout << "pad size = " << _paddingSize << endl;
+        in->waitForReadyRead(-1);
+        bytesRead += in->read(paddingTemp, _paddingSize);
 
+//        cout << "header size = " << _headerSize << endl;
+//        cout << "data size = " << _dataSize << endl;
+//        cout << "pad size = " << _paddingSize << endl;
+
+    }
+    if (bytesRead != _chunkSize)
+    {
+        cerr << "ERROR: Adapter failed to read correct number ";
+        cerr << "of bytes from socket" << endl;
     }
     timerUpdate(&adapterTime);
 }

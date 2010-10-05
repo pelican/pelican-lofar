@@ -12,6 +12,7 @@
 
 #include <QtCore/QString>
 #include <QtCore/QObject>
+#include <QtCore/QMutex>
 
 namespace pelican {
 namespace lofar {
@@ -60,6 +61,7 @@ class LofarDataSplittingChunker : public AbstractChunker
         { return QString("LofarDataSplittingChunker::") + message; }
 
     private:
+        //QMutex _mutex;
         unsigned _nPackets;
         unsigned _packetsRejected;
         unsigned _packetsAccepted;
