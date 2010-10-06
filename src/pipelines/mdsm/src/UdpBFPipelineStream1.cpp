@@ -65,7 +65,7 @@ void UdpBFPipelineStream1::run(QHash<QString, DataBlob*>& remoteData)
     timeSeries = (TimeSeriesDataSetC32*) remoteData["LofarTimeStream1"];
 
     //timeSeries->write("timeStream1-s1-p0.dat", 1, 0, -1);
-    timeSeries->write("timeStream1-i" + QString::number(_iteration) + "-s1-p0.dat", 1, 0, -1);
+    //timeSeries->write("timeStream1-i" + QString::number(_iteration) + "-s1-p0.dat", 1, 0, -1);
 
     // Run the polyphase channeliser.
     // Generates spectra from a blocks of time series indexed by sub-band
