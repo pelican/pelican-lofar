@@ -64,8 +64,8 @@ void UdpBFPipelineStream1::run(QHash<QString, DataBlob*>& remoteData)
     // N for each sub-band and polarisation.
     timeSeries = (TimeSeriesDataSetC32*) remoteData["LofarTimeStream1"];
 
-//    timeSeries->write("timeStream1-s0-p0.dat", 0, 0, -1);
-//    timeSeries->write("timeStream1-s1-p0.dat", 1, 0, -1);
+    //timeSeries->write("timeStream1-s1-p0.dat", 1, 0, -1);
+    timeSeries->write("timeStream1-i" + QString::number(_iteration) + "-s1-p0.dat", 1, 0, -1);
 
     // Run the polyphase channeliser.
     // Generates spectra from a blocks of time series indexed by sub-band
@@ -86,7 +86,7 @@ void UdpBFPipelineStream1::run(QHash<QString, DataBlob*>& remoteData)
      dataOutput(intStokes, "SpectrumDataSetStokes");
 
      //if (_iteration == 5) stop();
-    stop();
+    //stop();
 
     if (_iteration % 100 == 0)
         cout << "Finished the UDP beamforming pipeline, iteration " << _iteration << endl;

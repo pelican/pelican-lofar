@@ -13,7 +13,6 @@
 #include <iostream>
 #include <complex>
 #include <vector>
-
 using std::cout;
 using std::cerr;
 using std::endl;
@@ -90,13 +89,20 @@ void AdapterTimeSeriesDataSet::deserialise(QIODevice* in)
     char* dataTemp = &_dataTemp[0];
     char* paddingTemp = &_paddingTemp[0];
     unsigned bytesRead = 0;
+    int tempBytesRead = 0;
 
     // Loop over UDP packets
     for (unsigned p = 0u; p < _nUDPPacketsPerChunk; ++p) {
 
         // Read the header from the IO device.
-        in->waitForReadyRead(-1);
-        bytesRead += in->read(headerTemp, _headerSize);
+        bytesRead = 0;
+        while (1)
+        {
+            tempBytesRead = in->read(headerTemp + bytesRead, _headerSize - bytesRead);
+            if (tempBytesRead <= 0) in->waitForReadyRead(-1);
+            else bytesRead += tempBytesRead;
+            if (bytesRead == _headerSize) break;
+        }
         _readHeader(headerTemp, header);
 
         // First packet, extract time-stamp.
@@ -110,18 +116,27 @@ void AdapterTimeSeriesDataSet::deserialise(QIODevice* in)
         }
 
         // Read the useful data (depends on configured dimensions).
-        in->waitForReadyRead(-1);
-        bytesRead += in->read(dataTemp, _dataSize);
+        bytesRead = 0;
+        while (1)
+        {
+            tempBytesRead = in->read(dataTemp + bytesRead, _dataSize - bytesRead);
+            if (tempBytesRead <= 0) in->waitForReadyRead(-1);
+            else bytesRead += tempBytesRead;
+            if (bytesRead == _dataSize) break;
+        }
         _readData(p, dataTemp, _timeData);
 
         // Read off padding (from word alignment of the packet).
-        in->waitForReadyRead(-1);
-        bytesRead += in->read(paddingTemp, _paddingSize);
-    }
-    if (bytesRead != _chunkSize)
-    {
-        cerr << "ERROR: Adapter failed to read correct number ";
-        cerr << "of bytes from socket" << endl;
+        if (_paddingSize != 0) {
+            bytesRead = 0;
+            while (1)
+            {
+                tempBytesRead = in->read(paddingTemp + bytesRead, _paddingSize - bytesRead);
+                if (tempBytesRead <= 0) in->waitForReadyRead(-1);
+                else bytesRead += tempBytesRead;
+                if (bytesRead == _paddingSize) break;
+            }
+        }
     }
     timerUpdate(&adapterTime);
 }
