@@ -20,8 +20,8 @@ class SigprocStokesWriter : public AbstractOutputStream
         ~SigprocStokesWriter();
         QString filepath() { return _filepath; }
 
-    public:
-        virtual void send(const QString& streamName, const DataBlob* dataBlob);
+    protected:
+        virtual void sendStream(const QString& streamName, const DataBlob* dataBlob);
 
     private:
         // Header helpers

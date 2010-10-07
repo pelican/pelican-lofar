@@ -30,7 +30,9 @@ class OutputHDF5Lofar : public AbstractOutputStream
     public:
         OutputHDF5Lofar(  const ConfigNode& configNode );
         ~OutputHDF5Lofar();
-        void send(const QString& streamName, const DataBlob* dataBlob);
+
+    protected:
+        void sendStream(const QString& streamName, const DataBlob* dataBlob);
 
     private:
         QString _dir;

@@ -96,7 +96,7 @@ void SigprocStokesWriter::WriteLong(QString name, long value)
 // ---------------------------- Data helpers --------------------------
 
 // Write data blob to disk
-void SigprocStokesWriter::send(const QString& /*streamName*/, const DataBlob* incoming)
+void SigprocStokesWriter::sendStream(const QString& /*streamName*/, const DataBlob* incoming)
 {
     SpectrumDataSetStokes* stokes;
     DataBlob* blob = const_cast<DataBlob*>(incoming);

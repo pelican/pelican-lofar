@@ -96,7 +96,7 @@ void PumaOutput::_connect(QTcpSocket* tcpSocket , const QString& server, quint16
     }
 }
 
-void PumaOutput::send(const QString& /*streamName*/, const DataBlob* dataBlob)
+void PumaOutput::sendStream(const QString& /*streamName*/, const DataBlob* dataBlob)
 {
     if( dataBlob->type() == "SpectrumDataSetStokes" )
     {
