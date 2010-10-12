@@ -100,12 +100,12 @@ void AdapterTimeSeriesDataSet::deserialise(QIODevice* in)
 
         // First packet, extract time-stamp.
         if (p == 0u) {
-            TYPES::TimeStamp timestamp;
-            timestamp.setStationClockSpeed(_clock * 1000000);
-            timestamp.setStamp (header.timestamp, header.blockSequenceNumber);
-            _timeData->setLofarTimestamp(timestamp.itsTime);
-            // Sample rate when condensed in chunk (ie. diff in time between chunks)
-            _timeData->setBlockRate(_nSamplesPerTimeBlock);
+//            TYPES::TimeStamp timestamp;
+//            timestamp.setStationClockSpeed(_clock * 1000000);
+//            timestamp.setStamp (header.timestamp, header.blockSequenceNumber);
+            unsigned totBlocks = _clock == 160 ? 156250 : (header.timestamp % 2 == 0 ? 195313 : 195312);
+            _timeData->setLofarTimestamp(header.timestamp + (header.blockSequenceNumber / totBlocks * 1.0));
+            _timeData->setBlockRate(1 / totBlocks * 1.0);
         }
 
         // Read the useful data (depends on configured dimensions).

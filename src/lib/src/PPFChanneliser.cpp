@@ -119,7 +119,7 @@ void PPFChanneliser::run(const TimeSeriesDataSetC32* timeSeries,
     // We only need the timestamp of the first packet for this version of the
     // Channeliser.
     spectra->setLofarTimestamp(timeSeries->getLofarTimestamp());
-    spectra->setBlockRate(timeSeries->getBlockRate());
+    spectra->setBlockRate(timeSeries->getBlockRate() * _nChannels);
 
     // Set up the buffers if required.
     unsigned nFilterTaps = _ppfCoeffs.nTaps();

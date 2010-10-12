@@ -71,17 +71,17 @@ class SpectrumDataSet : public DataBlob
         { return _nChannels; }
 
         /// Return the block rate (time-span of the entire chunk)
-        long getBlockRate() const { return _blockRate; }
+        double getBlockRate() const { return _blockRate; }
 
         /// Return the block rate (time-span of the entire chunk)
-        void setBlockRate(long blockRate) { _blockRate = blockRate; }
+        void setBlockRate(double blockRate) { _blockRate = blockRate; }
 
         /// Return the lofar time-stamp
-        long long getLofarTimestamp() const
+        double getLofarTimestamp() const
         { return _lofarTimestamp; }
 
         /// Set the lofar time-stamp
-        void setLofarTimestamp(long long timestamp)
+        void setLofarTimestamp(double timestamp)
         { _lofarTimestamp = timestamp; }
 
         /// return the overall size of the data
@@ -125,8 +125,8 @@ class SpectrumDataSet : public DataBlob
         unsigned _nTimeBlocks;
         unsigned _nChannels;
 
-        long     _blockRate;
-        long long _lofarTimestamp;
+        double  _blockRate;
+        double  _lofarTimestamp;
 };
 
 

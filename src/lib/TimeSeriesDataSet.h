@@ -59,16 +59,16 @@ class TimeSeriesDataSet : public DataBlob
 
     public:
         /// Return the block rate (time-span of the entire chunk)
-        long getBlockRate() const { return _blockRate; }
+        double getBlockRate() const { return _blockRate; }
 
         /// Return the block rate (time-span of the entire chunk)
-        void setBlockRate(long blockRate) { _blockRate = blockRate; }
+        void setBlockRate(double blockRate) { _blockRate = blockRate; }
 
         /// Return the lofar time-stamp.
-        long long getLofarTimestamp() const { return _lofarTimestamp; }
+        double getLofarTimestamp() const { return _lofarTimestamp; }
 
         /// Set the lofar time-stamp.
-        void setLofarTimestamp(long long timestamp) { _lofarTimestamp = timestamp; }
+        void setLofarTimestamp(double timestamp) { _lofarTimestamp = timestamp; }
 
     public:
         /// Returns a pointer to start of the time series for the specified
@@ -90,8 +90,8 @@ class TimeSeriesDataSet : public DataBlob
 
         unsigned _nSubbands;
         unsigned _nPolarisations;
-        unsigned _nTimeBlocks;
-        unsigned _nTimesPerBlock;
+        double _nTimeBlocks;
+        double _nTimesPerBlock;
 
         long _blockRate;
         long long _lofarTimestamp;

@@ -15,35 +15,29 @@ namespace lofar {
 SigprocStokesWriter::SigprocStokesWriter(const ConfigNode& configNode )
 : AbstractOutputStream(configNode)
 {
-    _nSubbands = configNode.getOption("subbandsPerPacket", "value", "0").toUInt();
-    _nTotalSubbands = configNode.getOption("totalComplexSubbands", "value", "0").toUInt();
-    _clock = configNode.getOption("clock", "value", "200").toUInt();
+    _nSubbands = configNode.getOption("subbandsPerPacket", "value", "1").toUInt();
+    _nTotalSubbands = configNode.getOption("totalComplexSubbands", "value", "1").toUInt();
+    _clock = configNode.getOption("clock", "value", "200").toFloat();
     _integration    = configNode.getOption("integrateTimeBins", "value", "1").toUInt();
-    _nChannels = configNode.getOption("outputChannelsPerSubband", "value", "512").toUInt();
-
+    _nChannels = configNode.getOption("outputChannelsPerSubband", "value", "128").toUInt();
+    _nRawPols = configNode.getOption("nRawPolarisations", "value", "2").toUInt();
 
     // Initliase connection manager thread
     _filepath = configNode.getOption("file", "filepath");
-    _fch1     = configNode.getOption("topChannelFrequency", "value", "0").toFloat();
-    //_foff     = configNode.getOption("params", "frequencyOffset", "0").toFloat();
-    _foff = - float(_clock) / (2.0 * _nTotalSubbands) / float(_nChannels);
-    //_tsamp    = configNode.getOption("params", "samplingTime", "0").toFloat();
-    _tsamp =  (2.0 * _nTotalSubbands) * _nChannels * _integration / float(_clock) / 1e6;
+    _fch1     = configNode.getOption("topChannelFrequency", "value", "150").toFloat();
+    _foff     = -_clock / (_nRawPols * _nTotalSubbands) / float(_nChannels);
+    _tsamp    = (_nRawPols * _nTotalSubbands) * _nChannels * _integration / _clock/ 1e6;
     _nPols    = configNode.getOption("params", "nPolsToWrite", "1").toUInt();
-    //_nSubbandsToStore  = configNode.getOption("params", "subbandStoreOffset", "0").toUInt();
-    _nchans = _nChannels * _nSubbands;
-    _buffSize    = configNode.getOption("params", "bufferSize", "5120").toUInt();
+    _nchans   = _nChannels * _nSubbands;
+    _buffSize = configNode.getOption("params", "bufferSize", "5120").toUInt();
     _cur = 0;
 
     // Open file
     _buffer.resize(_buffSize);
-    //_file.rdbuf()->pubsetbuf(&_buffer[0], _buffer.capacity());
     _file.open(_filepath.toUtf8().data(), std::ios::out | std::ios::binary);
 
     // Write header
     WriteString("HEADER_START");
-    //WriteString("Telescope");
-    //WriteString("LOFAR");
     WriteInt("machine_id", 0);    // Ignore for now
     WriteInt("telescope_id", 0);  // Ignore for now
     WriteInt("data_type", 1);     // Channelised Data
@@ -106,35 +100,19 @@ void SigprocStokesWriter::sendStream(const QString& /*streamName*/, const DataBl
 
         unsigned nSamples = stokes->nTimeBlocks();
         unsigned nSubbands = stokes->nSubbands();
-        //unsigned nPolarisations = stokes->nPolarisations(); // this is now an option.
         unsigned nChannels = stokes->nChannels();
         float const * data;
-        //size_t dataSize = nChannels * sizeof(float);
 
-        //	unsigned chunkFloats = nChannels*nSubbands*_nPols;
-        //std::vector<float> chunkBuffer(chunkFloats);
         for (unsigned t = 0; t < nSamples; ++t) {
-            //	  unsigned bufferCounter = 0;
             for (unsigned p = 0; p < _nPols; ++p) {
                 for (int s = nSubbands - 1; s >= 0 ; --s) {
-
                     data = stokes->spectrumData(t, s, p);
-
                     for(int i = nChannels - 1; i >= 0 ; --i)
-                    {
-                        //_write(reinterpret_cast<char* >(&data[i]), sizeof(float));
                         _file.write(reinterpret_cast<const char*>(&data[i]), sizeof(float));
-
-                        //      chunkBuffer[bufferCounter]+=data[i];
-                        //      ++bufferCounter;
-                    }
                 }
             }
         }
 
-        /*		for (unsigned cb =0; cb < chunkFloats; ++cb){
-            _file.write(reinterpret_cast<char* >(&chunkBuffer[cb]), sizeof(float));
-            }*/
         _file.flush();
     }
     else {
