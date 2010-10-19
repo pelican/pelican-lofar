@@ -20,8 +20,8 @@ class SigprocStokesWriter : public AbstractOutputStream
         ~SigprocStokesWriter();
         QString filepath() { return _filepath; }
 
-    public:
-        virtual void send(const QString& streamName, const DataBlob* dataBlob);
+    protected:
+        virtual void sendStream(const QString& streamName, const DataBlob* dataBlob);
 
     private:
         // Header helpers
@@ -37,15 +37,14 @@ class SigprocStokesWriter : public AbstractOutputStream
         void _write(char*,size_t);
 
     private:
-        QString       _filepath;
-        std::ofstream _file;
-	std::vector<char> _buffer;
-        float         _fch1, _foff, _tsamp, _refdm;
-        int           _nchans, _nTotalSubbands;
-	int _buffSize;
-        unsigned	   _nPols, _nChannels, _nSubbands, _clock, _integration ;
-        unsigned	   _nSubbandsToStore;
-	int _cur;
+        QString             _filepath;
+        std::ofstream       _file;
+	    std::vector<char>   _buffer;
+        float               _fch1, _foff, _tsamp, _refdm, _clock;
+        int                 _nchans, _nTotalSubbands;
+    	int                 _buffSize, _cur;
+        unsigned	        _nRawPols, _nChannels, _nSubbands, _integration, _nPols;
+        unsigned	        _nSubbandsToStore;
 };
 
 PELICAN_DECLARE(AbstractOutputStream, SigprocStokesWriter)

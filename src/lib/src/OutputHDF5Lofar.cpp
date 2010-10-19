@@ -25,7 +25,7 @@ OutputHDF5Lofar::~OutputHDF5Lofar()
 {
 }
 
-void OutputHDF5Lofar::send(const QString& /*streamName*/, const DataBlob* dataBlob)
+void OutputHDF5Lofar::sendStream(const QString& /*streamName*/, const DataBlob* dataBlob)
 {
     if (dataBlob->type() == "LofarData")
     {

@@ -41,13 +41,15 @@ class PumaOutput : public AbstractOutputStream
         PumaOutput( const ConfigNode& configNode  );
         ~PumaOutput();
 
-        virtual void send(const QString& streamName, const DataBlob* dataBlob);
 
         // add a puma server to stream to
         void addServer(const QString& host, quint16 port );
 
         // add a file to which to send data
         void addFile( const QString& filename );
+
+    protected:
+        virtual void sendStream(const QString& streamName, const DataBlob* dataBlob);
 
     private:
         void _convertToPuma( const SpectrumDataSetStokes* );

@@ -114,8 +114,8 @@ void SpectrumDataSetTest::test_serialise_deserialise()
          }
      }
 
-     long blockRate = 1010;
-     long long timeStamp = 919191;
+     double blockRate = 1010;
+     double timeStamp = 919191;
      spectra.setBlockRate(blockRate);
      spectra.setLofarTimestamp(timeStamp);
 
