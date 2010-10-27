@@ -6,10 +6,7 @@
 
 #include "pelican/emulator/EmulatorDriver.h"
 #include "pelican/server/DataManager.h"
-#include "pelican/comms/Data.h"
 #include "pelican/server/test/ChunkerTester.h"
-
-#include "pelican/utility/memCheck.h"
 
 #include <boost/shared_ptr.hpp>
 
