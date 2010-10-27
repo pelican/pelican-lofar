@@ -3,6 +3,7 @@
 #include "PPFChanneliser.h"
 #include "SpectrumDataSet.h"
 #include "TimeSeriesDataSet.h"
+#include "constants.h"
 
 #include "pelican/utility/ConfigNode.h"
 
