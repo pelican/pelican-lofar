@@ -130,13 +130,13 @@ void PPFChanneliser::run(const TimeSeriesDataSetC32* timeSeries,
     Complex *workBuffer = 0, *filteredSamples = 0, *spectrum = 0;
     Complex const * timeData = 0;
 
-    double elapsed, tStart, tEnd;
+    //double elapsed, tStart, tEnd;
 
     #pragma omp parallel \
         shared(nTimeBlocks, nPolarisations, nSubbands, nFilterTaps, coeffs,\
                 tSum, tMin, tMax, tAve) \
         private(threadId, nThreads, start, end, workBuffer, filteredSamples, \
-                spectrum, timeData, elapsed, tStart)
+                spectrum, timeData/*, elapsed, /tStart*/)
     {
         threadId = omp_get_thread_num();
 
