@@ -22,8 +22,6 @@ using std::endl;
 
 #include "timer.h"
 
-
-
 //#ifdef PPF_TIMER
 unsigned counter;
 double tMin[12];
