@@ -76,7 +76,6 @@ class AdapterTimeSeriesDataSet : public AbstractStreamAdapter
         /// Destroys the AdapterTimeStream.
         ~AdapterTimeSeriesDataSet() {}
 
-    protected:
         /// Method to deserialise a LOFAR time stream data.
         void deserialise(QIODevice* in);
 
