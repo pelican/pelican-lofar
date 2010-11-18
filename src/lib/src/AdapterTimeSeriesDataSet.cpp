@@ -111,8 +111,8 @@ void AdapterTimeSeriesDataSet::deserialise(QIODevice* in)
 //            timestamp.setStationClockSpeed(_clock * 1000000);
 //            timestamp.setStamp (header.timestamp, header.blockSequenceNumber);
             unsigned totBlocks = _clock == 160 ? 156250 : (header.timestamp % 2 == 0 ? 195313 : 195312);
-            _timeData->setLofarTimestamp(header.timestamp + (header.blockSequenceNumber / totBlocks * 1.0));
-            _timeData->setBlockRate(1 / totBlocks * 1.0);
+            _timeData->setLofarTimestamp(header.timestamp + ((1.0 * header.blockSequenceNumber) / totBlocks));
+            _timeData->setBlockRate(1.0 / totBlocks );
         }
 
         // Read the useful data (depends on configured dimensions).

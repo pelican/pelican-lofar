@@ -24,7 +24,9 @@ SigprocStokesWriter::SigprocStokesWriter(const ConfigNode& configNode )
 
     // Initliase connection manager thread
     _filepath = configNode.getOption("file", "filepath");
-    _fch1     = configNode.getOption("topChannelFrequency", "value", "150").toFloat();
+    _topsubband     = configNode.getOption("topSubbandIndex", "value", "150").toFloat();
+    _lbahba     = configNode.getOption("LBA_0_or_HBA_1", "value", "1").toFloat();
+    _fch1     = _lbahba * 100 + _clock / (_nRawPols * _nTotalSubbands) * _topsubband;
     _foff     = -_clock / (_nRawPols * _nTotalSubbands) / float(_nChannels);
     _tsamp    = (_nRawPols * _nTotalSubbands) * _nChannels * _integration / _clock/ 1e6;
     _nPols    = configNode.getOption("params", "nPolsToWrite", "1").toUInt();

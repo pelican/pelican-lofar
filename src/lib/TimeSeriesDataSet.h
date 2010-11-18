@@ -93,8 +93,8 @@ class TimeSeriesDataSet : public DataBlob
         double _nTimeBlocks;
         double _nTimesPerBlock;
 
-        long _blockRate;
-        long long _lofarTimestamp;
+        double _blockRate;
+        double _lofarTimestamp;
 };
 
 

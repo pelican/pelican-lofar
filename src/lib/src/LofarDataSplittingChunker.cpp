@@ -207,6 +207,7 @@ void LofarDataSplittingChunker::next(QIODevice* device)
             // TODO: Convert from little endian to big endian.
             throw QString("LofarDataSplittingChunker: Endianness not supported.");
             seqid   = currPacket.header.timestamp;
+            std::cout << seqid << std::endl;
             blockid = currPacket.header.blockSequenceNumber;
 #elif Q_BYTE_ORDER == Q_LITTLE_ENDIAN
             seqid   = currPacket.header.timestamp;

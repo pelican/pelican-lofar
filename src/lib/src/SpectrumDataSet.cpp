@@ -64,8 +64,8 @@ void SpectrumDataSetC32::write(const QString& fileName, int s, int p, int b) con
 quint64 SpectrumDataSetC32::serialisedBytes() const
 {
     quint64 size = 4 * sizeof(unsigned);
-    size += sizeof(long);
-    size += sizeof(long long);
+    size += sizeof(double);
+    size += sizeof(double);
     size += _data.size() * sizeof(std::complex<float>);
     return size;
 }
@@ -89,10 +89,10 @@ void SpectrumDataSetC32::serialise(QIODevice& out) const
     out.write((char*)&nChan, sizeof(unsigned));
 
     // Write the lofar meta-data.
-    long blockRate = getBlockRate();
-    long long timeStamp = getLofarTimestamp();
-    out.write((char*)&blockRate, sizeof(long));
-    out.write((char*)&timeStamp, sizeof(long long));
+    double blockRate = getBlockRate();
+    double timeStamp = getLofarTimestamp();
+    out.write((char*)&blockRate, sizeof(double));
+    out.write((char*)&timeStamp, sizeof(double));
 
     // Write the data.
     out.write((char*)&_data[0], sizeof(std::complex<float>) * _data.size());
@@ -119,10 +119,10 @@ void SpectrumDataSetC32::deserialise(QIODevice& in, QSysInfo::Endian endian)
     in.read((char*)&nChan, sizeof(unsigned));
 
     // Read lofar meta-data
-    long blockRate;
-    long long timeStamp;
-    in.read((char*)&blockRate, sizeof(long));
-    in.read((char*)&timeStamp, sizeof(long long));
+    double blockRate;
+    double timeStamp;
+    in.read((char*)&blockRate, sizeof(double));
+    in.read((char*)&timeStamp, sizeof(double));
     setBlockRate(blockRate);
     setLofarTimestamp(timeStamp);
 
@@ -148,8 +148,8 @@ quint64 SpectrumDataSetStokes::serialisedBytes() const
 {
     // Sub-band spactra dimensions.
     quint64 size = 4 * sizeof(unsigned);
-    size += sizeof(long);
-    size += sizeof(long long);
+    size += sizeof(double);
+    size += sizeof(double);
     size += _data.size() * sizeof(float);
     return size;
 }
@@ -173,10 +173,10 @@ void SpectrumDataSetStokes::serialise(QIODevice& out) const
     out.write((char*)&nChan, sizeof(unsigned));
 
     // Write the lofar meta-data.
-    long blockRate = getBlockRate();
-    long long timeStamp = getLofarTimestamp();
-    out.write((char*)&blockRate, sizeof(long));
-    out.write((char*)&timeStamp, sizeof(long long));
+    double blockRate = getBlockRate();
+    double timeStamp = getLofarTimestamp();
+    out.write((char*)&blockRate, sizeof(double));
+    out.write((char*)&timeStamp, sizeof(double));
 
     // Write the data.
     out.write((char*)&_data[0], sizeof(float) * _data.size());
@@ -198,10 +198,10 @@ void SpectrumDataSetStokes::deserialise(QIODevice& in, QSysInfo::Endian /*endian
     in.read((char*)&nChan, sizeof(unsigned));
 
     // Read lofar meta-data
-    long blockRate;
-    long long timeStamp;
-    in.read((char*)&blockRate, sizeof(long));
-    in.read((char*)&timeStamp, sizeof(long long));
+    double blockRate;
+    double timeStamp;
+    in.read((char*)&blockRate, sizeof(double));
+    in.read((char*)&timeStamp, sizeof(double));
     setBlockRate(blockRate);
     setLofarTimestamp(timeStamp);
 
