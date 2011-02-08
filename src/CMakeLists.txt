@@ -23,7 +23,7 @@ if(NOT LIBRARY_INSTALL_DIR)
 endif(NOT LIBRARY_INSTALL_DIR)
 
 if(NOT INCLUDE_INSTALL_DIR)
-    set(INCLUDE_INSTALL_DIR "${PELICAN_LOFAR_INSTALL_DIR}/include")
+    set(INCLUDE_INSTALL_DIR "${PELICAN_LOFAR_INSTALL_DIR}/include/pelican-lofar")
 endif(NOT INCLUDE_INSTALL_DIR)
 
 if(NOT BINARY_INSTALL_DIR)
@@ -61,6 +61,8 @@ add_executable(lofarClient
     lofarClient.cpp
     # pipeline.cpp
 )
+install(TARGETS "lofarClient" DESTINATION ${BINARY_INSTALL_DIR})
+
 target_link_libraries(lofarClient
     pelican-lofar_static
     ${PELICAN_LIBRARY}
