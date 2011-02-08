@@ -70,9 +70,13 @@ target_link_libraries(lofarClient
 )
 
 # === Create the server binary.
-#set( serverBinSrc
-#     src/serverBin.cpp
-#)
-
-#add_executable(lofarServerClient ${serverClientBinSrc})
-#add_executable(lofarServer ${serverBinSrc})
+include_directories(${CMAKE_SOURCE_DIR}/lib)
+add_executable(serverMain serverMain.cpp)
+target_link_libraries(serverMain
+    ${PELICAN_LIBRARY}
+    pelican-lofar
+    ${QT_QTCORE_LIBRARY}
+    ${QT_QTNETWORK_LIBRARY}
+    ${Boost_PROGRAM_OPTIONS_LIBRARY}
+)
+install(TARGETS serverMain DESTINATION ${BINARY_INSTALL_DIR})

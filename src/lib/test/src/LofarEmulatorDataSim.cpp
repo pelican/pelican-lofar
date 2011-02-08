@@ -5,6 +5,8 @@
 #include "pelican/utility/ConfigNode.h"
 
 #include <iostream>
+using std::cout;
+using std::endl;
 #include <cmath>
 
 namespace pelican {
@@ -109,26 +111,36 @@ void LofarEmulatorDataSim::_setPacketData()
 
     unsigned i;
     int16 re, im;
-    unsigned long time =  _packetCounter * _samplesPerPacket;
+    unsigned long time0 =  _packetCounter * _samplesPerPacket;
+    float sampleRate = 122.0f;
+    float f0 = 0.0f;
+    float time;
+    float freq;
+    float arg;
+    float twoPi = 3.14159265358979323846264338327950 * 2.0f;
 
     Complex16 *data = reinterpret_cast<Complex16*>(_packet.data);
-    for (int t = 0; t < _samplesPerPacket; t++)
+    for (int s = 0; s < _nSubbands; s++)
     {
-        for (int s = 0; s < _nSubbands; s++)
+        for (int t = 0; t < _samplesPerPacket; t++)
         {
-            i = t * _nSubbands * _nPolarisations + s * _nPolarisations;
+            i = _nPolarisations * (t + s * _samplesPerPacket);
 
-            time += t;
+            time = float(time0 + t) / sampleRate;
 
-            re = time;
-            im = 0;
-
-            // polarisation 1
+            // polarisation 1.
+            freq = f0 + float(s*2);
+            arg = twoPi * freq * time;
+            re = 20.0f * cos(arg);
+            im = time0 + t;//freq; // 20.0f * sin(arg);
             data[i + 0] = Complex16(re, im);
 
-            im = 1;
+            // polarisation 2.
+            freq = f0 + float(s*2) + 1.0f;
+            arg = twoPi * freq * time;
+            re = (time0 + t); //30.0f * cos(arg);
+            im = 30.0f * sin(arg);
 
-            // polarisation 2
             data[i + 1] = Complex16(re, im);
         }
     }

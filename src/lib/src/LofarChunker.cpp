@@ -200,7 +200,6 @@ void LofarChunker::next(QIODevice* device)
 /**
  * @details
  * Generates an empty UDP packet with no time stamp.
- * TODO: packet data generation can be done once!
  */
 void LofarChunker::generateEmptyPacket(UDPPacket& packet, unsigned int seqid, unsigned int blockid)
 {

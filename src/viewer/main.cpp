@@ -69,9 +69,8 @@ Config createConfig(int argc, char** argv)
         ("port,p", opts::value<unsigned>(), "port.")
         ("address,a", opts::value<std::string>(), "port.");
 
-
     // Configuration option without a selection flag in the first argument
-    // position is assumed to be a fits file
+    // position is assumed to be a config file
     opts::positional_options_description p;
     p.add("config", -1);
 

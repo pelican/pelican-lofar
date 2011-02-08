@@ -93,8 +93,8 @@ class TimeSeriesDataSet : public DataBlob
         double _nTimeBlocks;
         double _nTimesPerBlock;
 
-        long _blockRate;
-        long long _lofarTimestamp;
+        double _blockRate;
+        double _lofarTimestamp;
 };
 
 
@@ -132,6 +132,7 @@ template <typename T>
 inline unsigned long TimeSeriesDataSet<T>::_index(unsigned s, unsigned p,
         unsigned b) const
 {
+    // subband (outer) -> pol -> timeBlock -> time (inner)
     return _nTimesPerBlock * ( _nTimeBlocks * (s * _nPolarisations + p) + b);
 }
 
@@ -158,12 +159,18 @@ class TimeSeriesDataSetC32 : public TimeSeriesDataSet<std::complex<float> >
         ~TimeSeriesDataSetC32() {}
 
     public:
-        void write(const QString& fileName) const;
+        void write(const QString& fileName,
+                int s = -1, int p = -1, int b = -1) const;
 };
 
 
+typedef TimeSeriesDataSetC32 LofarTimeStream1;
+typedef TimeSeriesDataSetC32 LofarTimeStream2;
+
 // Declare the data blob with the pelican the data blob factory.
 PELICAN_DECLARE_DATABLOB(TimeSeriesDataSetC32)
+PELICAN_DECLARE_DATABLOB(LofarTimeStream1)
+PELICAN_DECLARE_DATABLOB(LofarTimeStream2)
 
 }// namespace lofar
 }// namespace pelican

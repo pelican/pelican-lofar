@@ -120,7 +120,8 @@ class PPFChanneliser : public AbstractModule
         PolyphaseCoefficients _ppfCoeffs;
         vector<float> _coeffs;
 
-        unsigned _iOldestSamples; // Pointer to the oldest samples.
+        //unsigned _iOldestSamples; // Pointer to the oldest samples.
+        vector<unsigned> _iOldestSamples; // Pointer to the oldest samples.
 
         fftwf_plan _fftPlan;
 

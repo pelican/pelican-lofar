@@ -3,44 +3,48 @@
 #include "LofarTypes.h"
 
 #include "pelican/utility/ConfigNode.h"
-#include "pelican/utility/memCheck.h"
 
-#include <iostream>
 #include <cmath>
 
 namespace pelican {
 namespace lofar {
 
 /**
- * @details Constructs the LOFAR UDP emulator.
+ * @details
+ * Constructs the LOFAR UDP emulator.
  */
 LofarUdpEmulator::LofarUdpEmulator(const ConfigNode& configNode)
-    : AbstractUdpEmulator(configNode)
+: AbstractUdpEmulator(configNode)
 {
-    _packetCounter = 0;
-    _packetSize = sizeof(UDPPacket);
-    _interval = configNode.getOption("packet", "interval", "100000").toULong();
-
-    // Set data parameters.
+    // Load data (packet) parameters from the configuration.
     _subbandsPerPacket = configNode.getOption("packet", "subbands", "1").toInt();
     _samplesPerPacket = configNode.getOption("packet", "samples", "1").toInt();
     _nrPolarisations = configNode.getOption("packet", "polarisations", "2").toInt();
     _clock = configNode.getOption("params", "clock").toInt();
-
-    // Set test parameters.
     int sampleSize = configNode.getOption("packet", "sampleSize", "8").toInt();
-    if (sampleSize == 4) _sampleType = i4complex;
-    else if (sampleSize == 16) _sampleType = i16complex;
-    else _sampleType = i8complex;
-    _nPackets = configNode.getOption("packet", "nPackets", "-1").toInt();
+
+    // Load Emulator parameters. (Interval = microseconds between sending packets)
+    _interval = configNode.getOption("packet", "interval", "100000").toULong();
     _startDelay = configNode.getOption("packet", "startDelay", "0").toInt();
-    _timestamp = 1;
+    _nPackets = configNode.getOption("packet", "nPackets", "-1").toInt();
+
+    // Setup emulator class variables.
+    switch (sampleSize)
+    {
+        case 8: { _sampleType = i8complex;  break; }
+        case 16:{ _sampleType = i16complex; break; }
+        default: throw QString("LofarUdpEmulator: Unsupported sample size.");
+    }
     _blockid = _samplesPerPacket; // blockid offset
+    _timestamp = 1;
+    _packetCounter = 0;
+    _packetSize = sizeof(UDPPacket);
 
     // Fill the packet.
-    setPacketHeader(NULL);
+    setPacketHeader(0);
     fillPacket();
 }
+
 
 /**
  * @details
@@ -48,6 +52,9 @@ LofarUdpEmulator::LofarUdpEmulator(const ConfigNode& configNode)
  */
 void LofarUdpEmulator::fillPacket()
 {
+    typedef TYPES::i8complex i8c;
+    typedef TYPES::i16complex i16c;
+
     // Packet data is generated once and all packets will contain the same data
     // records. Each block consists of a time slice (one sample) for each
     // beamlet in beamlet order.
@@ -55,9 +62,8 @@ void LofarUdpEmulator::fillPacket()
     // Calculate the actual required packet size.
     _packetSize = _subbandsPerPacket * _samplesPerPacket * _nrPolarisations;
     switch (_sampleType) {
-        case i4complex: _packetSize *= sizeof(TYPES::i4complex); break;
-        case i8complex: _packetSize *= sizeof(TYPES::i8complex); break;
-        case i16complex: _packetSize *= sizeof(TYPES::i16complex); break;
+        case i8complex: { _packetSize *= sizeof(i8c);  break; }
+        case i16complex:{ _packetSize *= sizeof(i16c); break; }
     }
     _packetSize += sizeof(struct UDPPacket::Header);
 
@@ -66,49 +72,45 @@ void LofarUdpEmulator::fillPacket()
         throw QString("LofarUdpEmulator: Packet size (%1) too large (max %2).")
             .arg(_packetSize).arg(sizeof(_packet.data));
 
+
     // Create test data in packet.
-    switch (_sampleType) {
-    case i4complex:
+    // LOFAR packet oder
+    unsigned idx;
+    switch (_sampleType)
     {
-        TYPES::i4complex *s = reinterpret_cast<TYPES::i4complex*>(_packet.data);
-        for (int i = 0; i < _samplesPerPacket; i++) {
-            for (int j = 0; j < _subbandsPerPacket; j++) {
-                unsigned index = i * _subbandsPerPacket * _nrPolarisations +
-                        j * _nrPolarisations;
-                s[index] = TYPES::i4complex(i + j, i);
-                s[index + 1] = TYPES::i4complex(i + j, i);
+        case i8complex:
+        {
+            i8c* samples = reinterpret_cast<i8c*>(_packet.data);
+
+            for (int sb = 0; sb < _subbandsPerPacket; sb++)
+            {
+                for (int t = 0; t < _samplesPerPacket; t++)
+                {
+                    idx = _nrPolarisations * (t + sb * _samplesPerPacket);
+                    samples[idx] = i8c(sb, 0);      // pol1
+                    samples[idx + 1] = i8c(t, 1);   // pol2
+                }
             }
+            break;
         }
-        break;
-    }
-    case i8complex:
-    {
-        TYPES::i8complex *s = reinterpret_cast<TYPES::i8complex*>(_packet.data);
-        for (int i = 0; i < _samplesPerPacket; i++) {
-            for (int j = 0; j < _subbandsPerPacket; j++) {
-                unsigned index = i * _subbandsPerPacket * _nrPolarisations +
-                        j * _nrPolarisations;
-                s[index] = TYPES::i8complex(i + j, i);
-                s[index + 1] = TYPES::i8complex(i + j, i);
+        case i16complex:
+        {
+            i16c *samples = reinterpret_cast<i16c*>(_packet.data);
+
+            for (int sb = 0; sb < _subbandsPerPacket; sb++)
+            {
+                for (int t = 0; t < _samplesPerPacket; t++)
+                {
+                    idx = _nrPolarisations * (t + sb * _samplesPerPacket);
+                    samples[idx] = i16c(sb, 0);     // pol 1
+                    samples[idx + 1] = i16c(t, 1);  // pol 2
+                }
             }
+            break;
         }
-        break;
-    }
-    case i16complex:
-    {
-        TYPES::i16complex *s = reinterpret_cast<TYPES::i16complex*>(_packet.data);
-        for (int i = 0; i < _samplesPerPacket; i++) {
-            for (int j = 0; j < _subbandsPerPacket; j++) {
-                unsigned index = i * _subbandsPerPacket * _nrPolarisations +
-                        j * _nrPolarisations;
-                s[index] = TYPES::i16complex(i + j, i);
-                s[index + 1] = TYPES::i16complex(i + j, i);
-            }
-        }
-        break;
-    }
     }
 }
+
 
 /**
  * @details
@@ -151,6 +153,7 @@ void LofarUdpEmulator::getPacketData(char*& ptr, unsigned long& size)
     _packetCounter++;
 }
 
+
 /**
 * @details
 * Sets the UDP packet header that will be used.
@@ -160,7 +163,8 @@ void LofarUdpEmulator::getPacketData(char*& ptr, unsigned long& size)
 void LofarUdpEmulator::setPacketHeader(UDPPacket::Header* packetHeader)
 {
     // Create packet header.
-    if (packetHeader == NULL) {
+    if (!packetHeader)
+    {
         _packet.header.version    = (uint8_t) 0xAAAB;   // Hardcoded in RSP firmware
         _packet.header.nrBeamlets = _subbandsPerPacket;
         _packet.header.nrBlocks   = _samplesPerPacket;

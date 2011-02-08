@@ -18,13 +18,17 @@ StokesGenerator::StokesGenerator(const ConfigNode& config)
 }
 
 
-///
+
 StokesGenerator::~StokesGenerator()
 {
 }
 
 
-///
+/**
+ * @details
+ * Converts a collection of spectra from x,y polarisation to stokes
+ * parameters.
+ */
 void StokesGenerator::run(const SpectrumDataSetC32* channeliserOutput,
         SpectrumDataSetStokes* stokes)
 {
@@ -38,7 +42,7 @@ void StokesGenerator::run(const SpectrumDataSetC32* channeliserOutput,
     stokes->resize(nSamples, nSubbands, 1, nChannels);
 
     const Complex* dataPolX, *dataPolY;
-    float *I/*, *Q, *U, *V*/;
+    float *I;//, *Q, *U, *V;
     float powerX, powerY;
     Complex XxYstar;
 
@@ -68,6 +72,11 @@ void StokesGenerator::run(const SpectrumDataSetC32* channeliserOutput,
 
 
 
+
+/**
+ * @details
+ * Not used?
+ */
 void StokesGenerator::run(const TimeSeriesDataSetC32* streamData,
         SpectrumDataSetStokes* stokes)
 {

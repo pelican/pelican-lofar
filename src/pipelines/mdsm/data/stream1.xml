@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE pelican>
+
+<configuration version="1.0">
+
+  <pipeline>
+
+    <clients>
+      <PelicanServerClient>
+        <server host="127.0.0.1" port="2000"/>
+        <data type="LofarTimeStream1" adapter="AdapterTimeSeriesDataSet"/>
+      </PelicanServerClient>
+    </clients>
+
+    <adapters>
+      <AdapterTimeSeriesDataSet>
+        <subbandsPerPacket value="31"/> <!-- 31 or 61 or 62 -->
+        <import file="data/CommonParameters.xml"/>
+        <!--   -->
+        <fixedSizePackets value="false" />
+      </AdapterTimeSeriesDataSet>
+    </adapters>
+
+    <modules>
+
+      <PPFChanneliser>
+        <import file="data/CommonParameters.xml"/>
+        <!--   -->
+        <processingThreads value="1" />
+        <filter nTaps="8" filterWindow="kaiser"/>
+      </PPFChanneliser>
+
+      <StokesGenerator>
+      </StokesGenerator>
+
+      <StokesIntegrator>
+        <import file="data/CommonParameters.xml"/>
+      </StokesIntegrator>
+
+    </modules>
+
+    <output>
+
+      <dataStreams>
+        <!-- <stream name="SpectrumDataSetStokes" listeners="PelicanTCPBlobServer" />  -->
+        <!--  <stream name="SpectrumDataSetStokes" listeners="SigprocStokesWriter"/> -->
+      </dataStreams>
+
+      <streamers>
+        <!-- <PelicanTCPBlobServer active="true" >
+             <connection port="6969" />
+        </PelicanTCPBlobServer>
+        -->
+        <!--
+         <SigprocStokesWriter>
+            <import file="data/CommonParameters.xml"/>
+            <subbandsPerPacket value="31"/>
+            <file filepath="stokesStream1.dat" />
+            <params telescope="LOFAR" nPolsToWrite="1"/>
+         </SigprocStokesWriter>
+         -->
+      </streamers>
+
+    </output>
+
+  </pipeline>
+</configuration>
+
+

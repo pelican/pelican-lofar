@@ -20,8 +20,6 @@ class ConfigNode;
 
 namespace lofar {
 
-
-
 class TimeSeriesDataSetC32;
 
 /**

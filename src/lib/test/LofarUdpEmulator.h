@@ -20,13 +20,13 @@ namespace lofar {
  * @brief
  *
  * @details
- *
  */
+
 class LofarUdpEmulator : public AbstractUdpEmulator
 {
     public:
         /// Enum used to specify the sample type to use
-        enum SampleType { i4complex = 4, i8complex = 8, i16complex = 16 };
+        enum SampleType { i8complex = 8, i16complex = 16 };
 
         /// Constructor.
         LofarUdpEmulator(const ConfigNode& configNode);
@@ -41,7 +41,7 @@ class LofarUdpEmulator : public AbstractUdpEmulator
         virtual void getPacketData(char*& ptr, unsigned long& size);
 
         /// Returns the interval between packets in microseconds.
-        virtual unsigned long interval() {return _interval;}
+        virtual unsigned long interval() { return _interval; }
 
         /// Returns the number of packets to send. Runs forever if negative.
         virtual int nPackets() {return _nPackets;}
@@ -53,7 +53,7 @@ class LofarUdpEmulator : public AbstractUdpEmulator
         void looseEvenPackets(bool loose);
 
         /// Returns the start delay in seconds.
-        virtual int startDelay() {return _startDelay;}
+        virtual int startDelay() { return _startDelay; }
 
     private:
         // Data Params
@@ -71,7 +71,7 @@ class LofarUdpEmulator : public AbstractUdpEmulator
         unsigned long _packetSize;      ///< Actual packet size in bytes.
         unsigned long _interval;        ///< The interval between packets in microseconds.
         unsigned int  _clock;           ///< Station clock speed
-        UDPPacket _packet;               ///< The packet to send.
+        UDPPacket _packet;              ///< The packet to send.
 
         unsigned int _timestamp;        ///< The timestamp of the preceeding packet
         unsigned int _blockid;          ///< The blockSequenceNumber of the preceeding packet
@@ -79,5 +79,4 @@ class LofarUdpEmulator : public AbstractUdpEmulator
 
 } // namespace lofar
 } // namespace pelican
-
 #endif // LOFARUDPEMULATOR_H

@@ -57,12 +57,9 @@ LofarChunkerTest::LofarChunkerTest() : CppUnit::TestFixture()
             .arg(_clock)
             .arg(_numPackets);
 
-
-
     // Create the server configuration from the buffer and chunker.
     QString serverXml = bufferConfig + chunkerConfig;
     _config.setFromString("", serverXml);
-
 
     // Set up LOFAR data emulator configuration.
     unsigned interval = 1000;
@@ -125,6 +122,8 @@ void LofarChunkerTest::tearDown()
 */
 void LofarChunkerTest::test_normalPackets()
 {
+    typedef TYPES::i8complex i8c;
+    double err = 1.0e-6;
     try {
         std::cout << "---------------------------------" << std::endl;
         std::cout << "Starting LofarChunker normalPackets test" << std::endl;
@@ -154,22 +153,35 @@ void LofarChunkerTest::test_normalPackets()
 
         // Test read data.
         LockedData d = dataManager.getNext("LofarData");
-        char* dataPtr = (char *)reinterpret_cast<AbstractLockableData*>(d.object())->data()->data();
+        CPPUNIT_ASSERT(d.isValid());
+
+        // Check the data in the chunk.
+        char* data = (char *)reinterpret_cast<AbstractLockableData*>
+                                            (d.object())->data()->data();
 
         UDPPacket *packet;
-        unsigned packetSize = sizeof(struct UDPPacket::Header) + _subbandsPerPacket *
-                _samplesPerPacket * _nrPolarisations * sizeof(TYPES::i8complex);
+        unsigned packetSize = sizeof(struct UDPPacket::Header)
+                + _subbandsPerPacket * _samplesPerPacket * _nrPolarisations
+                * sizeof(i8c);
 
-        for (int counter = 0; counter < _numPackets; ++counter)
+        unsigned idx = 0;
+        for (int p = 0; p < _numPackets; ++p)
         {
-            packet = (UDPPacket *) (dataPtr + packetSize * counter);
-            TYPES::i8complex* s = reinterpret_cast<TYPES::i8complex*>(&packet->data);
+            packet = (UDPPacket *) (data + packetSize * p);
+            i8c* s = reinterpret_cast<i8c*>(&packet->data);
 
-            for (int k = 0; k < _samplesPerPacket; ++k) {
-                for (int j = 0; j < _subbandsPerPacket; ++j) {
-                    float val = s[k * _subbandsPerPacket * _nrPolarisations
-                                  + j * _nrPolarisations].real();
-                    CPPUNIT_ASSERT_EQUAL(float(k + j), val);
+            for (int sb = 0; sb < _subbandsPerPacket; ++sb)
+            {
+                for (int t = 0; t < _samplesPerPacket; ++t)
+                {
+                    idx = _nrPolarisations * (t + sb * _samplesPerPacket);
+                    // pol 1
+                    CPPUNIT_ASSERT_DOUBLES_EQUAL(float(sb), (float)s[idx].real(), err);
+                    CPPUNIT_ASSERT_DOUBLES_EQUAL(float(0), (float)s[idx].imag(), err);
+
+                    // pol 2
+                    CPPUNIT_ASSERT_DOUBLES_EQUAL(float(t), (float)s[idx + 1].real(), err);
+                    CPPUNIT_ASSERT_DOUBLES_EQUAL(float(1), (float)s[idx + 1].imag(), err);
                 }
             }
         }
@@ -177,7 +189,7 @@ void LofarChunkerTest::test_normalPackets()
         std::cout << "Finished LofarChunker normalPackets test" << std::endl;
         std::cout << "---------------------------------" << std::endl;
     }
-    catch (QString e) {
+    catch (const QString& e) {
         CPPUNIT_FAIL("Unexpected exception: " + e.toStdString());
     }
 }
@@ -188,79 +200,89 @@ void LofarChunkerTest::test_normalPackets()
 */
 void LofarChunkerTest::test_lostPackets()
 {
+    typedef TYPES::i8complex i8c;
+    double err = 1.0e-6;
     try {
         std::cout << "---------------------------------" << std::endl;
         std::cout << "Starting LofarChunker lostPackets test" << std::endl;
 
-        // Get chunker configuration
+        // Get chunker configuration.
         Config::TreeAddress address;
         address << Config::NodeId("server", "");
         address << Config::NodeId("chunkers", "");
         address << Config::NodeId("LofarChunker", "");
         ConfigNode configNode = _config.get(address);
 
-        // Create and setup chunker
+        // Create and setup chunker.
         LofarChunker chunker(configNode);
         QIODevice* device = chunker.newDevice();
         chunker.setDevice(device);
 
-        // Create Data Manager
+        // Create Data Manager.
         pelican::DataManager dataManager(&_config);
         dataManager.getStreamBuffer("LofarData");
         chunker.setDataManager(&dataManager);
 
-        // Start Lofar Data Generator
+        // Start Lofar Data Generator.
         LofarUdpEmulator* emu = new LofarUdpEmulator(_emulatorNode);
-        emu -> looseEvenPackets(true);
+        emu->looseEvenPackets(true);
         EmulatorDriver emulator(emu);
 
-        // Acquire data through chunker
+        // Acquire data through chunker.
         chunker.next(device);
 
         // Test read data
         LockedData d = dataManager.getNext("LofarData");
-        char* dataPtr = (char *)(reinterpret_cast<AbstractLockableData*>(d.object()) -> data() -> data() );
+
+        CPPUNIT_ASSERT(d.isValid());
+
+        char* data = (char *)(reinterpret_cast<AbstractLockableData*>
+                                            (d.object())->data()->data());
 
         UDPPacket *packet;
-        unsigned packetSize = sizeof(struct UDPPacket::Header) + _subbandsPerPacket *
-                _samplesPerPacket * _nrPolarisations * sizeof(TYPES::i8complex);
+        unsigned packetSize = sizeof(struct UDPPacket::Header)
+                + _subbandsPerPacket * _samplesPerPacket * _nrPolarisations
+                * sizeof(i8c);
 
-        for (int counter = 0; counter < _numPackets; counter++) {
+        unsigned idx = 0;
+        for (int p = 0; p < _numPackets; ++p)
+        {
+            packet = (UDPPacket *) (data + packetSize * p);
+            i8c* s = reinterpret_cast<i8c*>(&packet->data);
 
-            packet = (UDPPacket *) (dataPtr + packetSize * counter);
-            TYPES::i8complex* s = reinterpret_cast<TYPES::i8complex*>(&packet->data);
-
-            for (int k = 0; k < _samplesPerPacket; k++)
-                for (int j = 0; j < _subbandsPerPacket; j++) {
-                    unsigned index = k * _subbandsPerPacket * _nrPolarisations +
-                            j * _nrPolarisations;
-                    float val = s[index].real();
-                    if (counter % 2 == 1)
-                        CPPUNIT_ASSERT_EQUAL(float(k + j), val);
+            for (int sb = 0; sb < _subbandsPerPacket; ++sb)
+            {
+                for (int t = 0; t < _samplesPerPacket; ++t)
+                {
+                    idx = _nrPolarisations * (t + sb * _samplesPerPacket);
+                    if (p % 2 == 1)
+                    {
+                        // pol 1
+                        CPPUNIT_ASSERT_DOUBLES_EQUAL(float(sb), (float)s[idx].real(), err);
+                        CPPUNIT_ASSERT_DOUBLES_EQUAL(float(0), (float)s[idx].imag(), err);
+                        // pol 2
+                        CPPUNIT_ASSERT_DOUBLES_EQUAL(float(t), (float)s[idx + 1].real(), err);
+                        CPPUNIT_ASSERT_DOUBLES_EQUAL(float(1), (float)s[idx + 1].imag(), err);
+                    }
                     else
-                        CPPUNIT_ASSERT_EQUAL(0.0f, val);
+                    {
+                        // pol 1
+                        CPPUNIT_ASSERT_DOUBLES_EQUAL(float(0), (float)s[idx].real(), err);
+                        CPPUNIT_ASSERT_DOUBLES_EQUAL(float(0), (float)s[idx].imag(), err);
+                        // pol 2
+                        CPPUNIT_ASSERT_DOUBLES_EQUAL(float(0), (float)s[idx + 1].real(), err);
+                        CPPUNIT_ASSERT_DOUBLES_EQUAL(float(0), (float)s[idx + 1].imag(), err);
+                    }
                 }
+            }
         }
 
         std::cout << "Finished LofarChunker lostPackets test" << std::endl;
         std::cout << "---------------------------------" << std::endl;
     }
-    catch (QString e) {
+    catch (const QString& e) {
         CPPUNIT_FAIL("Unexpected exception: " + e.toStdString());
     }
-}
-
-
-void LofarChunkerTest::test_update()
-{
-//    try {
-//        unsigned long bufferSize = 100;
-//        ChunkerTester tester("LofarChunker", bufferSize, _serverXML);
-//    }
-//    catch (const QString& msg)
-//    {
-//        CPPUNIT_FAIL(msg.toStdString());
-//    }
 }
 
 

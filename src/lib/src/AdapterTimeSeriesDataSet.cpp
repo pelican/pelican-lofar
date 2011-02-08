@@ -13,16 +13,14 @@
 #include <iostream>
 #include <complex>
 #include <vector>
-
 using std::cout;
+using std::cerr;
 using std::endl;
 
 TimerData adapterTime;
 
 namespace pelican {
 namespace lofar {
-
-
 
 
 /**
@@ -80,7 +78,7 @@ AdapterTimeSeriesDataSet::AdapterTimeSeriesDataSet(const ConfigNode& config)
  */
 void AdapterTimeSeriesDataSet::deserialise(QIODevice* in)
 {
-  timerStart(&adapterTime);
+    timerStart(&adapterTime);
     // Sanity check on data blob dimensions and chunk size.
     _checkData();
 
@@ -90,12 +88,21 @@ void AdapterTimeSeriesDataSet::deserialise(QIODevice* in)
     char* headerTemp = &_headerTemp[0];
     char* dataTemp = &_dataTemp[0];
     char* paddingTemp = &_paddingTemp[0];
+    unsigned bytesRead = 0;
+    int tempBytesRead = 0;
 
     // Loop over UDP packets
     for (unsigned p = 0u; p < _nUDPPacketsPerChunk; ++p) {
 
         // Read the header from the IO device.
-        in->read(headerTemp, _headerSize);
+        bytesRead = 0;
+        while (1)
+        {
+            tempBytesRead = in->read(headerTemp + bytesRead, _headerSize - bytesRead);
+            if (tempBytesRead <= 0) in->waitForReadyRead(-1);
+            else bytesRead += tempBytesRead;
+            if (bytesRead == _headerSize) break;
+        }
         _readHeader(headerTemp, header);
 
         // First packet, extract time-stamp.
@@ -104,18 +111,34 @@ void AdapterTimeSeriesDataSet::deserialise(QIODevice* in)
 //            timestamp.setStationClockSpeed(_clock * 1000000);
 //            timestamp.setStamp (header.timestamp, header.blockSequenceNumber);
             unsigned totBlocks = _clock == 160 ? 156250 : (header.timestamp % 2 == 0 ? 195313 : 195312);
-            _timeData->setLofarTimestamp(header.timestamp + (header.blockSequenceNumber / totBlocks * 1.0));
-            _timeData->setBlockRate(1 / totBlocks * 1.0);
+            _timeData->setLofarTimestamp(header.timestamp + ((1.0 * header.blockSequenceNumber) / totBlocks));
+            _timeData->setBlockRate(1.0 / totBlocks );
         }
 
         // Read the useful data (depends on configured dimensions).
-        in->read(dataTemp, _dataSize);
+        bytesRead = 0;
+        while (1)
+        {
+            tempBytesRead = in->read(dataTemp + bytesRead, _dataSize - bytesRead);
+            if (tempBytesRead <= 0) in->waitForReadyRead(-1);
+            else bytesRead += tempBytesRead;
+            if (bytesRead == _dataSize) break;
+        }
         _readData(p, dataTemp, _timeData);
 
         // Read off padding (from word alignment of the packet).
-        in->read(paddingTemp, _paddingSize);
+        if (_paddingSize != 0) {
+            bytesRead = 0;
+            while (1)
+            {
+                tempBytesRead = in->read(paddingTemp + bytesRead, _paddingSize - bytesRead);
+                if (tempBytesRead <= 0) in->waitForReadyRead(-1);
+                else bytesRead += tempBytesRead;
+                if (bytesRead == _paddingSize) break;
+            }
+        }
     }
-  timerUpdate(&adapterTime);
+    timerUpdate(&adapterTime);
 }
 
 
@@ -129,7 +152,8 @@ void AdapterTimeSeriesDataSet::_checkData()
         throw _err("Sample size (%1 bits) not supported.").arg(_sampleBits);
 
     // Check that there is something of to adapt.
-    if (_chunkSize == 0) throw _err("Chunk size zero!");
+    if (_chunkSize == 0)
+        cerr << "WARNING: " << _err("Chunk size zero!").toStdString() << endl;
 
     // Check the data blob passed to the adapter is allocated.
     if (!_data) throw _err("Cannot deserialise into an unallocated blob!.");
@@ -174,7 +198,7 @@ inline
 void AdapterTimeSeriesDataSet::_readHeader(char* buffer, UDPPacket::Header& header)
 {
     header = *reinterpret_cast<UDPPacket::Header*>(buffer);
-//    _printHeader(header);
+    //_printHeader(header);
 }
 
 
@@ -189,13 +213,12 @@ void AdapterTimeSeriesDataSet::_readHeader(char* buffer, UDPPacket::Header& head
 void AdapterTimeSeriesDataSet::_readData(unsigned packet, char* buffer,
         TimeSeriesDataSetC32* data)
 {
-    unsigned tStart = packet * _nSamplesPerPacket;
+    unsigned time0 = packet * _nSamplesPerPacket;
 
     // Loop over dimensions in the packet and write into the data blob.
     unsigned iTimeBlock, index;
-    Complex* times, *times0, *times1;
+    Complex *times, *times0, *times1;
     unsigned iPtr = 0;
-//    Real re, im;
 
     switch (_sampleBits)
     {
@@ -204,10 +227,10 @@ void AdapterTimeSeriesDataSet::_readData(unsigned packet, char* buffer,
             TYPES::i8complex i8c;
             for (unsigned s = 0; s < _nSubbands; ++s) {
                 for (unsigned t = 0; t < _nSamplesPerPacket; ++t) {
-                    iTimeBlock = (tStart + t) / _nSamplesPerTimeBlock;
+                    iTimeBlock = (time0 + t) / _nSamplesPerTimeBlock;
                     for (unsigned p = 0; p < _nPolarisations; ++p) {
                         times = data->timeSeriesData(iTimeBlock, s, p);
-                        index = tStart - (iTimeBlock * _nSamplesPerTimeBlock) + t;
+                        index = time0 - (iTimeBlock * _nSamplesPerTimeBlock) + t;
                         i8c = *reinterpret_cast<TYPES::i8complex*>(&buffer[iPtr]);
                         times[index] = _makeComplex(i8c);
                         iPtr += sizeof(TYPES::i8complex);
@@ -220,33 +243,16 @@ void AdapterTimeSeriesDataSet::_readData(unsigned packet, char* buffer,
         {
             TYPES::i16complex i16c;
             size_t dataSize = sizeof(i16c);
-            //Complex temp = Complex(1.0, 2.0);
-//            TYPES::i16complex temp = TYPES::i16complex(1, 2);
+
             for (unsigned s = 0; s < _nSubbands; ++s) {
                 for (unsigned t = 0; t < _nSamplesPerPacket; ++t) {
 
-                    iTimeBlock = (tStart + t) / _nSamplesPerTimeBlock;
+                    iTimeBlock = (time0 + t) / _nSamplesPerTimeBlock;
 
-//                    for (unsigned p = 0; p < _nPolarisations; ++p) {
-//
-//                        times = data->timeSeriesData(iTimeBlock, s, p);
-//
-//                        // Index into time vector at cube location (iTimeBlock, s, p)
-//                        index = tStart - (iTimeBlock * _nSamplesPerTimeBlock) + t;
-//
-//                        i16c = *reinterpret_cast<TYPES::i16complex*>(&buffer[iPtr]);
-//                        times[index] = _makeComplex(i16c);
-//                        //times[index] = temp;
-//                        iPtr += dataSize;
-//
-//                    }
+                    index = time0 - (iTimeBlock * _nSamplesPerTimeBlock) + t;
 
-//                        cout << "b = " << iTimeBlock << " s = " << s << " p = " << p << " index = " << index << endl;
-                    index = tStart - (iTimeBlock * _nSamplesPerTimeBlock) + t;
                     times0 = data->timeSeriesData(iTimeBlock, s, 0);
                     times1 = data->timeSeriesData(iTimeBlock, s, 1);
-                    //cout << "times0 ptr = " << (void*)&times0[index] << endl;
-                    //cout << "times1 ptr = " << (void*)&times1[index] << endl;
 
                     i16c = *reinterpret_cast<TYPES::i16complex*>(&buffer[iPtr]);
                     times0[index] = _makeComplex(i16c);
@@ -282,7 +288,7 @@ void AdapterTimeSeriesDataSet::_printHeader(const UDPPacket::Header& header)
     cout << "* sourceInfo          = " << (unsigned)header.sourceInfo << endl;
     cout << "* configuration       = " << (unsigned)header.configuration << endl;
     cout << "* station             = " << (unsigned)header.station << endl;
-    cout << "* nrBeamlees          = " << (unsigned)header.nrBeamlets << endl;
+    cout << "* nrBeamlets          = " << (unsigned)header.nrBeamlets << endl;
     cout << "* nrBlocks            = " << (unsigned)header.nrBlocks << endl;
     cout << "* timestamp           = " << (unsigned)header.timestamp << endl;
     cout << "* blockSequenceNumber = " << (unsigned)header.blockSequenceNumber << endl;

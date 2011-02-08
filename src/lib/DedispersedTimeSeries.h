@@ -59,16 +59,16 @@ class DedispersedTimeSeries : public DataBlob
         unsigned nDMs() const { return _nDMs; }
 
         /// Return the block rate (timespan of the entire chunk)
-        long getBlockRate() const { return _blockRate; }
+        double getBlockRate() const { return _blockRate; }
 
         /// Return the block rate (timespan of the entire chunk)
-        void setBlockRate(long blockRate) { _blockRate = blockRate; }
+        void setBlockRate(double blockRate) { _blockRate = blockRate; }
 
         // Return the lofar timestamp
-        long long getLofarTimestamp() const { return _lofarTimestamp; }
+        double getLofarTimestamp() const { return _lofarTimestamp; }
 
         // Set the lofar timestamp
-        void setLofarTimestamp(long long timestamp) { _lofarTimestamp = timestamp; }
+        void setLofarTimestamp(double timestamp) { _lofarTimestamp = timestamp; }
 
         /// Returns a the value for the specified dm and sample
         DedispersedSeries<T>* samples(unsigned dm)
@@ -90,8 +90,8 @@ class DedispersedTimeSeries : public DataBlob
          std::vector<DedispersedSeries<T> > _values;
 
         unsigned _nDMs;
-        long     _blockRate;
-        long long _lofarTimestamp;
+        double     _blockRate;
+        double _lofarTimestamp;
 };
 
 
