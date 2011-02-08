@@ -74,6 +74,7 @@ target_link_libraries(timingPipeline
     ${FFTW3_FFTW_LIBRARY}
     ${FFTW3_FFTWF_LIBRARY}
 )
+install(TARGETS emptyPipeline udpBFPipeline udpBFPipelineStream1 udpBFPipelineStream2 DESTINATION ${BINARY_INSTALL_DIR})
 
 #install(TARGETS udpBFPipeline DESTINATION ${BINARY_INSTALL_DIR})
 

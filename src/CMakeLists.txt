@@ -77,3 +77,4 @@ target_link_libraries(serverMain
     ${QT_QTNETWORK_LIBRARY}
     ${Boost_PROGRAM_OPTIONS_LIBRARY}
 )
+install(TARGETS serverMain DESTINATION ${BINARY_INSTALL_DIR})
