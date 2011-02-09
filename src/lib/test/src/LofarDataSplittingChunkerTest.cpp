@@ -7,7 +7,7 @@
 
 #include "pelican/emulator/EmulatorDriver.h"
 #include "pelican/server/DataManager.h"
-#include "pelican/comms/Data.h"
+#include "pelican/comms/DataChunk.h"
 #include "pelican/server/test/ChunkerTester.h"
 
 #include <iostream>
