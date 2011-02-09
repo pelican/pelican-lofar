@@ -5,6 +5,7 @@
 #include "TimeSeriesDataSet.h"
 
 #include "pelican/utility/ConfigNode.h"
+#include "constants.h"
 
 #include <QtCore/QTime>
 #include <QtCore/QFile>
