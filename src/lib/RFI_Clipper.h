@@ -30,6 +30,7 @@ class RFI_Clipper : public AbstractModule
 
 
     private:
+        bool _active;
 };
 
     PELICAN_DECLARE_MODULE(RFI_Clipper)
