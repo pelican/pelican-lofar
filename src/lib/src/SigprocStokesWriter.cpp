@@ -13,7 +13,7 @@ namespace lofar {
 // Constructor
 // TODO: For now we write in 32-bit format...
 SigprocStokesWriter::SigprocStokesWriter(const ConfigNode& configNode )
-: AbstractOutputStream(configNode)
+  : AbstractOutputStream(configNode), _first(true)
 {
     _nSubbands = configNode.getOption("subbandsPerPacket", "value", "1").toUInt();
     _nTotalSubbands = configNode.getOption("totalComplexSubbands", "value", "1").toUInt();
@@ -33,29 +33,31 @@ SigprocStokesWriter::SigprocStokesWriter(const ConfigNode& configNode )
     _nchans   = _nChannels * _nSubbands;
     _buffSize = configNode.getOption("params", "bufferSize", "5120").toUInt();
     _cur = 0;
+    _first = (configNode.hasAttribute("writeHeader") && configNode.getAttribute("writeHeader").toLower() == "true" );
 
     // Open file
     _buffer.resize(_buffSize);
     _file.open(_filepath.toUtf8().data(), std::ios::out | std::ios::binary);
+}
 
+void SigprocStokesWriter::writeHeader(SpectrumDataSetStokes* stokes){
     // Write header
-    if( configNode.hasAttribute("writeHeader") && configNode.getAttribute("writeHeader").toLower() == "true" ) {
-        WriteString("HEADER_START");
-        WriteInt("machine_id", 0);    // Ignore for now
-        WriteInt("telescope_id", 0);  // Ignore for now
-        WriteInt("data_type", 1);     // Channelised Data
+    WriteString("HEADER_START");
+    WriteInt("machine_id", 0);    // Ignore for now
+    WriteInt("telescope_id", 0);  // Ignore for now
+    WriteInt("data_type", 1);     // Channelised Data
 
-        // Need to be parametrised ...
-        WriteDouble("fch1", _fch1);
-        WriteDouble("foff", _foff);
-        WriteInt("nchans", _nchans);
-        WriteDouble("tsamp", _tsamp);
-        WriteInt("nbits", 32);         // Only 32-bit binary data output is implemented for now
-        WriteDouble("tstart", 0);      //TODO: Extract start time from first packet
-        WriteInt("nifs", int(_nPols));		   // Polarisation channels.
-        WriteString("HEADER_END");
-        _file.flush();
-    }
+    // Need to be parametrised ...
+    WriteDouble("fch1", _fch1);
+    WriteDouble("foff", _foff);
+    WriteInt("nchans", _nchans);
+    WriteDouble("tsamp", _tsamp);
+    WriteInt("nbits", 32);         // Only 32-bit binary data output is implemented for now
+    WriteDouble("tstart", stokes->getLofarTimestamp());      //TODO: Extract start time from first packet
+    WriteInt("nifs", int(_nPols));		   // Polarisation channels.
+    WriteString("HEADER_END");
+    _file.flush();
+    
 }
 
 // Destructor
@@ -99,8 +101,13 @@ void SigprocStokesWriter::sendStream(const QString& /*streamName*/, const DataBl
     SpectrumDataSetStokes* stokes;
     DataBlob* blob = const_cast<DataBlob*>(incoming);
 
-    if (dynamic_cast<SpectrumDataSetStokes*>(blob)) {
-        stokes = (SpectrumDataSetStokes*) dynamic_cast<SpectrumDataSetStokes*>(blob);
+    //    if (dynamic_cast<SpectrumDataSetStokes*>(blob)) {
+    if (stokes = (SpectrumDataSetStokes*) dynamic_cast<SpectrumDataSetStokes*>(blob)){
+
+        if (_first){
+	  _first = false;
+	  writeHeader(stokes);
+        }
 
         unsigned nSamples = stokes->nTimeBlocks();
         unsigned nSubbands = stokes->nSubbands();

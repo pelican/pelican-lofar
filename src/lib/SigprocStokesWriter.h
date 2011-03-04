@@ -12,7 +12,7 @@
 namespace pelican {
 namespace lofar {
 
-
+class SpectrumDataSetStokes;
 class SigprocStokesWriter : public AbstractOutputStream
 {
     public:
@@ -30,13 +30,14 @@ class SigprocStokesWriter : public AbstractOutputStream
         void WriteFloat(QString name, float value);
         void WriteDouble(QString name, double value);
         void WriteLong(QString name, long value);
-
+	void writeHeader(SpectrumDataSetStokes* stokes);
         // Data helpers
     protected:
         // buffer and write data in blocks
         void _write(char*,size_t);
 
     private:
+	bool                _first;
         QString             _filepath;
         std::ofstream       _file;
 	    std::vector<char>   _buffer;
