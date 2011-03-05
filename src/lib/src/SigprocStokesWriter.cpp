@@ -40,7 +40,17 @@ SigprocStokesWriter::SigprocStokesWriter(const ConfigNode& configNode )
     _file.open(_filepath.toUtf8().data(), std::ios::out | std::ios::binary);
 }
 
-void SigprocStokesWriter::writeHeader(SpectrumDataSetStokes* stokes){
+  void SigprocStokesWriter::writeHeader(SpectrumDataSetStokes* stokes){
+    double _timeStamp = stokes->getLofarTimestamp();
+    struct tm tm;
+    time_t _epoch;
+    // MJD of 1/1/11 is 55562
+    if ( strptime("2011-1-1 1:0:0", "%Y-%m-%d %H:%M:%S", &tm) != NULL ){
+      _epoch = mktime(&tm);
+    }
+    double _mjdStamp = (_timeStamp-_epoch)/86400 + 55562.0;
+    std::cout << "MJD timestamp:" << std::fixed << _mjdStamp << std::endl;
+
     // Write header
     WriteString("HEADER_START");
     WriteInt("machine_id", 0);    // Ignore for now
@@ -53,7 +63,7 @@ void SigprocStokesWriter::writeHeader(SpectrumDataSetStokes* stokes){
     WriteInt("nchans", _nchans);
     WriteDouble("tsamp", _tsamp);
     WriteInt("nbits", 32);         // Only 32-bit binary data output is implemented for now
-    WriteDouble("tstart", stokes->getLofarTimestamp());      //TODO: Extract start time from first packet
+    WriteDouble("tstart", _mjdStamp);      //TODO: Extract start time from first packet
     WriteInt("nifs", int(_nPols));		   // Polarisation channels.
     WriteString("HEADER_END");
     _file.flush();
@@ -107,7 +117,7 @@ void SigprocStokesWriter::sendStream(const QString& /*streamName*/, const DataBl
         if (_first){
 	  _first = false;
 	  writeHeader(stokes);
-        }
+	}
 
         unsigned nSamples = stokes->nTimeBlocks();
         unsigned nSubbands = stokes->nSubbands();

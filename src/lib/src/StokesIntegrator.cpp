@@ -84,7 +84,10 @@ void StokesIntegrator::run(const SpectrumDataSetStokes* stokesGeneratorOutput,
         }
         timeStart=timeStart+_windowSize;
     }
+    // Set the timestamp of the first time sample
+    intStokes->setLofarTimestamp(stokesGeneratorOutput->getLofarTimestamp());
 
+    //std::cout << "timestamp in integrator:" << intStokes->getLofarTimestamp() << std::endl;
     //TIMER_STOP(ts);
     //std::cout << ts << std::endl;
 }
