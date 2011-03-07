@@ -40,13 +40,16 @@ SigprocStokesWriter::SigprocStokesWriter(const ConfigNode& configNode )
     _file.open(_filepath.toUtf8().data(), std::ios::out | std::ios::binary);
 }
 
-  void SigprocStokesWriter::writeHeader(SpectrumDataSetStokes* stokes){
+void SigprocStokesWriter::writeHeader(SpectrumDataSetStokes* stokes){
     double _timeStamp = stokes->getLofarTimestamp();
     struct tm tm;
     time_t _epoch;
     // MJD of 1/1/11 is 55562
     if ( strptime("2011-1-1 1:0:0", "%Y-%m-%d %H:%M:%S", &tm) != NULL ){
       _epoch = mktime(&tm);
+    }
+    else {
+        throw( QString("SigprocStokesWriter: unable to set epoch.") );
     }
     double _mjdStamp = (_timeStamp-_epoch)/86400 + 55562.0;
     std::cout << "MJD timestamp:" << std::fixed << _mjdStamp << std::endl;
