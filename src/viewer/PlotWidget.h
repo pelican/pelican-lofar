@@ -3,8 +3,8 @@
 
 #include <QtCore/QObject>
 
-#include <qwt-qt4/qwt_plot.h>
-#include <qwt-qt4/qwt_plot_curve.h>
+#include <qwt_plot.h>
+#include <qwt_plot_curve.h>
 
 class QwtPlotPanner;
 class QwtPlotZoomer;

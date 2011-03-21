@@ -1,12 +1,12 @@
 #include "viewer/PlotWidget.h"
 #include "viewer/PlotPicker.h"
 
-#include <qwt-qt4/qwt_plot_zoomer.h>
-#include <qwt-qt4/qwt_plot_grid.h>
-#include <qwt-qt4/qwt_symbol.h>
-#include <qwt-qt4/qwt_plot_panner.h>
-#include <qwt-qt4/qwt_plot_layout.h>
-#include <qwt-qt4/qwt_plot_curve.h>
+#include <qwt_plot_zoomer.h>
+#include <qwt_plot_grid.h>
+#include <qwt_symbol.h>
+#include <qwt_plot_panner.h>
+#include <qwt_plot_layout.h>
+#include <qwt_plot_curve.h>
 
 #include <QtGui/QColor>
 #include <QtGui/QFileDialog>
