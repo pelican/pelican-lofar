@@ -16,6 +16,9 @@ target_link_libraries(emptyPipeline
     pelicanMdsm
     pelican-lofar_static
     ${PELICAN_LIBRARY}
+    ${QT_QTNETWORK_LIBRARY}
+    ${QT_QTXML_LIBRARY}
+    ${QT_QTCORE_LIBRARY}
 )
 
 # === Build the UDP Beamforming pipeline binary.
@@ -30,6 +33,9 @@ target_link_libraries(udpBFPipeline
     ${PELICAN_LIBRARY}
     ${FFTW3_FFTW_LIBRARY}
     ${FFTW3_FFTWF_LIBRARY}
+    ${QT_QTNETWORK_LIBRARY}
+    ${QT_QTXML_LIBRARY}
+    ${QT_QTCORE_LIBRARY}
 )
 
 # === Build the UDP Beamforming pipeline binary for stream 1.
@@ -44,6 +50,9 @@ target_link_libraries(udpBFPipelineStream1
     ${PELICAN_LIBRARY}
     ${FFTW3_FFTW_LIBRARY}
     ${FFTW3_FFTWF_LIBRARY}
+    ${QT_QTNETWORK_LIBRARY}
+    ${QT_QTXML_LIBRARY}
+    ${QT_QTCORE_LIBRARY}
 )
 
 # === Build the UDP Beamforming pipeline binary for stream 2.
@@ -58,6 +67,9 @@ target_link_libraries(udpBFPipelineStream2
     ${PELICAN_LIBRARY}
     ${FFTW3_FFTW_LIBRARY}
     ${FFTW3_FFTWF_LIBRARY}
+    ${QT_QTNETWORK_LIBRARY}
+    ${QT_QTXML_LIBRARY}
+    ${QT_QTCORE_LIBRARY}
 )
 
 
@@ -73,6 +85,9 @@ target_link_libraries(timingPipeline
     ${PELICAN_LIBRARY}
     ${FFTW3_FFTW_LIBRARY}
     ${FFTW3_FFTWF_LIBRARY}
+    ${QT_QTNETWORK_LIBRARY}
+    ${QT_QTXML_LIBRARY}
+    ${QT_QTCORE_LIBRARY}
 )
 install(TARGETS emptyPipeline udpBFPipeline udpBFPipelineStream1 udpBFPipelineStream2 DESTINATION ${BINARY_INSTALL_DIR})
 

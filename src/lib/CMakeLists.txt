@@ -66,8 +66,11 @@ install(FILES ${public_headers} DESTINATION "${INCLUDE_INSTALL_DIR}")
 # ------------------------------------------------------------------------------
 add_executable(blobClient blobClientMain.cpp)
 target_link_libraries(blobClient
-    ${PELICAN_LIBRARY}
     pelican-lofar_static
+    ${PELICAN_LIBRARY}
+    ${QT_QTNETWORK_LIBRARY}
+    ${QT_QTXML_LIBRARY}
+    ${QT_QTCORE_LIBRARY}
 )
 
 # Recurse into the test directory.

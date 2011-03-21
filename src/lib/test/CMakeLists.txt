@@ -60,6 +60,9 @@ add_executable(lofarEmulatorDataSim src/lofarEmulatorDataSimMain.cpp)
 target_link_libraries(lofarEmulatorDataSim
     pelican-lofar_static
     ${PELICAN_LIBRARY}
+    ${QT_QTCORE_LIBRARY}
+    ${QT_QTNETWORK_LIBRARY}
+    ${QT_QTXML_LIBRARY}
     lofarTestLib
 )
 
@@ -76,6 +79,8 @@ target_link_libraries(ppfTest
     pelican-lofar_static
     ${PELICAN_LIBRARY}
     ${QT_QTCORE_LIBRARY}
+    ${QT_QTNETWORK_LIBRARY}
+    ${QT_QTXML_LIBRARY}
 )
 
 
