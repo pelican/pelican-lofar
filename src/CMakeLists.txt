@@ -65,6 +65,9 @@ install(TARGETS "lofarClient" DESTINATION ${BINARY_INSTALL_DIR})
 
 target_link_libraries(lofarClient
     pelican-lofar_static
+    ${QT_QTCORE_LIBRARY}
+    ${QT_QTNETWORK_LIBRARY}
+    ${QT_QTXML_LIBRARY}
     ${PELICAN_LIBRARY}
     ${FFTW3_LIBRARIES}
 )
