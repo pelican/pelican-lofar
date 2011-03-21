@@ -37,6 +37,9 @@ target_link_libraries(lofarTest
     ${FFTW3_FFTW_LIBRARY}
     ${FFTW3_FFTWF_LIBRARY}
     ${CPPUNIT_LIBRARIES}
+    ${QT_QTCORE_LIBRARY}
+    ${QT_QTNETWORK_LIBRARY}
+    ${QT_QTXML_LIBRARY}
 )
 
 add_test(lofarTest lofarTest)
