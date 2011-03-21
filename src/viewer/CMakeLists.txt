@@ -9,8 +9,6 @@ include_directories(
     ${Qwt5_INCLUDE_DIR}
 )
 
-message("qwt dir = ${Qwt5_INCLUDE_DIR}")
-
 set(widget_lib_UI
     forms/SpectrumDataSetViewer.ui
 )
