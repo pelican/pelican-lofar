@@ -5,8 +5,8 @@
  * @file PlotPicker.h
  */
 
-#include <qwt-qt4/qwt_plot_picker.h>
-#include <qwt-qt4/qwt_text.h>
+#include <qwt_plot_picker.h>
+#include <qwt_text.h>
 
 namespace pelican {
 namespace lofar {
