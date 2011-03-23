@@ -51,21 +51,31 @@ namespace lofar {
                         sumI += I[c];
                         sumI2 += pow(I[c],2);
                     }
+                    // This gets you the median of each spectrum on the copy, data not affected
                     std::nth_element(copyI.begin(), copyI.begin()+copyI.size()/2, copyI.end());
                     subbandMedian[s]=(float)*(copyI.begin()+copyI.size()/2);
 
+                    // These get you the mean and rms which you probably don't need
+
                     copySM[s] = subbandMedian[s];
                     subbandMean[s] = sumI/nChannels;
+
                     subbandRMS[s] = sqrt(sumI2/nChannels - pow(subbandMean[s],2));
 
                     copySubbandRMS[s] = subbandRMS[s];
                 }
+
+                // This is bad and needs to go. It gives you the median of the subband medians and RMSs
 
                 std::nth_element(copySM.begin(), copySM.begin()+copySM.size()/2, copySM.end());
                 medianOfMedians=*(copySM.begin()+copySM.size()/2);
 
                 std::nth_element(copySubbandRMS.begin(), copySubbandRMS.begin()+copySubbandRMS.size()/2, copySubbandRMS.end());
                 medianOfRMS=*(copySubbandRMS.begin()+copySubbandRMS.size()/2);
+
+
+                // this is where the criteria are applied
+                // if datum succeeds it is kept, if it fails, it is set to the bandpass value
 
                 for (unsigned s = 0; s < nSubbands; ++s) {
                     I = stokesI -> spectrumData(t, s, 0);
