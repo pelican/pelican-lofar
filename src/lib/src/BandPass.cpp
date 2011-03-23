@@ -20,31 +20,43 @@ BandPass::BandPass()
 /**
  *@details
  */
-BandPass::~BandPass()
-{
+BandPass::~BandPass() {
 }
 
 void BandPass::setData(const BinMap& map,const QVector<float>& params ) {
     _primaryMap = map;
     _params = params;
+     reBin( map );
 }
 
-float BandPass::intensity(float frequency, const BinMap& map ) const
+void BandPass::setRMS(float rms) {
+    _rms[_currentMap] = rms;
+}
+
+void BandPass::setMedian(float mean) {
+    _mean[_currentMap] = mean;
+}
+
+void BandPass::reBin(const BinMap& map)
 {
-    // our ref data corresponds to a specific binning
-    // where this is different we need to adjust the intensities
+    _currentMap = map;
     if( ! _dataSets.contains(map) ) {
-        // create the binned data with the
-        // parameterised equation, scaled suitably
         BinnedData binnedData(map); 
         float scale = map.width()/_primaryMap.width();
-        for( int i=0; i < map.numberBins(); ++i ) {
-             binnedData.setBin(i, scale * _evaluate(frequency));
+        // scale the RMS and mean
+        _rms[map]= _rms[_primaryMap] * std::sqrt( scale );
+        // scale and set the intensities
+        for( unsigned int i=0; i < map.numberBins(); ++i ) {
+            binnedData.setBin( i, scale * _evaluate(map.binAssignmentNumber(i)));
         }
         _dataSets.insert(map, binnedData);
     }
-    int index = map.binIndex(frequency);
-    return _dataSets[map][index];
+}
+
+float BandPass::intensity( float frequency ) const
+{
+    int index = _currentMap.binIndex(frequency);
+    return _dataSets[_currentMap][index];
 }
 
 float BandPass::_evaluate(float v) const

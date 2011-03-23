@@ -40,6 +40,8 @@ void BandPassAdapter::deserialise(QIODevice* device)
     float startFreq = (device->readLine()).toFloat();
     float endFreq = (device->readLine()).toFloat();
     float deltaF = (device->readLine()).toFloat();
+    float rms = (device->readLine()).toFloat();
+    float median = (device->readLine()).toFloat();
     QVector<float> params;
     while( device->canReadLine() ) {
         params.append( (device->readLine()).toFloat() );
@@ -48,6 +50,8 @@ void BandPassAdapter::deserialise(QIODevice* device)
     map.setStart(startFreq);
     map.setBinWidth(deltaF);
     blob->setData( map, params );
+    blob->setMedian(median);
+    blob->setRMS(rms);
 
 }
 

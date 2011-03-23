@@ -31,6 +31,8 @@ class BinMap
         float width() const { return _width; };
         unsigned int numberBins() const { return _nBins; };
         float startValue() const { return _lower; }
+        // return the value associated with the bin with the specified index
+        float binAssignmentNumber(int index) const;
         bool equals(const BinMap&) const;
         bool operator<(const BinMap&) const;
 

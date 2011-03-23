@@ -17,7 +17,7 @@ namespace lofar {
  * @class BandPassAdapter
  *  
  * @brief
- * 
+ *    Fills a BandPass object from a suitable bandpass data stream
  * @details
  * 
  */

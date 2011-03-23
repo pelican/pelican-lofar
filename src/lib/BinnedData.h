@@ -27,9 +27,9 @@ class BinnedData
         BinnedData(const BinMap& map);
         BinnedData() {};
         ~BinnedData();
-        BinnedData binAs(const BinMap&);
+        BinnedData binAs(const BinMap&) const;
         void setBin(int binIndex, float value);
-        float operator[](int i) const { return _bin[i]; };
+        inline float operator[](int i) const { return _bin[i]; };
 
     private:
         BinMap  _map;

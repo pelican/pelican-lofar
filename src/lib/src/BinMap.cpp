@@ -39,6 +39,11 @@ void BinMap::setBinWidth(float width)
     _width = width;
 }
 
+float BinMap::binAssignmentNumber(int index) const
+{
+    return _lower + ( _width * index );
+}
+
 bool BinMap::equals(const BinMap& map) const
 {
     return (_lower == map._lower) && (_width == map._width);

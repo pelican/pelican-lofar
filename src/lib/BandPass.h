@@ -7,6 +7,7 @@
 
 #include <QVector>
 #include <QMap>
+#include <QHash>
 
 /**
  * @file BandPass.h
@@ -32,15 +33,23 @@ class BandPass : public DataBlob
         BandPass(  );
         ~BandPass();
         void setData(const BinMap&,const QVector<float>& params );
-        float intensity(float frequency, const BinMap& b) const;
+        void setRMS(float);
+        void setMedian(float);
+        void reBin(const BinMap& map);
+        float intensity(float frequency) const;
+
+    protected:
+        float _evaluate(float) const; // calculate value of parameterised eqn
 
     private:
-        float _evaluate(float) const; // calculate value of parameterised eqn
         int _nChannels;
         BinMap _primaryMap;
+        BinMap _currentMap;
         QVector<float> _params;
         float _deltaFreq;
-        mutable QMap<BinMap,BinnedData> _dataSets;
+        QMap<BinMap,BinnedData> _dataSets;
+        QMap<BinMap,float> _rms;
+        QMap<BinMap,float> _mean;
 };
 
 PELICAN_DECLARE_DATABLOB(BandPass)

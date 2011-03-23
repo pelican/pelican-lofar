@@ -1,10 +1,7 @@
 #include "BinnedData.h"
 
-
 namespace pelican {
-
 namespace lofar {
-
 
 /**
  *@details BinnedData 
@@ -22,7 +19,7 @@ BinnedData::~BinnedData()
 {
 }
 
-BinnedData BinnedData::binAs(const BinMap& map)
+BinnedData BinnedData::binAs(const BinMap& map) const
 {
      // trivial case where binning is the same
      if( map.equals(_map) ) 
