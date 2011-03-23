@@ -1,11 +1,13 @@
 #include "RFI_Clipper.h"
 #include "SpectrumDataSet.h"
+#include <QFile>
+#include <QString>
+#include "BandPassAdapter.h"
+#include "BandPass.h"
+#include "pelican/utility/ConfigNode.h"
 
 namespace pelican {
-    
 namespace lofar {
-        
-    
     /**
      *@details RFI_Clipper 
      */
@@ -14,6 +16,17 @@ namespace lofar {
     {
         if( config.hasAttribute("active") &&  config.getAttribute("active").toLower() == QString("false") ) {
             _active = false;
+        }
+        // read in any fixed file data
+        QString file = config.getOption("BandPassData", "file", "");
+        if( file != "" ) { 
+            if(! QFile::exists(file)) 
+                throw(QString("RFI_Clipper: File \"" + file + "\" does not exist"));
+
+            QFile dataFile(file);
+            BandPassAdapter adapter(config);
+            adapter.config(&_bandPass, dataFile.size());
+            adapter.deserialise(&dataFile);
         }
     }
     
