@@ -5,7 +5,6 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 set(lib_src
     src/AdapterTimeSeriesDataSet.cpp
     src/BinMap.cpp
-    src/BinnedData.cpp
     src/BandPassAdapter.cpp
     src/BandPass.cpp
     src/OutputHDF5Lofar.cpp

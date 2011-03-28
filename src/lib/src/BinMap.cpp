@@ -56,7 +56,7 @@ bool operator==(const BinMap& m1, const BinMap& m2)
 
 bool BinMap::operator<(const BinMap& map) const
 {
-     return _lower < map._lower;
+     return _lower < map._lower || _nBins < map._nBins || _width < map._width;
 }
 
 } // namespace lofar

@@ -37,6 +37,9 @@ class BandPass : public DataBlob
         void setMedian(float);
         void reBin(const BinMap& map);
         float intensity(float frequency) const;
+        float intensityOfBin(unsigned index) const;
+        float median() const { return _median[_currentMap]; }
+        float rms() const { return _rms[_currentMap]; }
 
     protected:
         float _evaluate(float) const; // calculate value of parameterised eqn
@@ -47,9 +50,9 @@ class BandPass : public DataBlob
         BinMap _currentMap;
         QVector<float> _params;
         float _deltaFreq;
-        QMap<BinMap,BinnedData> _dataSets;
+        QMap<BinMap, QVector<float> > _dataSets;
         QMap<BinMap,float> _rms;
-        QMap<BinMap,float> _mean;
+        QMap<BinMap,float> _median;
 };
 
 PELICAN_DECLARE_DATABLOB(BandPass)

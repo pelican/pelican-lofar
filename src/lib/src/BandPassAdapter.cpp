@@ -3,7 +3,6 @@
 #include <QString>
 #include <QVector>
 #include "BinMap.h"
-#include "BinnedData.h"
 #include "BandPass.h"
 
 
