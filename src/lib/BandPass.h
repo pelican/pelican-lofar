@@ -36,6 +36,8 @@ class BandPass : public DataBlob
         void setRMS(float);
         void setMedian(float);
         void reBin(const BinMap& map);
+        float startFrequency() const;
+        float endFrequency() const;
         float intensity(float frequency) const;
         float intensityOfBin(unsigned index) const;
         float median() const { return _median[_currentMap]; }

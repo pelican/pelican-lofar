@@ -3,15 +3,18 @@
 
 #include <cppunit/extensions/HelperMacros.h>
 #include <QList>
+#include <QString>
 
 /**
  * @file RFI_ClipperTest.h
  */
 
 namespace pelican {
+    class ConfigNode;
 
 namespace lofar {
     class SpectrumDataSetStokes;
+    class BandPass;
 
 /**
  * @class RFI_ClipperTest
@@ -61,10 +64,11 @@ class RFI_ClipperTest : public CppUnit::TestFixture
 
     private:
         void dump(const SpectrumDataSetStokes a);
-        void  _initSubbandData( SpectrumDataSetStokes& s, SpectrumDataSetStokes& shifted, int numberOfSubbands, int numberOfChannels = 16 );
+        void  _initSubbandData( SpectrumDataSetStokes& s, SpectrumDataSetStokes& shifted, const BandPass& bandpass, int numberOfSubbands, int numberOfChannels = 16 );
         QList<StokesIndex> _diff(const SpectrumDataSetStokes& a, const SpectrumDataSetStokes& b );
+        ConfigNode testConfig(const QString& = "t191_BAND.bp");
 };
 
 } // namespace lofar
-} // namespace pelican
+} // namespace pelicanND.bp
 #endif // RFI_CLIPPERTEST_H 

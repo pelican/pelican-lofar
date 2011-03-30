@@ -39,6 +39,11 @@ void BinMap::setBinWidth(float width)
     _width = width;
 }
 
+void BinMap::setEnd(float end)
+{
+    _width = ( end - _lower )/_nBins;
+}
+
 float BinMap::binAssignmentNumber(int index) const
 {
     return _lower + ( _width * index );

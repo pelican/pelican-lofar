@@ -1,6 +1,8 @@
 #include "RFI_ClipperTest.h"
 #include "RFI_Clipper.h"
 #include "SpectrumDataSet.h"
+#include "BandPass.h"
+#include "pelican/utility/TestConfig.h"
 #include <iostream>
 
 
@@ -37,15 +39,16 @@ void RFI_ClipperTest::test_goodData()
 {
     try {
     // Use Case:
-    // Data has no significant pikes
+    // Data has no significant spikes
     // Expect:
     // Pass through unchanged
-    ConfigNode config;
+    ConfigNode config = testConfig();
     RFI_Clipper rfi(config);
 
     SpectrumDataSetStokes data;
     SpectrumDataSetStokes expect;
-    _initSubbandData(data, expect, 4);
+    int nChannels = 16;
+    _initSubbandData(data, expect, rfi.bandPass(), 31, nChannels);
     rfi.run(&data);
     CPPUNIT_ASSERT_EQUAL( 0,  _diff(data, expect).size() );
     }
@@ -62,13 +65,13 @@ void RFI_ClipperTest::test_badSubband()
     // Data has a single subband which is bad
     // Expect:
     // Bad Subband is reduced to 0, all other values pass OK
-    ConfigNode config;
+    ConfigNode config = testConfig();
     RFI_Clipper rfi(config);
 
     SpectrumDataSetStokes data;
     SpectrumDataSetStokes expect;
     int nChannels = 16;
-    _initSubbandData( data, expect, 31, nChannels );
+    _initSubbandData( data, expect,rfi.bandPass(), 31, nChannels );
     int badBlock = 0;
     int badSubband = 0;
     int badPol = 0;
@@ -77,8 +80,8 @@ void RFI_ClipperTest::test_badSubband()
     float* d2 = expect.spectrumData(badBlock,badSubband,badPol); 
     for(int channel=0; channel < nChannels; ++channel)
     {
-        d[channel] *= 3;
         d2[channel] = 0;
+        d[channel] *= 3;
     }
 
     rfi.run(&data);
@@ -106,12 +109,12 @@ void RFI_ClipperTest::test_badChannel()
     // Data has a single channel in a single subband which is bad
     // Expect:
     // Bad channel is reduced to 0, all other values are OK
-    ConfigNode config;
+    ConfigNode config = testConfig();
     RFI_Clipper rfi(config);
 
     SpectrumDataSetStokes data;
     SpectrumDataSetStokes expect;
-    _initSubbandData(data, expect, 31, 16);
+    _initSubbandData(data, expect, rfi.bandPass(), 31, 16);
 
     // put in a bad channel
     int badBlock = 0;
@@ -120,8 +123,8 @@ void RFI_ClipperTest::test_badChannel()
     int badPol = 0;
     float* d = data.spectrumData(badBlock,badSubband,badPol); 
     float* e = expect.spectrumData(badBlock,badSubband,badPol); 
+    e[badChannel] = 0; //d[badChannel];
     d[badChannel] *= 3; // should not catch below this
-    e[badChannel] = 0;
 
     rfi.run(&data);
     QList<RFI_ClipperTest::StokesIndex> different = _diff(expect,data);
@@ -140,24 +143,35 @@ void RFI_ClipperTest::test_badChannel()
     }
 }
 
-void  RFI_ClipperTest::_initSubbandData( SpectrumDataSetStokes& primary, SpectrumDataSetStokes& shifted, int numberOfSubbands, int numberOfChannels )
+void  RFI_ClipperTest::_initSubbandData( SpectrumDataSetStokes& primary, SpectrumDataSetStokes& shifted, const BandPass& bp, int numberOfSubbands, int numberOfChannels )
 {
     int numberOfBlocks = 10;
     int numberOfPolarisations = 1;
-    float value = (numberOfChannels/2.0);
-    int maxRange = value - 1;
+    BandPass bandPass = bp;
+    //float value = (numberOfChannels/2.0);
+    //int maxRange = value - 1;
+    BinMap map( numberOfChannels * numberOfSubbands );
+    map.setStart(bandPass.startFrequency());
+    map.setEnd(bandPass.endFrequency());
+    bandPass.reBin(map);
+    int maxRange = bandPass.rms();
 
     //float av = 0;
+    // generate a dataset that is like the BandPass with random noise < rms of the bandpass
     primary.resize( numberOfBlocks, numberOfSubbands, numberOfPolarisations, numberOfChannels );
     for( int block=0; block < numberOfBlocks; ++block ) {
+        int bin = 0;
         for( int subband=0; subband < numberOfSubbands; ++subband ) {
             for( int polarisation=0; polarisation < numberOfPolarisations; ++polarisation ) {
                 float* ptr = primary.spectrumData( block, subband, polarisation );
                 for( int i=0; i < numberOfChannels; ++i ) {
-                    ptr[i] = value + rand()%maxRange;
+                    //ptr[i] = value + rand()%maxRange;
+                    //ptr[i] = bandPass.intensityOfBin(bin + i) + rand()%maxRange;
+                    ptr[i] = bandPass.intensityOfBin(bin + i) + rand()%maxRange;
                     //av += ptr[i];
                 }
             }
+            bin += numberOfChannels;
         }
     }
     shifted = primary; // no longer need to shift
@@ -231,6 +245,19 @@ void RFI_ClipperTest::dump(const SpectrumDataSetStokes a)
         }
     }
     std::cout << "-----------------------------------------" << std::endl;
+}
+
+ConfigNode RFI_ClipperTest::testConfig(const QString& file)
+{
+    ConfigNode node;
+    QString xml = "<RFI_Clipper rejectionFactor=\"1.50\" >\n"
+                        "<BandPassData file=\"" + 
+                        pelican::test::TestConfig::findTestFile(file, "lib") 
+                        + "\" />\n"
+                        "<Band startFrequency=\"137.3\" endFrequency=\"131.250763\" />\n"
+                  "</RFI_Clipper>\n";
+    node.setFromString( xml );
+    return node;
 }
 
 } // namespace lofar

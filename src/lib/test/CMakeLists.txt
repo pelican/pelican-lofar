@@ -14,7 +14,7 @@ add_library(lofarTestLib STATIC ${lofarTestLib_src})
 set(lofarTest_src
     src/libTest.cpp
     src/BandPassTest.cpp
-    #src/RFI_ClipperTest.cpp
+    src/RFI_ClipperTest.cpp
     src/PumaOutputTest.cpp
     src/DataStreamingTest.cpp
     ###src/PelicanBlobClientTest.cpp

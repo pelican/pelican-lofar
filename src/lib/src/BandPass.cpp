@@ -53,6 +53,16 @@ void BandPass::reBin(const BinMap& map)
     }
 }
 
+float BandPass::startFrequency() const
+{
+    return _currentMap.startValue();
+}
+
+float BandPass::endFrequency() const
+{
+    return _currentMap.endValue();
+}
+
 float BandPass::intensity( float frequency ) const
 {
     int index = _currentMap.binIndex(frequency);

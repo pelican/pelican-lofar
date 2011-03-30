@@ -26,11 +26,13 @@ class BinMap
         BinMap( unsigned int numberBins );
         ~BinMap();
         void setStart(float);
+        void setEnd(float);
         void setBinWidth(float);
         int binIndex(float) const;
         float width() const { return _width; };
         unsigned int numberBins() const { return _nBins; };
         float startValue() const { return _lower; }
+        float endValue() const { return _lower + _width*_nBins; }
         // return the value associated with the bin with the specified index
         float binAssignmentNumber(int index) const;
         bool equals(const BinMap&) const;

@@ -28,10 +28,14 @@ class RFI_Clipper : public AbstractModule
         RFI_Clipper( const ConfigNode& config );
         ~RFI_Clipper();
         void run(SpectrumDataSetStokes* stokesI);
+        const BandPass& bandPass() const { return _bandPass; }; // return the BandPass Filter in use
 
     private:
         BandPass  _bandPass;
         bool _active;
+        float _startFrequency;
+        float _endFrequency;
+        float _rFactor; // scale factor for rejection (multiples of RMS)
 };
 
     PELICAN_DECLARE_MODULE(RFI_Clipper)
