@@ -38,16 +38,21 @@ namespace lofar {
 
         if( config.hasAttribute("rejectionFactor")  )
                 _rFactor = config.getAttribute("rejectionFactor").toFloat();
-        if( config.getOption("Band", "startFrequency" ) == "" ) {
-                throw(QString("RFI_Clipper: <Band startFrequency=?> not defined"));
+        if( config.getOption("Band", "matching" ) == "true" ) {
+            _startFrequency = _bandPass.startFrequency();
+            _endFrequency = _bandPass.endFrequency();
         }
-        _startFrequency = config.getOption("Band","startFrequency" ).toFloat();
+        else {
+            if( config.getOption("Band", "startFrequency" ) == "" ) {
+                    throw(QString("RFI_Clipper: <Band startFrequency=?> not defined"));
+            }
+            _startFrequency = config.getOption("Band","startFrequency" ).toFloat();
 
-        QString efreq = config.getOption("Band", "endFrequency" );
-        if( efreq == "" )
-                throw(QString("RFI_Clipper: <Band endFrequency=?> not defined"));
-        _endFrequency= efreq.toFloat();
-        
+            QString efreq = config.getOption("Band", "endFrequency" );
+            if( efreq == "" )
+                    throw(QString("RFI_Clipper: <Band endFrequency=?> not defined"));
+            _endFrequency= efreq.toFloat();
+        }
     }
 
     /**
