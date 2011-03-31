@@ -33,7 +33,8 @@ namespace lofar {
             adapter.deserialise(&dataFile);
         }
         else {
-            throw(QString("RFI_Clipper: <BandPassData file=?> not defined"));
+            if( _active )
+                throw(QString("RFI_Clipper: <BandPassData file=?> not defined"));
         }
 
         if( config.hasAttribute("rejectionFactor")  )
@@ -43,15 +44,17 @@ namespace lofar {
             _endFrequency = _bandPass.endFrequency();
         }
         else {
-            if( config.getOption("Band", "startFrequency" ) == "" ) {
-                    throw(QString("RFI_Clipper: <Band startFrequency=?> not defined"));
-            }
-            _startFrequency = config.getOption("Band","startFrequency" ).toFloat();
+            if( _active ) {
+                if( config.getOption("Band", "startFrequency" ) == "" ) {
+                        throw(QString("RFI_Clipper: <Band startFrequency=?> not defined"));
+                }
+                _startFrequency = config.getOption("Band","startFrequency" ).toFloat();
 
-            QString efreq = config.getOption("Band", "endFrequency" );
-            if( efreq == "" )
-                    throw(QString("RFI_Clipper: <Band endFrequency=?> not defined"));
-            _endFrequency= efreq.toFloat();
+                QString efreq = config.getOption("Band", "endFrequency" );
+                if( efreq == "" )
+                        throw(QString("RFI_Clipper: <Band endFrequency=?> not defined"));
+                _endFrequency= efreq.toFloat();
+            }
         }
     }
 
