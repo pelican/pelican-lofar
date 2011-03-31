@@ -113,9 +113,10 @@ namespace lofar {
                     I = stokesI -> spectrumData(t, s, 0);
                     for (unsigned c = 0; c < nChannels; ++c) {
                         float res = I[c] - medianDelta - _bandPass.intensityOfBin( ++bin );
-                        if ( std::fabs(res) > margin ) {
-                            //I[c] = _bandPass.intensityOfBin( bin ) + medianDelta;
-                            I[c] = 0;
+			//                        if ( std::fabs(res) > margin ) {
+                        if ( res > margin ) {
+                            I[c] = _bandPass.intensityOfBin( bin ) + medianDelta;
+                            //I[c] = 0;
                         }
                     }
             }
