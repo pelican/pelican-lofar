@@ -100,7 +100,7 @@ namespace lofar {
                     }
                 }
             }
-            // calculate the mean of all subbands and channels
+            // calculate the DC offset between bandpass description and current spectrum
             std::nth_element(copyI.begin(), copyI.begin()+copyI.size()/2, copyI.end());
             float median = (float)*(copyI.begin()+copyI.size()/2);
             float medianDelta = median - _bandPass.median();
@@ -108,86 +108,19 @@ namespace lofar {
             // readjust relative to median
             float margin = std::fabs(_rFactor * _bandPass.rms());
             for (unsigned t = 0; t < nSamples; ++t) {
+	        int clipped = 0;
+		float clipping_ratio = 0.0;
                 int bin = -1;
                 for (unsigned s = 0; s < nSubbands; ++s) {
                     I = stokesI -> spectrumData(t, s, 0);
                     for (unsigned c = 0; c < nChannels; ++c) {
                         float res = I[c] - medianDelta - _bandPass.intensityOfBin( ++bin );
-			//                        if ( std::fabs(res) > margin ) {
                         if ( res > margin ) {
-                            I[c] = _bandPass.intensityOfBin( bin ) + medianDelta;
-                            //I[c] = 0;
-                        }
+			  I[c] = _bandPass.intensityOfBin( bin ) + medianDelta + margin;
+			  ++clipped;
+			} 
                     }
-            }
-/*
-            for (unsigned t = 0; t < nSamples; ++t) {
-                unsigned int bin = 0;
-                for (unsigned s = 0; s < nSubbands; ++s) {
-                    //sumI2 = 0.0;
-                    sumI = 0.0;
-                    I = stokesI -> spectrumData(t, s, 0);
-                    for (unsigned c = 0; c < nChannels; ++c) {
-                        copyI[c]=I[c];
-                        sumI += I[c];
-                        //sumI2 += pow(I[c],2);
-                    }
-                    // This gets you the median of each spectrum on the copy, data not affected
-                    std::nth_element(copyI.begin(), copyI.begin()+copyI.size()/2, copyI.end());
-                    subbandMedian[s]=(float)*(copyI.begin()+copyI.size()/2);
-
-                    float res = subbandMedian[s] - _bandPass.intensityOfBin( s );
-                    std::cout << "s=" << s << " res=" << res << " intensity=" << _bandPass.intensityOfBin( s ) << std::endl;
-                    if ( res > margin ) {
-                        for (unsigned int c = 0; c < nChannels; ++c) {
-                            //I[c] -= res;
-                            I[c] = 0;
-                        }
-                    }
-
-                    // These get you the mean and rms which you probably don't need
-                    //copySM[s] = subbandMedian[s];
-                    //subbandMean[s] = sumI/nChannels;
-                    //subbandRMS[s] = sqrt(sumI2/nChannels - pow(subbandMean[s],2));
-                    //copySubbandRMS[s] = subbandRMS[s];
-                }
-*/
-
-                // This is bad and needs to go. It gives you the median of the subband medians and RMSs
-
-                //std::nth_element(copySM.begin(), copySM.begin()+copySM.size()/2, copySM.end());
-                //medianOfMedians=*(copySM.begin()+copySM.size()/2);
-
-                //std::nth_element(copySubbandRMS.begin(), copySubbandRMS.begin()+copySubbandRMS.size()/2, copySubbandRMS.end());
-                //medianOfRMS=*(copySubbandRMS.begin()+copySubbandRMS.size()/2);
-
-
-                // this is where the criteria are applied
-                // if datum succeeds it is kept, if it fails, it is set to the bandpass value
-
-/*
-                for (unsigned s = 0; s < nSubbands; ++s) {
-                    I = stokesI -> spectrumData(t, s, 0);
-                    if (subbandMedian[s] > 2.0 * medianOfMedians){
-                        //std::cout << "Clipping subband: " << s << std::endl;
-                        //std::cout << subbandMedian[s] << " " << medianOfMedians << std::endl;
-                        for (unsigned c = 0; c < nChannels; ++c) {
-                            I[c]=medianOfMedians;
-                        }
-                    }
-                    else{
-                        for (unsigned c = 0; c < nChannels; ++c) {
-                            if (fabs(I[c]-subbandMedian[s]) > 5. * medianOfRMS){
-                                //std::cout << "Clipping subband, channel: " << std::endl;
-                                //std::cout << s << " " << c << std::endl;
-                                //std::cout << subbandMedian[s] << " " << subbandRMS[s] << std::endl;
-                                //std::cout << medianOfMedians << " " << medianOfRMS << std::endl;
-                                I[c]=subbandMedian[s];
-                            }
-                        }
-                    }
-                }
-*/
+		}
             }
         }
     }
