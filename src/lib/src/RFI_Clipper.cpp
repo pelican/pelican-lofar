@@ -108,16 +108,14 @@ namespace lofar {
             // readjust relative to median
             float margin = std::fabs(_rFactor * _bandPass.rms());
             for (unsigned t = 0; t < nSamples; ++t) {
-	        int clipped = 0;
-		float clipping_ratio = 0.0;
                 int bin = -1;
                 for (unsigned s = 0; s < nSubbands; ++s) {
                     I = stokesI -> spectrumData(t, s, 0);
                     for (unsigned c = 0; c < nChannels; ++c) {
                         float res = I[c] - medianDelta - _bandPass.intensityOfBin( ++bin );
                         if ( res > margin ) {
-			  I[c] = _bandPass.intensityOfBin( bin ) + medianDelta + margin;
-			  ++clipped;
+			  //  I[c] = _bandPass.intensityOfBin( bin ) + medianDelta + margin;
+			  I[c] = 0;
 			} 
                     }
 		}
