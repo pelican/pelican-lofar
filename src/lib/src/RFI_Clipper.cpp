@@ -109,13 +109,25 @@ namespace lofar {
             float margin = std::fabs(_rFactor * _bandPass.rms());
             for (unsigned t = 0; t < nSamples; ++t) {
                 int bin = -1;
+		float DCoffset = 0.0;
+		/* first loop to find the DC offset between bandpass and data
                 for (unsigned s = 0; s < nSubbands; ++s) {
                     I = stokesI -> spectrumData(t, s, 0);
                     for (unsigned c = 0; c < nChannels; ++c) {
-                        float res = I[c] - medianDelta - _bandPass.intensityOfBin( ++bin );
+  		        DCoffset += I[c] - _bandPass.intensityOfBin( ++bin );
+		    }
+		}
+		DCoffset /= bin;
+		bin = -1; */
+		
+                for (unsigned s = 0; s < nSubbands; ++s) {
+                    for (unsigned c = 0; c < nChannels; ++c) {
+		        float res = I[c] - medianDelta - _bandPass.intensityOfBin( ++bin );
+                        //float res = I[c] - DCoffset - _bandPass.intensityOfBin( ++bin );
                         if ( res > margin ) {
-			  //  I[c] = _bandPass.intensityOfBin( bin ) + medianDelta + margin;
-			  I[c] = 0;
+			  // I[c] = _bandPass.intensityOfBin( bin ) + medianDelta + margin;
+			  I[c] -= res;
+			  //I[c] = 0;
 			} 
                     }
 		}
