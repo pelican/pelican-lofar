@@ -1,5 +1,6 @@
 #include "BandPass.h"
 #include "BinMap.h"
+#include "Range.h"
 #include <cmath>
 #include <iostream>
 
@@ -17,9 +18,6 @@ BandPass::BandPass()
 {
 }
 
-/**
- *@details
- */
 BandPass::~BandPass() {
 }
 
@@ -50,7 +48,21 @@ void BandPass::reBin(const BinMap& map)
         for( unsigned int i=0; i < map.numberBins(); ++i ) {
            _dataSets[map][i] = scale * _evaluate(map.binAssignmentNumber(i));
         }
+        _zeroChannelsMap(map);
     }
+}
+
+// set the dataset for a specified map to zero for all killed bands
+void BandPass::_zeroChannelsMap(const BinMap& map)
+{
+     foreach( const Range<float>& r, _killed.subranges() ) {
+         int min = map.binIndex(r.min());
+         int max = map.binIndex(r.max());
+         if( max < min ) { int tmp; tmp = max; max = min; min = tmp; };
+         do {
+             _dataSets[map][min] = 0.0;
+         } while( ++min <= max );
+     }
 }
 
 float BandPass::startFrequency() const
@@ -72,6 +84,24 @@ float BandPass::intensity( float frequency ) const
 float BandPass::intensityOfBin( unsigned index ) const
 {
     return _dataSets[_currentMap][index];
+}
+
+void BandPass::killChannel(unsigned int index)
+{
+    killBand( _currentMap.binStart(index), _currentMap.binEnd(index) );
+}
+
+bool BandPass::filterBin( unsigned int index ) 
+{
+    return _dataSets[_currentMap][index] == 0.0;
+}
+
+void BandPass::killBand( float start, float end)
+{
+    _killed = _killed + Range<float>(start,end);
+    foreach( const BinMap& map, _dataSets.keys() ) {
+        _zeroChannelsMap(map);
+    }
 }
 
 float BandPass::_evaluate(float v) const

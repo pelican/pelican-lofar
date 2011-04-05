@@ -37,8 +37,10 @@ void BandPassTest::test_reBin()
      // setup the reference bandpass
      BandPass bp;
      BinMap map(7936);
-     map.setStart(137.304688);
-     map.setBinWidth(-0.0007628);
+     float start=137.304688;
+     float width=-0.0007628;
+     map.setStart(start - width/2.0);
+     map.setBinWidth(width);
      QVector<float> params;
      params << 4460.84130843 << -24.8135957376;
      bp.setData(map, params);
@@ -46,15 +48,22 @@ void BandPassTest::test_reBin()
      bp.setRMS(rms);
      float median=1128.9281113;
      bp.setMedian(median);
+     
+     // add a kill zone
+     float killStart= start + 3*width;
+     float killEnd= start + 15*width;
+     bp.killBand( killStart, killEnd );
 
      float a = bp.intensityOfBin(0);
      
      {  // Use Case:
         // rebin to twice as many bins over the same range
         BinMap map(7936*2);
-        map.setStart(137.304688);
-        map.setBinWidth(-0.0007628/2.0);
+        map.setStart(start);
+        map.setBinWidth(width/2.0);
         bp.reBin(map);
+        CPPUNIT_ASSERT( bp.intensity( killStart) < 0.00001 );
+        CPPUNIT_ASSERT( bp.intensity( killEnd) < 0.00001 );
         CPPUNIT_ASSERT_DOUBLES_EQUAL( median/2.0 , bp.median() , 0.000001 );
         CPPUNIT_ASSERT_DOUBLES_EQUAL( rms * std::sqrt(2.0) , bp.rms() , 0.000001 );
         CPPUNIT_ASSERT_DOUBLES_EQUAL( a/2.0 , bp.intensityOfBin(0) , 0.001 );

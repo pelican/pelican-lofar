@@ -24,29 +24,40 @@ BinMap::~BinMap()
 }
 
 // 0 - (_nBins-1) if value is in range
-int BinMap::binIndex(float value) const
+int BinMap::binIndex(double value) const
 {
-    return (int)((value - _lower)/ _width);
+    return (int)(0.5 + ((value - _lower)/ _width ));
 }
 
-void BinMap::setStart(float start)
+void BinMap::setStart(double start)
 {
     _lower = start;
 }
 
-void BinMap::setBinWidth(float width)
+void BinMap::setBinWidth(double width)
 {
     _width = width;
+    _halfwidth = width/2.0;
 }
 
-void BinMap::setEnd(float end)
+void BinMap::setEnd(double end)
 {
-    _width = ( end - _lower )/_nBins;
+    setBinWidth( ( end - _lower )/_nBins );
 }
 
-float BinMap::binAssignmentNumber(int index) const
+double BinMap::binStart(unsigned int index) const
 {
-    return _lower + ( _width * index );
+   return _lower + _width*index;
+}
+
+double BinMap::binEnd(unsigned int index) const
+{
+   return _lower + _width*(index+1);
+}
+
+double BinMap::binAssignmentNumber(int index) const
+{
+    return _lower + ( _width * index ) + _halfwidth;
 }
 
 bool BinMap::equals(const BinMap& map) const

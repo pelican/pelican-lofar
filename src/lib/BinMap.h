@@ -25,24 +25,29 @@ class BinMap
         BinMap();
         BinMap( unsigned int numberBins );
         ~BinMap();
-        void setStart(float);
-        void setEnd(float);
-        void setBinWidth(float);
-        int binIndex(float) const;
-        float width() const { return _width; };
+        void setStart(double);
+        void setEnd(double);
+        void setBinWidth(double);
+        int binIndex(double) const;
+        double width() const { return _width; };
         unsigned int numberBins() const { return _nBins; };
-        float startValue() const { return _lower; }
-        float endValue() const { return _lower + _width*_nBins; }
+        double startValue() const { return _lower; }
+        double endValue() const { return _lower + _width*_nBins; }
+        // the value represented by the left hand edge of the bin
+        double binStart(unsigned int index) const;
+        // the value represented by the right hand edge of the bin
+        double binEnd(unsigned int index) const;
         // return the value associated with the bin with the specified index
-        float binAssignmentNumber(int index) const;
+        double binAssignmentNumber(int index) const;
         bool equals(const BinMap&) const;
         bool operator<(const BinMap&) const;
 
         friend bool operator==(const BinMap&, const BinMap&);
     private:
         unsigned int _nBins;
-        float _lower;
-        float _width;
+        double _lower;
+        double _width;
+        double _halfwidth;
 };
 
 } // namespace lofar
