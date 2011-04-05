@@ -31,6 +31,7 @@ if(NOT BINARY_INSTALL_DIR)
 endif(NOT BINARY_INSTALL_DIR)
 
 include(compilerDefaults)
+include(cmake/tags.cmake)
 
 # === Find Dependencies.
 find_package(Pelican REQUIRED)
