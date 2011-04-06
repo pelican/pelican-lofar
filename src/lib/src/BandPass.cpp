@@ -93,7 +93,7 @@ void BandPass::killChannel(unsigned int index)
 
 bool BandPass::filterBin( unsigned int index ) 
 {
-    return _dataSets[_currentMap][index] == 0.0;
+    return _dataSets[_currentMap][index] < 0.0000001;
 }
 
 void BandPass::killBand( float start, float end)

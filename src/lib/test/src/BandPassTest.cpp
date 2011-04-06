@@ -39,7 +39,7 @@ void BandPassTest::test_reBin()
      BinMap map(7936);
      float start=137.304688;
      float width=-0.0007628;
-     map.setStart(start - width/2.0);
+     map.setStart(start);
      map.setBinWidth(width);
      QVector<float> params;
      params << 4460.84130843 << -24.8135957376;
@@ -64,6 +64,7 @@ void BandPassTest::test_reBin()
         bp.reBin(map);
         CPPUNIT_ASSERT( bp.intensity( killStart) < 0.00001 );
         CPPUNIT_ASSERT( bp.intensity( killEnd) < 0.00001 );
+        CPPUNIT_ASSERT( bp.intensityOfBin( 15*2 ) < 0.00001 );
         CPPUNIT_ASSERT_DOUBLES_EQUAL( median/2.0 , bp.median() , 0.000001 );
         CPPUNIT_ASSERT_DOUBLES_EQUAL( rms * std::sqrt(2.0) , bp.rms() , 0.000001 );
         CPPUNIT_ASSERT_DOUBLES_EQUAL( a/2.0 , bp.intensityOfBin(0) , 0.001 );

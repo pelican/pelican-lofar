@@ -91,7 +91,7 @@ void BandPassAdapter::deserialise(QIODevice* device)
     params.remove(0,6);
  
     BinMap map( nChan );
-    map.setStart( startFreq - deltaF/2.0 );
+    map.setStart( startFreq );
     map.setBinWidth(deltaF);
     blob->setData( map, params );
     blob->setMedian(median);

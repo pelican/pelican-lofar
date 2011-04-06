@@ -121,6 +121,7 @@ namespace lofar {
                    bin = -1; */
 
                 for (unsigned s = 0; s < nSubbands; ++s) {
+                    I = stokesI -> spectrumData(t, s, 0);
                     for (unsigned c = 0; c < nChannels; ++c) {
                         if( _bandPass.filterBin( ++bin ) ) {
                             I[c] = 0.0;

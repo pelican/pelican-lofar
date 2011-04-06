@@ -47,17 +47,17 @@ void BinMap::setEnd(double end)
 
 double BinMap::binStart(unsigned int index) const
 {
-   return _lower + _width*index;
+   return binAssignmentNumber(index) - _halfwidth;
 }
 
 double BinMap::binEnd(unsigned int index) const
 {
-   return _lower + _width*(index+1);
+   return binAssignmentNumber(index) +_halfwidth;
 }
 
 double BinMap::binAssignmentNumber(int index) const
 {
-    return _lower + ( _width * index ) + _halfwidth;
+    return _lower + ( _width * index );
 }
 
 bool BinMap::equals(const BinMap& map) const
