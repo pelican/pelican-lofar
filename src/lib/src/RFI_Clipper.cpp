@@ -129,7 +129,7 @@ namespace lofar {
                         }
                         float res = I[c] - medianDelta - _bandPass.intensityOfBin( bin );
                         //float res = I[c] - DCoffset - _bandPass.intensityOfBin( bin );
-                        if ( res > margin ) {
+                        if ( res > margin || I[c] > 1000.0) {
                             // I[c] = _bandPass.intensityOfBin( bin ) + medianDelta + margin;
                             //                       I[c] -= res;
                             I[c] = 0;
