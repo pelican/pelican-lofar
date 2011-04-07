@@ -25,6 +25,7 @@ class BinMapTest : public CppUnit::TestFixture
     public:
         CPPUNIT_TEST_SUITE( BinMapTest );
         CPPUNIT_TEST( test_bin );
+        CPPUNIT_TEST( test_hash );
         CPPUNIT_TEST_SUITE_END();
 
     public:
@@ -33,6 +34,7 @@ class BinMapTest : public CppUnit::TestFixture
 
         // Test Methods
         void test_bin();
+        void test_hash();
 
     public:
         BinMapTest(  );

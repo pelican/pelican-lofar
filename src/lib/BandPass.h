@@ -7,7 +7,6 @@
 #include "Range.h"
 
 #include <QVector>
-#include <QMap>
 #include <QHash>
 #include <QPair>
 #include <QSet>
@@ -61,9 +60,9 @@ class BandPass : public DataBlob
         BinMap _currentMap;
         QVector<float> _params;
         float _deltaFreq;
-        QMap<BinMap, QVector<float> > _dataSets;
-        QMap<BinMap,float> _rms;
-        QMap<BinMap,float> _median;
+        QHash<BinMap, QVector<float> > _dataSets;
+        QHash<BinMap,float> _rms;
+        QHash<BinMap,float> _median;
         Range<float> _killed;
 };
 

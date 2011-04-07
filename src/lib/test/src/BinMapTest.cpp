@@ -30,6 +30,21 @@ void BinMapTest::tearDown()
 {
 }
 
+void BinMapTest::test_hash()
+{
+     // Use Case:
+     // two identical maps should hash to the same value
+     BinMap map1(32*256);
+     BinMap map2(32*256);
+     unsigned int id1=map1.hash();
+     unsigned int id2=map2.hash();
+     CPPUNIT_ASSERT_EQUAL(id1,id2);
+     map2.setStart(10030.012);
+     CPPUNIT_ASSERT(id1 != map2.hash());
+     map1.setStart(10030.012);
+     CPPUNIT_ASSERT_EQUAL(map1.hash(), map2.hash());
+}
+
 void BinMapTest::test_bin()
 {
      BinMap map(32*256);

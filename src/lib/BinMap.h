@@ -1,6 +1,8 @@
 #ifndef BINMAP_H
 #define BINMAP_H
 
+#include <QHash>
+#include <QMap>
 
 /**
  * @file BinMap.h
@@ -42,14 +44,21 @@ class BinMap
         bool equals(const BinMap&) const;
         bool operator<(const BinMap&) const;
 
+        // a representation for hashing
+        unsigned int hash() const;
+
         friend bool operator==(const BinMap&, const BinMap&);
     private:
+        static QMap< unsigned int, QMap< double, QMap<double, unsigned int> > > _unique; // assigns unique id to a BinMap type
+        static unsigned int _uniqueCount; // guarantees a unique id
         unsigned int _nBins;
         double _lower;
         double _width;
         double _halfwidth;
+        mutable unsigned int _hash;
 };
 
+unsigned int qHash(const BinMap& key);
 } // namespace lofar
 } // namespace pelican
 #endif // BINMAP_H 

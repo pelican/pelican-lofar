@@ -1,5 +1,6 @@
 #include "BandPassAdapter.h"
 #include <QIODevice>
+#include <QMap>
 #include <QString>
 #include <QVector>
 #include "BinMap.h"
