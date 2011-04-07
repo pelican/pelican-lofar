@@ -107,6 +107,7 @@ namespace lofar {
 
             // readjust relative to median
             float margin = std::fabs(_rFactor * _bandPass.rms());
+            float doublemargin = margin * 2.0;
             for (unsigned t = 0; t < nSamples; ++t) {
                 int bin = -1;
                 //float DCoffset = 0.0;
@@ -127,12 +128,13 @@ namespace lofar {
                             I[c] = 0.0;
                             continue;
                         }
-                        float res = I[c] - medianDelta - _bandPass.intensityOfBin( bin );
+                        float bandpass = _bandPass.intensityOfBin( bin );
+                        float res = I[c] - medianDelta - bandpass;
                         //float res = I[c] - DCoffset - _bandPass.intensityOfBin( bin );
-                        if ( res > margin || I[c] > _bandPass.intensityOfBin( bin ) + 2. * margin) {
+                        if ( res > margin || I[c] > bandpass + doublemargin) {
                             // I[c] = _bandPass.intensityOfBin( bin ) + medianDelta + margin;
                             //                       I[c] -= res;
-                            I[c] = 0;
+                            I[c] = 0.0;
                         } 
                     }
                 }
