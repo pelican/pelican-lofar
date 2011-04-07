@@ -8,13 +8,15 @@ if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE debug)
 endif(NOT CMAKE_BUILD_TYPE)
 
-if(NOT CMAKE_BUILD_TYPE MATCHES "^RELEASE|DEBUG|[Rr]elease|[Dd]ebug$")
-    message(FATAL_ERROR "## Unknown build type. Select 'debug' or 'release'")
-endif(NOT CMAKE_BUILD_TYPE MATCHES "^RELEASE|DEBUG|[Rr]elease|[Dd]ebug$")
+if(NOT CMAKE_BUILD_TYPE MATCHES "^RELEASE|DEBUG|[Rr]elease|[Dd]ebug|[Pp]rofile|PROFILE$")
+    message(FATAL_ERROR "## Unknown build type. Select 'debug','release' or 'profile'")
+endif(NOT CMAKE_BUILD_TYPE MATCHES "^RELEASE|DEBUG|[Rr]elease|[Dd]ebug|[Pp]rofile|PROFILE$")
 
 #=== Set compiler flags.
 if(CMAKE_COMPILER_IS_GNUCXX)
     set(CMAKE_CXX_FLAGS_RELEASE "-O3 -DQT_NO_DEBUG -DNDEBUG")
+    set(CMAKE_CXX_FLAGS_PROFILE "-pg")
+    set(CMAKE_EXE_LINKER_FLAG_PROFILE "-pg")
     add_definitions(-Wall -Wextra)
     add_definitions(-Wno-deprecated -Wno-unknown-pragmas)
     list(APPEND CPP_PLATFORM_LIBS util dl)
