@@ -91,7 +91,7 @@ void BandPass::killChannel(unsigned int index)
     killBand( _currentMap.binStart(index), _currentMap.binEnd(index) );
 }
 
-bool BandPass::filterBin( unsigned int index ) 
+bool BandPass::filterBin( unsigned int index ) const
 {
     return _dataSets[_currentMap][index] < 0.0000001;
 }

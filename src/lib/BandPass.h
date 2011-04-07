@@ -49,7 +49,7 @@ class BandPass : public DataBlob
         void killChannel(unsigned int index);
         void killBand(float startFreq, float endFreq);
         // return true if bin has been killed
-        bool filterBin( unsigned int i );
+        bool filterBin( unsigned int i ) const;
 
     protected:
         float _evaluate(float) const; // calculate value of parameterised eqn

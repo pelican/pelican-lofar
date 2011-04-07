@@ -108,8 +108,10 @@ namespace lofar {
             // readjust relative to median
             float margin = std::fabs(_rFactor * _bandPass.rms());
             float doublemargin = margin * 2.0;
+#pragma omp parallel for
             for (unsigned t = 0; t < nSamples; ++t) {
                 int bin = -1;
+                float* I;
                 //float DCoffset = 0.0;
                 /* first loop to find the DC offset between bandpass and data
                    for (unsigned s = 0; s < nSubbands; ++s) {
@@ -120,7 +122,6 @@ namespace lofar {
                    }
                    DCoffset /= bin;
                    bin = -1; */
-
                 for (unsigned s = 0; s < nSubbands; ++s) {
                     I = stokesI -> spectrumData(t, s, 0);
                     for (unsigned c = 0; c < nChannels; ++c) {
