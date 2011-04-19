@@ -7,6 +7,8 @@ set(lib_src
     src/BinMap.cpp
     src/BandPassAdapter.cpp
     src/BandPass.cpp
+    src/FilterBankHeader.cpp
+    src/FilterBankAdapter.cpp
     src/OutputHDF5Lofar.cpp
     src/LofarData.cpp
     src/LofarChunker.cpp
