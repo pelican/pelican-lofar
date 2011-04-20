@@ -37,7 +37,7 @@ void FilterBankAdapter::deserialise(QIODevice* in)
         unsigned int polarisations = _header.numberPolarisations();
         if( polarisations == 0 ) { polarisations = _nPolarisations; }
         unsigned int nSubbands = 1;
-        if( nSubbands == 0 ) { nSubbands = _nPolarisations; }
+        if( nSubbands == 0 ) { nSubbands = _nSubbands; }
         unsigned int nSamplesPerTimeBlock = _header.numberChannels();
         if( nSamplesPerTimeBlock == 0 ) { nSamplesPerTimeBlock = _nSamplesPerTimeBlock; }
         unsigned long nBlocks = (chunkSize() - bytes)/( nSubbands*polarisations*nSamplesPerTimeBlock);
@@ -46,13 +46,13 @@ void FilterBankAdapter::deserialise(QIODevice* in)
         SpectrumDataSetStokes* blob = (SpectrumDataSetStokes*) dataBlob();
 
         unsigned int nChannels = _header.numberChannels();
-        blob->resize(nBlocks, _nSubbands, polarisations, _nSamplesPerTimeBlock);
+        blob->resize(nBlocks, nSubbands, polarisations, nChannels );
 
         // read in block data
         for(unsigned int block=0; block < nBlocks; ++block ) {
             for(unsigned int polar=0; polar < polarisations; ++polar ) {
-                for (unsigned s = 0; s < nSubbands; s++) {
-                    _readBlock(in, blob->spectrumData(block, s, polar), _nSamplesPerTimeBlock);
+                for (unsigned s = 0; s < nSubbands; ++s ) {
+                    _readBlock(in, blob->spectrumData(block, s, polar), nChannels );
                 }
            }
         }

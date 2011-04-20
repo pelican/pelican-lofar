@@ -43,7 +43,7 @@ void FilterBankAdapterTest::test_readFile()
        tester.execute(blob);
 
        CPPUNIT_ASSERT_EQUAL( (unsigned int)1   , blob->nPolarisations() );
-       //CPPUNIT_ASSERT_EQUAL( (unsigned int)496 , blob->nChannels() );
+       CPPUNIT_ASSERT_EQUAL( (unsigned int)496 , blob->nChannels() );
        
        delete blob;
      }
