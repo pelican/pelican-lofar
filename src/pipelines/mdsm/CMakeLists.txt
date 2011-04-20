@@ -7,6 +7,7 @@ set(pipeline_lib_src
     src/UdpBFPipelineStream2.cpp
     src/TimingPipeline.cpp
     src/EmptyPipeline.cpp
+    src/StokesOnlyPipeline.cpp
 )
 add_library(pelicanMdsm ${pipeline_lib_src})
 
