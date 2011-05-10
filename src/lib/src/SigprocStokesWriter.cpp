@@ -34,6 +34,9 @@ SigprocStokesWriter::SigprocStokesWriter(const ConfigNode& configNode )
     _buffSize = configNode.getOption("params", "bufferSize", "5120").toUInt();
     _cur = 0;
     _first = (configNode.hasAttribute("writeHeader") && configNode.getAttribute("writeHeader").toLower() == "true" );
+    _ra = configNode.getOption("RAJ", "value", "000000.0").toFloat();
+    _dec = configNode.getOption("DecJ", "value", "000000.0").toFloat();
+    _site = configNode.getOption("TelescopeID", "value", "0").toUInt();
 
     // Open file
     _buffer.resize(_buffSize);
@@ -57,10 +60,12 @@ void SigprocStokesWriter::writeHeader(SpectrumDataSetStokes* stokes){
     // Write header
     WriteString("HEADER_START");
     WriteInt("machine_id", 0);    // Ignore for now
-    WriteInt("telescope_id", 0);  // Ignore for now
+    WriteInt("telescope_id", _site);
     WriteInt("data_type", 1);     // Channelised Data
 
     // Need to be parametrised ...
+    WriteDouble("src_raj", _ra); // Write J2000 RA
+    WriteDouble("src_dej", _dec); // Write J2000 Dec
     WriteDouble("fch1", _fch1);
     WriteDouble("foff", _foff);
     WriteInt("nchans", _nchans);
