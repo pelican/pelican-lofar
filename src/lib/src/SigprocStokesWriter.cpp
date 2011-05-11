@@ -34,10 +34,19 @@ SigprocStokesWriter::SigprocStokesWriter(const ConfigNode& configNode )
     _buffSize = configNode.getOption("params", "bufferSize", "5120").toUInt();
     _cur = 0;
     _first = (configNode.hasAttribute("writeHeader") && configNode.getAttribute("writeHeader").toLower() == "true" );
-    _ra = configNode.getOption("RAJ", "value", "000000.0").toFloat();
-    _dec = configNode.getOption("DecJ", "value", "000000.0").toFloat();
     _site = configNode.getOption("TelescopeID", "value", "0").toUInt();
-
+    _machine = configNode.getOption("MachineID", "value", "9").toUInt();
+    _raString = configNode.getOption("RAJ", "value", "000000.0");
+    _decString = configNode.getOption("DecJ", "value", "000000.0");
+    _ra = _raString.toFloat();
+    _dec = _decString.toFloat();
+    _sourceName = _raString.left(4);
+    if (_dec > 0.0 ) {
+      _sourceName.append("+");
+      _sourceName.append(_decString.left(4));
+    } else {
+      _sourceName.append(_decString.left(5));
+    }
     // Open file
     _buffer.resize(_buffSize);
     _file.open(_filepath.toUtf8().data(), std::ios::out | std::ios::binary);
@@ -59,11 +68,13 @@ void SigprocStokesWriter::writeHeader(SpectrumDataSetStokes* stokes){
 
     // Write header
     WriteString("HEADER_START");
-    WriteInt("machine_id", 0);    // Ignore for now
+    WriteInt("machine_id", _machine);    // Ignore for now
     WriteInt("telescope_id", _site);
     WriteInt("data_type", 1);     // Channelised Data
 
     // Need to be parametrised ...
+    WriteString("source_name");
+    WriteString(_sourceName);
     WriteDouble("src_raj", _ra); // Write J2000 RA
     WriteDouble("src_dej", _dec); // Write J2000 Dec
     WriteDouble("fch1", _fch1);
@@ -75,7 +86,7 @@ void SigprocStokesWriter::writeHeader(SpectrumDataSetStokes* stokes){
     WriteInt("nifs", int(_nPols));		   // Polarisation channels.
     WriteString("HEADER_END");
     _file.flush();
-    
+
 }
 
 // Destructor

@@ -1,2 +1,2 @@
 include_directories(../lib)
-add_subdirectory(mdsm)
+add_subdirectory(udpstream)

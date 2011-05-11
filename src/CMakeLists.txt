@@ -78,7 +78,7 @@ include_directories(${CMAKE_SOURCE_DIR}/lib)
 add_executable(serverMain serverMain.cpp)
 target_link_libraries(serverMain
     ${PELICAN_LIBRARY}
-    pelican-lofar
+    pelican-lofar-static
     ${QT_QTCORE_LIBRARY}
     ${QT_QTXML_LIBRARY}
     ${QT_QTNETWORK_LIBRARY}
