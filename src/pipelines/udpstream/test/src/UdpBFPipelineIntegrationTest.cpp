@@ -75,7 +75,7 @@ void UdpBFPipelineIntegrationTest::test_topdownInit()
                 "    <packetSendInterval value=\"200\"/>"
                 "    <packetStartDelay   value=\"1\"/>"
                 "    <polsPerPacket      value=\"2\"/>"
-                "    <subbandsPerPacket value=\"61\"/> <!-- 31 or 61 or 62 -->"
+                "    <subbandsPerPacket value=\"31\"/> <!-- 31 or 61 or 62 -->"
                 "    <samplesPerPacket value=\"16\" />"
                 "    <clock value=\"200\" /> <!-- Could also be 160 -->"
                 "<dataBitSize value=\"16\" />"
@@ -103,7 +103,7 @@ void UdpBFPipelineIntegrationTest::test_topdownInit()
      startServer();
      client1.startup();
      client2.startup();
-     while( ! client1.count() ) { _app->processEvents(); }
+     while( ! client1.count() ) { _app->processEvents(); usleep(5); }
      clientCalledCount1 = client1.count();
      CPPUNIT_ASSERT( clientCalledCount1 >= 1 );
 return;
