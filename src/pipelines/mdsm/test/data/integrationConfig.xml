@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE pelican>
+
+<configuration version="1.0">
+
+  <pipeline>
+
+    <clients>
+      <PelicanServerClient>
+        <server host="127.0.0.1" port="2000"/>
+        <data type="LofarTimeStream2" adapter="AdapterTimeSeriesDataSet"/>
+        <data type="LofarTimeStream1" adapter="AdapterTimeSeriesDataSet"/>
+      </PelicanServerClient>
+    </clients>
+
+    <adapters>
+      <AdapterTimeSeriesDataSet>
+        <subbandsPerPacket value="30"/> <!-- 31 or 61 or 62 -->
+        <samplesPerPacket value="16" />
+        <nRawPolarisations value="2" />
+        <clock value="200" /> <!-- Could also be 160 -->
+        <dataBitSize value="16" />
+        <fixedSizePackets value="false" />
+        <outputChannelsPerSubband value="32" />
+        <udpPacketsPerIteration value="64" />
+        <integrateTimeBins value="1" />
+      </AdapterTimeSeriesDataSet>
+    </adapters>
+
+    <modules>
+    </modules>
+
+    <output>
+    </output>
+
+  </pipeline>
+</configuration>
+
+
