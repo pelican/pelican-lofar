@@ -20,7 +20,7 @@ IF(UNIX)
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
   )
   ADD_CUSTOM_TARGET (ctags
-    COMMAND  ctags --extra=+f -R -f ${CMAKE_BINARY_DIR}/tags ${CMAKE_SOURCE_DIR}
+    COMMAND  ctags --extra=+f -R -f ${CMAKE_BINARY_DIR}/tags ${CMAKE_SOURCE_DIR} ${PELICAN_INCLUDE_DIR}
   )
 ENDIF()
 
