@@ -97,4 +97,4 @@ install(TARGETS emptyPipeline udpBFPipeline udpBFPipelineStream1 udpBFPipelineSt
 include(CopyFiles)
 copy_files(${CMAKE_CURRENT_SOURCE_DIR}/data/*.xml . mdsmXmlFiles)
 
-#add_subdirectory(test)
+add_subdirectory(test)
