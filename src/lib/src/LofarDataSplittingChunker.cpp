@@ -146,9 +146,10 @@ QIODevice* LofarDataSplittingChunker::newDevice()
 {
     QUdpSocket* socket = new QUdpSocket;
 
-    if (!socket->bind(port()))
+    if (!socket->bind(port(), QUdpSocket::ShareAddress | QUdpSocket::ReuseAddressHint ))
         cerr << "LofarDataSplittingChunker::newDevice(): "
-        "Unable to bind to UDP port!" << endl;
+        "Unable to bind to UDP port!" << 
+        socket->errorString().toStdString() << std::endl;
 
     return socket;
 }
@@ -314,8 +315,8 @@ void LofarDataSplittingChunker::next(QIODevice* device)
     else {
         // Must discard the datagram if there is no available space.
         socket->readDatagram(0, 0);
-        cout << "LofarDataSplittingChunker::next(): "
-                "Writable data not valid, discarding packets." << endl;
+        //cout << "LofarDataSplittingChunker::next(): "
+        //        "Writable data not valid, discarding packets." << endl;
     }
 
     // Update _startTime
