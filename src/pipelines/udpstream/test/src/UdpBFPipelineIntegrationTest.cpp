@@ -75,7 +75,7 @@ void UdpBFPipelineIntegrationTest::test_topdownInit()
                 "    <packetSendInterval value=\"200\"/>"
                 "    <packetStartDelay   value=\"1\"/>"
                 "    <polsPerPacket      value=\"2\"/>"
-                "    <subbandsPerPacket value=\"30\"/> <!-- 31 or 61 or 62 -->"
+                "    <subbandsPerPacket value=\"61\"/> <!-- 31 or 61 or 62 -->"
                 "    <samplesPerPacket value=\"16\" />"
                 "    <clock value=\"200\" /> <!-- Could also be 160 -->"
                 "<dataBitSize value=\"16\" />"
