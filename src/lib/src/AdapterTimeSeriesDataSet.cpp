@@ -168,7 +168,7 @@ void AdapterTimeSeriesDataSet::_checkData()
     // Check the chunk size matches the expected number of UDPPackets.
     if (_chunkSize != packetSize * _nUDPPacketsPerChunk)
         throw _err("Chunk size '%1' != '%2' expected for %3 UDP packets.")
-                .arg(_chunkSize).arg(packetSize).arg(_nUDPPacketsPerChunk);
+                .arg(_chunkSize).arg(packetSize * _nUDPPacketsPerChunk).arg(_nUDPPacketsPerChunk);
 
     // Adapter dimensions must agree with packet data size.
     if (usefulBits > udpDataBits)
