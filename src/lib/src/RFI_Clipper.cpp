@@ -91,6 +91,7 @@ namespace lofar {
             //float medianOfMedians, medianOfRMS, sumI, sumI2 ;
 //            float sumI;
             // create an ordered copy of the data
+	    /*
             for (unsigned t = 0; t < nSamples; ++t) {
                 int bin = -1;
                 for (unsigned s = 0; s < nSubbands; ++s) {
@@ -100,11 +101,13 @@ namespace lofar {
                     }
                 }
             }
+	    
             // calculate the DC offset between bandpass description and current spectrum
             std::nth_element(copyI.begin(), copyI.begin()+copyI.size()/2, copyI.end());
             float median = (float)*(copyI.begin()+copyI.size()/2);
             float medianDelta = median - _bandPass.median();
-
+	    */
+	    float medianDelta = 0.0;
             // readjust relative to median
             float margin = std::fabs(_rFactor * _bandPass.rms());
             float doublemargin = margin * 2.0;
@@ -126,10 +129,12 @@ namespace lofar {
                         int bin = (s * nChannels) - 1;
                         float *I = stokesI -> spectrumData(t, s, 0);
                         for (unsigned c = 0; c < nChannels; ++c) {
+			  /*
                             if( _bandPass.filterBin( ++bin ) ) {
                                 I[c] = 0.0;
                                 continue;
                             }
+			  */
                             float bandpass = _bandPass.intensityOfBin( bin );
                             float res = I[c] - medianDelta - bandpass;
                             //float res = I[c] - DCoffset - _bandPass.intensityOfBin( bin );

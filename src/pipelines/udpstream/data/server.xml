@@ -7,10 +7,10 @@
 
     <chunkers>
       <LofarDataSplittingChunker>
-        <connection host="127.0.0.1" port="8090"/> <!--Change-->
+        <connection host="127.0.0.1" port="4346"/> <!--Change-->
         <!--  -->
         <subbandsPerPacket value="61" /> <!-- 31 or 61 or 62 -->
-        <import file="pipelines/mdsm/data/CommonParameters.xml"/>
+        <import file="/Data/XML/my_common.xml"/>
         <!--  -->
         <Stream1 subbandStart="0" subbandEnd="30"/>
         <Stream2 subbandStart="31" subbandEnd="60"/>
@@ -21,11 +21,11 @@
 
     <buffers>
       <LofarTimeStream1>
-        <buffer maxSize="500000000" maxChunkSize="500000000"/>
+        <buffer maxSize="15000000000" maxChunkSize="1500000000"/>
       </LofarTimeStream1>
 
       <LofarTimeStream2>
-        <buffer maxSize="500000000" maxChunkSize="500000000"/>
+        <buffer maxSize="15000000000" maxChunkSize="1500000000"/>
       </LofarTimeStream2>
     </buffers>
 

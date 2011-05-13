@@ -9,11 +9,8 @@
     <totalComplexSubbands value="512" />
 
     <clock value="200" /> <!-- Could also be 160 -->
-    <outputChannelsPerSubband value="512" />
-
-    <udpPacketsPerIteration value="512" />
-
+    <outputChannelsPerSubband value="16" />
+    <udpPacketsPerIteration value="64" />
     <integrateTimeBins value="16" />
-    <topChannelFrequency value="150" />
 
 </configuration>

@@ -1,4 +1,4 @@
-#include "UdpBFPipelineStream2.h"
+#include "UdpBFPipelineStream1.h"
 #include <iostream>
 
 using std::cout;
@@ -11,7 +11,7 @@ namespace lofar {
 /**
  * @details
  */
-UdpBFPipelineStream2::UdpBFPipelineStream2() : AbstractPipeline()
+UdpBFPipelineStream1::UdpBFPipelineStream1() : AbstractPipeline()
 {
     _iteration = 0;
 }
@@ -20,7 +20,7 @@ UdpBFPipelineStream2::UdpBFPipelineStream2() : AbstractPipeline()
 /**
  * @details
  */
-UdpBFPipelineStream2::~UdpBFPipelineStream2()
+UdpBFPipelineStream1::~UdpBFPipelineStream1()
 {
 }
 
@@ -31,7 +31,7 @@ UdpBFPipelineStream2::~UdpBFPipelineStream2()
  *
  * This method is run once on construction of the pipeline.
  */
-void UdpBFPipelineStream2::init()
+void UdpBFPipelineStream1::init()
 {
     // Create modules
     ppfChanneliser = (PPFChanneliser *) createModule("PPFChanneliser");
@@ -45,7 +45,7 @@ void UdpBFPipelineStream2::init()
     intStokes = (SpectrumDataSetStokes*) createBlob("SpectrumDataSetStokes");
 
     // Request remote data
-    requestRemoteData("LofarTimeStream2");
+    requestRemoteData("LofarTimeStream1");
 
 }
 
@@ -57,17 +57,22 @@ void UdpBFPipelineStream2::init()
  * data matching the requested remote data is available until either
  * the pipeline application is killed or the method 'stop()' is called.
  */
-void UdpBFPipelineStream2::run(QHash<QString, DataBlob*>& remoteData)
+void UdpBFPipelineStream1::run(QHash<QString, DataBlob*>& remoteData)
 {
     // Get pointer to the remote time series data blob.
     // This is a block of data containing a number of time series of length
     // N for each sub-band and polarisation.
-    timeSeries = (TimeSeriesDataSetC32*) remoteData["LofarTimeStream2"];
+    timeSeries = (TimeSeriesDataSetC32*) remoteData["LofarTimeStream1"];
+
+    //timeSeries->write("timeStream1-s1-p0.dat", 1, 0, -1);
+    //timeSeries->write("timeStream1-i" + QString::number(_iteration) + "-s1-p0.dat", 1, 0, -1);
 
     // Run the polyphase channeliser.
     // Generates spectra from a blocks of time series indexed by sub-band
     // and polarisation.
     ppfChanneliser->run(timeSeries, spectra);
+
+//    spectra->write("stream1-s0-p0-b0.dat", 0, 0, 0);
 
     // Convert spectra in X, Y polarisation into spectra with stokes parameters.
     stokesGenerator->run(spectra, stokes);
@@ -80,14 +85,15 @@ void UdpBFPipelineStream2::run(QHash<QString, DataBlob*>& remoteData)
     // manager is configured in the xml.
      dataOutput(intStokes, "SpectrumDataSetStokes");
 
-//    stop();
+     //if (_iteration == 5) stop();
+    //stop();
 
     if (_iteration % 100 == 0)
         cout << "Finished the UDP beamforming pipeline, iteration " << _iteration << endl;
 
     _iteration++;
 
-    if (_iteration > 750000) stop();
+    if (_iteration > 2500000) stop();
 }
 
 } // namespace lofar
