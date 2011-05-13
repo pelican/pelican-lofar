@@ -69,7 +69,7 @@ namespace lofar {
     void RFI_Clipper::run(SpectrumDataSetStokes* stokesI)
     {
         if( _active ) {
-            float* I;
+            //float* I;
             unsigned nSamples = stokesI->nTimeBlocks();
             unsigned nSubbands = stokesI->nSubbands();
             unsigned nChannels = stokesI->nChannels();
@@ -112,7 +112,7 @@ namespace lofar {
             float margin = std::fabs(_rFactor * _bandPass.rms());
             float doublemargin = margin * 2.0;
             for (unsigned t = 0; t < nSamples; ++t) {
-                int bin = -1;
+ //               int bin = -1;
  //               float* I;
                 //float DCoffset = 0.0;
                 /* first loop to find the DC offset between bandpass and data
