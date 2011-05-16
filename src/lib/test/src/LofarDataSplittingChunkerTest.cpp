@@ -225,7 +225,7 @@ void LofarDataSplittingChunkerTest::test_normal_packets()
                     CPPUNIT_ASSERT_EQUAL(float(0.0), (float)s[idx].imag());
 
                     CPPUNIT_ASSERT_EQUAL(float(t), (float)s[idx + 1].real());
-                    CPPUNIT_ASSERT_EQUAL(float(1.0), (float)s[idx + 1].imag());
+                    CPPUNIT_ASSERT_DOUBLES_EQUAL(float(1.0), (float)s[idx + 1].imag(), 0.0001);
                 }
             }
         }
