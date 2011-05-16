@@ -1,6 +1,7 @@
 #include "LofarUdpEmulator.h"
 #include "LofarUdpHeader.h"
 #include "LofarTypes.h"
+#include <iostream>
 
 #include "pelican/utility/ConfigNode.h"
 
@@ -129,6 +130,9 @@ void LofarUdpEmulator::getPacketData(char*& ptr, unsigned long& size)
     // Set the return variables.
     size = _packetSize;
     ptr = (char*)(&_packet);
+
+    _packet.header.timestamp = 1 + (_blockid + _samplesPerPacket) / (_clock == 160 ? 156250 : (_timestamp % 2 == 0 ? 195313 : 195212));
+    _packet.header.blockSequenceNumber = (_blockid + _samplesPerPacket) % (_clock == 160 ? 156250 : (_timestamp % 2 == 0 ? 195313 : 195212));
 
     // Calculate seqid and blockid from packet counter and clock
     if (!_looseEvenPackets || (_looseEvenPackets && _packetCounter % 2 == 1)) {
