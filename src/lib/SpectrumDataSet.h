@@ -12,6 +12,7 @@
 
 #include <vector>
 #include <complex>
+#include <algorithm>
 #include <iostream>
 
 namespace pelican {
@@ -47,9 +48,16 @@ class SpectrumDataSet : public DataBlob
         /// Clears the data.
         void clear();
 
+        /// initialise the data
+        void init( const T& value);
+
         /// Resizes the spectrum data blob to the specified dimensions.
         void resize(unsigned nTimeBlocks, unsigned nSubbands,
                 unsigned nPolarisations, unsigned nChannels);
+        void resize(const SpectrumDataSet<T>& data ) {
+            resize( data.nTimeBlocks(), data.nSubbands(), 
+                    data.nPolarisations(), data.nChannels() );
+        }
 
     public:
         /// Returns the number of spectra in the data blob.
@@ -92,6 +100,12 @@ class SpectrumDataSet : public DataBlob
 
         /// Returns a pointer to the data (const overload).
         T const * data() const { return &_data[0]; }
+
+        /// Return an iterator over the data starting at the beginning
+        typename std::vector<T>::const_iterator begin() const { return _data.begin(); }
+
+        /// Return an iterator over the data starting at the end 
+        typename std::vector<T>::const_iterator end() const { return _data.end(); }
 
         /// Returns a pointer to the spectrum data at index i.
         T * spectrumData(unsigned i)
@@ -146,6 +160,11 @@ inline void SpectrumDataSet<T>::clear()
     _lofarTimestamp = 0;
 }
 
+template <typename T>
+inline void SpectrumDataSet<T>::init(const T& val)
+{
+    std::fill(_data.begin(),_data.end(), val);
+}
 
 template <typename T>
 inline void SpectrumDataSet<T>::resize(unsigned nTimeBlocks, unsigned nSubbands,
