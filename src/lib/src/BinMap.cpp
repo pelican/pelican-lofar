@@ -29,6 +29,11 @@ BinMap::~BinMap()
 {
 }
 
+void BinMap::reset(unsigned int numberOfBins)
+{
+     _nBins = 0; _lower=0.0; _width=1.0, _hash=0;
+}
+
 unsigned int BinMap::hash() const
 {
     if (_hash == 0) {

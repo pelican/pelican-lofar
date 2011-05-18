@@ -27,9 +27,19 @@ class BinMap
         BinMap();
         BinMap( unsigned int numberBins );
         ~BinMap();
+
+        /// reset the map with all default values
+        void reset(unsigned int numberOfBins);
+
+        /// set the starting value for the first bin
         void setStart(double);
+
+        /// set the starting value for the last bin
         void setEnd(double);
+
+        /// set the width of each bin
         void setBinWidth(double);
+
         int binIndex(double) const;
         double width() const { return _width; };
         unsigned int numberBins() const { return _nBins; };
