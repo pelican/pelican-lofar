@@ -20,7 +20,7 @@ RFI_Clipper::RFI_Clipper( const ConfigNode& config )
     }
     // read in any fixed file data
     QString file = config.getOption("BandPassData", "file", "");
-    if( file != "" ) { 
+    if( file != "" && _active ) { 
         if(! QFile::exists(file)) 
             throw(QString("RFI_Clipper: File \"" + file + "\" does not exist"));
 
