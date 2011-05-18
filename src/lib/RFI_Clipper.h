@@ -13,6 +13,7 @@ namespace pelican {
 
 namespace lofar {
     class SpectrumDataSetStokes;
+    class WeightedSpectrumDataSet;
 /**
  * @class RFI_Clipper
  *  
@@ -28,9 +29,11 @@ class RFI_Clipper : public AbstractModule
         RFI_Clipper( const ConfigNode& config );
         ~RFI_Clipper();
         void run(SpectrumDataSetStokes* stokesI);
+        void run(SpectrumDataSetStokes* stokesI, WeightedSpectrumDataSet* weights);
         const BandPass& bandPass() const { return _bandPass; }; // return the BandPass Filter in use
 
     private:
+        BinMap  _map;
         BandPass  _bandPass;
         bool _active;
         float _startFrequency;
