@@ -50,8 +50,9 @@ class BinMap
         // the value represented by the right hand edge of the bin
         double binEnd(unsigned int index) const;
         // return the value associated with the bin with the specified index
-        double binAssignmentNumber(int index) const;
-        bool equals(const BinMap&) const;
+        inline double binAssignmentNumber(int index) const {
+            return _lower + ( _width * index );
+        }
         bool operator<(const BinMap&) const;
 
         // a representation for hashing

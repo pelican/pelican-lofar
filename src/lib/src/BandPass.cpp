@@ -23,30 +23,33 @@ BandPass::~BandPass() {
 
 void BandPass::setData(const BinMap& map,const QVector<float>& params ) {
     _primaryMap = map;
+    _primaryMapId = map.hash();
     _params = params;
      reBin( map );
 }
 
 void BandPass::setRMS(float rms) {
-    _rms[_currentMap] = rms;
+    _rms[_currentMapId] = rms;
 }
 
 void BandPass::setMedian(float median) {
-    _median[_currentMap] = median;
+    _median[_currentMapId] = median;
 }
 
 void BandPass::reBin(const BinMap& map)
 {
     _currentMap = map;
-    if( ! _dataSets.contains(map) ) {
-        _dataSets.insert(map, QVector<float>(map.numberBins()) );
+    int mapId = map.hash();
+    _currentMapId = mapId;
+    if( ! _dataSets.contains(mapId) ) {
+        _dataSets.insert(mapId, QVector<float>(map.numberBins()) );
         float scale = map.width()/_primaryMap.width();
         // scale the RMS and median
-        _rms[map]= _rms[_primaryMap] * std::sqrt( 1.0/scale );
-        _median[map] = _median[_primaryMap] * scale;
+        _rms[mapId]= _rms[_primaryMapId] * std::sqrt( 1.0/scale );
+        _median[mapId] = _median[_primaryMapId] * scale;
         // scale and set the intensities
         for( unsigned int i=0; i < map.numberBins(); ++i ) {
-           _dataSets[map][i] = scale * _evaluate(map.binAssignmentNumber(i));
+           _dataSets[mapId][i] = scale * _evaluate(map.binAssignmentNumber(i));
         }
         _zeroChannelsMap(map);
     }
@@ -59,8 +62,9 @@ void BandPass::_zeroChannelsMap(const BinMap& map)
          int min = map.binIndex(r.min());
          int max = map.binIndex(r.max());
          if( max < min ) { int tmp; tmp = max; max = min; min = tmp; };
+         int mapId=map.hash();
          do {
-             _dataSets[map][min] = 0.0;
+             _dataSets[mapId][min] = 0.0;
          } while( ++min <= max );
      }
 }
@@ -78,12 +82,7 @@ float BandPass::endFrequency() const
 float BandPass::intensity( float frequency ) const
 {
     int index = _currentMap.binIndex(frequency);
-    return _dataSets[_currentMap][index];
-}
-
-float BandPass::intensityOfBin( unsigned index ) const
-{
-    return _dataSets[_currentMap][index];
+    return _dataSets[_currentMapId][index];
 }
 
 void BandPass::killChannel(unsigned int index)
@@ -93,7 +92,7 @@ void BandPass::killChannel(unsigned int index)
 
 bool BandPass::filterBin( unsigned int index ) const
 {
-    return _dataSets[_currentMap][index] < 0.0000001;
+    return _dataSets[_currentMapId][index] < 0.0000001;
 }
 
 void BandPass::killBand( float start, float end)

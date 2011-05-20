@@ -41,9 +41,11 @@ class BandPass : public DataBlob
         float startFrequency() const;
         float endFrequency() const;
         float intensity(float frequency) const;
-        float intensityOfBin(unsigned int index) const;
-        float median() const { return _median[_currentMap]; }
-        float rms() const { return _rms[_currentMap]; }
+        inline float intensityOfBin(unsigned int index) const {
+            return _dataSets[_currentMapId][index];
+        };
+        inline float median() const { return _median[_currentMapId]; }
+        inline float rms() const { return _rms[_currentMapId]; }
         // Mark channels to be killed (set to 0)
         void killChannel(unsigned int index);
         void killBand(float startFreq, float endFreq);
@@ -58,11 +60,13 @@ class BandPass : public DataBlob
         int _nChannels;
         BinMap _primaryMap;
         BinMap _currentMap;
+        int _currentMapId;
+        int _primaryMapId;
         QVector<float> _params;
         float _deltaFreq;
-        QHash<BinMap, QVector<float> > _dataSets;
-        QHash<BinMap,float> _rms;
-        QHash<BinMap,float> _median;
+        QHash<int, QVector<float> > _dataSets;
+        QHash<int,float> _rms;
+        QHash<int,float> _median;
         Range<float> _killed;
 };
 

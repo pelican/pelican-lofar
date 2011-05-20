@@ -79,19 +79,20 @@ double BinMap::binEnd(unsigned int index) const
    return binAssignmentNumber(index) +_halfwidth;
 }
 
-double BinMap::binAssignmentNumber(int index) const
-{
-    return _lower + ( _width * index );
-}
+//double BinMap::binAssignmentNumber(int index) const
+//{
+//    return _lower + ( _width * index );
+//}
 
-bool BinMap::equals(const BinMap& map) const
-{
-    return (_lower == map._lower) && (_width == map._width);
-}
+//bool BinMap::equals(const BinMap& map) const
+//{
+//    return (_lower == map._lower) && (_width == map._width);
+//}
 
 bool operator==(const BinMap& m1, const BinMap& m2)
 {
-    return m1.equals(m2);
+    return (m1._lower == m2._lower) && (m1._width == m2._width);
+    //return m1.equals(m2);
 }
 
 bool BinMap::operator<(const BinMap& map) const
