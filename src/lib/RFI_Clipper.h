@@ -3,6 +3,7 @@
 
 
 #include "pelican/modules/AbstractModule.h"
+#include <vector>
 #include "BandPass.h"
 
 /**
@@ -29,11 +30,12 @@ class RFI_Clipper : public AbstractModule
         RFI_Clipper( const ConfigNode& config );
         ~RFI_Clipper();
         void run(SpectrumDataSetStokes* stokesI);
-        void run(SpectrumDataSetStokes* stokesI, WeightedSpectrumDataSet* weights);
+        void run( WeightedSpectrumDataSet* weightedStokes );
         const BandPass& bandPass() const { return _bandPass; }; // return the BandPass Filter in use
 
     private:
         BinMap  _map;
+        std::vector<float> _copyI;
         BandPass  _bandPass;
         bool _active;
         float _startFrequency;
