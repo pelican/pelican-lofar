@@ -29,6 +29,7 @@ class WeightedSpectrumDataSet
         WeightedSpectrumDataSet( SpectrumDataSet<float>* dat );
         ~WeightedSpectrumDataSet();
         SpectrumDataSet<float>* dataSet() const { return _dataSet; };
+        SpectrumDataSet<float>* weights() { return &_weights; };
         float rms() const;
         float mean() const;
 
