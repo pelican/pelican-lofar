@@ -4,6 +4,7 @@
 
 #include "pelican/core/AbstractPipeline.h"
 #include "pelican/data/DataBlob.h"
+#include "pelican/utility/PelicanTimeRecorder.h"
 #include "pelican/output/PelicanTCPBlobServer.h"
 #include "TimeSeriesDataSet.h"
 #include "SigprocStokesWriter.h"
@@ -36,6 +37,7 @@ class EmptyPipeline : public AbstractPipeline
         void run(QHash<QString, DataBlob*>& remoteData);
 
     private:
+        PelicanTimeRecorder _recorder;
         unsigned _iteration;
 };
 

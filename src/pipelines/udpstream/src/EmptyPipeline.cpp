@@ -31,6 +31,8 @@ EmptyPipeline::~EmptyPipeline()
 void EmptyPipeline::init()
 {
     requestRemoteData("TimeSeriesDataSetC32");
+    _recorder.setReportInterval(10000);
+    _recorder.start();
 }
 
 /**
@@ -39,10 +41,7 @@ void EmptyPipeline::init()
  */
 void EmptyPipeline::run(QHash<QString, DataBlob*>& /*remoteData*/)
 {
-    if (_iteration % 200 == 0)
-        cout << "Finished pipeline, iteration " << _iteration << endl;
-
-    _iteration++;
+    _recorder.tick("run");
 }
 
 } // namespace lofar
