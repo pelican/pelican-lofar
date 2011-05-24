@@ -1,6 +1,5 @@
 #include "LofarTestClient.h"
 #include "EmulatorPipeline.h"
-#include "pelican/core/PipelineApplication.h"
 
 
 namespace pelican {
@@ -26,12 +25,14 @@ LofarTestClient::LofarTestClient( LofarEmulatorDataSim* e, const QFile& configFi
  */
 LofarTestClient::~LofarTestClient()
 {
+    terminate();
+    wait();
 }
 
 void LofarTestClient::startup()
 {
     start();
-    while( ! _pipeline ) { msleep(5); }
+    while( ! _pipeline || ! _pApp->isRunning() ) { msleep(5); }
 }
 
 void LofarTestClient::run()
@@ -46,23 +47,24 @@ void LofarTestClient::run()
      // start up the pipeline application
     try {
         // Create a PipelineApplication.
-        PipelineApplication pApp(argc, argv);
+        _pApp.reset(new PipelineApplication(argc, argv));
 
         // Set the data client.
-        pApp.setDataClient("PelicanServerClient");
+        _pApp->setDataClient("PelicanServerClient");
 
         // Register the pipelines that can run.
         _pipeline = new EmulatorPipeline( _stream, _emulator );
-        pApp.registerPipeline(_pipeline);
+        _pApp->registerPipeline(_pipeline);
 
         // Start the pipeline driver.
-        pApp.start();
+        _pApp->start();
     }
     catch (QString err) {
         _pipeline = 0;
         delete[] argv[1];
-        std::cerr << err.toStdString() << std::endl;
+        std::cerr << "error in LofarTestClient:: " << err.toStdString() << std::endl;
         throw( QString("Error caught in LofarTestClient.cpp: ") + err );
+        //exit(1);
     }
     delete[] argv[1];
     _pipeline = 0;

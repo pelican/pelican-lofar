@@ -82,70 +82,74 @@ void UdpBFPipelineIntegrationTest::test_topdownInit()
                 "<fixedSizePackets value=\"false\" />"
                 "<outputChannelsPerSubband value=\"32\" />"
                 "<udpPacketsPerIteration value=\"64\" />"
-            "</LofarEmulatorDataSim>"
+                "</LofarEmulatorDataSim>"
             );
     try {
-    LofarEmulatorDataSim* emulator = new LofarEmulatorDataSim(emulatorConfig);
-    EmulatorDriver data(emulator); // takes ownership of the emulator
-    QFile config( pelican::lofar::test::TEST_DATA_DIR + "/integrationConfig.xml" );
-    LofarTestClient client1(emulator, config, stream1);
-    LofarTestClient client2(emulator, config, stream2);
+        LofarEmulatorDataSim* emulator = new LofarEmulatorDataSim(emulatorConfig);
+        QFile config( pelican::lofar::test::TEST_DATA_DIR + "/integrationConfig.xml" );
+        LofarTestClient client1(emulator, config, stream1);
+        LofarTestClient client2(emulator, config, stream2);
+        EmulatorDriver data(emulator); // takes ownership of the emulator
 
-    /* Use Case
-     * Instantiate a data stream, a packet splitting server,
-     * and a suitable Client
-     * Expect:
-     * Everything to stay up and data to be propagated doewn the chain
-     */
-     data.start();
-     CPPUNIT_ASSERT_EQUAL( (unsigned long)0, client1.count() );
-     CPPUNIT_ASSERT_EQUAL( (unsigned long)0, client2.count() );
-     startServer();
-     client1.startup();
-     client2.startup();
-     while( ! client1.count() ) { _app->processEvents(); usleep(5); }
-     clientCalledCount1 = client1.count();
-     CPPUNIT_ASSERT( clientCalledCount1 >= 1 );
-return;
+        // Use Case
+        // Instantiate a data stream, a packet splitting server,
+        // and a suitable Client
+        // Expect:
+        // Everything to stay up and data to be propagated doewn the chain
+        //
+        data.start();
+        CPPUNIT_ASSERT_EQUAL( (unsigned long)0, client1.count() );
+        CPPUNIT_ASSERT_EQUAL( (unsigned long)0, client2.count() );
+        startServer();
+        client1.startup();
+        client2.startup();
+        while( ! client1.count() ) { _app->processEvents(); usleep(5); }
+        clientCalledCount1 = client1.count();
+        CPPUNIT_ASSERT( clientCalledCount1 >= 1 );
 
-    /* Use Case
-     * Kill the data stream, wait and then restart
-     * Expect
-     * Server and client to wait patiently, and restart processing
-     * when the data stream comes back online
-     */
-     data.exit();
-     sleep(10);
-     CPPUNIT_ASSERT_EQUAL( clientCalledCount1, client1.count() );
-     data.start();
-     CPPUNIT_ASSERT( clientCalledCount1 < client1.count() );
-     clientCalledCount1 = client1.count();
+        // Use Case
+        // Kill the data stream, wait and then restart
+        // Expect
+        // Server and client to wait patiently, and restart processing
+        // when the data stream comes back online
+        //
+        data.terminate();
+        data.wait();
+        clientCalledCount1 = client1.count();
+        data.start();
+        do { _app->processEvents(); usleep(5); }
+        while( !( clientCalledCount1 < client1.count()) );
+        clientCalledCount1 = client1.count();
 
-    /* Use Case
-     * Kill the server, wait and then restart
-     * Expect
-     * Client to wait patiently, and restart processing
-     * when the server comes back online
-     */
-     stopServer();
-     startServer();
-     sleep(1);
-     CPPUNIT_ASSERT( clientCalledCount1 < client1.count() );
-     clientCalledCount1 = client1.count();
+        // Use Case
+        //  Kill the server, wait and then restart
+        //  Expect
+        //  Client to wait patiently, and restart processing
+        //  when the server comes back online
+        //
+        stopServer();
+        startServer();
+        sleep(1);
+        CPPUNIT_ASSERT( _server->pid() != 0 );
+        do { _app->processEvents(); usleep(5); }
+        while( !( clientCalledCount1 < client1.count()) );
+        clientCalledCount1 = client1.count();
 
-    /* Use Case
-     * Kill one client, and fill the server buffer, before
-     * restarting
-     * Expect
-     * Client to continue processing data
-     */
-     client1.exit();
-     unsigned long start = data.dataCount();
-     do{ sleep(1); }
-     while( ( data.dataCount() - start ) < bufferSize );
-     client1.start();
-     CPPUNIT_ASSERT( clientCalledCount1 < client1.count() );
-     clientCalledCount1 = client1.count();
+        // Use Case
+        //  Kill one client, and fill the server buffer, before
+        //  restarting
+        // Expect
+        //  Client to continue processing data
+        //
+        client1.exit();
+        unsigned long start = data.dataCount();
+        do{ sleep(1); }
+        while( ( data.dataCount() - start ) < bufferSize );
+        client1.start();
+        do { _app->processEvents(); usleep(5); }
+        while( !( clientCalledCount1 < client1.count()) );
+        clientCalledCount1 = client1.count();
+        data.terminate();
      }
      catch ( const QString& e ) {
         stopServer();

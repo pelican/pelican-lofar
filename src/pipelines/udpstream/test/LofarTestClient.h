@@ -4,6 +4,8 @@
 #include <QThread>
 #include <QString>
 #include <QFile>
+#include <boost/shared_ptr.hpp>
+#include "pelican/core/PipelineApplication.h"
 
 /**
  * @file LofarTestClient.h
@@ -48,6 +50,7 @@ class LofarTestClient : public QThread
         EmulatorPipeline* _pipeline;
         QFile _configFile;
         QString _stream;
+        boost::shared_ptr<PipelineApplication> _pApp;
 };
 
 } // namespace lofar

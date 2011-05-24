@@ -44,7 +44,7 @@ target_link_libraries(pipelineTest
 
 CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/testInfo.in ${CMAKE_CURRENT_BINARY_DIR}/testInfo.h)
 
-#add_test(pipelineTest pipelineTest)
+add_test(pipelineTest pipelineTest)
 
 
 # Copy files required for testing to the build directory.
