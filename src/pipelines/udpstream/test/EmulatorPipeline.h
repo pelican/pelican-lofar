@@ -4,6 +4,7 @@
 #include <QString>
 
 #include "pelican/core/AbstractPipeline.h"
+#include "pelican/utility/PelicanTimeRecorder.h"
 
 /**
  * @file EmulatorPipeline.h
@@ -38,6 +39,7 @@ class EmulatorPipeline : public AbstractPipeline
         unsigned long _runCount;
         QString _dataStream;
         LofarEmulatorDataSim* _emulator;
+        PelicanTimeRecorder _recorder;
 
 };
 

@@ -22,16 +22,20 @@ EmulatorPipeline::EmulatorPipeline( const QString& streamName,
  */
 EmulatorPipeline::~EmulatorPipeline()
 {
+    _recorder.report();
 }
 
 void EmulatorPipeline::init() {
     // Request remote data
     std::cout << "EmulatorPipeline::init() : request for " << _dataStream.toStdString() << std::endl;
     requestRemoteData(_dataStream);
+    _recorder.setReportInterval(1);
+    _recorder.start();
 }
 
 void EmulatorPipeline::run(QHash<QString, DataBlob*>& )
 {
+    _recorder.tick("run");
     ++_runCount;
 }
 
