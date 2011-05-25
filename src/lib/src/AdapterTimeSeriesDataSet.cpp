@@ -242,9 +242,10 @@ void AdapterTimeSeriesDataSet::_readData(unsigned packet, char* buffer,
         case 16:
         {
             TYPES::i16complex i16c;
-            size_t dataSize = sizeof(i16c);
+            const size_t dataSize = sizeof(i16c);
 
             for (unsigned s = 0; s < _nSubbands; ++s) {
+                unsigned s0 = s*_nSamplesPerPacket * dataSize;
                 for (unsigned t = 0; t < _nSamplesPerPacket; ++t) {
 
                     iTimeBlock = (time0 + t) / _nSamplesPerTimeBlock;
@@ -257,11 +258,10 @@ void AdapterTimeSeriesDataSet::_readData(unsigned packet, char* buffer,
                     i16c = *reinterpret_cast<TYPES::i16complex*>(&buffer[iPtr]);
                     times0[index] = _makeComplex(i16c);
 
-                    iPtr += dataSize;
+                    iPtr = dataSize * t + s0;
                     i16c = *reinterpret_cast<TYPES::i16complex*>(&buffer[iPtr]);
                     times1[index] = _makeComplex(i16c);
 
-                    iPtr += dataSize;
                 }
             }
             break;
