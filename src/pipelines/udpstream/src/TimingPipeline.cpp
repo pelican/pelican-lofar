@@ -18,6 +18,7 @@ TimingPipeline::TimingPipeline() : AbstractPipeline()
 
     // Initialise timer data.
     timerInit(&_ppfTime);
+    timerInit(&_rfiClipper);
     timerInit(&_stokesTime);
     timerInit(&_integratorTime);
     timerInit(&_outputTime);
@@ -44,6 +45,7 @@ void TimingPipeline::init()
     // Create modules
     ppfChanneliser = (PPFChanneliser *) createModule("PPFChanneliser");
     stokesGenerator = (StokesGenerator *) createModule("StokesGenerator");
+    rfiClipper = (RFI_Clipper *) createModule("RFI_Clipper");
     stokesIntegrator = (StokesIntegrator *) createModule("StokesIntegrator");
 
     // Create local datablobs
@@ -88,6 +90,12 @@ void TimingPipeline::run(QHash<QString, DataBlob*>& remoteData)
     stokesGenerator->run(spectra, stokes);
     timerUpdate(&_stokesTime);
 
+    // The RFI clipper
+
+    timerStart(&_rfiClipper);
+    rfiClipper->run(stokes);
+    timerUpdate(&_rfiClipper);
+
     //    timerStart(&_integratorTime);
     //    stokesIntegrator->run(stokes, intStokes);
     //    timerUpdate(&_integratorTime);
@@ -104,14 +112,15 @@ void TimingPipeline::run(QHash<QString, DataBlob*>& remoteData)
     if (_iteration % 10 == 0)
         cout << "Finished the UDP beamforming pipeline, iteration " << _iteration << endl;
   timerUpdate(&_totalTime);
-    _iteration++;
+    ++_iteration;
 
 //    if (_iteration > 43000) stop();
     if (_iteration * _totalSamplesPerChunk >= 16*16384*5) {
         stop();
     timerReport(&adapterTime, "Adapter Time");
-        timerReport(&_ppfTime, "Polyphase Filter");
-        timerReport(&_stokesTime, "Stokes Generator");
+    timerReport(&_ppfTime, "Polyphase Filter");
+    timerReport(&_stokesTime, "Stokes Generator");
+    timerReport(&_rfiClipper, "RFI_Clipper");
     //    	timerReport(&_integratorTime, "Stokes Integrator");
     //    	timerReport(&_outputTime, "Output");
     timerReport(&_totalTime, "Pipeline Time (excluding adapter)");
