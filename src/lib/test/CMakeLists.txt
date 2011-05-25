@@ -18,7 +18,7 @@ set(lofarTest_src
     src/RFI_ClipperTest.cpp
     src/PumaOutputTest.cpp
     src/DataStreamingTest.cpp
-    #src/FilterBankAdapterTest.cpp
+    ##src/FilterBankAdapterTest.cpp
     ###src/PelicanBlobClientTest.cpp
     src/PolyphaseCoefficientsTest.cpp
     src/AdapterTimeSeriesDataSetTest.cpp
@@ -72,6 +72,7 @@ target_link_libraries(lofarEmulatorDataSim
     ${QT_QTXML_LIBRARY}
     lofarTestLib
 )
+install(TARGETS "lofarEmulatorDataSim" DESTINATION ${BINARY_INSTALL_DIR})
 
 
 
