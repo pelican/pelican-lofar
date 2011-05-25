@@ -52,7 +52,7 @@ void TimingPipeline::init()
     intStokes = (SpectrumDataSetStokes*) createBlob("SpectrumDataSetStokes");
 
     // Request remote data
-    requestRemoteData("TimeSeriesDataSetC32");
+    requestRemoteData("LofarTimeStream1");
 }
 
 /**
@@ -70,7 +70,7 @@ void TimingPipeline::run(QHash<QString, DataBlob*>& remoteData)
     // Get pointer to the remote time series data blob.
     // This is a block of data containing a number of time series of length
     // N for each sub-band and polarisation.
-    timeSeries = (TimeSeriesDataSetC32*) remoteData["TimeSeriesDataSetC32"];
+    timeSeries = (TimeSeriesDataSetC32*) remoteData["LofarTimeStream1"];
 
     // Get the total number of samples per chunk.
     _totalSamplesPerChunk =
