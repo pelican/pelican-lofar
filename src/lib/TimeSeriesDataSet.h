@@ -81,6 +81,9 @@ class TimeSeriesDataSet : public DataBlob
         T const * timeSeriesData(unsigned b, unsigned s, unsigned p) const
         { return &_data[_index(s, p, b)]; }
 
+        /// Returns a pointer to start of the data memory block
+        T * data() { return &_data[0]; }
+
     private:
         /// Time block index.
         unsigned long _index(unsigned s, unsigned p, unsigned b) const;
