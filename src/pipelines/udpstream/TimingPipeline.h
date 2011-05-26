@@ -1,7 +1,7 @@
 #ifndef UDP_BF_PIPELINE_H
 #define UDP_BF_PIPELINE_H
 
-
+#include "RFI_Clipper.h"
 #include "pelican/core/AbstractPipeline.h"
 #include "pelican/data/DataBlob.h"
 #include "pelican/output/PelicanTCPBlobServer.h"
@@ -49,6 +49,7 @@ class TimingPipeline : public AbstractPipeline
         PPFChanneliser* ppfChanneliser;
         StokesGenerator* stokesGenerator;
         StokesIntegrator* stokesIntegrator;
+        RFI_Clipper* rfiClipper;
 
         /// Local data blob
         SpectrumDataSetC32* spectra;
@@ -65,6 +66,7 @@ class TimingPipeline : public AbstractPipeline
         TimerData _integratorTime;
         TimerData _outputTime;
 	TimerData _totalTime;
+	TimerData _rfiClipper;
 };
 
 } // namespace lofar

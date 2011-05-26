@@ -27,7 +27,7 @@ int main(int argc, char* argv[])
         pApp.registerPipeline(new TimingPipeline);
 
         // Set the data client.
-        pApp.setDataClient("LofarStreamDataClient");
+        pApp.setDataClient("PelicanServerClient");
 
         // Start the pipeline driver.
         pApp.start();
