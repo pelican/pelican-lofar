@@ -78,6 +78,7 @@ void RFI_Clipper::run( WeightedSpectrumDataSet* weightedStokes )
         unsigned nSamples = stokesI->nTimeBlocks();
         unsigned nSubbands = stokesI->nSubbands();
         unsigned nChannels = stokesI->nChannels();
+        unsigned nPolarisations = stokesI->nPolarisations();
         unsigned nBins = nChannels * nSubbands;
 
         _map.reset( nBins );
@@ -105,26 +106,32 @@ void RFI_Clipper::run( WeightedSpectrumDataSet* weightedStokes )
         float medianDelta = median - _bandPass.median();
         // readjust relative to median
         float margin = std::fabs(_rFactor * _bandPass.rms());
+        I = stokesI->data();
+        float *W = weights->data();
         for (unsigned t = 0; t < nSamples; ++t) {
 #pragma omp parallel for
             for (unsigned s = 0; s < nSubbands; ++s) {
                 int bin = (s * nChannels) - 1;
-                float *I = stokesI -> spectrumData(t, s, 0);
-                float *W = weights -> spectrumData(t, s, 0);
+                long index = stokesI->index(s, nSubbands, 
+                                            0, nPolarisations,
+                                            t, nChannels ); 
+                                            
+                //float *I = stokesI -> spectrumData(t, s, 0);
+                //float *W = weights -> spectrumData(t, s, 0);
           /* this If statement doubles the loop time :(
                         if( _bandPass.filterBin( ++bin ) ) {
-                            I[c] = 0.0;
+                            I[index +c] = 0.0;
                             continue;
                         }
           */
                 for (unsigned c = 0; c < nChannels; ++c) {
                     ++bin;
                     float bandpass = _bandPass.intensityOfBin( bin );
-                    float res = I[c] - medianDelta - bandpass;
+                    float res = I[index +c] - medianDelta - bandpass;
                     if ( res > margin ) {
-                        W[c] = 0.0;
+                        W[index +c] = 0.0;
                     }
-                    I[c] *= W[c];
+                    I[index +c] *= W[index +c];
                 }
             }
             // loop takes from 7millsecs (first iteration) to 7 microsecs (over 1000 samples) 
@@ -140,6 +147,7 @@ void RFI_Clipper::run(SpectrumDataSetStokes* stokesI)
         unsigned nSamples = stokesI->nTimeBlocks();
         unsigned nSubbands = stokesI->nSubbands();
         unsigned nChannels = stokesI->nChannels();
+        unsigned nPolarisations = stokesI->nPolarisations();
         unsigned nBins = nChannels * nSubbands;
 
         _map.reset( nBins );
@@ -167,27 +175,30 @@ void RFI_Clipper::run(SpectrumDataSetStokes* stokesI)
         float medianDelta = median - _bandPass.median();
         // readjust relative to median
         float margin = std::fabs(_rFactor * _bandPass.rms());
+        I = stokesI->data();
         for (unsigned t = 0; t < nSamples; ++t) {
 #pragma omp parallel for
                 for (unsigned s = 0; s < nSubbands; ++s) {
                     int bin = (s * nChannels) - 1;
-                    float *I = stokesI -> spectrumData(t, s, 0);
+                    long index = stokesI->index(s, nSubbands, 
+                                            0, nPolarisations,
+                                            t, nChannels ); 
+                                            
+                    //float *I = stokesI -> spectrumData(t, s, 0);
                     for (unsigned c = 0; c < nChannels; ++c) {
                       ++bin;
           /* this If statement doubles the loop time :(
                         if( _bandPass.filterBin( ++bin ) ) {
-                            I[c] = 0.0;
+                            I[index + c] = 0.0;
                             continue;
                         }
           */
                         float bandpass = _bandPass.intensityOfBin( bin );
-                        float res = I[c] - medianDelta - bandpass;
-                        //float res = I[c] - DCoffset - _bandPass.intensityOfBin( bin );
-                        //if ( res > margin || I[c] > bandpass + doublemargin) {
+                        float res = I[index + c] - medianDelta - bandpass;
                         if ( res > margin ) {
                             // I[c] = _bandPass.intensityOfBin( bin ) + medianDelta + margin;
                             //                       I[c] -= res;
-                            I[c] = 0.0;
+                            I[index + c] = 0.0;
                         }
                     }
                 }

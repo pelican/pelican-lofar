@@ -42,7 +42,7 @@ void StokesGenerator::run(const SpectrumDataSetC32* channeliserOutput,
     stokes->resize(nSamples, nSubbands, 1, nChannels);
 
     const Complex* dataPolX, *dataPolY;
-    float *I, *Q, *U, *V;
+    float *I; // *Q, *U, *V;
     float powerX, powerY;
     Complex XxYstar;
 

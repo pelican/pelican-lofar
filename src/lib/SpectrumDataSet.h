@@ -125,6 +125,12 @@ class SpectrumDataSet : public DataBlob
         T const * spectrumData(unsigned b, unsigned s, unsigned p) const
         { return &_data[_index(s, p, b)]; }
 
+        /// calculates what the index should be given the block, subband, polarisation
+        //  primarily used as an aid to optimisation
+        static inline long index( unsigned subband, unsigned numSubbands,
+                   unsigned polarisation, unsigned numPolarisations,
+                   unsigned block, unsigned numChannels );
+
     private:
         /// Returns the data index for a given time block \b, sub-band \s and
         /// polarisation.
@@ -185,6 +191,16 @@ inline int SpectrumDataSet<T>::size() const
 
 
 template <typename T>
+inline long SpectrumDataSet<T>::index( unsigned subband, unsigned numSubbands,
+                   unsigned polarisation, unsigned numPolarisations,
+                   unsigned block, unsigned numChannels
+                 )
+{
+    return numChannels * ( numPolarisations * ( numSubbands * block + subband ) 
+                        + polarisation );
+}
+
+template <typename T>
 inline
 unsigned long SpectrumDataSet<T>::_index(unsigned s, unsigned p, unsigned b) const
 {
@@ -196,7 +212,8 @@ unsigned long SpectrumDataSet<T>::_index(unsigned s, unsigned p, unsigned b) con
     // CHECK: this looks like
     // block [slowest] -> subband -> pol [fastest] (ben - 15/09).
     // NOT what is written above.
-    return _nChannels * ( _nPolarisations * ( _nSubbands * b + s ) + p);
+    //return _nChannels * ( _nPolarisations * ( _nSubbands * b + s ) + p);
+    return index(s, _nSubbands, p, _nPolarisations, b, _nChannels );
 }
 
 
