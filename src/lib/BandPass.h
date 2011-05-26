@@ -41,6 +41,7 @@ class BandPass : public DataBlob
         float startFrequency() const;
         float endFrequency() const;
         float intensity(float frequency) const;
+        const QVector<float>& currentSet() const { return _dataSets[_currentMapId]; };
         inline float intensityOfBin(unsigned int index) const {
             return _dataSets[_currentMapId][index];
         };
