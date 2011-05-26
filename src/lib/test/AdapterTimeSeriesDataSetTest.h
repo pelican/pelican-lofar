@@ -32,7 +32,7 @@ class AdapterTimeSeriesDataSetTest : public CppUnit::TestFixture
         //CPPUNIT_TEST(test_configuration);
         //CPPUNIT_TEST(test_checkDataFixedPacket);
         //CPPUNIT_TEST(test_checkDataVariablePacket);
-        //CPPUNIT_TEST(test_deserialise);
+        CPPUNIT_TEST(test_deserialise);
         CPPUNIT_TEST(test_deserialise_timing);
         CPPUNIT_TEST_SUITE_END();
 

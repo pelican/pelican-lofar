@@ -242,25 +242,42 @@ void AdapterTimeSeriesDataSet::_readData(unsigned packet, char* buffer,
         case 16:
         {
             TYPES::i16complex i16c;
+            float tmp[2];
             const size_t dataSize = sizeof(i16c);
-
+	    //Complex* times0start = data->timeSeriesData(time0/_nSamplesPerTimeBlock, 0, 0);
+	    //Complex* times1start = data->timeSeriesData(time0/_nSamplesPerTimeBlock, 0, 1);
+	    Complex* times0start = data->data();
+	    unsigned nTimeBlocks = data->nTimeBlocks();
+	    unsigned nPols = data->nPolarisations();
             for (unsigned s = 0; s < _nSubbands; ++s) {
-                unsigned s0 = s*_nSamplesPerPacket * dataSize;
                 for (unsigned t = 0; t < _nSamplesPerPacket; ++t) {
 
                     iTimeBlock = (time0 + t) / _nSamplesPerTimeBlock;
 
                     index = time0 - (iTimeBlock * _nSamplesPerTimeBlock) + t;
 
-                    times0 = data->timeSeriesData(iTimeBlock, s, 0);
-                    times1 = data->timeSeriesData(iTimeBlock, s, 1);
+		    //                    times0 = data->timeSeriesData(iTimeBlock, s, 0);
+		    //                    times1 = data->timeSeriesData(iTimeBlock, s, 1);
+		    times0 = &times0start[_nSamplesPerTimeBlock*(nTimeBlocks*(s*nPols+0)+iTimeBlock)];
+		    times1 = &times0start[_nSamplesPerTimeBlock*(nTimeBlocks*(s*nPols+1)+iTimeBlock)];
+		    
+
+		    //printf("Times0 pointer: %p \n", times0);
+		    //printf("Times1 pointer: %p \n", times1);
 
                     i16c = *reinterpret_cast<TYPES::i16complex*>(&buffer[iPtr]);
-                    times0[index] = _makeComplex(i16c);
+		    //times0[index] = _makeComplex(i16c);
+		    tmp[0]=(Real)i16c.real();
+		    tmp[1]=(Real)i16c.imag();
+		    times0[index] = *reinterpret_cast<Complex*>(&tmp[0]);
 
-                    iPtr = dataSize * t + s0;
+                    iPtr += dataSize;
                     i16c = *reinterpret_cast<TYPES::i16complex*>(&buffer[iPtr]);
-                    times1[index] = _makeComplex(i16c);
+		    //times1[index] = _makeComplex(i16c);
+		    tmp[0]=(Real)i16c.real();
+		    tmp[1]=(Real)i16c.imag();
+		    times1[index] = *reinterpret_cast<Complex*>(&tmp[0]);
+                    iPtr += dataSize;
 
                 }
             }
@@ -309,7 +326,6 @@ AdapterTimeSeriesDataSet::_makeComplex(const TYPES::i16complex& z)
 {
     return Complex( (Real) z.real(), (Real) z.imag() );
 }
-
 
 inline QString AdapterTimeSeriesDataSet::_err(const QString& message)
 {
