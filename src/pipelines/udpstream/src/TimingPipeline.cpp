@@ -109,7 +109,7 @@ void TimingPipeline::run(QHash<QString, DataBlob*>& remoteData)
 
 //    stop();
 
-    if (_iteration % 10 == 0)
+    if (_iteration % 50 == 0)
         cout << "Finished the UDP beamforming pipeline, iteration " << _iteration << endl;
   timerUpdate(&_totalTime);
     ++_iteration;
@@ -122,11 +122,11 @@ void TimingPipeline::run(QHash<QString, DataBlob*>& remoteData)
     timerReport(&_stokesTime, "Stokes Generator");
     timerReport(&_rfiClipper, "RFI_Clipper");
     //    	timerReport(&_integratorTime, "Stokes Integrator");
-    //    	timerReport(&_outputTime, "Output");
+    timerReport(&_outputTime, "Output");
     timerReport(&_totalTime, "Pipeline Time (excluding adapter)");
     cout << endl;
     cout << "Total (average) allowed time per iteration = "
-         << _totalSamplesPerChunk * 5.0e-6 << " sec" << endl;
+         << _totalSamplesPerChunk * 5.12e-6 << " sec" << endl;
     cout << "Total (average) actual time per iteration = "
          << adapterTime.timeAverage + _totalTime.timeAverage << " sec" << endl;
     cout << "nSubbands = " << timeSeries->nSubbands() << endl;

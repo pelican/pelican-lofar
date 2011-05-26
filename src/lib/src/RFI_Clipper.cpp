@@ -176,6 +176,7 @@ void RFI_Clipper::run(SpectrumDataSetStokes* stokesI)
         // readjust relative to median
         float margin = std::fabs(_rFactor * _bandPass.rms());
         I = stokesI->data();
+	const QVector<float>& bandPass = _bandPass.currentSet();
         for (unsigned t = 0; t < nSamples; ++t) {
 #pragma omp parallel for
                 for (unsigned s = 0; s < nSubbands; ++s) {
@@ -193,8 +194,7 @@ void RFI_Clipper::run(SpectrumDataSetStokes* stokesI)
                             continue;
                         }
           */
-                        float bandpass = _bandPass.intensityOfBin( bin );
-                        float res = I[index + c] - medianDelta - bandpass;
+                        float res = I[index + c] - medianDelta - bandPass[bin];
                         if ( res > margin ) {
                             // I[c] = _bandPass.intensityOfBin( bin ) + medianDelta + margin;
                             //                       I[c] -= res;
