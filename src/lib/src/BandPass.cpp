@@ -63,6 +63,7 @@ void BandPass::_zeroChannelsMap(const BinMap& map)
          int max = map.binIndex(r.max());
          if( max < min ) { int tmp; tmp = max; max = min; min = tmp; };
          int mapId=map.hash();
+         if(_dataSets[mapId].size() < max ) _dataSets[mapId].resize(max);
          do {
              _dataSets[mapId][min] = 0.0;
          } while( ++min <= max );
