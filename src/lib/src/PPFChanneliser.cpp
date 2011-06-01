@@ -130,16 +130,18 @@ void PPFChanneliser::run(const TimeSeriesDataSetC32* timeSeries,
     const float* coeffs = &_coeffs[0];
 
     unsigned threadId = 0, nThreads = 0, start = 0, end = 0;
-    Complex *workBuffer = 0, *filteredSamples = 0, *spectrum = 0;
+    Complex *workBuffer = 0, *filteredSamples = 0; // *spectrum = 0;
     Complex const * timeData = 0;
 
     //double elapsed, tStart, tEnd;
+    const Complex* timeStart = timeSeries->constData();
+    Complex* spectraStart = spectra->data();
 
     #pragma omp parallel \
         shared(nTimeBlocks, nPolarisations, nSubbands, nFilterTaps, coeffs,\
-                tSum, tMin, tMax, tAve) \
+                tSum, tMin, tMax, tAve, timeStart, spectraStart) \
         private(threadId, nThreads, start, end, workBuffer, filteredSamples, \
-                spectrum, timeData/*, elapsed, /tStart*/)
+                timeData/*,spectrum , elapsed, /tStart*/)
     {
         threadId = omp_get_thread_num();
 
@@ -152,7 +154,6 @@ void PPFChanneliser::run(const TimeSeriesDataSetC32* timeSeries,
 
         filteredSamples = &_filteredData[threadId][0];
 
-        const Complex* timeStart = timeSeries->constData();
         for (unsigned s = start; s < end; ++s)
         {
             for (unsigned p = 0; p < nPolarisations; ++p) {
@@ -173,8 +174,12 @@ void PPFChanneliser::run(const TimeSeriesDataSetC32* timeSeries,
                     _filter(workBuffer, nFilterTaps, _nChannels, coeffs, filteredSamples);
 
                     // FFT the filtered sub-band data to form a new spectrum.
-                    spectrum = spectra->spectrumData(b, s ,p);
-                    _fft(filteredSamples, spectrum);
+                    unsigned indexSpectra = spectra->index(s, nSubbands, 
+                                                           p, nPolarisations,
+                                                           b, _nChannels );
+                    //spectrum = spectra->spectrumData(b, s ,p);
+                    //_fft(filteredSamples, spectrum);
+                    _fft(filteredSamples, &spectraStart[indexSpectra]);
                 }
             }
         }
