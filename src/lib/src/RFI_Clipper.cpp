@@ -154,6 +154,10 @@ void RFI_Clipper::run(SpectrumDataSetStokes* stokesI)
         _map.setStart( _startFrequency );
         _map.setEnd( _endFrequency );
         _bandPass.reBin(_map);
+        float bpMedian = _bandPass.median();
+        float margin = std::fabs(_rFactor * _bandPass.rms());
+        float doubleMargin = margin * 2.0;
+        const QVector<float>& bandPass = _bandPass.currentSet();
 
         // create an ordered copy of the data
         _copyI.resize(nBins);
@@ -165,45 +169,43 @@ void RFI_Clipper::run(SpectrumDataSetStokes* stokesI)
                     _copyI[++bin]=I[c];
                 }
             }
-        }
+            //}
 
-        // calculate the DC offset between bandpass description and current spectrum
-        std::nth_element(_copyI.begin(), _copyI.begin()+_copyI.size()/2, _copyI.end());
+            // calculate the DC offset between bandpass description and current spectrum
+            std::nth_element(_copyI.begin(), _copyI.begin()+_copyI.size()/2, _copyI.end());
 
-        // --- .50 microseconds to here (10000 iterations) ----------------
-        float median = (float)*(_copyI.begin()+_copyI.size()/2);
-        float medianDelta = median - _bandPass.median();
-        // readjust relative to median
-        float margin = std::fabs(_rFactor * _bandPass.rms());
-        I = stokesI->data();
-	const QVector<float>& bandPass = _bandPass.currentSet();
-        for (unsigned t = 0; t < nSamples; ++t) {
+            // --- .50 microseconds to here (10000 iterations) ----------------
+            float median = (float)*(_copyI.begin()+_copyI.size()/2);
+            float medianDelta = median - bpMedian;
+            // readjust relative to median
+            I = stokesI->data();
+            //for (unsigned t = 0; t < nSamples; ++t) {
 #pragma omp parallel for
-                for (unsigned s = 0; s < nSubbands; ++s) {
-                    int bin = (s * nChannels) - 1;
-                    long index = stokesI->index(s, nSubbands, 
-                                            0, nPolarisations,
-                                            t, nChannels ); 
-                                            
-                    //float *I = stokesI -> spectrumData(t, s, 0);
-                    for (unsigned c = 0; c < nChannels; ++c) {
-                      ++bin;
-          /* this If statement doubles the loop time :(
-                        if( _bandPass.filterBin( ++bin ) ) {
-                            I[index + c] = 0.0;
-                            continue;
-                        }
-          */
-                        float res = I[index + c] - medianDelta - bandPass[bin];
-                        if ( res > margin ) {
-                            // I[c] = _bandPass.intensityOfBin( bin ) + medianDelta + margin;
-                            //                       I[c] -= res;
-                            I[index + c] = 0.0;
-                        }
+            for (unsigned s = 0; s < nSubbands; ++s) {
+                int bin = (s * nChannels) - 1;
+                long index = stokesI->index(s, nSubbands, 
+                        0, nPolarisations,
+                        t, nChannels ); 
+
+                //float *I = stokesI -> spectrumData(t, s, 0);
+                for (unsigned c = 0; c < nChannels; ++c) {
+                    ++bin;
+                    /* this If statement doubles the loop time :(
+                       if( _bandPass.filterBin( ++bin ) ) {
+                       I[index + c] = 0.0;
+                       continue;
+                       }
+                       */
+                    //float res = I[index + c] - medianDelta - bandPass[bin];
+                    if ( medianDelta > doubleMargin || I[index + c] - medianDelta - bandPass[bin] > margin ) {
+                        // I[c] = _bandPass.intensityOfBin( bin ) + medianDelta + margin;
+                        //                       I[c] -= res;
+                        I[index + c] = 0.0;
                     }
                 }
-        }
-        // loop takes from 7millsecs (first iteration) to 7 microsecs (over 1000 samples) 
+            }
+    }
+    // loop takes from 7millsecs (first iteration) to 7 microsecs (over 1000 samples) 
     }
 }
 
