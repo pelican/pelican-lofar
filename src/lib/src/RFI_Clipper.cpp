@@ -169,7 +169,6 @@ void RFI_Clipper::run(SpectrumDataSetStokes* stokesI)
                     _copyI[++bin]=I[c];
                 }
             }
-            //}
 
             // calculate the DC offset between bandpass description and current spectrum
             std::nth_element(_copyI.begin(), _copyI.begin()+_copyI.size()/2, _copyI.end());
@@ -204,8 +203,8 @@ void RFI_Clipper::run(SpectrumDataSetStokes* stokesI)
                     }
                 }
             }
-    }
-    // loop takes from 7millsecs (first iteration) to 7 microsecs (over 1000 samples) 
+        }
+        // loop takes from 7millsecs (first iteration) to 7 microsecs (over 1000 samples) 
     }
 }
 
