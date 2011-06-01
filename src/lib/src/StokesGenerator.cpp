@@ -46,7 +46,6 @@ void StokesGenerator::run(const SpectrumDataSetC32* channeliserOutput,
     float powerX, powerY;
     Complex XxYstar;
 
-    float* stokesDataBlock = stokes->data();
     const Complex* dataPolDataBlock = channeliserOutput->data();
     for (unsigned t = 0; t < nSamples; ++t) {
         for (unsigned s = 0; s < nSubbands; ++s) {
@@ -63,8 +62,7 @@ void StokesGenerator::run(const SpectrumDataSetC32* channeliserOutput,
             //dataPolY = channeliserOutput->spectrumData(t, s, 1);
             dataPolX = &dataPolDataBlock[dataPolIndexX];
             dataPolY = &dataPolDataBlock[dataPolIndexY];
-            //I = stokes->spectrumData(t, s, 0);
-            I = &stokesDataBlock[indexStokes];
+            I = stokes->spectrumData(t, s, 0);
         //        Q = stokes->spectrumData(t, s, 1);
         //        U = stokes->spectrumData(t, s, 2);
         //        V = stokes->spectrumData(t, s, 3);
