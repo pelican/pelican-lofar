@@ -111,33 +111,36 @@ void PumaOutput::sendStream(const QString& /*streamName*/, const DataBlob* dataB
 
 void PumaOutput::_convertToPuma( const SpectrumDataSetStokes* data )
 {
-    //
-    // unwrap the datablob and munge channels and subbands together
-    //
-    QVector<float> puma(data->nTimeBlocks());
-    puma.fill(0);
-    unsigned int polarisation = 0; // only do one polarisation
+    int blocks = data->nTimeBlocks();
+    if ( blocks ) {
+	    //
+	    // unwrap the datablob and munge channels and subbands together
+	    //
+	    QVector<float> puma(blocks);
+	    puma.fill(0);
+	    unsigned int polarisation = 0; // only do one polarisation
 
-    unsigned int nSubbands = data->nSubbands();
-    unsigned int nChannels = data->nChannels();
-    for (unsigned t = 0; t < data->nTimeBlocks(); ++t) {
-        for (unsigned s = 0; s < nSubbands; ++s) {
-            const float* spectrum = data->spectrumData(t, s, polarisation );
-            for (unsigned int c = 0; c < nChannels ; ++c) {
-                puma[t] = spectrum[c];
-            }
-        }
-    }
+	    unsigned int nSubbands = data->nSubbands();
+	    unsigned int nChannels = data->nChannels();
+	    for (unsigned t = 0; t < data->nTimeBlocks(); ++t) {
+		    for (unsigned s = 0; s < nSubbands; ++s) {
+			    const float* spectrum = data->spectrumData(t, s, polarisation );
+			    for (unsigned int c = 0; c < nChannels ; ++c) {
+				    puma[t] = spectrum[c];
+			    }
+		    }
+	    }
 
-    // send out the data to all required devices
-    foreach( QTcpSocket* sock, _sockets.keys() )
-    {
-        _connect( sock, _sockets[sock].first, _sockets[sock].second );
-        sock->write( (char*)&puma[0], puma.size()*sizeof(float) );
-    }
-    foreach( QIODevice* device, _devices )
-    {
-        device->write( (char*)&puma[0], puma.size()*sizeof(float) );
+	    // send out the data to all required devices
+	    foreach( QTcpSocket* sock, _sockets.keys() )
+	    {
+		    _connect( sock, _sockets[sock].first, _sockets[sock].second );
+		    sock->write( (char*)&puma[0], puma.size()*sizeof(float) );
+	    }
+	    foreach( QIODevice* device, _devices )
+	    {
+		    device->write( (char*)&puma[0], puma.size()*sizeof(float) );
+	    }
     }
 }
 

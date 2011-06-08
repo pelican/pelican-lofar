@@ -81,6 +81,16 @@ class TimeSeriesDataSet : public DataBlob
         T const * timeSeriesData(unsigned b, unsigned s, unsigned p) const
         { return &_data[_index(s, p, b)]; }
 
+        /// Returns a pointer to start of the data memory block
+        T * data() { return &_data[0]; }
+        const T* constData() const { return &_data[0]; }
+
+        /// calculates what the index should be given the block, subband, polarisation
+        //  primarily used as an aid to optimisation
+        static inline long index( unsigned subband, unsigned numTimesPerBlock,
+                   unsigned polarisation, unsigned numPolarisations,
+                   unsigned block, unsigned numTimeBlocks);
+
     private:
         /// Time block index.
         unsigned long _index(unsigned s, unsigned p, unsigned b) const;
@@ -125,6 +135,16 @@ inline void TimeSeriesDataSet<T>::resize(unsigned nTimeBlocks,
     _nTimeBlocks = nTimeBlocks;
     _nTimesPerBlock = nTimes;
     _data.resize(nSubbands * nPols * nTimeBlocks * nTimes);
+}
+
+template <typename T>
+inline long TimeSeriesDataSet<T>::index( unsigned subband, unsigned numTimesPerBlock,
+                   unsigned polarisation, unsigned numPolarisations,
+                   unsigned block, unsigned numTimeBlocks
+                 )
+{
+    return numTimesPerBlock * ( numTimeBlocks *
+           ( subband * numPolarisations + polarisation ) + block );
 }
 
 

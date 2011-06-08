@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE pelican>
+
+<configuration version="1.0">
+
+  <server>
+
+    <chunkers>
+      <LofarDataSplittingChunker>
+        <connection host="127.0.0.1" port="4347"/> <!--Change-->
+        <!--  -->
+        <subbandsPerPacket value="62" /> <!-- 31 or 61 or 62 -->
+        <samplesPerPacket value="16" />
+        <nRawPolarisations value="2" />
+        <clock value="200" /> <!-- Could also be 160 -->
+        <dataBitSize value="16" />
+        <fixedSizePackets value="false" />
+        <udpPacketsPerIteration value="64" />
+        <integrateTimeBins value="1" />
+        <!--  -->
+        <Stream1 subbandStart="0" subbandEnd="30"/>
+        <Stream2 subbandStart="31" subbandEnd="61"/>
+        <data type="LofarTimeStream1" />
+        <data type="LofarTimeStream2" />
+      </LofarDataSplittingChunker>
+    </chunkers>
+
+    <buffers>
+      <LofarTimeStream1>
+        <buffer maxSize="5000000" maxChunkSize="500000" />
+      </LofarTimeStream1>
+      <LofarTimeStream2>
+        <buffer maxSize="5000000" />
+      </LofarTimeStream2>
+    </buffers>
+
+  </server>
+</configuration>
+
+

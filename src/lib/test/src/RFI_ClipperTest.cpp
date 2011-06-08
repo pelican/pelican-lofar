@@ -215,7 +215,7 @@ QList<RFI_ClipperTest::StokesIndex> RFI_ClipperTest::_diff(const SpectrumDataSet
                 for( int i=0; i < numberOfChannels; ++i ) {
                     if( ptra[i] != ptrb[i] )
                     {
-                        std::cout << "subband=" << subband << "channel=" << i << " a=" << ptra[i] << " b=" <<  ptrb[i] << std::endl;
+//                        std::cout << "subband=" << subband << "channel=" << i << " a=" << ptra[i] << " b=" <<  ptrb[i] << std::endl;
                         StokesIndex index(block,subband,polarisation,i);
                         diff.append( index );
                     }
@@ -254,7 +254,7 @@ ConfigNode RFI_ClipperTest::testConfig(const QString& file)
                         "<BandPassData file=\"" + 
                         pelican::test::TestConfig::findTestFile(file, "lib") 
                         + "\" />\n"
-                        "<Band startFrequency=\"137.3\" endFrequency=\"131.250763\" />\n"
+                        "<Band startFrequency=\"131.250763\" endFrequency=\"137.3\" />\n"
                   "</RFI_Clipper>\n";
     node.setFromString( xml );
     return node;

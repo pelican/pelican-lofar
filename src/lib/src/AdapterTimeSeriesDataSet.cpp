@@ -69,7 +69,7 @@ AdapterTimeSeriesDataSet::AdapterTimeSeriesDataSet(const ConfigNode& config)
  * Method to deserialise a single station sub-band time stream chunk.
  *
  * @param[in] in QIODevice containing a number of serialised UDP packets from
- * 				 the LOFAR RSP board.
+ *              the LOFAR RSP board.
  *
  * @note
  * There might be a problem with packing padding on different architectures
@@ -168,7 +168,7 @@ void AdapterTimeSeriesDataSet::_checkData()
     // Check the chunk size matches the expected number of UDPPackets.
     if (_chunkSize != packetSize * _nUDPPacketsPerChunk)
         throw _err("Chunk size '%1' != '%2' expected for %3 UDP packets.")
-                .arg(_chunkSize).arg(packetSize).arg(_nUDPPacketsPerChunk);
+                .arg(_chunkSize).arg(packetSize * _nUDPPacketsPerChunk).arg(_nUDPPacketsPerChunk);
 
     // Adapter dimensions must agree with packet data size.
     if (usefulBits > udpDataBits)
@@ -191,8 +191,8 @@ void AdapterTimeSeriesDataSet::_checkData()
  * @details
  * Reads the UDP packet header from the IO device.
  *
- * @param[out] header	UDP packet header to be filled.
- * @param[in]  buffer	Char* buffer read from the IO device
+ * @param[out] header   UDP packet header to be filled.
+ * @param[in]  buffer   Char* buffer read from the IO device
  */
 inline
 void AdapterTimeSeriesDataSet::_readHeader(char* buffer, UDPPacket::Header& header)
@@ -207,8 +207,8 @@ void AdapterTimeSeriesDataSet::_readHeader(char* buffer, UDPPacket::Header& head
  * Reads the UDP data data section into the data blob data array.
  *
  * @param[in]  packet   Packet index to read data from.
- * @param[in]  buffer 	Char* buffer read from the IO device.
- * @param[out] data		time stream data data array (assumes double precision).
+ * @param[in]  buffer    Char* buffer read from the IO device.
+ * @param[out] data      time stream data data array (assumes double precision).
  */
 void AdapterTimeSeriesDataSet::_readData(unsigned packet, char* buffer,
         TimeSeriesDataSetC32* data)
@@ -242,8 +242,13 @@ void AdapterTimeSeriesDataSet::_readData(unsigned packet, char* buffer,
         case 16:
         {
             TYPES::i16complex i16c;
-            size_t dataSize = sizeof(i16c);
-
+            float tmp[2];
+            const size_t dataSize = sizeof(i16c);
+            //Complex* times0start = data->timeSeriesData(time0/_nSamplesPerTimeBlock, 0, 0);
+            //Complex* times1start = data->timeSeriesData(time0/_nSamplesPerTimeBlock, 0, 1);
+            Complex* times0start = data->data();
+            unsigned nTimeBlocks = data->nTimeBlocks();
+            unsigned nPols = data->nPolarisations();
             for (unsigned s = 0; s < _nSubbands; ++s) {
                 for (unsigned t = 0; t < _nSamplesPerPacket; ++t) {
 
@@ -251,17 +256,29 @@ void AdapterTimeSeriesDataSet::_readData(unsigned packet, char* buffer,
 
                     index = time0 - (iTimeBlock * _nSamplesPerTimeBlock) + t;
 
-                    times0 = data->timeSeriesData(iTimeBlock, s, 0);
-                    times1 = data->timeSeriesData(iTimeBlock, s, 1);
+                    //                    times0 = data->timeSeriesData(iTimeBlock, s, 0);
+                    //                    times1 = data->timeSeriesData(iTimeBlock, s, 1);
+                    times0 = &times0start[_nSamplesPerTimeBlock*(nTimeBlocks*(s*nPols+0)+iTimeBlock)];
+                    times1 = &times0start[_nSamplesPerTimeBlock*(nTimeBlocks*(s*nPols+1)+iTimeBlock)];
+
+
+                    //printf("Times0 pointer: %p \n", times0);
+                    //printf("Times1 pointer: %p \n", times1);
 
                     i16c = *reinterpret_cast<TYPES::i16complex*>(&buffer[iPtr]);
-                    times0[index] = _makeComplex(i16c);
+                    //times0[index] = _makeComplex(i16c);
+                    tmp[0]=(Real)i16c.real();
+                    tmp[1]=(Real)i16c.imag();
+                    times0[index] = *reinterpret_cast<Complex*>(&tmp[0]);
 
                     iPtr += dataSize;
                     i16c = *reinterpret_cast<TYPES::i16complex*>(&buffer[iPtr]);
-                    times1[index] = _makeComplex(i16c);
-
+                    //times1[index] = _makeComplex(i16c);
+                    tmp[0]=(Real)i16c.real();
+                    tmp[1]=(Real)i16c.imag();
+                    times1[index] = *reinterpret_cast<Complex*>(&tmp[0]);
                     iPtr += dataSize;
+
                 }
             }
             break;
@@ -309,7 +326,6 @@ AdapterTimeSeriesDataSet::_makeComplex(const TYPES::i16complex& z)
 {
     return Complex( (Real) z.real(), (Real) z.imag() );
 }
-
 
 inline QString AdapterTimeSeriesDataSet::_err(const QString& message)
 {

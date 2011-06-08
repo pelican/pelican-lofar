@@ -111,6 +111,7 @@ void PPFChanneliser::run(const TimeSeriesDataSetC32* timeSeries,
     unsigned nSubbands = timeSeries->nSubbands();
     unsigned nPolarisations = timeSeries->nPolarisations();
     unsigned nTimeBlocks = timeSeries->nTimeBlocks();
+    unsigned nTimesPerBlock = timeSeries->nTimesPerBlock();
 
     // Resize the output spectra blob. (only if the number of channels changes!).
     spectra->resize(nTimeBlocks, nSubbands, nPolarisations, _nChannels);
@@ -129,16 +130,18 @@ void PPFChanneliser::run(const TimeSeriesDataSetC32* timeSeries,
     const float* coeffs = &_coeffs[0];
 
     unsigned threadId = 0, nThreads = 0, start = 0, end = 0;
-    Complex *workBuffer = 0, *filteredSamples = 0, *spectrum = 0;
+    Complex *workBuffer = 0, *filteredSamples = 0; // *spectrum = 0;
     Complex const * timeData = 0;
 
     //double elapsed, tStart, tEnd;
+    const Complex* timeStart = timeSeries->constData();
+    Complex* spectraStart = spectra->data();
 
     #pragma omp parallel \
         shared(nTimeBlocks, nPolarisations, nSubbands, nFilterTaps, coeffs,\
-                tSum, tMin, tMax, tAve) \
+                tSum, tMin, tMax, tAve, timeStart, spectraStart) \
         private(threadId, nThreads, start, end, workBuffer, filteredSamples, \
-                spectrum, timeData/*, elapsed, /tStart*/)
+                timeData/*,spectrum , elapsed, /tStart*/)
     {
         threadId = omp_get_thread_num();
 
@@ -155,9 +158,11 @@ void PPFChanneliser::run(const TimeSeriesDataSetC32* timeSeries,
         {
             for (unsigned p = 0; p < nPolarisations; ++p) {
                 for (unsigned b = 0; b < nTimeBlocks; ++b) {
-
+                    unsigned index = timeSeries->index(s, nTimesPerBlock,
+                                 p, nPolarisations, b, nTimeBlocks);
                     // Get a pointer to the time series.
-                    timeData = timeSeries->timeSeriesData(b, s, p);
+                    //timeData = timeSeries->timeSeriesData(b, s, p);
+                    timeData = &timeStart[index];
 
                     // Get a pointer to the work buffer.
                     workBuffer = &(_workBuffer[s * nPolarisations + p])[0];
@@ -169,8 +174,12 @@ void PPFChanneliser::run(const TimeSeriesDataSetC32* timeSeries,
                     _filter(workBuffer, nFilterTaps, _nChannels, coeffs, filteredSamples);
 
                     // FFT the filtered sub-band data to form a new spectrum.
-                    spectrum = spectra->spectrumData(b, s ,p);
-                    _fft(filteredSamples, spectrum);
+                    unsigned indexSpectra = spectra->index(s, nSubbands, 
+                                                           p, nPolarisations,
+                                                           b, _nChannels );
+                    //spectrum = spectra->spectrumData(b, s ,p);
+                    //_fft(filteredSamples, spectrum);
+                    _fft(filteredSamples, &spectraStart[indexSpectra]);
                 }
             }
         }

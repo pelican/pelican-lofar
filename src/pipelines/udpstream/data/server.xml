@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE pelican>
+
+<configuration version="1.0">
+
+  <server>
+
+    <chunkers>
+      <LofarDataSplittingChunker>
+        <connection host="127.0.0.1" port="4346"/> <!--Change-->
+        <!--  -->
+        <subbandsPerPacket value="61" /> <!-- 31 or 61 or 62 -->
+        <import file="/Data/XML/my_common.xml"/>
+        <!--  -->
+        <Stream1 subbandStart="0" subbandEnd="30"/>
+        <Stream2 subbandStart="31" subbandEnd="60"/>
+        <data type="LofarTimeStream1" />
+        <data type="LofarTimeStream2" />
+      </LofarDataSplittingChunker>
+    </chunkers>
+
+    <buffers>
+      <LofarTimeStream1>
+        <buffer maxSize="15000000000" maxChunkSize="1500000000"/>
+      </LofarTimeStream1>
+
+      <LofarTimeStream2>
+        <buffer maxSize="15000000000" maxChunkSize="1500000000"/>
+      </LofarTimeStream2>
+    </buffers>
+
+  </server>
+</configuration>
+
+

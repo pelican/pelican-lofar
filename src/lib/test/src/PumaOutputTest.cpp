@@ -29,8 +29,10 @@ PumaOutputTest::~PumaOutputTest()
 
 void PumaOutputTest::setUp()
 {
-    _filename = QDir::tempPath() + "/_PumaOutputTest_" 
-              + QString().setNum( QCoreApplication::applicationPid() );
+    _filename = QDir::tempPath() + "/_PumaOutputTest_";
+#ifdef QT_VERSION >= 0x040400 
+       _filename += QString().setNum( QCoreApplication::applicationPid() );
+#endif
     int argc = 1;
     char *argv[] = {(char*)"lofartest"};
     _app = new QCoreApplication(argc,argv);

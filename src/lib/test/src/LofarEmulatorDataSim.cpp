@@ -18,17 +18,37 @@ namespace lofar {
 LofarEmulatorDataSim::LofarEmulatorDataSim(const ConfigNode& configNode)
     : AbstractUdpEmulator(configNode)
 {
+    // Check the configuration type matches the class name.                                                                              
+    if (configNode.type() != "LofarEmulatorDataSim")
+      throw QString("LofarEmulatorDataSim(): "
+		    "Invalid or missing XML configuration." + configNode.type());
+
+
+    // Port and host set by base class; connection line in xml file
+
     // Get the config.
     _interval = configNode.getOption("packetSendInterval", "value", "100").toULong();
     _startDelay = configNode.getOption("packetStartDelay", "value", "1").toInt();
 
-    _nSubbands = configNode.getOption("subbandsPerPacket", "value", "62").toInt();
-    _nPolarisations = configNode.getOption("polsPerPacket", "value", "2").toInt();
+    //    _nSubbands = configNode.getOption("subbandsPerPacket", "value", "62").toInt();
+    _nSubbands = configNode.getOption("subbandsPerPacket", "value").toUInt();
+    //    _nPolarisations = configNode.getOption("polsPerPacket", "value", "2").toInt();
+    _nPolarisations = configNode.getOption("nRawPolarisations", "value").toUInt();
 
     // Fixed parameters.
-    _samplesPerPacket = 16;
+    //    _samplesPerPacket = 16;
+    _samplesPerPacket = configNode.getOption("samplesPerPacket", "value").toUInt();
 
-    _clock = 200;
+    //    _clock = 200;
+    _clock = configNode.getOption("clock", "value").toUInt();
+ 
+
+    // Number of UDP packets collected into one chunk (iteration of the pipeline).                                                       
+    _nPackets = configNode.getOption("udpPacketsPerIteration", "value").toUInt();
+
+    unsigned sampleBits = configNode.getOption("dataBitSize", "value").toUInt();
+ 
+
     _blockid = _samplesPerPacket; // blockid offset
     _nPackets = -1; // Continue for ever.
 
@@ -37,6 +57,8 @@ LofarEmulatorDataSim::LofarEmulatorDataSim(const ConfigNode& configNode)
     _packetSize = sizeof(UDPPacket);
 
     _setPacketHeader();
+
+
 }
 
 

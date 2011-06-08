@@ -30,7 +30,7 @@ class PPFChanneliserTest : public CppUnit::TestFixture
         //CPPUNIT_TEST(test_channelProfile);
         //CPPUNIT_TEST(test_makeSpectrum);
 
-        //CPPUNIT_TEST(test_configuration);
+        CPPUNIT_TEST(test_configuration);
         //CPPUNIT_TEST(test_threadAssign);
         //CPPUNIT_TEST(test_updateBuffer);
         //CPPUNIT_TEST(test_filter);

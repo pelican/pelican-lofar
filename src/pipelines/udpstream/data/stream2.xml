@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE pelican>
+
+<configuration version="1.0">
+
+  <pipeline>
+
+    <clients>
+      <PelicanServerClient>
+        <server host="127.0.0.1" port="2000"/>
+        <data type="LofarTimeStream2" adapter="AdapterTimeSeriesDataSet"/>
+      </PelicanServerClient>
+    </clients>
+
+    <adapters>
+      <AdapterTimeSeriesDataSet>
+        <subbandsPerPacket value="30"/> <!-- 31 or 61 or 62 -->
+        <import file="/Data/XML/my_common.xml"/>
+        <!--   -->
+        <fixedSizePackets value="false" />
+      </AdapterTimeSeriesDataSet>
+    </adapters>
+
+    <modules>
+
+      <PPFChanneliser>
+        <import file="/Data/XML/my_common.xml"/>
+        <!--   -->
+        <processingThreads value="6" />
+        <filter nTaps="8" filterWindow="kaiser"/>
+      </PPFChanneliser>
+
+      <StokesGenerator>
+      </StokesGenerator>
+
+      <RFI_Clipper active="true" rejectionFactor="10.0" >
+	<BandPassData file="/Data/XML/band30.bp" />
+	<Band matching="true" />
+      </RFI_Clipper>
+
+      <MdsmModule>
+        <observationfile filepath="/Data/XML/obs30.xml" />
+        <import file="/Data/XML/my_common.xml"/>
+	<createOutputBlob value="0" />
+	<invertChannels value="1" />
+      </MdsmModule>
+      
+      <StokesIntegrator>
+        <import file="/Data/XML/my_common.xml"/>
+      </StokesIntegrator>
+
+    </modules>
+
+    <output>
+
+      <dataStreams>
+        <!-- <stream name="SpectrumDataSetStokes" listeners="PelicanTCPBlobServer" />  -->
+        <stream name="SpectrumDataSetStokes" listeners="SigprocStokesWriter"/>
+      </dataStreams>
+
+      <streamers>
+        <!-- <PelicanTCPBlobServer active="true" >
+             <connection port="6969" />
+        </PelicanTCPBlobServer>
+        -->
+        <SigprocStokesWriter active="true" writeHeader="true">
+          <import file="/Data/XML/my_common.xml"/>
+          <topSubbandIndex value="280"/>
+          <LBA_0_or_HBA_1 value="1" />
+          <subbandsPerPacket value="30"/>
+          <!-- -->
+          <file filepath="V1_HBA30_t280_test_0329.dat" /><!--Change-->
+          <params telescope="LOFAR" nPolsToWrite="1"/><!--Change-->
+          <RAJ value="033259.368" />
+          <DecJ value="543443.57"/>
+          <TelescopeID value="3"/>
+          <MachineID value="9"/>
+        </SigprocStokesWriter>
+      </streamers>
+      
+    </output>
+
+  </pipeline>
+</configuration>

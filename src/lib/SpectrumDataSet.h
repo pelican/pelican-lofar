@@ -12,6 +12,7 @@
 
 #include <vector>
 #include <complex>
+#include <algorithm>
 #include <iostream>
 
 namespace pelican {
@@ -47,9 +48,16 @@ class SpectrumDataSet : public DataBlob
         /// Clears the data.
         void clear();
 
+        /// initialise the data
+        void init( const T& value);
+
         /// Resizes the spectrum data blob to the specified dimensions.
         void resize(unsigned nTimeBlocks, unsigned nSubbands,
                 unsigned nPolarisations, unsigned nChannels);
+        void resize(const SpectrumDataSet<T>& data ) {
+            resize( data.nTimeBlocks(), data.nSubbands(), 
+                    data.nPolarisations(), data.nChannels() );
+        }
 
     public:
         /// Returns the number of spectra in the data blob.
@@ -93,6 +101,12 @@ class SpectrumDataSet : public DataBlob
         /// Returns a pointer to the data (const overload).
         T const * data() const { return &_data[0]; }
 
+        /// Return an iterator over the data starting at the beginning
+        typename std::vector<T>::const_iterator begin() const { return _data.begin(); }
+
+        /// Return an iterator over the data starting at the end 
+        typename std::vector<T>::const_iterator end() const { return _data.end(); }
+
         /// Returns a pointer to the spectrum data at index i.
         T * spectrumData(unsigned i)
         { return &_data[i * _nChannels]; }
@@ -110,6 +124,12 @@ class SpectrumDataSet : public DataBlob
         /// \p b, sub-band \p s, and polarisation \p p (const overload).
         T const * spectrumData(unsigned b, unsigned s, unsigned p) const
         { return &_data[_index(s, p, b)]; }
+
+        /// calculates what the index should be given the block, subband, polarisation
+        //  primarily used as an aid to optimisation
+        static inline long index( unsigned subband, unsigned numSubbands,
+                   unsigned polarisation, unsigned numPolarisations,
+                   unsigned block, unsigned numChannels );
 
     private:
         /// Returns the data index for a given time block \b, sub-band \s and
@@ -146,6 +166,11 @@ inline void SpectrumDataSet<T>::clear()
     _lofarTimestamp = 0;
 }
 
+template <typename T>
+inline void SpectrumDataSet<T>::init(const T& val)
+{
+    std::fill(_data.begin(),_data.end(), val);
+}
 
 template <typename T>
 inline void SpectrumDataSet<T>::resize(unsigned nTimeBlocks, unsigned nSubbands,
@@ -166,6 +191,16 @@ inline int SpectrumDataSet<T>::size() const
 
 
 template <typename T>
+inline long SpectrumDataSet<T>::index( unsigned subband, unsigned numSubbands,
+                   unsigned polarisation, unsigned numPolarisations,
+                   unsigned block, unsigned numChannels
+                 )
+{
+    return numChannels * ( numPolarisations * ( numSubbands * block + subband ) 
+                        + polarisation );
+}
+
+template <typename T>
 inline
 unsigned long SpectrumDataSet<T>::_index(unsigned s, unsigned p, unsigned b) const
 {
@@ -177,7 +212,8 @@ unsigned long SpectrumDataSet<T>::_index(unsigned s, unsigned p, unsigned b) con
     // CHECK: this looks like
     // block [slowest] -> subband -> pol [fastest] (ben - 15/09).
     // NOT what is written above.
-    return _nChannels * ( _nPolarisations * ( _nSubbands * b + s ) + p);
+    //return _nChannels * ( _nPolarisations * ( _nSubbands * b + s ) + p);
+    return index(s, _nSubbands, p, _nPolarisations, b, _nChannels );
 }
 
 

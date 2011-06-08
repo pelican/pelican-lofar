@@ -146,9 +146,10 @@ QIODevice* LofarDataSplittingChunker::newDevice()
 {
     QUdpSocket* socket = new QUdpSocket;
 
-    if (!socket->bind(port()))
+    if (!socket->bind(port(), QUdpSocket::ShareAddress | QUdpSocket::ReuseAddressHint ))
         cerr << "LofarDataSplittingChunker::newDevice(): "
-        "Unable to bind to UDP port!" << endl;
+        "Unable to bind to UDP port!" << 
+        socket->errorString().toStdString() << std::endl;
 
     return socket;
 }
