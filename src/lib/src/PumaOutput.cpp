@@ -74,6 +74,7 @@ void PumaOutput::addFile(const QString& filename)
     }
     else {
         std::cerr << "unable to open file for writing: " << filename.toStdString() << std::endl;
+        delete file;
     }
 }
 
