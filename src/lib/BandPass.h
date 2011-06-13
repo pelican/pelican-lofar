@@ -41,15 +41,24 @@ class BandPass : public DataBlob
         float startFrequency() const;
         float endFrequency() const;
         float intensity(float frequency) const;
+
+        /// return a reference to the binned data corresponding to the current bin mapping
+        //  (call to reBin)
         const QVector<float>& currentSet() { return _dataSets[_currentMapId]; };
+
         inline float intensityOfBin(unsigned int index) const {
             return _dataSets[_currentMapId][index];
         };
+        /// return the median for the current bin mapping
         inline float median() const { return _median[_currentMapId]; }
+
+        /// return the rms for the current bin mapping
         inline float rms() const { return _rms[_currentMapId]; }
+
         // Mark channels to be killed (set to 0)
         void killChannel(unsigned int index);
         void killBand(float startFreq, float endFreq);
+
         // return true if bin has been killed
         bool filterBin( unsigned int i ) const;
 

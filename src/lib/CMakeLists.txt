@@ -7,6 +7,7 @@ set(lib_src
     src/BinMap.cpp
     src/BandPassAdapter.cpp
     src/BandPass.cpp
+    src/BandPassRecorder.cpp
     src/FilterBankHeader.cpp
     src/FilterBankAdapter.cpp
     src/OutputHDF5Lofar.cpp
@@ -52,7 +53,7 @@ install(TARGETS pelican-lofar DESTINATION ${LIBRARY_INSTALL_DIR})
 set(pelican-lofar_externals
     ${FFTW3_FFTW_LIBRARY}
     ${FFTW3_FFTWF_LIBRARY}
-    #${CBLAS_LIBS}
+    ${LAPACK_LIBRARIES}
 )
 
 target_link_libraries(pelican-lofar_static ${pelican-lofar_externals})

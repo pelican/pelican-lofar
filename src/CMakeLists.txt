@@ -1,5 +1,5 @@
 # === Set the project name and specify the required CMAKE version.
-project(pelican-lofar CXX C)
+project(pelican-lofar CXX C Fortran)
 cmake_minimum_required(VERSION 2.4)
 
 # === Project version
@@ -39,6 +39,7 @@ find_package(CppUnit REQUIRED)
 find_package(OpenMP REQUIRED)
 find_package(FFTW3 REQUIRED)
 find_package(Boost REQUIRED)
+find_package(LAPACK REQUIRED)
 #find_package(MKL QUIET)
 #if(MKL_FOUND)
 #    add_definitions(-DUSING_MKL)
@@ -48,6 +49,7 @@ find_package(Boost REQUIRED)
 #else(MKL_FOUND)
 #    find_package(CBLAS REQUIRED)
 #    set(CBLAS_LIBS ${CBLAS_LIBRARIES})
+#    message(STATUS "Using CBLAS ${CBLAS_LIBRARIES}")
 #endif(MKL_FOUND)
 
 
@@ -71,6 +73,7 @@ target_link_libraries(lofarClient
     ${QT_QTXML_LIBRARY}
     ${PELICAN_LIBRARY}
     ${FFTW3_LIBRARIES}
+    ${CBLAS_LIBS}
 )
 
 # === Create the server binary.
