@@ -156,7 +156,7 @@ void RFI_Clipper::run(SpectrumDataSetStokes* stokesI)
         _bandPass.reBin(_map);
         float bpMedian = _bandPass.median();
         float margin = std::fabs(_rFactor * _bandPass.rms());
-	float spectrumRMStolerance = 10.0 * _bandPass.rms()/sqrt(nBins);
+        float spectrumRMStolerance = 10.0 * _bandPass.rms()/sqrt(nBins);
         float doubleMargin = margin * 2.0;
         const QVector<float>& bandPass = _bandPass.currentSet();
 
@@ -180,10 +180,10 @@ void RFI_Clipper::run(SpectrumDataSetStokes* stokesI)
             // readjust relative to median
             I = stokesI->data();
             //for (unsigned t = 0; t < nSamples; ++t) {
-	    //#pragma omp parallel for
-	    float spectrumSum = 0.0;
-	    float spectrumSumSq = 0.0;
-	    int goodChannels = 0;
+            //#pragma omp parallel for
+            float spectrumSum = 0.0;
+            float spectrumSumSq = 0.0;
+            int goodChannels = 0;
             for (unsigned s = 0; s < nSubbands; ++s) {
                 int bin = (s * nChannels) - 1;
                 long index = stokesI->index(s, nSubbands, 
@@ -198,36 +198,36 @@ void RFI_Clipper::run(SpectrumDataSetStokes* stokesI)
                        I[index + c] = 0.0;
                        continue;
                        }
-                       */
+                     */
                     //float res = I[index + c] - medianDelta - bandPass[bin];
                     if ( /*medianDelta > doubleMargin || */ I[index + c] - medianDelta - bandPass[bin] > margin ) {
                         // I[c] = _bandPass.intensityOfBin( bin ) + medianDelta + margin;
                         //                       I[c] -= res;
                         I[index + c] = 0.0;
                     }
-		    else{
-		      spectrumSum += I[index+c] - medianDelta - bandPass[bin];
-		      spectrumSumSq += pow(I[index+c] - medianDelta - bandPass[bin],2);
-		      ++goodChannels;
-		    }
+                    else{
+                        spectrumSum += I[index+c] - medianDelta - bandPass[bin];
+                        spectrumSumSq += pow(I[index+c] - medianDelta - bandPass[bin],2);
+                        ++goodChannels;
+                    }
 
                 }
             }
-	    float spectrumRMS = sqrt(spectrumSumSq/goodChannels - std::pow((spectrumSum/goodChannels),2));
-	    if (fabs(spectrumRMS - _bandPass.rms()) > spectrumRMStolerance) {
-	      std::cout << "spectrumRMS:" << spectrumRMS << " Model RMS:" << _bandPass.rms() << " Tolerance:" << spectrumRMStolerance << " SpectrumMean:" << spectrumSum/goodChannels << " Spectrum median:" << median << std::endl;
-	      for (unsigned s = 0; s < nSubbands; ++s) {
-                long index = stokesI->index(s, nSubbands, 
-                        0, nPolarisations,
-                        t, nChannels ); 
-                for (unsigned c = 0; c < nChannels; ++c) {
+            float spectrumRMS = sqrt(spectrumSumSq/goodChannels - std::pow((spectrumSum/goodChannels),2));
+            if (fabs(spectrumRMS - _bandPass.rms()) > spectrumRMStolerance) {
+                std::cout << "spectrumRMS:" << spectrumRMS << " Model RMS:" << _bandPass.rms() << " Tolerance:" << spectrumRMStolerance << " SpectrumMean:" << spectrumSum/goodChannels << " Spectrum median:" << median << std::endl;
+                for (unsigned s = 0; s < nSubbands; ++s) {
+                    long index = stokesI->index(s, nSubbands, 
+                            0, nPolarisations,
+                            t, nChannels ); 
+                    for (unsigned c = 0; c < nChannels; ++c) {
                         I[index + c] = 0.0;
-		}
-	      }	      
-	    }
+                    }
+                }	      
+            }
         }
         // loop takes from 7millsecs (first iteration) to 7 microsecs (over 1000 samples) 
+        }
     }
-}
 } // namespace lofar
 } // namespace pelican
