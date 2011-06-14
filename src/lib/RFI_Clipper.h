@@ -41,6 +41,9 @@ class RFI_Clipper : public AbstractModule
         float _startFrequency;
         float _endFrequency;
         float _rFactor; // scale factor for rejection (multiples of RMS)
+        QVector<float> _history;
+        int _current; // history pointer
+        int _maxHistory; // max size of history buffer
 };
 
     PELICAN_DECLARE_MODULE(RFI_Clipper)

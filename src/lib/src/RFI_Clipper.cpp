@@ -15,7 +15,7 @@ namespace lofar {
  *@details RFI_Clipper 
  */
 RFI_Clipper::RFI_Clipper( const ConfigNode& config )
-    : AbstractModule( config ), _active(true), _rFactor(3.0)
+    : AbstractModule( config ), _active(true), _rFactor(3.0), _current(0)
 {
     if( config.hasAttribute("active") &&  
         config.getAttribute("active").toLower() == QString("false") ) {
@@ -58,6 +58,7 @@ RFI_Clipper::RFI_Clipper( const ConfigNode& config )
                     throw(QString("RFI_Clipper: <Band endFrequency=?> not defined"));
             _endFrequency= efreq.toFloat();
         }
+        _maxHistory = config.getOption("History", "maximum", "10" ).toInt();
     }
 }
 
@@ -154,10 +155,11 @@ void RFI_Clipper::run(SpectrumDataSetStokes* stokesI)
         _map.setStart( _startFrequency );
         _map.setEnd( _endFrequency );
         _bandPass.reBin(_map);
+
         float bpMedian = _bandPass.median();
         float margin = std::fabs(_rFactor * _bandPass.rms());
         float spectrumRMStolerance = 10.0 * _bandPass.rms()/sqrt(nBins);
-        float doubleMargin = margin * 2.0;
+        //float doubleMargin = margin * 2.0;
         const QVector<float>& bandPass = _bandPass.currentSet();
 
         // create an ordered copy of the data
@@ -215,7 +217,12 @@ void RFI_Clipper::run(SpectrumDataSetStokes* stokesI)
             }
             float spectrumRMS = sqrt(spectrumSumSq/goodChannels - std::pow((spectrumSum/goodChannels),2));
             if (fabs(spectrumRMS - _bandPass.rms()) > spectrumRMStolerance) {
-                std::cout << "spectrumRMS:" << spectrumRMS << " Model RMS:" << _bandPass.rms() << " Tolerance:" << spectrumRMStolerance << " SpectrumMean:" << spectrumSum/goodChannels << " Spectrum median:" << median << std::endl;
+                std::cout << "spectrumRMS:" << spectrumRMS << " Model RMS:" 
+                    << _bandPass.rms() << " Tolerance:" 
+                    << spectrumRMStolerance 
+                    << " SpectrumMean:" << spectrumSum/goodChannels 
+                    << " Spectrum median:" << median 
+                    << std::endl;
                 for (unsigned s = 0; s < nSubbands; ++s) {
                     long index = stokesI->index(s, nSubbands, 
                             0, nPolarisations,
@@ -225,9 +232,19 @@ void RFI_Clipper::run(SpectrumDataSetStokes* stokesI)
                     }
                 }	      
             }
-        }
-        // loop takes from 7millsecs (first iteration) to 7 microsecs (over 1000 samples) 
+            else {
+                // update historical data
+                _history[(++_current)%_maxHistory] = median;
+                float meanMedian;
+                for( int i=0; i< _history.size(); ++i ) {
+                    meanMedian += _history[i]; 
+                }
+                meanMedian /= _history.size();
+                _bandPass.setMedian(meanMedian);
+            }
+        //}
         }
     }
+}
 } // namespace lofar
 } // namespace pelican
