@@ -59,6 +59,7 @@ RFI_Clipper::RFI_Clipper( const ConfigNode& config )
             _endFrequency= efreq.toFloat();
         }
         _maxHistory = config.getOption("History", "maximum", "10" ).toInt();
+        _history.resize(_maxHistory);
     }
 }
 
