@@ -4,6 +4,7 @@
 
 #include "pelican/core/AbstractPipeline.h"
 #include "BandPass.h"
+#include "BandPassOutput.h"
 
 /**
  * @file BandPassPipeline.h

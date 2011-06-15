@@ -4,6 +4,7 @@
 #include "UdpBFPipeline.h"
 #include "AdapterTimeSeriesDataSet.h"
 #include "PumaOutput.h"
+#include "BandPassOutput.h"
 
 #include <QtCore/QCoreApplication>
 

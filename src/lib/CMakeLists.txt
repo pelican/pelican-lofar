@@ -7,6 +7,7 @@ set(lib_src
     src/BinMap.cpp
     src/BandPassAdapter.cpp
     src/BandPass.cpp
+    src/BandPassOutput.cpp
     src/BandPassRecorder.cpp
     src/FilterBankHeader.cpp
     src/FilterBankAdapter.cpp

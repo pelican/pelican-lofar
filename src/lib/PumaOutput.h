@@ -55,13 +55,13 @@ class PumaOutput : public AbstractOutputStream
         void _convertToPuma( const SpectrumDataSetStokes* );
         void _convertToPuma( const DedispersedTimeSeriesF32* );
         void _connect(QTcpSocket*, const QString&, quint16 port);
-	void _send(const char* puma, size_t size);
+	    void _send(const char* puma, size_t size);
 
     private:
         QMap<QTcpSocket*, QPair<QString,quint16> > _sockets;
         QList<QIODevice*> _devices;
 	
-	std::vector<float>  _dmValues;
+	    std::vector<float>  _dmValues;
 };
 
 PELICAN_DECLARE(AbstractOutputStream, PumaOutput )

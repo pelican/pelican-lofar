@@ -26,7 +26,9 @@ namespace lofar {
  *    Interface to the stations bandpass
  * @details
  *    Takes a description of the bandpass as a polynomial
- * and allows rescaling etc. appropriately
+ * and allows rescaling etc. appropriately. The polynomial
+ * is always linked to a primary BinMap and all conversions
+ * are done relative to this primary map
  */
 class BinnedData;
 
@@ -46,6 +48,7 @@ class BandPass : public DataBlob
 
         // rest object to use the primary binning map
         void resetMap();
+        const BinMap& primaryMap() const { return _primaryMap; };
 
         void reBin(const BinMap& map);
         float startFrequency() const;
@@ -62,8 +65,14 @@ class BandPass : public DataBlob
         /// return the median for the current bin mapping
         inline float median() const { return _median[_currentMapId]; }
 
+        /// return the median for the primary bin mapping
+        inline float primaryMedian() const { return _median[_primaryMapId]; }
+
         /// return the rms for the current bin mapping
         inline float rms() const { return _rms[_currentMapId]; }
+
+        /// return the rms for the primary bin mapping
+        inline float primaryRms() const { return _rms[_primaryMapId]; }
 
         // Mark channels to be killed (set to 0)
         void killChannel(unsigned int index);
