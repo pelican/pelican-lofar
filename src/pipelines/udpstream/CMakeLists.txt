@@ -3,6 +3,7 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 # === Create library of pipelines.
 set(pipeline_lib_src
     src/UdpBFPipeline.cpp
+    src/UdpBFApplication.cpp
     src/TimingPipeline.cpp
     src/EmptyPipeline.cpp
     src/StokesOnlyPipeline.cpp
