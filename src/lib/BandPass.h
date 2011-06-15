@@ -25,7 +25,8 @@ namespace lofar {
  * @brief
  *    Interface to the stations bandpass
  * @details
- *
+ *    Takes a description of the bandpass as a polynomial
+ * and allows rescaling etc. appropriately
  */
 class BinnedData;
 
@@ -36,7 +37,16 @@ class BandPass : public DataBlob
         ~BandPass();
         void setData(const BinMap&,const QVector<float>& params );
         void setRMS(float);
+        /// set a new median and rescale the polynomial 
+        //  appropriately. Does not rebin the hash
         void setMedian(float);
+
+        /// return the coefficients of the underlying polynomial
+        const QVector<float>& params() const { return _params; };
+
+        // rest object to use the primary binning map
+        void resetMap();
+
         void reBin(const BinMap& map);
         float startFrequency() const;
         float endFrequency() const;
@@ -65,6 +75,8 @@ class BandPass : public DataBlob
     protected:
         float _evaluate(float) const; // calculate value of parameterised eqn
         void _zeroChannelsMap(const BinMap& map);
+        // build a data map, scaled appropriately
+        void _buildData(const BinMap& map, float scale);
 
     private:
         int _nChannels;
@@ -77,6 +89,7 @@ class BandPass : public DataBlob
         QHash<int, QVector<float> > _dataSets;
         QHash<int,float> _rms;
         QHash<int,float> _median;
+        QHash<int,float> _mean;
         Range<float> _killed;
 };
 

@@ -75,5 +75,35 @@ void BandPassTest::test_reBin()
 
 }
 
+void BandPassTest::test_setMedian()
+{
+     // setup the reference bandpass
+     BandPass bp;
+     BinMap map(7936);
+     float start=137.304688;
+     float width=-0.0007628;
+     map.setStart(start);
+     map.setBinWidth(width);
+     QVector<float> params;
+     params << 4460.84130843 << -24.8135957376;
+     bp.setData(map, params);
+     float rms = 44.3413175435;
+     bp.setRMS(rms);
+     float median=bp.median();
+
+     {  // Use Case:
+        // set medium on the primary map
+        // expect values to be shifted
+        float halfMedian = median/2.0;
+        bp.setMedian(halfMedian);
+        CPPUNIT_ASSERT_DOUBLES_EQUAL( halfMedian , bp.median() , 0.000001 );
+
+        // test params have been updated correctly
+        BandPass bp2; // use to calculate a median
+        bp2.setData(map,bp.params());
+        CPPUNIT_ASSERT_DOUBLES_EQUAL( bp2.median() , bp.median() , 0.001 );
+     }
+}
+
 } // namespace lofar
 } // namespace pelican

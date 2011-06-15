@@ -25,6 +25,7 @@ class BandPassTest : public CppUnit::TestFixture
     public:
         CPPUNIT_TEST_SUITE( BandPassTest );
         CPPUNIT_TEST( test_reBin );
+        CPPUNIT_TEST( test_setMedian );
         CPPUNIT_TEST_SUITE_END();
 
     public:
@@ -33,6 +34,7 @@ class BandPassTest : public CppUnit::TestFixture
 
         // Test Methods
         void test_reBin();
+        void test_setMedian();
 
     public:
         BandPassTest(  );

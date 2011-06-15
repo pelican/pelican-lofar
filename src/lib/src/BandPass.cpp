@@ -2,6 +2,7 @@
 #include "BinMap.h"
 #include "Range.h"
 #include <cmath>
+#include <algorithm>
 #include <iostream>
 
 
@@ -16,6 +17,7 @@ namespace lofar {
 BandPass::BandPass()
     : DataBlob( "BandPass" )
 {
+    _params.insert(0,0.0f);
 }
 
 BandPass::~BandPass() {
@@ -25,7 +27,18 @@ void BandPass::setData(const BinMap& map,const QVector<float>& params ) {
     _primaryMap = map;
     _primaryMapId = map.hash();
     _params = params;
-     reBin( map );
+    reBin( map );
+
+    // calculate the median & mean for the primary map
+    std::vector<float> copy;
+    _mean[_primaryMapId] = 0;
+    for( unsigned int i=0; i < map.numberBins(); ++i ) {
+        _mean[_primaryMapId] += _dataSets[_primaryMapId][i];
+        copy.push_back(_dataSets[_primaryMapId][i]);
+    }
+    _mean[_primaryMapId] /= map.numberBins();
+    std::nth_element(copy.begin(), copy.begin()+copy.size()/2, copy.end());
+    _median[_primaryMapId] = (float)*(copy.begin()+copy.size()/2);
 }
 
 void BandPass::setRMS(float rms) {
@@ -33,7 +46,23 @@ void BandPass::setRMS(float rms) {
 }
 
 void BandPass::setMedian(float median) {
-    _median[_currentMapId] = median;
+    float delta = median - _median[_currentMapId];
+    if( std::fabs(delta) > 0.0f ) {
+        // set the new median and rescale the polynomial
+        float scale = _currentMap.width()/_primaryMap.width();
+        _median[_currentMapId] = median;
+        _median[_primaryMapId] = median / scale;
+        _params[0] += delta/scale;
+        _mean[_currentMapId] += delta;
+        _mean[_primaryMapId] += delta / scale;
+        _dataSets.clear();
+        _buildData(_currentMap, scale);
+    }
+}
+
+void BandPass::resetMap()
+{
+    reBin(_primaryMap);
 }
 
 void BandPass::reBin(const BinMap& map)
@@ -42,17 +71,27 @@ void BandPass::reBin(const BinMap& map)
     int mapId = map.hash();
     _currentMapId = mapId;
     if( ! _dataSets.contains(mapId) ) {
-        _dataSets.insert(mapId, QVector<float>(map.numberBins()) );
         float scale = map.width()/_primaryMap.width();
         // scale the RMS and median
         _rms[mapId]= _rms[_primaryMapId] * std::sqrt( 1.0/scale );
         _median[mapId] = _median[_primaryMapId] * scale;
+        _mean[mapId] = _mean[_primaryMapId] * scale;
         // scale and set the intensities
-        for( unsigned int i=0; i < map.numberBins(); ++i ) {
-           _dataSets[mapId][i] = scale * _evaluate(map.binAssignmentNumber(i));
-        }
-        _zeroChannelsMap(map);
+        _buildData(_currentMap, scale);
+        //for( unsigned int i=0; i < map.numberBins(); ++i ) {
+        //   _dataSets[mapId][i] = scale * _evaluate(map.binAssignmentNumber(i));
+        //}
+        //_zeroChannelsMap(map);
     }
+}
+
+void BandPass::_buildData(const BinMap& map, float scale) {
+    int mapId = map.hash();
+    _dataSets.insert(mapId, QVector<float>(map.numberBins()) );
+    for( unsigned int i=0; i < map.numberBins(); ++i ) {
+        _dataSets[mapId][i] = scale * _evaluate(map.binAssignmentNumber(i));
+    }
+    _zeroChannelsMap(map);
 }
 
 // set the dataset for a specified map to zero for all killed bands
