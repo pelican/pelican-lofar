@@ -3,11 +3,10 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 # === Create library of pipelines.
 set(pipeline_lib_src
     src/UdpBFPipeline.cpp
-    src/UdpBFPipelineStream1.cpp
-    src/UdpBFPipelineStream2.cpp
     src/TimingPipeline.cpp
     src/EmptyPipeline.cpp
     src/StokesOnlyPipeline.cpp
+    src/BandPassPipeline.cpp
 )
 add_library(pelicanMdsm ${pipeline_lib_src})
 

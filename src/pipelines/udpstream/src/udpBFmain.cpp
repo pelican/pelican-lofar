@@ -25,7 +25,7 @@ int main(int argc, char* argv[])
         PipelineApplication pApp(argc, argv);
 
         // Register the pipelines that can run.
-        pApp.registerPipeline(new UdpBFPipeline);
+        pApp.registerPipeline(new UdpBFPipeline("LofarDataStream1"));
 
         // Set the data client.
         pApp.setDataClient("LofarStreamDataClient");

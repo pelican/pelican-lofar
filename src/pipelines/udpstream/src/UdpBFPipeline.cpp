@@ -11,7 +11,8 @@ namespace lofar {
 /**
  * @details
  */
-UdpBFPipeline::UdpBFPipeline() : AbstractPipeline()
+UdpBFPipeline::UdpBFPipeline( const QString& streamIdentifier ) 
+    : AbstractPipeline(), _streamIdentifier(streamIdentifier)
 {
     _iteration = 0;
 }

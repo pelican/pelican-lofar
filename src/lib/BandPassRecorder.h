@@ -30,7 +30,9 @@ class BandPassRecorder : public AbstractModule
     public:
         BandPassRecorder( const ConfigNode& config );
         ~BandPassRecorder();
-        void run( SpectrumDataSetStokes* stokesI, BandPass* bp );
+        // take it data and process it to fill in the BandPass object
+        // returns false if more data is required, true if complete
+        bool run( SpectrumDataSetStokes* stokesI, BandPass* bp );
 
     protected:
         // resets the working variables
@@ -49,6 +51,8 @@ class BandPassRecorder : public AbstractModule
         std::vector<float> _sum;
         unsigned long _totalSamples;
         unsigned long _requiredSamples;
+        float _startFrequency;
+        float _endFrequency;
         int _polyDegree;
         std::vector<float> _fit;
         std::vector<float> _freq;

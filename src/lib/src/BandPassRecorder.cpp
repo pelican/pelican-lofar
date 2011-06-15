@@ -20,10 +20,6 @@ int BandPassRecorder::sgels(int n, int m, int nrhs,
     return info;
 }
 
-//extern void sgels_( char* trans, int* m, int* n, int* nrhs, float* a, int* lda,
-//                float* b, int* ldb, float* work, int* lwork, int* info );
-
-
 /**
  *@details BandPassRecorder 
  */
@@ -33,15 +29,23 @@ BandPassRecorder::BandPassRecorder( const ConfigNode& config )
     _requiredSamples = config.getOption("requiredSamples", "value", "20000").toULong();
     _polyDegree = config.getOption("fitParmaters", "coefficients", "3" ).toUInt();
     _totalSamples = 0;
+
+    if( config.getOption("Band", "startFrequency" ) == "" ) {
+        throw(QString("BandPassRecorder: <Band startFrequency=?> not defined"));
+    }
+    _startFrequency = config.getOption("Band","startFrequency" ).toFloat();
+
+    QString efreq = config.getOption("Band", "endFrequency" );
+    if( efreq == "" )
+        throw(QString("BandPassRecorder: <Band endFrequency=?> not defined"));
+    _endFrequency= efreq.toFloat();
 }
 
-/**
- *@details
- */
 BandPassRecorder::~BandPassRecorder() {
 }
 
 void BandPassRecorder::_reset(const BinMap& map) {
+
     unsigned int size = map.numberBins();
     _sum.resize(size);
     _freq.resize(size);
@@ -60,7 +64,7 @@ void BandPassRecorder::_reset(const BinMap& map) {
     _fit.resize(_polyDegree);
 }
 
-void BandPassRecorder::run( SpectrumDataSetStokes* stokesI, BandPass* bp ) {
+bool BandPassRecorder::run( SpectrumDataSetStokes* stokesI, BandPass* bp ) {
         unsigned nSamples = stokesI->nTimeBlocks();
         unsigned nSubbands = stokesI->nSubbands();
         unsigned nChannels = stokesI->nChannels();
@@ -69,12 +73,13 @@ void BandPassRecorder::run( SpectrumDataSetStokes* stokesI, BandPass* bp ) {
 
         float* I = stokesI->data();
 
-        // TODO - initialise this object
         BinMap map(nBins);
+        map.setStart(_startFrequency);
+        map.setEnd(_endFrequency);
 
         // if data type changes between calls then reset
-        // all accumulative variables
-        if( _sum.size() != nBins ) _reset(map);
+        // all accumulative variables.
+        if( _sum.size() != nBins || _totalSamples == 0 ) _reset(map);
 
         // calculate the integrated spectrum
         for (unsigned t = 0; t < nSamples; ++t) {
@@ -90,7 +95,7 @@ void BandPassRecorder::run( SpectrumDataSetStokes* stokesI, BandPass* bp ) {
             }
         }
         _totalSamples += nSamples;
-        if( _totalSamples < _requiredSamples ) return; // collect more data
+        if( _totalSamples < _requiredSamples ) return false; // collect more data
 
         // get averaged values
         for (unsigned t = 0; t < nBins; ++t) {
@@ -111,8 +116,8 @@ void BandPassRecorder::run( SpectrumDataSetStokes* stokesI, BandPass* bp ) {
                 rsum += residual[s];
                 rsumSquared += std::pow(residual[s],2);
             }
-            float resRms = std::sqrt(rsumSquared/nBins - std::pow((rsum/nBins),2));
-            float margin = 2.0f * resRms;
+            float residualRms = std::sqrt(rsumSquared/nBins - std::pow((rsum/nBins),2));
+            float margin = 2.0f * residualRms;
             for (unsigned s = 0; s < nBins; ++s) {
                 if( residual[s] > margin ) {
                     // chop this value out, setting it to the value of
@@ -122,8 +127,15 @@ void BandPassRecorder::run( SpectrumDataSetStokes* stokesI, BandPass* bp ) {
                 }
             }
         } while( trimmed ); // iterate until no outliers left
+
+        // calculate the rms of the cleaned data
+        float sumInt = 0.0f, sumSquared=0.0f;
+        for (unsigned s = 0; s < nBins; ++s) {
+            sumInt += _sum[s]; sumSquared += std::pow(_sum[s],2);
+        }
         bp->setData(map, QVector<float>::fromStdVector(_fit ));
-        _reset(map);
+        bp->setRMS( std::sqrt(sumSquared/nBins - std::pow((sumInt/nBins),2) ) );
+        return true;
 }
 
 float BandPassRecorder::_theFit(float v) const

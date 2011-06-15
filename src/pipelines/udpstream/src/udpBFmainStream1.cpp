@@ -1,7 +1,7 @@
 #include "pelican/core/PipelineApplication.h"
 
 #include "LofarStreamDataClient.h"
-#include "UdpBFPipelineStream1.h"
+#include "UdpBFPipeline.h"
 #include "AdapterTimeSeriesDataSet.h"
 #include "PumaOutput.h"
 
@@ -25,7 +25,8 @@ int main(int argc, char* argv[])
         PipelineApplication pApp(argc, argv);
 
         // Register the pipelines that can run.
-        pApp.registerPipeline(new UdpBFPipelineStream1);
+        //pApp.registerPipeline(new UdpBFPipelineStream1);
+        pApp.registerPipeline(new UdpBFPipeline("LofarDataStream1"));
 
         // Set the data client.
         pApp.setDataClient("PelicanServerClient");

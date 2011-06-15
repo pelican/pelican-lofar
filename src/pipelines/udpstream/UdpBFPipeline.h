@@ -35,7 +35,7 @@ namespace lofar {
 class UdpBFPipeline : public AbstractPipeline
 {
     public:
-        UdpBFPipeline();
+        UdpBFPipeline( const QString& streamIdentifier );
         ~UdpBFPipeline();
 
         /// Initialises the pipeline.
@@ -45,6 +45,8 @@ class UdpBFPipeline : public AbstractPipeline
         void run(QHash<QString, DataBlob*>& remoteData);
 
     private:
+        QString _streamIdentifier;
+
         /// Module pointers
         PPFChanneliser* ppfChanneliser;
         StokesGenerator* stokesGenerator;
