@@ -157,13 +157,13 @@ void RFI_Clipper::run(SpectrumDataSetStokes* stokesI)
         _map.setEnd( _endFrequency );
         _bandPass.reBin(_map);
 
-        float bpMedian = _bandPass.median();
+	float modelLevel = _bandPass.median();
         float margin = std::fabs(_rFactor * _bandPass.rms());
-        float spectrumRMStolerance = 10.0 * _bandPass.rms()/sqrt(nBins);
+        float spectrumRMStolerance = 3.5 * _bandPass.rms()/sqrt(nBins);
         //float doubleMargin = margin * 2.0;
         const QVector<float>& bandPass = _bandPass.currentSet();
 
-        // create an ordered copy of the data
+        // create an ordered copy of the data in order to compute the median
         _copyI.resize(nBins);
         for (unsigned t = 0; t < nSamples; ++t) {
             int bin = -1;
@@ -173,55 +173,53 @@ void RFI_Clipper::run(SpectrumDataSetStokes* stokesI)
                     _copyI[++bin]=I[c];
                 }
             }
-
-            // calculate the DC offset between bandpass description and current spectrum
             std::nth_element(_copyI.begin(), _copyI.begin()+_copyI.size()/2, _copyI.end());
-
-            // --- .50 microseconds to here (10000 iterations) ----------------
             float median = (float)*(_copyI.begin()+_copyI.size()/2);
-            float medianDelta = median - bpMedian;
-            // readjust relative to median
+            // medianDelta is the DC offset between the current spectrum and the data
+            float medianDelta = median - modelLevel;
             I = stokesI->data();
-            //for (unsigned t = 0; t < nSamples; ++t) {
-            //#pragma omp parallel for
             float spectrumSum = 0.0;
             float spectrumSumSq = 0.0;
             int goodChannels = 0;
+	    // Perform first test: look for individual very bright
+	    // channels compared to the model
             for (unsigned s = 0; s < nSubbands; ++s) {
                 int bin = (s * nChannels) - 1;
                 long index = stokesI->index(s, nSubbands, 
                         0, nPolarisations,
                         t, nChannels ); 
 
-                //float *I = stokesI -> spectrumData(t, s, 0);
                 for (unsigned c = 0; c < nChannels; ++c) {
                     ++bin;
-                    /* this If statement doubles the loop time :(
-                       if( _bandPass.filterBin( ++bin ) ) {
-                       I[index + c] = 0.0;
-                       continue;
-                       }
-                     */
-                    //float res = I[index + c] - medianDelta - bandPass[bin];
-                    if ( /*medianDelta > doubleMargin || */ I[index + c] - medianDelta - bandPass[bin] > margin ) {
-                        // I[c] = _bandPass.intensityOfBin( bin ) + medianDelta + margin;
-                        //                       I[c] -= res;
+		    // If the condition holds, blank that channel, if
+		    // not add it to the population of used channels
+                    if (I[index + c] - medianDelta - bandPass[bin] > margin ) {
                         I[index + c] = 0.0;
                     }
                     else{
-                        spectrumSum += I[index+c] - medianDelta - bandPass[bin];
-                        spectrumSumSq += pow(I[index+c] - medianDelta - bandPass[bin],2);
+                        spectrumSum += I[index+c];
+			//                        spectrumSum += I[index+c] - medianDelta - bandPass[bin];
+			//                        spectrumSumSq += pow(I[index+c] - medianDelta - bandPass[bin],2);
                         ++goodChannels;
                     }
 
                 }
             }
-            float spectrumRMS = sqrt(spectrumSumSq/goodChannels - std::pow((spectrumSum/goodChannels),2));
-            if (fabs(spectrumRMS - _bandPass.rms()) > spectrumRMStolerance) {
-                std::cout << "spectrumRMS:" << spectrumRMS << " Model RMS:" 
-                    << _bandPass.rms() << " Tolerance:" 
-                    << spectrumRMStolerance 
-                    << " SpectrumMean:" << spectrumSum/goodChannels 
+	    // This is the RMS of the residual, current data - model - IGNORE FOR NOW
+	    //            float spectrumRMS = sqrt(spectrumSumSq/goodChannels - std::pow((spectrumSum/goodChannels),2));
+
+	    spectrumSum /= goodChannels;
+
+	    // Perform second test: look for broadband interference,
+	    // by comparing the mean of the current spectrum (minus
+	    // strong spikes from test 1) to the current estimate of
+	    // the mean
+	    // if (fabs(spectrumRMS - _bandPass.rms()) > spectrumRMStolerance) {
+            if (fabs(spectrumSum - modelLevel) > spectrumRMStolerance) {
+                std::cout 
+                    << " SpectrumSum:" << spectrumSum 
+                    << " ModelLevel:" << modelLevel 
+                    << " Tolerance:" << spectrumRMStolerance 
                     << " Spectrum median:" << median 
                     << std::endl;
                 for (unsigned s = 0; s < nSubbands; ++s) {
@@ -235,13 +233,14 @@ void RFI_Clipper::run(SpectrumDataSetStokes* stokesI)
             }
             else {
                 // update historical data
-                _history[(++_current)%_maxHistory] = median;
-                float meanMedian;
+                _history[(++_current)%_maxHistory] = spectrumSum;
+                float baselineLevel;
                 for( int i=0; i< _history.size(); ++i ) {
-                    meanMedian += _history[i]; 
+                    baselineLevel += _history[i]; 
                 }
-                meanMedian /= _history.size();
-                _bandPass.setMedian(meanMedian);
+                baselineLevel /= _history.size();
+                _bandPass.setMedian(baselineLevel);
+		modelLevel = baselineLevel;
             }
         //}
         }
