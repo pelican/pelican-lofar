@@ -46,7 +46,7 @@ void UdpBFPipeline::init()
     intStokes = (SpectrumDataSetStokes*) createBlob("SpectrumDataSetStokes");
 
     // Request remote data
-    requestRemoteData("TimeSeriesDataSetC32");
+    requestRemoteData(_streamIdentifier);
 
 }
 
@@ -63,7 +63,7 @@ void UdpBFPipeline::run(QHash<QString, DataBlob*>& remoteData)
     // Get pointer to the remote time series data blob.
     // This is a block of data containing a number of time series of length
     // N for each sub-band and polarisation.
-    timeSeries = (TimeSeriesDataSetC32*) remoteData["TimeSeriesDataSetC32"];
+    timeSeries = (TimeSeriesDataSetC32*) remoteData[_streamIdentifier];
 
     // Run the polyphase channeliser.
     // Generates spectra from a blocks of time series indexed by sub-band
