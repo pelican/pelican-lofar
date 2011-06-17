@@ -5,7 +5,6 @@
 #include "LofarStreamDataClient.h"
 #include "UdpBFPipeline.h"
 #include "BandPassPipeline.h"
-#include "TimeSeriesDataSet.h"
 #include "AdapterTimeSeriesDataSet.h"
 #include "pelican/core/PipelineApplication.h"
 #include "pelican/core/PipelineSwitcher.h"

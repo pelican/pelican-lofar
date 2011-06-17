@@ -2,6 +2,7 @@
 #define UDPBFAPPLICATION_H
 
 #include <QString>
+#include "TimeSeriesDataSet.h"
 
 /**
  * @file UdpBFApplication.h
