@@ -22,7 +22,7 @@ int main(int argc, char* argv[])
 {
     // Create a QCoreApplication.
     //QCoreApplication app(argc, argv);
-    QString stream = "LofarDataStream1";
+    QString stream = "LofarTimeStream1";
 
     try {
         UdpBFApplication(argc, argv,stream);

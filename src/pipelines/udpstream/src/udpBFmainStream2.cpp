@@ -9,7 +9,7 @@ int main(int argc, char* argv[])
 {
     // Create a QCoreApplication.
     //QCoreApplication app(argc, argv);
-    QString stream = "LofarDataStream2";
+    QString stream = "LofarTimeStream2";
 
     try {
         UdpBFApplication(argc, argv, stream);
