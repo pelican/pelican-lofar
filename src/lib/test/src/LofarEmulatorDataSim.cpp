@@ -46,7 +46,7 @@ LofarEmulatorDataSim::LofarEmulatorDataSim(const ConfigNode& configNode)
     // Number of UDP packets collected into one chunk (iteration of the pipeline).                                                       
     _nPackets = configNode.getOption("udpPacketsPerIteration", "value").toUInt();
 
-    unsigned sampleBits = configNode.getOption("dataBitSize", "value").toUInt();
+    //unsigned sampleBits = configNode.getOption("dataBitSize", "value").toUInt();
  
 
     _blockid = _samplesPerPacket; // blockid offset

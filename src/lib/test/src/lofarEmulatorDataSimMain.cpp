@@ -88,13 +88,13 @@ pelican::Config createConfig(int argc, char** argv)
 	      .positional(p).run(), varMap);
   opts::notify(varMap);
 
-  // Check for help message.                                                                                                           
+  // Check for help message
   if (varMap.count("help")) {
-    std::cout << desc << endl;;
+    std::cout << desc << std::endl;;
     exit(0);
   }
 
-  // Get the configuration file name.                                                                                                  
+  // Get the configuration file name
   std::string configFilename = "";
   if (varMap.count("config"))
     configFilename = varMap["config"].as<std::string>();
