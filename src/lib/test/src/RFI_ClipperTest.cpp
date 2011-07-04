@@ -1,6 +1,7 @@
 #include "RFI_ClipperTest.h"
 #include "RFI_Clipper.h"
 #include "SpectrumDataSet.h"
+#include "WeightedSpectrumDataSet.h"
 #include "BandPass.h"
 #include "pelican/utility/TestConfig.h"
 #include <iostream>
@@ -45,12 +46,13 @@ void RFI_ClipperTest::test_goodData()
     ConfigNode config = testConfig();
     RFI_Clipper rfi(config);
 
-    SpectrumDataSetStokes data;
+    SpectrumDataSetStokes dataStokes;
+    WeightedSpectrumDataSet data(&dataStokes);
     SpectrumDataSetStokes expect;
     int nChannels = 16;
-    _initSubbandData(data, expect, rfi.bandPass(), 31, nChannels);
+    _initSubbandData(dataStokes, expect, rfi.bandPass(), 31, nChannels);
     rfi.run(&data);
-    CPPUNIT_ASSERT_EQUAL( 0,  _diff(data, expect).size() );
+    CPPUNIT_ASSERT_EQUAL( 0,  _diff(dataStokes, expect).size() );
     }
     catch( QString s )
     {
@@ -68,15 +70,16 @@ void RFI_ClipperTest::test_badSubband()
     ConfigNode config = testConfig();
     RFI_Clipper rfi(config);
 
-    SpectrumDataSetStokes data;
+    SpectrumDataSetStokes dataStokes;
+    WeightedSpectrumDataSet data(&dataStokes);
     SpectrumDataSetStokes expect;
     int nChannels = 16;
-    _initSubbandData( data, expect,rfi.bandPass(), 31, nChannels );
+    _initSubbandData( dataStokes, expect,rfi.bandPass(), 31, nChannels );
     int badBlock = 0;
     int badSubband = 0;
     int badPol = 0;
 
-    float* d = data.spectrumData(badBlock,badSubband,badPol); 
+    float* d = dataStokes.spectrumData(badBlock,badSubband,badPol); 
     float* d2 = expect.spectrumData(badBlock,badSubband,badPol); 
     for(int channel=0; channel < nChannels; ++channel)
     {
@@ -85,7 +88,7 @@ void RFI_ClipperTest::test_badSubband()
     }
 
     rfi.run(&data);
-    QList<RFI_ClipperTest::StokesIndex> different = _diff(expect,data);
+    QList<RFI_ClipperTest::StokesIndex> different = _diff(expect,dataStokes);
     if( different.size() > 0  )
     {
         foreach( const StokesIndex& i, different )
@@ -112,22 +115,23 @@ void RFI_ClipperTest::test_badChannel()
     ConfigNode config = testConfig();
     RFI_Clipper rfi(config);
 
-    SpectrumDataSetStokes data;
+    SpectrumDataSetStokes dataStokes;
+    WeightedSpectrumDataSet data(&dataStokes);
     SpectrumDataSetStokes expect;
-    _initSubbandData(data, expect, rfi.bandPass(), 31, 16);
+    _initSubbandData(dataStokes, expect, rfi.bandPass(), 31, 16);
 
     // put in a bad channel
     int badBlock = 0;
     int badSubband = 1;
     int badChannel = 2;
     int badPol = 0;
-    float* d = data.spectrumData(badBlock,badSubband,badPol); 
+    float* d = dataStokes.spectrumData(badBlock,badSubband,badPol); 
     float* e = expect.spectrumData(badBlock,badSubband,badPol); 
     e[badChannel] = 0; //d[badChannel];
     d[badChannel] *= 3; // should not catch below this
 
     rfi.run(&data);
-    QList<RFI_ClipperTest::StokesIndex> different = _diff(expect,data);
+    QList<RFI_ClipperTest::StokesIndex> different = _diff(expect,dataStokes);
     if( different.size() > 0  )
     {
         foreach( const StokesIndex& i, different )

@@ -1,4 +1,5 @@
 #include "UdpBFPipeline.h"
+#include "WeightedSpectrumDataSet.h"
 #include <iostream>
 
 using std::cout;
@@ -44,6 +45,7 @@ void UdpBFPipeline::init()
     spectra = (SpectrumDataSetC32*) createBlob("SpectrumDataSetC32");
     stokes = (SpectrumDataSetStokes*) createBlob("SpectrumDataSetStokes");
     intStokes = (SpectrumDataSetStokes*) createBlob("SpectrumDataSetStokes");
+    weightedIntStokes = (WeightedSpectrumDataSet*) createBlob("WeightedSpectrumDataSet");
 
     // Request remote data
     requestRemoteData(_streamIdentifier);
@@ -74,7 +76,9 @@ void UdpBFPipeline::run(QHash<QString, DataBlob*>& remoteData)
     // Convert spectra in X, Y polarisation into spectra with stokes parameters.
     stokesGenerator->run(spectra, stokes);
     // Clips RFI and modifies blob in place
-    rfiClipper->run(stokes);
+    weightedIntStokes->reset(stokes);
+
+    rfiClipper->run(weightedIntStokes);
 
     stokesIntegrator->run(stokes, intStokes);
 

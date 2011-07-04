@@ -23,6 +23,7 @@
 
 namespace pelican {
 namespace lofar {
+class WeightedSpectrumDataSet;
 
 /**
  * @class UdpBFPipeline
@@ -56,6 +57,7 @@ class TimingPipeline : public AbstractPipeline
         TimeSeriesDataSetC32* timeSeries;
         SpectrumDataSetStokes* stokes;
         SpectrumDataSetStokes* intStokes;
+        WeightedSpectrumDataSet* weightedIntStokes;
 
         unsigned _totalSamplesPerChunk;
         unsigned _iteration;
@@ -65,8 +67,8 @@ class TimingPipeline : public AbstractPipeline
         TimerData _stokesTime;
         TimerData _integratorTime;
         TimerData _outputTime;
-	TimerData _totalTime;
-	TimerData _rfiClipper;
+        TimerData _totalTime;
+        TimerData _rfiClipper;
 };
 
 } // namespace lofar

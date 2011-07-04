@@ -1,5 +1,6 @@
 #include "TimingPipeline.h"
 #include "AdapterTimeSeriesDataSet.h"
+#include "WeightedSpectrumDataSet.h"
 #include <iostream>
 
 using std::cout;
@@ -47,11 +48,13 @@ void TimingPipeline::init()
     stokesGenerator = (StokesGenerator *) createModule("StokesGenerator");
     rfiClipper = (RFI_Clipper *) createModule("RFI_Clipper");
     stokesIntegrator = (StokesIntegrator *) createModule("StokesIntegrator");
+    weightedIntStokes = (WeightedSpectrumDataSet*) createBlob("WeightedSpectrumDataSet");
 
     // Create local datablobs
     spectra = (SpectrumDataSetC32*) createBlob("SpectrumDataSetC32");
     stokes = (SpectrumDataSetStokes*) createBlob("SpectrumDataSetStokes");
     intStokes = (SpectrumDataSetStokes*) createBlob("SpectrumDataSetStokes");
+    weightedIntStokes = (WeightedSpectrumDataSet*) createBlob("WeightedSpectrumDataSet");
 
     // Request remote data
     requestRemoteData("LofarTimeStream1");
@@ -93,7 +96,8 @@ void TimingPipeline::run(QHash<QString, DataBlob*>& remoteData)
     // The RFI clipper
 
     timerStart(&_rfiClipper);
-    rfiClipper->run(stokes);
+    weightedIntStokes->reset(stokes);
+    rfiClipper->run(weightedIntStokes);
     timerUpdate(&_rfiClipper);
 
     //    timerStart(&_integratorTime);
