@@ -11,6 +11,7 @@
 #include <QtCore/QVector>
 #include <QtCore/QFile>
 #include <QtCore/QTimer>
+#include <QtCore/QStringList>
 
 #include <iostream>
 

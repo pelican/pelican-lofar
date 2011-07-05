@@ -29,7 +29,7 @@ class RFI_Clipper : public AbstractModule
     public:
         RFI_Clipper( const ConfigNode& config );
         ~RFI_Clipper();
-        void run(SpectrumDataSetStokes* stokesI);
+//        void run(SpectrumDataSetStokes* stokesI);
         void run( WeightedSpectrumDataSet* weightedStokes );
         const BandPass& bandPass() const { return _bandPass; }; // return the BandPass Filter in use
 
@@ -46,7 +46,7 @@ class RFI_Clipper : public AbstractModule
         int _maxHistory; // max size of history buffer
 };
 
-    PELICAN_DECLARE_MODULE(RFI_Clipper)
+PELICAN_DECLARE_MODULE(RFI_Clipper)
 } // namespace lofar
 } // namespace pelican
 #endif // RFI_CLIPPER_H 

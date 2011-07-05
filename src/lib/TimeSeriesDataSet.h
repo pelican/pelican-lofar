@@ -96,13 +96,13 @@ class TimeSeriesDataSet : public DataBlob
         unsigned long _index(unsigned s, unsigned p, unsigned b) const;
 
     private:
-        std::vector<T> _data;
-
         unsigned _nSubbands;
         unsigned _nPolarisations;
-        double _nTimeBlocks;
-        double _nTimesPerBlock;
+        unsigned _nTimeBlocks;
+        unsigned _nTimesPerBlock;
 
+    protected:
+        std::vector<T> _data;
         double _blockRate;
         double _lofarTimestamp;
 };
@@ -177,6 +177,12 @@ class TimeSeriesDataSetC32 : public TimeSeriesDataSet<std::complex<float> >
 
         /// Destroys the time stream data blob.
         ~TimeSeriesDataSetC32() {}
+
+        /// Serialises the data blob.
+        virtual void serialise(QIODevice&) const;
+
+        /// Deserialises the data blob.
+        virtual void deserialise(QIODevice&, QSysInfo::Endian);
 
     public:
         void write(const QString& fileName,

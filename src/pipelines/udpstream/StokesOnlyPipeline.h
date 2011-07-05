@@ -17,6 +17,7 @@
 namespace pelican {
 
 namespace lofar {
+class WeightedSpectrumDataSet;
 
 /**
  * @class StokesOnlyPipeline
@@ -43,6 +44,7 @@ class StokesOnlyPipeline : public AbstractPipeline
     private:
         SpectrumDataSetStokes* _intStokes;
         StokesIntegrator* stokesIntegrator;
+        WeightedSpectrumDataSet* _weightedIntStokes;
         RFI_Clipper* rfiClipper;
 };
 

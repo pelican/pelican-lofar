@@ -5,7 +5,6 @@
 #include "LofarStreamDataClient.h"
 #include "UdpBFPipeline.h"
 #include "BandPassPipeline.h"
-#include "AdapterTimeSeriesDataSet.h"
 #include "pelican/core/PipelineApplication.h"
 #include "pelican/core/PipelineSwitcher.h"
 #include "PumaOutput.h"
@@ -27,7 +26,6 @@ UdpBFApplication::UdpBFApplication(int argc, char** argv, const QString& stream)
         PipelineApplication pApp(argc, argv);
 
         // Register the pipelines that can run.
-        //pApp.registerPipeline(new UdpBFPipelineStream1);
         PipelineSwitcher sw;
         //sw.addPipeline(new BandPassPipeline(stream));
         sw.addPipeline(new UdpBFPipeline(stream));

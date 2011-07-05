@@ -28,6 +28,7 @@ class WeightedSpectrumDataSet
     public:
         WeightedSpectrumDataSet( SpectrumDataSet<float>* dat );
         ~WeightedSpectrumDataSet();
+        void reset( SpectrumDataSet<float>* data );
         SpectrumDataSet<float>* dataSet() const { return _dataSet; };
         SpectrumDataSet<float>* weights() { return &_weights; };
         float rms() const;

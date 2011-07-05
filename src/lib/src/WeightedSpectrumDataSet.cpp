@@ -24,6 +24,13 @@ WeightedSpectrumDataSet::~WeightedSpectrumDataSet()
 {
 }
 
+void WeightedSpectrumDataSet::reset( SpectrumDataSet<float>* data )
+{
+     _dataSet = data;
+     _weights.resize(*data);
+     _weights.init(1.0);
+}
+
 float WeightedSpectrumDataSet::rms() const
 {
    // TODO

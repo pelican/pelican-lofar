@@ -58,6 +58,7 @@ class UdpBFPipeline : public AbstractPipeline
         TimeSeriesDataSetC32* timeSeries;
         SpectrumDataSetStokes* stokes;
         SpectrumDataSetStokes* intStokes;
+        WeightedSpectrumDataSet* weightedIntStokes;
 
         unsigned _iteration;
 };

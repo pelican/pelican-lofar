@@ -2,6 +2,8 @@
 #define UDPBFAPPLICATION_H
 
 #include <QString>
+#include "TimeSeriesDataSet.h"
+#include "AdapterTimeSeriesDataSet.h"
 
 /**
  * @file UdpBFApplication.h

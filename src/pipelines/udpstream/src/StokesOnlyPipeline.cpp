@@ -1,4 +1,5 @@
 #include "StokesOnlyPipeline.h"
+#include "WeightedSpectrumDataSet.h"
 
 
 namespace pelican {
@@ -29,6 +30,7 @@ void StokesOnlyPipeline::init()
 
     // Create local datablobs
     _intStokes = (SpectrumDataSetStokes*) createBlob("SpectrumDataSetStokes");
+    _weightedIntStokes = (WeightedSpectrumDataSet*) createBlob("WeightedSpectrumDataSet");
 
     // Request remote data
     requestRemoteData("LofarTimeStream1");
@@ -39,7 +41,8 @@ void StokesOnlyPipeline::run(QHash<QString, DataBlob*>& remoteData)
     SpectrumDataSetStokes* stokes = (SpectrumDataSetStokes*) remoteData["SpectrumStokes"];
 
     // Clips RFI and modifies blob in place
-    rfiClipper->run(stokes);
+    _weightedIntStokes->reset(stokes);
+    rfiClipper->run(_weightedIntStokes);
 
     stokesIntegrator->run(stokes, _intStokes);
 

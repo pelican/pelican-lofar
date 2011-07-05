@@ -1,4 +1,5 @@
 #include "UdpBFPipeline.h"
+#include "WeightedSpectrumDataSet.h"
 #include <iostream>
 
 using std::cout;
@@ -44,9 +45,10 @@ void UdpBFPipeline::init()
     spectra = (SpectrumDataSetC32*) createBlob("SpectrumDataSetC32");
     stokes = (SpectrumDataSetStokes*) createBlob("SpectrumDataSetStokes");
     intStokes = (SpectrumDataSetStokes*) createBlob("SpectrumDataSetStokes");
+    weightedIntStokes = (WeightedSpectrumDataSet*) createBlob("WeightedSpectrumDataSet");
 
     // Request remote data
-    requestRemoteData("TimeSeriesDataSetC32");
+    requestRemoteData(_streamIdentifier);
 
 }
 
@@ -63,7 +65,8 @@ void UdpBFPipeline::run(QHash<QString, DataBlob*>& remoteData)
     // Get pointer to the remote time series data blob.
     // This is a block of data containing a number of time series of length
     // N for each sub-band and polarisation.
-    timeSeries = (TimeSeriesDataSetC32*) remoteData["TimeSeriesDataSetC32"];
+    timeSeries = (TimeSeriesDataSetC32*) remoteData[_streamIdentifier];
+    dataOutput( timeSeries, _streamIdentifier);
 
     // Run the polyphase channeliser.
     // Generates spectra from a blocks of time series indexed by sub-band
@@ -73,7 +76,9 @@ void UdpBFPipeline::run(QHash<QString, DataBlob*>& remoteData)
     // Convert spectra in X, Y polarisation into spectra with stokes parameters.
     stokesGenerator->run(spectra, stokes);
     // Clips RFI and modifies blob in place
-    rfiClipper->run(stokes);
+    weightedIntStokes->reset(stokes);
+
+    rfiClipper->run(weightedIntStokes);
 
     stokesIntegrator->run(stokes, intStokes);
 

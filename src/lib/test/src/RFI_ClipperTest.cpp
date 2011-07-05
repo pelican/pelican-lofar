@@ -1,6 +1,7 @@
 #include "RFI_ClipperTest.h"
 #include "RFI_Clipper.h"
 #include "SpectrumDataSet.h"
+#include "WeightedSpectrumDataSet.h"
 #include "BandPass.h"
 #include "pelican/utility/TestConfig.h"
 #include <iostream>
@@ -45,12 +46,14 @@ void RFI_ClipperTest::test_goodData()
     ConfigNode config = testConfig();
     RFI_Clipper rfi(config);
 
-    SpectrumDataSetStokes data;
+    SpectrumDataSetStokes dataStokes;
     SpectrumDataSetStokes expect;
     int nChannels = 16;
-    _initSubbandData(data, expect, rfi.bandPass(), 31, nChannels);
+    //int nChannels = 256;
+    _initSubbandData(dataStokes, expect, rfi.bandPass(), 31, nChannels);
+    WeightedSpectrumDataSet data(&dataStokes);
     rfi.run(&data);
-    CPPUNIT_ASSERT_EQUAL( 0,  _diff(data, expect).size() );
+    CPPUNIT_ASSERT_EQUAL( 0,  _diff(dataStokes, expect).size() );
     }
     catch( QString s )
     {
@@ -68,30 +71,32 @@ void RFI_ClipperTest::test_badSubband()
     ConfigNode config = testConfig();
     RFI_Clipper rfi(config);
 
-    SpectrumDataSetStokes data;
+    SpectrumDataSetStokes dataStokes;
     SpectrumDataSetStokes expect;
+    //int nChannels = 16;
     int nChannels = 16;
-    _initSubbandData( data, expect,rfi.bandPass(), 31, nChannels );
-    int badBlock = 0;
+    _initSubbandData( dataStokes, expect,rfi.bandPass(), 31, nChannels );
+    WeightedSpectrumDataSet data(&dataStokes);
+    int badBlock = 1;
     int badSubband = 0;
     int badPol = 0;
 
-    float* d = data.spectrumData(badBlock,badSubband,badPol); 
+    float* d = dataStokes.spectrumData(badBlock,badSubband,badPol); 
     float* d2 = expect.spectrumData(badBlock,badSubband,badPol); 
     for(int channel=0; channel < nChannels; ++channel)
     {
         d2[channel] = 0;
-        d[channel] *= 3;
+        d[channel] += 15.0*rfi.bandPass().rms();
     }
 
     rfi.run(&data);
-    QList<RFI_ClipperTest::StokesIndex> different = _diff(expect,data);
+    QList<RFI_ClipperTest::StokesIndex> different = _diff(expect,dataStokes);
     if( different.size() > 0  )
     {
-        foreach( const StokesIndex& i, different )
-        {
-            std::cout << "badSubband: block=" << i.block << " subband=" << i.subband << " pol=" << i.polarisation << "channel=" << i.channel <<std::endl;
-        }
+        //foreach( const StokesIndex& i, different )
+        //{
+       //     std::cout << "badSubband: block=" << i.block << " subband=" << i.subband << " pol=" << i.polarisation << " channel=" << i.channel <<  std::endl;
+        //}
         CPPUNIT_ASSERT_EQUAL( 0 ,  different.size() );
     }
     //CPPUNIT_ASSERT_EQUAL( 0 ,  _diff(expect ,data).size() );
@@ -112,24 +117,30 @@ void RFI_ClipperTest::test_badChannel()
     ConfigNode config = testConfig();
     RFI_Clipper rfi(config);
 
-    SpectrumDataSetStokes data;
+    SpectrumDataSetStokes dataStokes;
     SpectrumDataSetStokes expect;
-    _initSubbandData(data, expect, rfi.bandPass(), 31, 16);
+    int numSubbands = 1;
+    int nChannels = 256;
+    _initSubbandData(dataStokes, expect, rfi.bandPass(), numSubbands, nChannels);
+    WeightedSpectrumDataSet data(&dataStokes);
 
     // put in a bad channel
-    int badBlock = 0;
-    int badSubband = 1;
+    int badBlock = 1;
+    int badSubband = 0;
     int badChannel = 2;
     int badPol = 0;
-    float* d = data.spectrumData(badBlock,badSubband,badPol); 
+    float* d = dataStokes.spectrumData(badBlock,badSubband,badPol); 
     float* e = expect.spectrumData(badBlock,badSubband,badPol); 
     e[badChannel] = 0; //d[badChannel];
-    d[badChannel] *= 3; // should not catch below this
+    d[badChannel] += 15.0*rfi.bandPass().rms(); // should not catch below this
+    int badIndex = dataStokes.index(badSubband, numSubbands, 0, 1,
+                        badBlock, nChannels ) + badChannel;
 
     rfi.run(&data);
-    QList<RFI_ClipperTest::StokesIndex> different = _diff(expect,data);
+    QList<RFI_ClipperTest::StokesIndex> different = _diff(expect,dataStokes);
     if( different.size() > 0  )
     {
+        std::cout << "expecting clipped channel : " << badIndex << std::endl;
         foreach( const StokesIndex& i, different )
         {
             std::cout << "badChannel: block=" << i.block << " subband=" << i.subband << " pol=" << i.polarisation << "channel=" << i.channel <<std::endl;
@@ -147,14 +158,17 @@ void  RFI_ClipperTest::_initSubbandData( SpectrumDataSetStokes& primary, Spectru
 {
     int numberOfBlocks = 10;
     int numberOfPolarisations = 1;
+    float offset = 10000.00;
     BandPass bandPass = bp;
     //float value = (numberOfChannels/2.0);
     //int maxRange = value - 1;
-    BinMap map( numberOfChannels * numberOfSubbands );
+    int nBins = numberOfChannels * numberOfSubbands;
+    BinMap map( nBins );
     map.setStart(bandPass.startFrequency());
     map.setEnd(bandPass.endFrequency());
     bandPass.reBin(map);
-    int maxRange = bandPass.rms();
+    //int maxRange = bandPass.rms();
+    int maxRange = 5.0 * bandPass.rms()/sqrt(numberOfChannels * numberOfSubbands);
 
     //float av = 0;
     // generate a dataset that is like the BandPass with random noise < rms of the bandpass
@@ -166,8 +180,7 @@ void  RFI_ClipperTest::_initSubbandData( SpectrumDataSetStokes& primary, Spectru
                 float* ptr = primary.spectrumData( block, subband, polarisation );
                 for( int i=0; i < numberOfChannels; ++i ) {
                     //ptr[i] = value + rand()%maxRange;
-                    //ptr[i] = bandPass.intensityOfBin(bin + i) + rand()%maxRange;
-                    ptr[i] = bandPass.intensityOfBin(bin + i) + rand()%maxRange;
+                    ptr[i] = bandPass.intensityOfBin(bin + i) + rand()%maxRange + offset;
                     //av += ptr[i];
                 }
             }
@@ -215,7 +228,7 @@ QList<RFI_ClipperTest::StokesIndex> RFI_ClipperTest::_diff(const SpectrumDataSet
                 for( int i=0; i < numberOfChannels; ++i ) {
                     if( ptra[i] != ptrb[i] )
                     {
-//                        std::cout << "subband=" << subband << "channel=" << i << " a=" << ptra[i] << " b=" <<  ptrb[i] << std::endl;
+                        std::cout << "subband=" << subband << "channel=" << i << " a=" << ptra[i] << " b=" <<  ptrb[i] << std::endl;
                         StokesIndex index(block,subband,polarisation,i);
                         diff.append( index );
                     }
@@ -250,13 +263,15 @@ void RFI_ClipperTest::dump(const SpectrumDataSetStokes a)
 ConfigNode RFI_ClipperTest::testConfig(const QString& file)
 {
     ConfigNode node;
-    QString xml = "<RFI_Clipper rejectionFactor=\"1.50\" >\n"
+    QString xml = "<RFI_Clipper rejectionFactor=\"10.0\" >\n"
                         "<BandPassData file=\"" + 
                         pelican::test::TestConfig::findTestFile(file, "lib") 
                         + "\" />\n"
                         "<Band startFrequency=\"131.250763\" endFrequency=\"137.3\" />\n"
                   "</RFI_Clipper>\n";
     node.setFromString( xml );
+                        //"<Band startFrequency=\"131.250763\" endFrequency=\"131.2530514\" />\n"
+                        //"<Band startFrequency=\"131.250763\" endFrequency=\"137.3\" />\n"
     return node;
 }
 
