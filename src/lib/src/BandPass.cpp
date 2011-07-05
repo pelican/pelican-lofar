@@ -71,7 +71,7 @@ void BandPass::reBin(const BinMap& map)
     int mapId = map.hash();
     _currentMapId = mapId;
     if( ! _dataSets.contains(mapId) ) {
-        float scale = map.width()/_primaryMap.width();
+        double scale = map.width()/_primaryMap.width();
         // scale the RMS and median
         _rms[mapId]= _rms[_primaryMapId] * std::sqrt( 1.0/scale );
         _median[mapId] = _median[_primaryMapId] * scale;

@@ -158,12 +158,12 @@ void RFI_Clipper::run( WeightedSpectrumDataSet* weightedStokes )
         _map.setStart( _startFrequency );
         _map.setEnd( _endFrequency );
         _bandPass.reBin(_map);
-        //float doubleMargin = margin * 2.0;
-        //const QVector<float>& bandPass = _bandPass.currentSet();
 
         _copyI.resize(nBins);
         for (unsigned t = 0; t < nSamples; ++t) {
             float margin = std::fabs(_rFactor * _bandPass.rms());
+            //float doubleMargin = margin * 2.0;
+            const QVector<float>& bandPass = _bandPass.currentSet();
             float spectrumRMStolerance = 5.0 * _bandPass.rms()/sqrt(nBins);
             int bin = -1;
             float spectrumSum = 0.0;
@@ -201,9 +201,10 @@ void RFI_Clipper::run( WeightedSpectrumDataSet* weightedStokes )
                     // If the condition holds, blank that channel, if
                     // not add it to the population of used channels
                     if (I[index + c] - medianDelta - _bandPass.intensityOfBin( bin ) > margin ) {
+            //        std::cout << index+c << " : medianDelata="<< medianDelta << " amrgin=" << margin << " I[" << index +c  << "]" << I[index + c] << " - " << bandPass[bin] << std::endl;
                         I[index + c] = 0.0;
                         W[index +c] = 0.0;
-                        for(int pol = 2; pol <= nPolarisations; ++pol ) {
+                        for(unsigned int pol = 2; pol <= nPolarisations; ++pol ) {
                             long index = stokesI->index(s, nSubbands, 
                                     0, pol, t, nChannels ); 
                             I[index + c] = 0.0;
@@ -211,11 +212,14 @@ void RFI_Clipper::run( WeightedSpectrumDataSet* weightedStokes )
                         }
                     }
                     else{
-                        spectrumSum += I[index+c];
-                        spectrumSumSq += pow(I[index+c],2);
+                        //spectrumSum += I[index+c];
+                        //spectrumSumSq += pow(I[index+c],2);
                         // Maybe it is better to subtract the model:
-                        // spectrumSum += I[index+c] - medianDelta - bandPass[bin];
-                        // spectrumSumSq += pow(I[index+c] - medianDelta - bandPass[bin],2);
+                        spectrumSum += I[index+c] - medianDelta - bandPass[bin];
+                        //spectrumSum += I[index+c] - bandPass[bin];
+                        //spectrumSum += I[index+c] - _bandPass.intensityOfBin(bin);
+                        spectrumSumSq += pow(I[index+c] - medianDelta - bandPass[bin],2);
+                        //spectrumSumSq += pow(I[index+c] - bandPass[bin],2);
                         ++goodChannels;
                     }
                 }
@@ -227,16 +231,18 @@ void RFI_Clipper::run( WeightedSpectrumDataSet* weightedStokes )
             // by comparing the mean of the current spectrum (minus
             // strong spikes from test 1) to the current estimate of
             // the levels
-            // if (fabs(spectrumRMS - _bandPass.rms()) > spectrumRMStolerance) {
-            if (fabs(spectrumSum - modelLevel) > spectrumRMStolerance) {
+            // if (fabs(spectrumRMS - _bandPass.rms()) > spectrumRMStolerance) 
+            //if (fabs(spectrumSum - modelLevel) > spectrumRMStolerance) {
+            if (fabs(spectrumSum) > spectrumRMStolerance) {
                 std::cout 
                     << " SpectrumSum:" << spectrumSum 
-                    << " ModelLevel:" << modelLevel 
                     << " Tolerance:" << spectrumRMStolerance 
+                    << " ModelLevel:" << modelLevel 
                     << " Spectrum median:" << median 
                     << " Good Channels:" << goodChannels 
                     << " History Size:" << _history.size() 
                     << std::endl;
+/*
                 for (unsigned s = 0; s < nSubbands; ++s) {
                     long index = stokesI->index(s, nSubbands, 
                             0, 1, //nPolarisations,
@@ -252,19 +258,11 @@ void RFI_Clipper::run( WeightedSpectrumDataSet* weightedStokes )
                         }
                     }
                 }
+*/
             }
             else {
                 // update historical data
-                _history[(++_current)%_maxHistory] = spectrumSum;
-        /*
-          std::cout << "Updating history " << _current  
-            << " Max History " << _maxHistory 
-            << " History Size " << _history.size() 
-            << " This point " << _history[(_current)%_maxHistory]
-            << " This index " << (_current)%_maxHistory
-            << " spectrumSum " << spectrumSum 
-            << " min " << std::min(_current,_history.size())
-            << std::endl; */
+                _history[(++_current)%_maxHistory] = spectrumSum + modelLevel;
                 float baselineLevel = 0.0;
                 for( int i=0; i< std::min(_current,_history.size()); ++i ) {
                     baselineLevel += _history[i+1]; 
