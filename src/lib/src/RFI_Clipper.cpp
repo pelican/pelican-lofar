@@ -18,7 +18,7 @@ namespace lofar {
 RFI_Clipper::RFI_Clipper( const ConfigNode& config )
     : AbstractModule( config ), _active(true), _rFactor(3.0), _current(0)
 {
-  _current = 0;
+    _current = 0;
     if( config.hasAttribute("active") &&  
             config.getAttribute("active").toLower() == QString("false") ) {
         _active = false;
@@ -172,12 +172,12 @@ void RFI_Clipper::run( WeightedSpectrumDataSet* weightedStokes )
             float modelLevel = _bandPass.median();
             I = stokesI->data();
             float *W = weights->data();
+
             // create an ordered copy of the data in order to compute the median
             for (unsigned s = 0; s < nSubbands; ++s) {
                 long index = stokesI->index(s, nSubbands, 
-                        0, nPolarisations,
-                        t, nChannels ); 
-            //  I = stokesI -> spectrumData(t, s, 0);
+                        0, 1, //nPolarisations,
+                        t, nChannels );
                 for (unsigned c = 0; c < nChannels; ++c) {
                     _copyI[++bin]=I[index+c];
                 }
@@ -186,13 +186,15 @@ void RFI_Clipper::run( WeightedSpectrumDataSet* weightedStokes )
             float median = (float)*(_copyI.begin()+_copyI.size()/2);
             // medianDelta is the DC offset between the current spectrum and the data
             float medianDelta = median - modelLevel;
+
+
             // Perform first test: look for individual very bright
             // channels compared to the model
             bin = -1;
             for (unsigned s = 0; s < nSubbands; ++s) {
           //                int bin = (s * nChannels) - 1;
                 long index = stokesI->index(s, nSubbands, 
-                        0, nPolarisations,
+                        0, 1, //nPolarisations,
                         t, nChannels ); 
                 for (unsigned c = 0; c < nChannels; ++c) {
                     ++bin;
@@ -200,7 +202,13 @@ void RFI_Clipper::run( WeightedSpectrumDataSet* weightedStokes )
                     // not add it to the population of used channels
                     if (I[index + c] - medianDelta - _bandPass.intensityOfBin( bin ) > margin ) {
                         I[index + c] = 0.0;
-                        //W[index +c] = 0.0;
+                        W[index +c] = 0.0;
+                        for(int pol = 2; pol <= nPolarisations; ++pol ) {
+                            long index = stokesI->index(s, nSubbands, 
+                                    0, pol, t, nChannels ); 
+                            I[index + c] = 0.0;
+                            W[index +c] = 0.0;
+                        }
                     }
                     else{
                         spectrumSum += I[index+c];
@@ -231,10 +239,17 @@ void RFI_Clipper::run( WeightedSpectrumDataSet* weightedStokes )
                     << std::endl;
                 for (unsigned s = 0; s < nSubbands; ++s) {
                     long index = stokesI->index(s, nSubbands, 
-                            0, nPolarisations,
+                            0, 1, //nPolarisations,
                             t, nChannels ); 
                     for (unsigned c = 0; c < nChannels; ++c) {
                         I[index + c] = 0.0;
+                        W[index + c] = 0.0;
+                        for(int pol = 2; pol <= nPolarisations; ++pol ) {
+                            long index = stokesI->index(s, nSubbands, 
+                                    0, pol, t, nChannels ); 
+                            I[index + c] = 0.0;
+                            W[index +c] = 0.0;
+                        }
                     }
                 }
             }
@@ -264,5 +279,6 @@ void RFI_Clipper::run( WeightedSpectrumDataSet* weightedStokes )
         }
     }
 }
+
 } // namespace lofar
 } // namespace pelican
