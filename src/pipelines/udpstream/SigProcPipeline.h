@@ -6,6 +6,7 @@
 #include "RFI_Clipper.h"
 #include "StokesIntegrator.h"
 #include "SigprocStokesWriter.h"
+#include "WeightedSpectrumDataSet.h"
 
 /**
  * @file SigProcPipeline.h
