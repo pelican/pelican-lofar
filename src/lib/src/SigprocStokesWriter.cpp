@@ -21,6 +21,9 @@ SigprocStokesWriter::SigprocStokesWriter(const ConfigNode& configNode )
     _integration    = configNode.getOption("integrateTimeBins", "value", "1").toUInt();
     _nChannels = configNode.getOption("outputChannelsPerSubband", "value", "128").toUInt();
     _nRawPols = configNode.getOption("nRawPolarisations", "value", "2").toUInt();
+    _nBits = configNode.getOption("dataBits", "value", "32").toUInt();
+    _scaleMin = configNode.getOption("scaleMin", "value", "0.0" ).toFloat();
+    _scaleMax = configNode.getOption("scaleMax", "value", "255.0" ).toFloat();
 
     // Initliase connection manager thread
     _filepath = configNode.getOption("file", "filepath");
@@ -81,9 +84,9 @@ void SigprocStokesWriter::writeHeader(SpectrumDataSetStokes* stokes){
     WriteDouble("foff", _foff);
     WriteInt("nchans", _nchans);
     WriteDouble("tsamp", _tsamp);
-    WriteInt("nbits", 32);         // Only 32-bit binary data output is implemented for now
+    WriteInt("nbits", _nBits);         // Only 32-bit binary data output is implemented for now
     WriteDouble("tstart", _mjdStamp);      //TODO: Extract start time from first packet
-    WriteInt("nifs", int(_nPols));		   // Polarisation channels.
+    WriteInt("nifs", int(_nPols));           // Polarisation channels.
     WriteString("HEADER_END");
     _file.flush();
 
@@ -130,13 +133,12 @@ void SigprocStokesWriter::sendStream(const QString& /*streamName*/, const DataBl
     SpectrumDataSetStokes* stokes;
     DataBlob* blob = const_cast<DataBlob*>(incoming);
 
-    //    if (dynamic_cast<SpectrumDataSetStokes*>(blob)) {
-    if (stokes = (SpectrumDataSetStokes*) dynamic_cast<SpectrumDataSetStokes*>(blob)){
+    if( (stokes = (SpectrumDataSetStokes*) dynamic_cast<SpectrumDataSetStokes*>(blob))){
 
         if (_first){
-	  _first = false;
-	  writeHeader(stokes);
-	}
+            _first = false;
+            writeHeader(stokes);
+        }
 
         unsigned nSamples = stokes->nTimeBlocks();
         unsigned nSubbands = stokes->nSubbands();
@@ -147,8 +149,21 @@ void SigprocStokesWriter::sendStream(const QString& /*streamName*/, const DataBl
             for (unsigned p = 0; p < _nPols; ++p) {
                 for (int s = nSubbands - 1; s >= 0 ; --s) {
                     data = stokes->spectrumData(t, s, p);
-                    for(int i = nChannels - 1; i >= 0 ; --i)
-                        _file.write(reinterpret_cast<const char*>(&data[i]), sizeof(float));
+                    for(int i = nChannels - 1; i >= 0 ; --i) {
+                        switch (_nBits) {
+                            case 32:
+                                _file.write(reinterpret_cast<const char*>(&data[i]), sizeof(float));
+                                break;
+                            case 8:
+                                int ci;
+                                _float2int(&data[i],1,8,_scaleMin,_scaleMax,&ci);
+                                _file.write((const char*)ci,sizeof(unsigned char));
+                                break;
+                            default:
+                                throw(QString("SigprocStokesWriter:"));
+                                break;
+                        }
+                    }
                 }
             }
         }
@@ -177,5 +192,17 @@ void SigprocStokesWriter::_write(char* data, size_t size)
     _cur=ptr;
 }
 
+void SigprocStokesWriter::_float2int(const float *f, int n, int b, float min, float max, int *i)
+{
+  int j;
+  float ftmp,delta,imax;
+  imax=pow(2.0,(double) b)-1.0;
+  delta=max-min;
+  for (j=0; j<n; j++) {
+    ftmp = (f[j]>max)? (max) : f[j];
+    i[j] = (ftmp<min) ? (0.0): (int) rint((ftmp-min)*imax/delta);
+  }
 }
-}
+
+} // namepsace lofar
+} // namepsace pelican
