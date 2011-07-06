@@ -29,7 +29,7 @@ void SigProcPipeline::init() {
     weightedIntStokes = (WeightedSpectrumDataSet*) createBlob("WeightedSpectrumDataSet");
 
     // Request remote data
-    requestRemoteData("SigProcData");
+    requestRemoteData("SpectrumDataSetStokes");
 }
 
 void SigProcPipeline::run(QHash<QString, DataBlob*>& remoteData)
