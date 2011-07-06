@@ -159,12 +159,12 @@ void RFI_Clipper::run( WeightedSpectrumDataSet* weightedStokes )
         _map.setEnd( _endFrequency );
         _bandPass.reBin(_map);
 
-        _copyI.resize(nBins);
+        _copyI.resize(nBins/2);
         for (unsigned t = 0; t < nSamples; ++t) {
             float margin = std::fabs(_rFactor * _bandPass.rms());
             //float doubleMargin = margin * 2.0;
             const QVector<float>& bandPass = _bandPass.currentSet();
-            float spectrumRMStolerance = 5.0 * _bandPass.rms()/sqrt(nBins);
+            float spectrumRMStolerance = 10.0 * _bandPass.rms()/sqrt(nBins);
             int bin = -1;
             float spectrumSum = 0.0;
             float spectrumSumSq = 0.0;
@@ -176,9 +176,10 @@ void RFI_Clipper::run( WeightedSpectrumDataSet* weightedStokes )
             // create an ordered copy of the data in order to compute the median
             for (unsigned s = 0; s < nSubbands; ++s) {
                 long index = stokesI->index(s, nSubbands, 
-                        0, 1, //nPolarisations,
+                        0, nPolarisations,
                         t, nChannels );
-                for (unsigned c = 0; c < nChannels; ++c) {
+				//                for (unsigned c = 0; c < nChannels; ++c) {
+                for (unsigned c = nChannels/4; c < nChannels-nChannels/4; ++c) {
                     _copyI[++bin]=I[index+c];
                 }
             }
@@ -194,9 +195,10 @@ void RFI_Clipper::run( WeightedSpectrumDataSet* weightedStokes )
             for (unsigned s = 0; s < nSubbands; ++s) {
           //                int bin = (s * nChannels) - 1;
                 long index = stokesI->index(s, nSubbands, 
-                        0, 1, //nPolarisations,
+                        0, nPolarisations,
                         t, nChannels ); 
-                for (unsigned c = 0; c < nChannels; ++c) {
+				//for (unsigned c = 0; c < nChannels; ++c) {
+                for (unsigned c = nChannels/4; c < nChannels-nChannels/4; ++c) {
                     ++bin;
                     // If the condition holds, blank that channel, if
                     // not add it to the population of used channels
@@ -204,9 +206,9 @@ void RFI_Clipper::run( WeightedSpectrumDataSet* weightedStokes )
             //        std::cout << index+c << " : medianDelata="<< medianDelta << " amrgin=" << margin << " I[" << index +c  << "]" << I[index + c] << " - " << bandPass[bin] << std::endl;
                         I[index + c] = 0.0;
                         W[index +c] = 0.0;
-                        for(unsigned int pol = 2; pol <= nPolarisations; ++pol ) {
+                        for(unsigned int pol = 1; pol < nPolarisations; ++pol ) {
                             long index = stokesI->index(s, nSubbands, 
-                                    0, pol, t, nChannels ); 
+														pol, nPolarisations, t, nChannels ); 
                             I[index + c] = 0.0;
                             W[index +c] = 0.0;
                         }
@@ -241,24 +243,25 @@ void RFI_Clipper::run( WeightedSpectrumDataSet* weightedStokes )
                     << " Spectrum median:" << median 
                     << " Good Channels:" << goodChannels 
                     << " History Size:" << _history.size() 
+                    << " medianDelta:" << medianDelta 
                     << std::endl;
-/*
+
                 for (unsigned s = 0; s < nSubbands; ++s) {
                     long index = stokesI->index(s, nSubbands, 
-                            0, 1, //nPolarisations,
+                            0, nPolarisations,
                             t, nChannels ); 
                     for (unsigned c = 0; c < nChannels; ++c) {
                         I[index + c] = 0.0;
                         W[index + c] = 0.0;
-                        for(int pol = 2; pol <= nPolarisations; ++pol ) {
+                        for(int pol = 1; pol < nPolarisations; ++pol ) {
                             long index = stokesI->index(s, nSubbands, 
-                                    0, pol, t, nChannels ); 
+														pol, nPolarisations, t, nChannels ); 
                             I[index + c] = 0.0;
                             W[index +c] = 0.0;
                         }
                     }
                 }
-*/
+
             }
             else {
                 // update historical data
@@ -269,7 +272,7 @@ void RFI_Clipper::run( WeightedSpectrumDataSet* weightedStokes )
                 }
                 baselineLevel /= (float)std::min(_current,_history.size());
                 _bandPass.setMedian(baselineLevel);
-                _bandPass.setRMS(spectrumRMS);
+				//        _bandPass.setRMS(spectrumRMS);
         //        modelRMS = spectrumRMS;
         //        modelLevel = baselineLevel;
             }

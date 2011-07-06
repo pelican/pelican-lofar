@@ -1,7 +1,7 @@
 #include "BandPassRecorder.h"
 #include <QVector>
 #include <stdlib.h>
-#include <clapack.h>
+//#include <clapack.h>
 #include "BandPass.h"
 #include "SpectrumDataSet.h"
 
