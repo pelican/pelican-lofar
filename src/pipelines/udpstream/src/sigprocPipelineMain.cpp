@@ -1,7 +1,7 @@
 #include "pelican/core/PipelineApplication.h"
 #include "pelican/core/FileDataClient.h"
 #include "SigProcPipeline.h"
-
+#include "FilterBankAdapter.h"
 #include <QtCore/QCoreApplication>
 
 #include <iostream>

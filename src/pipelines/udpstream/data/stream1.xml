@@ -6,6 +6,9 @@
   <pipeline>
 
     <clients>
+      <FileDataClient>
+        <data type="SigProcData" adapter="FilterBankAdapter" file="testData.dat"/>
+      </FileDataClient>
       <PelicanServerClient>
         <server host="127.0.0.1" port="2000"/>
         <data type="LofarTimeStream1" adapter="AdapterTimeSeriesDataSet"/>

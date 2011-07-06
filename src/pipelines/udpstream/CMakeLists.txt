@@ -77,6 +77,10 @@ target_link_libraries(udpBFPipelineStream2
 
 # === Build the sigprocPipeline
 add_executable(sigprocPipeline src/sigprocPipelineMain.cpp)
+set_target_properties(sigprocPipeline PROPERTIES
+    COMPILE_FLAGS "${OpenMP_CXX_FLAGS}"
+    LINK_FLAGS "${OpenMP_CXX_FLAGS}"
+)
 target_link_libraries(sigprocPipeline
     pelicanMdsm
     pelican-lofar_static
