@@ -23,10 +23,10 @@ namespace lofar {
  * 
  */
 
-class WeightedSpectrumDataSet
+class WeightedSpectrumDataSet : public DataBlob
 {
     public:
-        WeightedSpectrumDataSet( SpectrumDataSet<float>* dat );
+        WeightedSpectrumDataSet( SpectrumDataSet<float>* dat = 0 );
         ~WeightedSpectrumDataSet();
         void reset( SpectrumDataSet<float>* data );
         SpectrumDataSet<float>* dataSet() const { return _dataSet; };
@@ -38,6 +38,7 @@ class WeightedSpectrumDataSet
         SpectrumDataSet<float>* _dataSet;
         SpectrumDataSet<float> _weights;
 };
+PELICAN_DECLARE_DATABLOB(WeightedSpectrumDataSet)
 
 } // namespace lofar
 } // namespace pelican
