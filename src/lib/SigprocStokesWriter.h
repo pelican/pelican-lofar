@@ -42,14 +42,14 @@ class SigprocStokesWriter : public AbstractOutputStream
         QString           _filepath;
         std::ofstream     _file;
         std::vector<char>  _buffer;
-        QString         _sourceName, _raString, _decString;
-        float           _fch1, _foff, _tsamp, _refdm, _clock, _ra, _dec;
-        float           _cropMin, _cropMax; // for scaling floats to lesser values
-        int             _nchans, _nTotalSubbands;
-        int             _buffSize, _cur;
-        unsigned int    _nRawPols, _nChannels, _nSubbands, _integration, _nPols;
-        unsigned int    _nSubbandsToStore, _topsubband, _lbahba, _site, _machine;
-        unsigned int    _nBits;
+        QString       _sourceName, _raString, _decString;
+        float         _fch1, _foff, _tsamp, _refdm, _clock, _ra, _dec;
+        float         _cropMin, _cropMax, _scaleDelta, _nRange; // for scaling floats to lesser values
+        int           _nchans, _nTotalSubbands;
+        int           _buffSize, _cur;
+        unsigned int  _nRawPols, _nChannels, _nSubbands, _integration, _nPols;
+        unsigned int  _nSubbandsToStore, _topsubband, _lbahba, _site, _machine;
+        unsigned int  _nBits;
 };
 
 PELICAN_DECLARE(AbstractOutputStream, SigprocStokesWriter)

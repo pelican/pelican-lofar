@@ -22,12 +22,14 @@ SigprocStokesWriter::SigprocStokesWriter(const ConfigNode& configNode )
     _nChannels = configNode.getOption("outputChannelsPerSubband", "value", "128").toUInt();
     _nRawPols = configNode.getOption("nRawPolarisations", "value", "2").toUInt();
     _nBits = configNode.getOption("dataBits", "value", "32").toUInt();
-    _cropMin = configNode.getOption("cropMin", "value", "0.0" ).toFloat();
+    _nRange = (int) pow(2.0,(double) _nBits)-1.0;
+    _cropMin = configNode.getOption("scale", "min", "0.0" ).toFloat();
     bool goodConversion=false;
-    _cropMax = configNode.getOption("cropMax", "value", "X" ).toFloat(&goodConversion);
+    _cropMax = configNode.getOption("scale", "max", "X" ).toFloat(&goodConversion);
     if( ! goodConversion ) {
-        _cropMax=pow(2.0,(double) _nBits)-1.0;
+        _cropMax=_nRange;
     }
+    _scaleDelta = _cropMax - _cropMin;
 
     // Initliase connection manager thread
     _filepath = configNode.getOption("file", "filepath");
@@ -156,7 +158,7 @@ void SigprocStokesWriter::sendStream(const QString& /*streamName*/, const DataBl
                         for (unsigned p = 0; p < _nPols; ++p) {
                             for (int s = nSubbands - 1; s >= 0 ; --s) {
                                 long index = stokes->index(s, nSubbands, 
-                                          0, nPolarisations, t, nChannels );
+                                          p, nPolarisations, t, nChannels );
                                 _file.write(reinterpret_cast<const char*>(&data[index]), sizeof(float));
                             }
                         }
@@ -168,7 +170,7 @@ void SigprocStokesWriter::sendStream(const QString& /*streamName*/, const DataBl
                         for (unsigned p = 0; p < _nPols; ++p) {
                             for (int s = nSubbands - 1; s >= 0 ; --s) {
                                 long index = stokes->index(s, nSubbands, 
-                                          0, nPolarisations, t, nChannels );
+                                          p, nPolarisations, t, nChannels );
                                 int ci;
                                 _float2int(&data[index],&ci);
                                 _file.write((const char*)&ci,sizeof(unsigned char));
@@ -231,9 +233,9 @@ void SigprocStokesWriter::_write(char* data, size_t size)
 
 void SigprocStokesWriter::_float2int(const float *f, int *i)
 {
-  float ftmp; //,delta,imax;
-  ftmp = (*f>_cropMax)? (_cropMax) : *f;
-  *i = (int) (ftmp<_cropMin) ?_cropMin : ftmp; // rint((ftmp-min)*imax/delta);
+    float ftmp;
+    ftmp = (*f>_cropMax)? (_cropMax) : *f;
+    *i = (ftmp<_cropMin) ? 0 : (int)rint((ftmp-_cropMin)*_nRange/_scaleDelta);
 }
 
 } // namepsace lofar
