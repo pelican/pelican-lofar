@@ -22,8 +22,12 @@ SigprocStokesWriter::SigprocStokesWriter(const ConfigNode& configNode )
     _nChannels = configNode.getOption("outputChannelsPerSubband", "value", "128").toUInt();
     _nRawPols = configNode.getOption("nRawPolarisations", "value", "2").toUInt();
     _nBits = configNode.getOption("dataBits", "value", "32").toUInt();
-    _scaleMin = configNode.getOption("scaleMin", "value", "0.0" ).toFloat();
-    _scaleMax = configNode.getOption("scaleMax", "value", "255.0" ).toFloat();
+    _cropMin = configNode.getOption("cropMin", "value", "0.0" ).toFloat();
+    bool goodConversion=false;
+    _cropMax = configNode.getOption("cropMax", "value", "X" ).toFloat(&goodConversion);
+    if( ! goodConversion ) {
+        _cropMax=pow(2.0,(double) _nBits)-1.0;
+    }
 
     // Initliase connection manager thread
     _filepath = configNode.getOption("file", "filepath");
@@ -143,8 +147,41 @@ void SigprocStokesWriter::sendStream(const QString& /*streamName*/, const DataBl
         unsigned nSamples = stokes->nTimeBlocks();
         unsigned nSubbands = stokes->nSubbands();
         unsigned nChannels = stokes->nChannels();
-        float const * data;
+        unsigned nPolarisations = stokes->nPolarisations();
+        float const * data = stokes->data();
 
+        switch (_nBits) {
+            case 32: {
+                    for (unsigned t = 0; t < nSamples; ++t) {
+                        for (unsigned p = 0; p < _nPols; ++p) {
+                            for (int s = nSubbands - 1; s >= 0 ; --s) {
+                                long index = stokes->index(s, nSubbands, 
+                                          0, nPolarisations, t, nChannels );
+                                _file.write(reinterpret_cast<const char*>(&data[index]), sizeof(float));
+                            }
+                        }
+                    }
+                }
+                break;
+            case 8: {
+                    for (unsigned t = 0; t < nSamples; ++t) {
+                        for (unsigned p = 0; p < _nPols; ++p) {
+                            for (int s = nSubbands - 1; s >= 0 ; --s) {
+                                long index = stokes->index(s, nSubbands, 
+                                          0, nPolarisations, t, nChannels );
+                                int ci;
+                                _float2int(&data[index],&ci);
+                                _file.write((const char*)&ci,sizeof(unsigned char));
+                            }
+                        }
+                    }
+                }
+                break;
+            default:
+                throw(QString("SigprocStokesWriter: %1 bit datafiles not yet supported"));
+                break;
+        }
+/*
         for (unsigned t = 0; t < nSamples; ++t) {
             for (unsigned p = 0; p < _nPols; ++p) {
                 for (int s = nSubbands - 1; s >= 0 ; --s) {
@@ -155,7 +192,7 @@ void SigprocStokesWriter::sendStream(const QString& /*streamName*/, const DataBl
                                 _file.write(reinterpret_cast<const char*>(&data[i]), sizeof(float));
                                 break;
                             case 8:
-                                int ci;
+                                int ci = ;
                                 _float2int(&data[i],1,8,_scaleMin,_scaleMax,&ci);
                                 _file.write((const char*)&ci,sizeof(unsigned char));
                                 break;
@@ -167,12 +204,12 @@ void SigprocStokesWriter::sendStream(const QString& /*streamName*/, const DataBl
                 }
             }
         }
-
+*/
         _file.flush();
     }
     else {
         std::cerr << "SigprocStokesWriter::send(): "
-                "Only blobs can be written by the SigprocWriter" << std::endl;
+                "Only SpectrumDataSetStokes data can be written by the SigprocWriter" << std::endl;
         return;
     }
 }
@@ -192,14 +229,11 @@ void SigprocStokesWriter::_write(char* data, size_t size)
     _cur=ptr;
 }
 
-void SigprocStokesWriter::_float2int(const float *f, int n, int b, float min, float max, int *i)
+void SigprocStokesWriter::_float2int(const float *f, int *i)
 {
-  int j;
-  float ftmp,delta,imax;
-  imax=pow(2.0,(double) b)-1.0;
-  delta=max-min;
-  ftmp = (*f>max)? (max) : *f;
-  *i = (ftmp<min) ? (int)min : (int) ftmp; // rint((ftmp-min)*imax/delta);
+  float ftmp; //,delta,imax;
+  ftmp = (*f>_cropMax)? (_cropMax) : *f;
+  *i = (int) (ftmp<_cropMin) ?_cropMin : ftmp; // rint((ftmp-min)*imax/delta);
 }
 
 } // namepsace lofar

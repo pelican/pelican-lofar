@@ -35,7 +35,7 @@ class SigprocStokesWriter : public AbstractOutputStream
     protected:
         // buffer and write data in blocks
         void _write(char*,size_t);
-        void _float2int(const float *f, int n, int b, float min, float max, int *i);
+        inline void _float2int(const float *f, int *i);
 
     private:
         bool              _first;
@@ -44,7 +44,7 @@ class SigprocStokesWriter : public AbstractOutputStream
         std::vector<char>  _buffer;
         QString         _sourceName, _raString, _decString;
         float           _fch1, _foff, _tsamp, _refdm, _clock, _ra, _dec;
-        float           _scaleMin, _scaleMax; // for scaling floats to lesser values
+        float           _cropMin, _cropMax; // for scaling floats to lesser values
         int             _nchans, _nTotalSubbands;
         int             _buffSize, _cur;
         unsigned int    _nRawPols, _nChannels, _nSubbands, _integration, _nPols;
