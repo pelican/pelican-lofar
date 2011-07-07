@@ -159,7 +159,10 @@ void SigprocStokesWriter::sendStream(const QString& /*streamName*/, const DataBl
                             for (int s = nSubbands - 1; s >= 0 ; --s) {
                                 long index = stokes->index(s, nSubbands, 
                                           p, nPolarisations, t, nChannels );
-                                _file.write(reinterpret_cast<const char*>(&data[index]), sizeof(float));
+                                for(int i = nChannels - 1; i >= 0 ; --i) {
+                                _file.write(reinterpret_cast<const char*>(&data[index + i]), 
+                                            sizeof(float));
+                                }
                             }
                         }
                     }
@@ -171,9 +174,11 @@ void SigprocStokesWriter::sendStream(const QString& /*streamName*/, const DataBl
                             for (int s = nSubbands - 1; s >= 0 ; --s) {
                                 long index = stokes->index(s, nSubbands, 
                                           p, nPolarisations, t, nChannels );
-                                int ci;
-                                _float2int(&data[index],&ci);
-                                _file.write((const char*)&ci,sizeof(unsigned char));
+                                for(int i = nChannels - 1; i >= 0 ; --i) {
+                                    int ci;
+                                    _float2int(&data[index + i],&ci);
+                                    _file.write((const char*)&ci,sizeof(unsigned char));
+                                }
                             }
                         }
                     }
