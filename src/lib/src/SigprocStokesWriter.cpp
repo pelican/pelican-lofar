@@ -157,7 +157,7 @@ void SigprocStokesWriter::sendStream(const QString& /*streamName*/, const DataBl
                             case 8:
                                 int ci;
                                 _float2int(&data[i],1,8,_scaleMin,_scaleMax,&ci);
-                                _file.write((const char*)ci,sizeof(unsigned char));
+                                _file.write((const char*)&ci,sizeof(unsigned char));
                                 break;
                             default:
                                 throw(QString("SigprocStokesWriter:"));
@@ -198,10 +198,8 @@ void SigprocStokesWriter::_float2int(const float *f, int n, int b, float min, fl
   float ftmp,delta,imax;
   imax=pow(2.0,(double) b)-1.0;
   delta=max-min;
-  for (j=0; j<n; j++) {
-    ftmp = (f[j]>max)? (max) : f[j];
-    i[j] = (ftmp<min) ? (0.0): (int) rint((ftmp-min)*imax/delta);
-  }
+  ftmp = (*f>max)? (max) : *f;
+  *i = (ftmp<min) ? (int)min : (int) ftmp; // rint((ftmp-min)*imax/delta);
 }
 
 } // namepsace lofar
