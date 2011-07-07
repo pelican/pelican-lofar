@@ -43,6 +43,7 @@ class RFI_Clipper : public AbstractModule
         float _rFactor; // scale factor for rejection (multiples of RMS)
         QVector<float> _history;
         int _current; // history pointer
+        int _num;// number of values in history
         int _maxHistory; // max size of history buffer
 };
 
