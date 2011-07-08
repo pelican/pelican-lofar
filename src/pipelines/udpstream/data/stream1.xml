@@ -6,9 +6,6 @@
   <pipeline>
 
     <clients>
-      <FileDataClient>
-        <data type="SigProcData" adapter="FilterBankAdapter" file="testData.dat"/>
-      </FileDataClient>
       <PelicanServerClient>
         <server host="127.0.0.1" port="2000"/>
         <data type="LofarTimeStream1" adapter="AdapterTimeSeriesDataSet"/>
@@ -18,7 +15,7 @@
     <adapters>
       <AdapterTimeSeriesDataSet>
         <subbandsPerPacket value="31"/> <!-- 31 or 61 or 62 -->
-        <import file="/Data/XML/my_common.xml"/>
+        <import file="/home/artemis/Pulsars/B0329+54/mycommon.xml"/>
         <!--   -->
         <fixedSizePackets value="false" />
       </AdapterTimeSeriesDataSet>
@@ -27,7 +24,7 @@
     <modules>
 
       <PPFChanneliser>
-        <import file="/Data/XML/my_common.xml"/>
+        <import file="/home/artemis/Pulsars/B0329+54/mycommon.xml"/>
         <!--   -->
         <processingThreads value="6" />
         <filter nTaps="8" filterWindow="kaiser"/>
@@ -37,19 +34,20 @@
       </StokesGenerator>
 
       <RFI_Clipper active="true" rejectionFactor="10.0" >
-	<BandPassData file="/Data/XML/band31.bp" />
-	<Band matching="true" />
+		<BandPassData file="/home/artemis/Pulsars/band31.bp" />
+		<Band matching="true" />
+		<History maximum="10000" />
       </RFI_Clipper>
 
-      <MdsmModule>
+      <!--MdsmModule>
         <observationfile filepath="/Data/XML/obs31.xml" />
-        <import file="/Data/XML/my_common.xml"/>
+        <import file="/home/artemis/Pulsars/mycommon.xml"/>
 	<createOutputBlob value="0" />
 	<invertChannels value="1" />
-      </MdsmModule>
+      </MdsmModule-->
       
       <StokesIntegrator>
-        <import file="/Data/XML/my_common.xml"/>
+        <import file="/home/artemis/Pulsars/B0329+54/mycommon.xml"/>
       </StokesIntegrator>
 
     </modules>
@@ -59,7 +57,6 @@
       <dataStreams>
         <!-- <stream name="SpectrumDataSetStokes" listeners="PelicanTCPBlobServer" />  -->
         <stream name="SpectrumDataSetStokes" listeners="SigprocStokesWriter"/>
-        <stream name="LofarTimeStream1" listeners="DataBlobFile"/>
       </dataStreams>
 
       <streamers>
@@ -68,22 +65,22 @@
         </PelicanTCPBlobServer>
         -->
         <SigprocStokesWriter active="true" writeHeader="true">
-          <import file="/Data/XML/my_common.xml"/>
+          <import file="/home/artemis/Pulsars/B0329+54/mycommon.xml"/>
+          <dataBits value="8"/>
+          <scale max="200" min="-200"/>
           <topSubbandIndex value="250"/>
           <LBA_0_or_HBA_1 value="1" />
           <subbandsPerPacket value="31"/>
           <!-- -->
-          <file filepath="V1_HBA31_t250_test_0329.dat" /><!--Change-->
+          <file filepath="V1_HBA31_t250_B0329+54.dat" /><!--Change-->
           <params telescope="LOFAR" nPolsToWrite="1"/><!--Change-->
-          <RAJ value="033259.368" />
-          <DecJ value="543443.57"/>
+          <RAJ value="033259.3" />
+          <DecJ value="+543443.5"/>
           <TelescopeID value="3"/>
           <MachineID value="9"/>
         </SigprocStokesWriter>
-        <DataBlobFile>
-          <file name="rawStream1.dat" />
-        </DataBlobFile>
       </streamers>
+      
     </output>
 
   </pipeline>

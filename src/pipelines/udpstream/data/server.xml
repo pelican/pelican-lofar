@@ -10,7 +10,7 @@
         <connection host="127.0.0.1" port="4346"/> <!--Change-->
         <!--  -->
         <subbandsPerPacket value="61" /> <!-- 31 or 61 or 62 -->
-        <import file="/Data/XML/my_common.xml"/>
+        <import file="/home/artemis/Pulsars/B0329+54/mycommon.xml"/>
         <!--  -->
         <Stream1 subbandStart="0" subbandEnd="30"/>
         <Stream2 subbandStart="31" subbandEnd="60"/>
