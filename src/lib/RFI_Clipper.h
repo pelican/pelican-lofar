@@ -29,7 +29,6 @@ class RFI_Clipper : public AbstractModule
     public:
         RFI_Clipper( const ConfigNode& config );
         ~RFI_Clipper();
-//        void run(SpectrumDataSetStokes* stokesI);
         void run( WeightedSpectrumDataSet* weightedStokes );
         const BandPass& bandPass() const { return _bandPass; }; // return the BandPass Filter in use
 
