@@ -33,10 +33,15 @@ class WeightedSpectrumDataSet : public DataBlob
         SpectrumDataSet<float>* weights() { return &_weights; };
         float rms() const;
         float mean() const;
+        float median() const;
+        void setRMS(float rms);
+        void setMedian(float median);
+        void setMean(float mean);
 
     private:
         SpectrumDataSet<float>* _dataSet;
         SpectrumDataSet<float> _weights;
+        float _mean, _median, _rms;
 };
 PELICAN_DECLARE_DATABLOB(WeightedSpectrumDataSet)
 

@@ -145,6 +145,8 @@ v        float median = (float)*(_copyI.begin()+_copyI.size()/2);
 void RFI_Clipper::run( WeightedSpectrumDataSet* weightedStokes )
 {
   if( _active ) {
+    float blobRMS = 0.0f;
+    float blobSum = 0.0f;
     SpectrumDataSetStokes* stokesAll = 
       static_cast<SpectrumDataSetStokes*>(weightedStokes->dataSet());
     SpectrumDataSet<float>* weights = weightedStokes->weights();
@@ -229,10 +231,13 @@ void RFI_Clipper::run( WeightedSpectrumDataSet* weightedStokes )
       // medianDelta is the DC offset between the current spectrum and the model
       float medianDelta = median - modelLevel;
       
+
       spectrumSum /= goodChannels;
+      blobSum += spectrumSum;
 
       // This is the RMS of the residual, current data 
       float spectrumRMS = sqrt(spectrumSumSq/goodChannels - std::pow(spectrumSum,2));
+      blobRMS += spectrumRMS;
       
       // Perform second test: Take a look at whether the median of the
       // spectrum is close to the model. If it isn't, it is likely
@@ -263,7 +268,7 @@ void RFI_Clipper::run( WeightedSpectrumDataSet* weightedStokes )
           for (unsigned c = 0; c < nChannels; ++c) {
             I[index + c] = 0.0;
             W[index + c] = 0.0;
-            for(int pol = 1; pol < nPolarisations; ++pol ) {
+            for(unsigned int pol = 1; pol < nPolarisations; ++pol ) {
               long index = stokesAll->index(s, nSubbands, 
                                           pol, nPolarisations, t, nChannels ); 
               I[index + c] = 0.0;
@@ -305,6 +310,10 @@ void RFI_Clipper::run( WeightedSpectrumDataSet* weightedStokes )
         _bandPass.setRMS(spectrumRMS);
       }
     }
+    blobRMS /= nSamples; 
+    blobSum /= nSamples;
+    weightedStokes->setRMS( blobRMS ); 
+    weightedStokes->setMean( blobSum ); 
   }
 }
   
