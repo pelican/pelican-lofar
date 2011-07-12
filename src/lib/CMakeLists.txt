@@ -9,6 +9,7 @@ set(lib_src
     src/BandPass.cpp
     src/BandPassOutput.cpp
     src/BandPassRecorder.cpp
+    src/BlobStatistics.cpp
     src/FilterBankHeader.cpp
     src/FilterBankAdapter.cpp
     src/OutputHDF5Lofar.cpp
