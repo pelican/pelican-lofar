@@ -168,7 +168,7 @@ void RFI_Clipper::run( WeightedSpectrumDataSet* weightedStokes )
       //float doubleMargin = margin * 2.0;
       const QVector<float>& bandPass = _bandPass.currentSet();
       // The following is the amount of tolerance to changes in the average value of the spectrum
-      float spectrumRMStolerance = 5.0 * _bandPass.rms()/sqrt(nBins);
+      float spectrumRMStolerance = 4.0 * _bandPass.rms()/sqrt(nBins);
       int bin = -1;
       float spectrumSum = 0.0;
       float spectrumSumSq = 0.0;
@@ -188,10 +188,6 @@ void RFI_Clipper::run( WeightedSpectrumDataSet* weightedStokes )
                                     t, nChannels ); 
         for (unsigned c = 0; c < nChannels; ++c) {
           ++bin;
-
-          // create an ordered copy of the data in order to compute the median
-          // The median is used as a single number to characterise the level of each spectrum
-          _copyI[bin]=I[index+c];
 
           // Subtract the current model from the data
           I[index+c] -= bandPass[bin];
@@ -217,12 +213,18 @@ void RFI_Clipper::run( WeightedSpectrumDataSet* weightedStokes )
             // description;
             spectrumSum += I[index+c];
 
+            // create an ordered copy of the data in order to compute the median
+            // The median is used as a single number to characterise the level of each spectrum
+            _copyI[goodChannels]=I[index+c] + bandPass[bin];
+
+
             // Use this for RMS calculation
             spectrumSumSq += pow(I[index+c],2);
             ++goodChannels;
           }
         }
       }
+      _copyI.resize(goodChannels);
 
       // Compute the median
       std::nth_element(_copyI.begin(), _copyI.begin()+_copyI.size()/2, _copyI.end());
@@ -293,9 +295,10 @@ void RFI_Clipper::run( WeightedSpectrumDataSet* weightedStokes )
         baselineLevel /= (float) _num;
 
         if (_current == 1) std::cout 
-                             << "History Update ---------> " 
+                             << "*****History Update ---------> " 
                              << " Baseline at: " << baselineLevel 
                              << " Tolerance: " << 5.0 * spectrumRMS/sqrt(nBins)
+                             << " Spectrum Mean: " << spectrumSum
                              << " Good Channels: " << goodChannels
                              << std::endl;
 
@@ -310,7 +313,7 @@ void RFI_Clipper::run( WeightedSpectrumDataSet* weightedStokes )
         _bandPass.setRMS(spectrumRMS);
       }
     }
-    blobRMS /= nSamples; 
+    blobRMS /= (nSamples*sqrt(nBins)); 
     blobSum /= nSamples;
     weightedStokes->setRMS( blobRMS ); 
     weightedStokes->setMean( blobSum ); 
