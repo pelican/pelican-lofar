@@ -1,5 +1,6 @@
 #ifndef WEIGHTEDSPECTRUMDATASET_H
 #define WEIGHTEDSPECTRUMDATASET_H
+#include "BlobStatistics.h"
 
 
 /**
@@ -37,11 +38,13 @@ class WeightedSpectrumDataSet : public DataBlob
         void setRMS(float rms);
         void setMedian(float median);
         void setMean(float mean);
+        const BlobStatistics& stats() const;
 
     private:
         SpectrumDataSet<float>* _dataSet;
         SpectrumDataSet<float> _weights;
-        float _mean, _median, _rms;
+        BlobStatistics _stats;
+        //float _mean, _median, _rms;
 };
 PELICAN_DECLARE_DATABLOB(WeightedSpectrumDataSet)
 

@@ -79,6 +79,7 @@ void UdpBFPipeline::run(QHash<QString, DataBlob*>& remoteData)
     weightedIntStokes->reset(stokes);
 
     rfiClipper->run(weightedIntStokes);
+    dataOutput(&(weightedIntStokes->stats()), "RFI_Stats");
 
     stokesIntegrator->run(stokes, intStokes);
 
