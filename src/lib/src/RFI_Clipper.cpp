@@ -156,6 +156,7 @@ void RFI_Clipper::run( WeightedSpectrumDataSet* weightedStokes )
     unsigned nChannels = stokesAll->nChannels();
     unsigned nPolarisations = stokesAll->nPolarisations();
     unsigned nBins = nChannels * nSubbands;
+    unsigned goodSamples = 0;
     
     _map.reset( nBins );
     _map.setStart( _startFrequency );
@@ -235,11 +236,9 @@ void RFI_Clipper::run( WeightedSpectrumDataSet* weightedStokes )
       
 
       spectrumSum /= goodChannels;
-      blobSum += spectrumSum;
 
       // This is the RMS of the residual, current data 
       float spectrumRMS = sqrt(spectrumSumSq/goodChannels - std::pow(spectrumSum,2));
-      blobRMS += spectrumRMS;
       
       // Perform second test: Take a look at whether the median of the
       // spectrum is close to the model. If it isn't, it is likely
@@ -253,7 +252,7 @@ void RFI_Clipper::run( WeightedSpectrumDataSet* weightedStokes )
       
       if (fabs(medianDelta) > spectrumRMStolerance) {
         std::cout 
-          << " SpectrumSum:" << spectrumSum 
+          << "RFI_Clipper------------- SpectrumSum:" << spectrumSum 
           << " Tolerance:" << spectrumRMStolerance 
           << " ModelLevel:" << modelLevel 
           << " Spectrum median:" << median 
@@ -281,10 +280,15 @@ void RFI_Clipper::run( WeightedSpectrumDataSet* weightedStokes )
         
       }
       else {
+        // Yey! This spectrum has made it out of the clipper so consider it in the noise statistics
+        ++goodSamples;
+        blobSum += spectrumSum;
+        blobRMS += spectrumRMS;
+
         // update historical data to the median value of the
         // current spectrum, since it has passed all the tests
         // and is good for comparison to the next spectrum
-        
+   
         if (_num != _maxHistory ) ++_num;
         _history[_current] = median;
         _current = ++_current%_maxHistory;
@@ -300,6 +304,7 @@ void RFI_Clipper::run( WeightedSpectrumDataSet* weightedStokes )
                              << " Tolerance: " << 5.0 * spectrumRMS/sqrt(nBins)
                              << " Spectrum Mean: " << spectrumSum
                              << " Good Channels: " << goodChannels
+                             << std::endl
                              << std::endl;
 
 
@@ -313,8 +318,8 @@ void RFI_Clipper::run( WeightedSpectrumDataSet* weightedStokes )
         _bandPass.setRMS(spectrumRMS);
       }
     }
-    blobRMS /= (nSamples*sqrt(nBins)); 
-    blobSum /= nSamples;
+    blobRMS /= (goodSamples*sqrt(nBins)); 
+    blobSum /= goodSamples;
     weightedStokes->setRMS( blobRMS ); 
     weightedStokes->setMean( blobSum ); 
   }
