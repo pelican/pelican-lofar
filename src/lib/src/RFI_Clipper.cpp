@@ -241,7 +241,7 @@ void RFI_Clipper::run( WeightedSpectrumDataSet* weightedStokes )
           }
           else{
             // Subtract the current model from the data
-            I[index+c] -= bandPass[bin];
+            I[index+c] -= bandPass[bin] + medianDelta ;
             // if the condition doesn't hold build up the statistical
             // description;
             spectrumSum += I[index+c];
