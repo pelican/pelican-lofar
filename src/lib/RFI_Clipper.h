@@ -39,10 +39,13 @@ class RFI_Clipper : public AbstractModule
         bool _active;
         float _startFrequency;
         float _endFrequency;
-        float _rFactor; // scale factor for rejection (multiples of RMS)
-        QVector<float> _history;
-        int _current; // history pointer
-        int _num;// number of values in history
+        float _medianFromFile;
+        float _rmsFromFile;
+        float _crFactor, _srFactor; // scale factor for rejection (multiples of RMS)
+        QVector<float> _history, _historyMean, _historyRMS;
+        int _current, _currentChunk; // history pointers
+        int _badSpectra;
+        int _num, _numChunks;// number of values in history
         int _maxHistory; // max size of history buffer
 };
 
