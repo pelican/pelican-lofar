@@ -24,6 +24,7 @@ set(lib_src
     src/PumaOutput.cpp
     src/PolyphaseCoefficients.cpp
     src/RFI_Clipper.cpp
+    src/RTMS_Data.cpp
     src/SpectrumDataSet.cpp
     src/TimeSeriesDataSet.cpp
     src/PPFChanneliser.cpp
