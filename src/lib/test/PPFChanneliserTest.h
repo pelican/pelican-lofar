@@ -24,13 +24,17 @@ namespace lofar {
 class PPFChanneliserTest : public CppUnit::TestFixture
 {
     public:
+        PPFChanneliserTest() : CppUnit::TestFixture() {}
+        virtual ~PPFChanneliserTest() {}
+
+    public:
         /// Register test methods.
         CPPUNIT_TEST_SUITE(PPFChanneliserTest);
-        CPPUNIT_TEST(test_run);
-        //CPPUNIT_TEST(test_channelProfile);
+        //CPPUNIT_TEST(test_run);
+        CPPUNIT_TEST(test_channelProfile);
         //CPPUNIT_TEST(test_makeSpectrum);
 
-        CPPUNIT_TEST(test_configuration);
+        //CPPUNIT_TEST(test_configuration);
         //CPPUNIT_TEST(test_threadAssign);
         //CPPUNIT_TEST(test_updateBuffer);
         //CPPUNIT_TEST(test_filter);
@@ -44,6 +48,7 @@ class PPFChanneliserTest : public CppUnit::TestFixture
         /// Test module configuration.
         void test_configuration();
 
+        /// Test various thread assignment schemes.
         void test_threadAssign();
 
         /// Test updating the delay buffer.
@@ -64,10 +69,6 @@ class PPFChanneliserTest : public CppUnit::TestFixture
         /// Test the channel profile for a given set of weights.
         void test_channelProfile();
 
-    public:
-        PPFChanneliserTest() : CppUnit::TestFixture() {}
-        ~PPFChanneliserTest() {}
-
     private:
         /// Generate configuration XML.
         QString _configXml(unsigned nChannels, unsigned nThreads,
@@ -79,11 +80,12 @@ class PPFChanneliserTest : public CppUnit::TestFixture
         unsigned _nSubbands;
         unsigned _nPols;
         unsigned _nChannels;
-
         unsigned _nTaps;
 };
 
 
 } // namespace lofar
 } // namespace pelican
+
+
 #endif // PPF_CHANNELISER_TEST_H_

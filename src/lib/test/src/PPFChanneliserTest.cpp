@@ -29,7 +29,6 @@ namespace lofar {
 
 CPPUNIT_TEST_SUITE_REGISTRATION(PPFChanneliserTest);
 
-
 void PPFChanneliserTest::setUp()
 {
     _verbose = true;
@@ -41,7 +40,8 @@ void PPFChanneliserTest::setUp()
 
     unsigned timesPerChunk =  16 * 16384;
 
-    if (timesPerChunk%_nChannels) CPPUNIT_FAIL("Setup error");
+    if (timesPerChunk%_nChannels)
+        CPPUNIT_FAIL("Setup error");
 
     _nBlocks = timesPerChunk / _nChannels;
 }
@@ -288,7 +288,7 @@ void PPFChanneliserTest::test_configuration()
         CPPUNIT_ASSERT_EQUAL(_nChannels, channeliser._nChannels);
         CPPUNIT_ASSERT_EQUAL(nThreads, channeliser._nThreads);
     }
-    catch (QString err) {
+    catch (QString const& err) {
         CPPUNIT_FAIL(err.toLatin1().data());
     }
 }

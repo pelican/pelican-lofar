@@ -1,3 +1,7 @@
+#
+# pelican-lofar/lib/test/CMakeLists.txt
+#
+
 include_directories(${CMAKE_CURRENT_SOURCE_DIR} ..)
 
 # Create test utility library.
@@ -90,6 +94,24 @@ target_link_libraries(ppfTest
     ${QT_QTNETWORK_LIBRARY}
     ${QT_QTXML_LIBRARY}
 )
+
+
+# Test the channel profile of the PPF channeliser.
+# -----------------------------------------------------------------------------
+add_executable(ppf_channel_profile src/PPF_ChannelProfileTest.cpp)
+set_target_properties(ppf_channel_profile PROPERTIES
+    COMPILE_FLAGS "${OpenMP_CXX_FLAGS}"
+    LINK_FLAGS "${OpenMP_CXX_FLAGS}"
+)
+target_link_libraries(ppf_channel_profile
+    pelican-lofar_static
+    ${PELICAN_LIBRARY}
+    ${QT_QTCORE_LIBRARY}
+    ${QT_QTNETWORK_LIBRARY}
+    ${QT_QTXML_LIBRARY}
+)
+
+
 
 
 # Copy files required for testing to the build directory.
