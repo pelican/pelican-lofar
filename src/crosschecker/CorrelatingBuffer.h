@@ -1,10 +1,10 @@
 #ifndef CORRELATINGBUFFER_H
 #define CORRELATINGBUFFER_H
 
-#include <QObject>
-#include <QString>
-#include <QMap>
-#include <QHash>
+#include <QtCore/QObject>
+#include <QtCore/QString>
+#include <QtCore/QMap>
+#include <QtCore/QHash>
 #include "../lib/RTMS_Data.h"
 
 /**
@@ -17,12 +17,12 @@ namespace lofar {
 
 /**
  * @class CorrelatingBuffer
- *  
+ *
  * @brief
  *     Takes RTMS datablobs and correlates against the timestamps with
  *     other RTMS datablobs
  * @details
- * 
+ *
  */
 
 class RTMS_Data;
@@ -45,7 +45,7 @@ class CorrelatingBuffer : public QObject
         void foundCorrelation(QMap<QString, RTMS_Data>);
 
     private:
-        typedef long Timestamp_T; 
+        typedef long Timestamp_T;
         QString _name;
         QHash<Timestamp_T,RTMS_Data> _buffer;
         int _delta;
@@ -54,4 +54,4 @@ class CorrelatingBuffer : public QObject
 
 } // namespace lofar
 } // namespace pelican
-#endif // CORRELATINGBUFFER_H 
+#endif // CORRELATINGBUFFER_H

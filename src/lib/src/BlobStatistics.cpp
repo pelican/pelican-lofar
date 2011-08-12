@@ -1,5 +1,5 @@
 #include "BlobStatistics.h"
-#include <QDataStream>
+#include <QtCore/QDataStream>
 
 namespace pelican {
 
@@ -7,7 +7,7 @@ namespace lofar {
 
 
 /**
- *@details BlobStatistics 
+ *@details BlobStatistics
  */
 
 BlobStatistics::BlobStatistics(float mean, float rms, float median )

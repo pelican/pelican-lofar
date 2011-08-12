@@ -1,6 +1,6 @@
 #include "SigprocAdapter.h"
 #include "LofarTypes.h"
-#include <QFile>
+#include <QtCore/QFile>
 
 /// Constructs a new SigprocAdapter.
 SigprocAdapter::SigprocAdapter(const ConfigNode& config)

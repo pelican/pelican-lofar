@@ -19,8 +19,6 @@ using std::cerr;
 using std::cout;
 using std::endl;
 
-#include "pelican/utility/memCheck.h"
-
 namespace pelican {
 namespace lofar {
 
@@ -148,7 +146,7 @@ QIODevice* LofarDataSplittingChunker::newDevice()
 
     if (!socket->bind(port(), QUdpSocket::ShareAddress | QUdpSocket::ReuseAddressHint ))
         cerr << "LofarDataSplittingChunker::newDevice(): "
-        "Unable to bind to UDP port!" << 
+        "Unable to bind to UDP port!" <<
         socket->errorString().toStdString() << std::endl;
 
     return socket;

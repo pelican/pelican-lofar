@@ -1,6 +1,6 @@
 #include "FilterBankHeader.h"
-#include <QIODevice>
-#include <QByteArray>
+#include <QtCore/QIODevice>
+#include <QtCore/QByteArray>
 #include <iostream>
 
 
@@ -10,7 +10,7 @@ namespace lofar {
 
 
 /**
- *@details FilterBankHeader 
+ *@details FilterBankHeader
  */
 FilterBankHeader::FilterBankHeader()
 {
@@ -23,7 +23,7 @@ FilterBankHeader::~FilterBankHeader()
 {
 }
 
-QString FilterBankHeader::_getString(QIODevice* device) 
+QString FilterBankHeader::_getString(QIODevice* device)
 {
      int nchars = 0;
      device->read((char*)&nchars,sizeof(nchars));

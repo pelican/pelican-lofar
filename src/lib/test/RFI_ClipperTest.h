@@ -2,8 +2,8 @@
 #define RFI_CLIPPERTEST_H
 
 #include <cppunit/extensions/HelperMacros.h>
-#include <QList>
-#include <QString>
+#include <QtCore/QList>
+#include <QtCore/QString>
 
 /**
  * @file RFI_ClipperTest.h
@@ -18,11 +18,11 @@ namespace lofar {
 
 /**
  * @class RFI_ClipperTest
- *  
+ *
  * @brief
  *   unit test for the RFI Clipper
  * @details
- * 
+ *
  */
 
 class RFI_ClipperTest : public CppUnit::TestFixture
@@ -71,4 +71,4 @@ class RFI_ClipperTest : public CppUnit::TestFixture
 
 } // namespace lofar
 } // namespace pelicanND.bp
-#endif // RFI_CLIPPERTEST_H 
+#endif // RFI_CLIPPERTEST_H

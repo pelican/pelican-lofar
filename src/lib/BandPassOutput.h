@@ -3,8 +3,8 @@
 
 
 #include "pelican/output/AbstractOutputStream.h"
-#include <QString>
-#include <QList>
+#include <QtCore/QString>
+#include <QtCore/QList>
 
 class QIODevice;
 
@@ -19,7 +19,7 @@ namespace lofar {
 
 /**
  * @class BandPassOutput
- *  
+ *
  * @configuration
  * <BandPassOutput>
  *  <file name="somefilename" />
@@ -28,7 +28,7 @@ namespace lofar {
  * @brief
  *    creates a bandpass file
  * @details
- * 
+ *
  */
 
 class BandPassOutput : public AbstractOutputStream
@@ -41,7 +41,7 @@ class BandPassOutput : public AbstractOutputStream
         void addFile(const QString& filename);
 
     protected:
-        virtual void sendStream(const QString& streamName, 
+        virtual void sendStream(const QString& streamName,
                                 const DataBlob* dataBlob);
         QList<QIODevice*> _devices;
 
@@ -53,4 +53,4 @@ PELICAN_DECLARE(AbstractOutputStream, BandPassOutput )
 
 } // namespace lofar
 } // namespace pelican
-#endif // BANDPASSOUTPUT_H 
+#endif // BANDPASSOUTPUT_H
