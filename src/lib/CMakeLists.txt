@@ -16,6 +16,7 @@ set(lib_src
     src/OutputHDF5Lofar.cpp
     src/LofarData.cpp
     src/LofarChunker.cpp
+    src/LofarPelicanClientApp.cpp
     src/LofarServerClient.cpp
     src/LofarStreamDataClient.cpp
     src/LofarStationConfiguration.cpp
