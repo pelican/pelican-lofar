@@ -33,8 +33,8 @@ int main(int /*argc*/, char** /*argv*/)
     unsigned num_subbands = 1;
     unsigned num_pols     = 1;
     unsigned num_threads  = 1;
-    unsigned num_channels = 16;
-    unsigned num_taps     = 8;
+    unsigned num_channels = 64;
+    unsigned num_taps     = 16;
 
     printf("= Channeliser setup:\n");
     printf("     num_channels = %i\n", num_channels);
@@ -49,7 +49,7 @@ int main(int /*argc*/, char** /*argv*/)
     unsigned num_freq_steps = 1000;    // Number of frequency points scanned in profile.
                                        // this controls how smooth the profile will look.
     double freq_inc         = bandwidth / num_freq_steps;
-    double sample_rate      = bandwidth * 2.0;  // Hz
+    double sample_rate      = bandwidth * 4.0;  // Hz
 
     double end_freq         = start_freq + freq_inc * num_freq_steps;
 
@@ -69,20 +69,22 @@ int main(int /*argc*/, char** /*argv*/)
     for (unsigned i = 0; i < num_channels; ++i)
         channel_profile[i].resize(num_freq_steps);
 
+    // TODO generate a noise spectrum... and test with that?
+
 
     // ==== Generate channel profile by scanning though frequencies.
     for (unsigned k = 0; k < num_freq_steps; ++k)
     {
-        // Generate a time series for the k'th frequency.
-        freqs[k] = start_freq + k * freq_inc;
 
+        // Generate a time series for the k'th frequency.
+        // The time series needs to be num_taps * num_channels long
+        freqs[k] = start_freq + k * freq_inc;
         for (unsigned i = 0, t = 0; t < num_taps; ++t)
         {
-            Complex * time_data = data.timeSeriesData(t, 0, 0);
+            Complex* time_data = data.timeSeriesData(t, 0, 0);
             for (unsigned c = 0; c < num_channels; ++c)
             {
                 double time = double(i++) / sample_rate;
-                //printf("t = %e\n", time);
                 double arg = 2.0 * M_PI * freqs[k] * time;
                 time_data[c] = Complex(cos(arg), sin(arg));
             }
