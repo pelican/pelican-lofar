@@ -138,13 +138,12 @@ inline void TimeSeriesDataSet<T>::resize(unsigned nTimeBlocks,
 }
 
 template <typename T>
-inline long TimeSeriesDataSet<T>::index( unsigned subband, unsigned numTimesPerBlock,
-                   unsigned polarisation, unsigned numPolarisations,
-                   unsigned block, unsigned numTimeBlocks
-                 )
+inline long TimeSeriesDataSet<T>::index(unsigned subband,
+        unsigned numTimesPerBlock, unsigned polarisation,
+        unsigned numPolarisations, unsigned block, unsigned numTimeBlocks)
 {
     return numTimesPerBlock * ( numTimeBlocks *
-           ( subband * numPolarisations + polarisation ) + block );
+            ( subband * numPolarisations + polarisation ) + block );
 }
 
 
@@ -186,7 +185,7 @@ class TimeSeriesDataSetC32 : public TimeSeriesDataSet<std::complex<float> >
 
     public:
         void write(const QString& fileName,
-                int s = -1, int p = -1, int b = -1) const;
+                int subband = -1, int pol = -1, int block = -1) const;
 };
 
 

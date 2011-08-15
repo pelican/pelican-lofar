@@ -82,12 +82,12 @@ install(TARGETS "lofarEmulatorDataSim" DESTINATION ${BINARY_INSTALL_DIR})
 
 # Create a non cppunit PPF test binary
 # ------------------------------------------------------------------------------
-add_executable(ppfTest src/PPFChanneliserTestMain.cpp)
-set_target_properties(ppfTest PROPERTIES
+add_executable(ppf_performance_test src/PPFChanneliserTestMain.cpp)
+set_target_properties(ppf_performance_test PROPERTIES
     COMPILE_FLAGS "${OpenMP_CXX_FLAGS}"
     LINK_FLAGS "${OpenMP_CXX_FLAGS}"
 )
-target_link_libraries(ppfTest
+target_link_libraries(ppf_performance_test
     pelican-lofar_static
     ${PELICAN_LIBRARY}
     ${QT_QTCORE_LIBRARY}
@@ -98,20 +98,18 @@ target_link_libraries(ppfTest
 
 # Test the channel profile of the PPF channeliser.
 # -----------------------------------------------------------------------------
-add_executable(ppf_channel_profile src/PPF_ChannelProfileTest.cpp)
-set_target_properties(ppf_channel_profile PROPERTIES
+add_executable(ppf_profile_test src/PPF_ProfileTest.cpp)
+set_target_properties(ppf_profile_test PROPERTIES
     COMPILE_FLAGS "${OpenMP_CXX_FLAGS}"
     LINK_FLAGS "${OpenMP_CXX_FLAGS}"
 )
-target_link_libraries(ppf_channel_profile
+target_link_libraries(ppf_profile_test
     pelican-lofar_static
     ${PELICAN_LIBRARY}
     ${QT_QTCORE_LIBRARY}
     ${QT_QTNETWORK_LIBRARY}
     ${QT_QTXML_LIBRARY}
 )
-
-
 
 
 # Copy files required for testing to the build directory.
