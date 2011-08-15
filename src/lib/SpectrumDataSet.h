@@ -26,8 +26,6 @@ namespace lofar {
  * sub-band and polarisation.
  *
  * @details
- * WARNING (15/09/2010): this object is in a little bit of flux with respect
- * to the data order. The interface should remain fixed.
  *
  * @details
  */
@@ -54,9 +52,12 @@ class SpectrumDataSet : public DataBlob
         /// Resizes the spectrum data blob to the specified dimensions.
         void resize(unsigned nTimeBlocks, unsigned nSubbands,
                 unsigned nPolarisations, unsigned nChannels);
-        void resize(const SpectrumDataSet<T>& data ) {
-            resize( data.nTimeBlocks(), data.nSubbands(), 
-                    data.nPolarisations(), data.nChannels() );
+
+
+        void resize(const SpectrumDataSet<T>& data)
+        {
+            resize(data.nTimeBlocks(), data.nSubbands(), data.nPolarisations(),
+                    data.nChannels());
         }
 
     public:
@@ -104,7 +105,7 @@ class SpectrumDataSet : public DataBlob
         /// Return an iterator over the data starting at the beginning
         typename std::vector<T>::const_iterator begin() const { return _data.begin(); }
 
-        /// Return an iterator over the data starting at the end 
+        /// Return an iterator over the data starting at the end
         typename std::vector<T>::const_iterator end() const { return _data.end(); }
 
         /// Returns a pointer to the spectrum data at index i.
@@ -125,11 +126,11 @@ class SpectrumDataSet : public DataBlob
         T const * spectrumData(unsigned b, unsigned s, unsigned p) const
         { return &_data[_index(s, p, b)]; }
 
-        /// calculates what the index should be given the block, subband, polarisation
-        //  primarily used as an aid to optimisation
-        static inline long index( unsigned subband, unsigned numSubbands,
+        /// calculates what the index should be given the block, subband,
+        /// polarisation (primarily used as an aid to optimisation).
+        static inline long index(unsigned subband, unsigned numSubbands,
                    unsigned polarisation, unsigned numPolarisations,
-                   unsigned block, unsigned numChannels );
+                   unsigned block, unsigned numChannels);
 
     private:
         /// Returns the data index for a given time block \b, sub-band \s and
@@ -176,10 +177,11 @@ template <typename T>
 inline void SpectrumDataSet<T>::resize(unsigned nTimeBlocks, unsigned nSubbands,
         unsigned nPolarisations, unsigned nChannels)
 {
-    _nSubbands = nSubbands;
+    _nSubbands      = nSubbands;
     _nPolarisations = nPolarisations;
-    _nTimeBlocks = nTimeBlocks;
-    _nChannels = nChannels;
+    _nTimeBlocks    = nTimeBlocks;
+    _nChannels      = nChannels;
+
     _data.resize(nSubbands * nPolarisations * nTimeBlocks * nChannels);
 }
 
@@ -192,27 +194,17 @@ inline int SpectrumDataSet<T>::size() const
 
 template <typename T>
 inline long SpectrumDataSet<T>::index( unsigned subband, unsigned numSubbands,
-                   unsigned polarisation, unsigned numPolarisations,
-                   unsigned block, unsigned numChannels
-                 )
+        unsigned polarisation, unsigned numPolarisations, unsigned block,
+        unsigned numChannels)
 {
-    return numChannels * ( numPolarisations * ( numSubbands * block + subband ) 
-                        + polarisation );
+    return numChannels * ( numPolarisations * ( numSubbands * block + subband )
+            + polarisation );
 }
 
 template <typename T>
 inline
 unsigned long SpectrumDataSet<T>::_index(unsigned s, unsigned p, unsigned b) const
 {
-    //  times, polarizations, subbands
-    //  return _nChannels * ( _nTimeBlocks * (s * _nPolarisations + p) + b);
-
-
-    // Polarisation, subbands, times.
-    // CHECK: this looks like
-    // block [slowest] -> subband -> pol [fastest] (ben - 15/09).
-    // NOT what is written above.
-    //return _nChannels * ( _nPolarisations * ( _nSubbands * b + s ) + p);
     return index(s, _nSubbands, p, _nPolarisations, b, _nChannels );
 }
 
@@ -244,7 +236,7 @@ class SpectrumDataSetC32 : public SpectrumDataSet<std::complex<float> >
         : SpectrumDataSet<std::complex<float> >("SpectrumDataSetC32") {}
 
         /// Destructor.
-        ~SpectrumDataSetC32() {}
+        virtual ~SpectrumDataSetC32() {}
 
     public:
         /// Write the spectrum to file.
@@ -277,7 +269,7 @@ class SpectrumDataSetStokes : public SpectrumDataSet<float>
         : SpectrumDataSet<float>("SpectrumDataSetStokes") {}
 
         /// Destructor.
-        ~SpectrumDataSetStokes() {}
+        virtual ~SpectrumDataSetStokes() {}
 
     public:
         quint64 serialisedBytes() const;

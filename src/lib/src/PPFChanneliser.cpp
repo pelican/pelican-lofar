@@ -20,16 +20,6 @@
 using std::cout;
 using std::endl;
 
-#include "timer.h"
-
-//#ifdef PPF_TIMER
-unsigned counter;
-double tMin[12];
-double tMax[12];
-double tSum[12];
-double tAve[12];
-//#endif
-
 namespace pelican {
 namespace lofar {
 
@@ -45,7 +35,7 @@ PPFChanneliser::PPFChanneliser(const ConfigNode& config)
 {
     // Get options from the XML configuration node.
     _nChannels = config.getOption("outputChannelsPerSubband", "value", "512").toUInt();
-    _nThreads = config.getOption("processingThreads", "value", "2").toUInt();
+    _nThreads  = config.getOption("processingThreads", "value", "2").toUInt();
     unsigned nTaps = config.getOption("filter", "nTaps", "8").toUInt();
     QString window = config.getOption("filter", "filterWindow", "kaiser").toLower();
 
@@ -54,7 +44,8 @@ PPFChanneliser::PPFChanneliser(const ConfigNode& config)
     _iOldestSamples.resize(_nThreads, 0);
 
     // Enforce even number of channels.
-    if (_nChannels%2) throw _err("Number of channels needs to be even.");
+    if (_nChannels%2)
+        throw _err("Number of channels needs to be even.");
 
     // Generate the FIR coefficients;
     _generateFIRCoefficients(window, nTaps);
@@ -66,15 +57,6 @@ PPFChanneliser::PPFChanneliser(const ConfigNode& config)
 
     // Create the FFTW plan.
     _createFFTWPlan(_nChannels, _fftPlan);
-
-#ifdef PPF_TIMER
-    counter = 0;
-    for (unsigned i = 0; i < _nThreads; ++i) {
-        tMin[i] = DBL_MAX;
-        tMax[i] = -DBL_MAX;
-        tSum[i] = 0.0;
-    }
-#endif
 }
 
 
@@ -108,9 +90,9 @@ void PPFChanneliser::run(const TimeSeriesDataSetC32* timeSeries,
     _checkData(timeSeries);
 
     // Get local copies of the data dimensions.
-    unsigned nSubbands = timeSeries->nSubbands();
+    unsigned nSubbands      = timeSeries->nSubbands();
     unsigned nPolarisations = timeSeries->nPolarisations();
-    unsigned nTimeBlocks = timeSeries->nTimeBlocks();
+    unsigned nTimeBlocks    = timeSeries->nTimeBlocks();
     unsigned nTimesPerBlock = timeSeries->nTimesPerBlock();
 
     // Resize the output spectra blob. (only if the number of channels changes!).
@@ -139,15 +121,11 @@ void PPFChanneliser::run(const TimeSeriesDataSetC32* timeSeries,
 
     #pragma omp parallel \
         shared(nTimeBlocks, nPolarisations, nSubbands, nFilterTaps, coeffs,\
-                tSum, tMin, tMax, tAve, timeStart, spectraStart) \
+                timeStart, spectraStart) \
         private(threadId, nThreads, start, end, workBuffer, filteredSamples, \
-                timeData/*,spectrum , elapsed, /tStart*/)
+                timeData)
     {
         threadId = omp_get_thread_num();
-
-#ifdef PPF_TIMER
-        tStart = timerSec();
-#endif
 
         nThreads = omp_get_num_threads();
         _threadProcessingIndices(start, end, nSubbands, nThreads, threadId);
@@ -156,12 +134,13 @@ void PPFChanneliser::run(const TimeSeriesDataSetC32* timeSeries,
 
         for (unsigned s = start; s < end; ++s)
         {
-            for (unsigned p = 0; p < nPolarisations; ++p) {
-                for (unsigned b = 0; b < nTimeBlocks; ++b) {
+            for (unsigned p = 0; p < nPolarisations; ++p)
+            {
+                for (unsigned b = 0; b < nTimeBlocks; ++b)
+                {
+
                     unsigned index = timeSeries->index(s, nTimesPerBlock,
                                  p, nPolarisations, b, nTimeBlocks);
-                    // Get a pointer to the time series.
-                    //timeData = timeSeries->timeSeriesData(b, s, p);
                     timeData = &timeStart[index];
 
                     // Get a pointer to the work buffer.
@@ -174,41 +153,14 @@ void PPFChanneliser::run(const TimeSeriesDataSetC32* timeSeries,
                     _filter(workBuffer, nFilterTaps, _nChannels, coeffs, filteredSamples);
 
                     // FFT the filtered sub-band data to form a new spectrum.
-                    unsigned indexSpectra = spectra->index(s, nSubbands, 
-                                                           p, nPolarisations,
-                                                           b, _nChannels );
-                    //spectrum = spectra->spectrumData(b, s ,p);
-                    //_fft(filteredSamples, spectrum);
+                    unsigned indexSpectra = spectra->index(s, nSubbands,
+                            p, nPolarisations, b, _nChannels);
                     _fft(filteredSamples, &spectraStart[indexSpectra]);
                 }
             }
         }
 
-#ifdef PPF_TIMER
-        tEnd = timerSec();
-        elapsed = tEnd - tStart;
-        tSum[threadId] += elapsed;
-        if (elapsed > tMax[threadId]) tMax[threadId] = elapsed;
-        if (elapsed < tMin[threadId]) tMin[threadId] = elapsed;
-        tAve[threadId] = (elapsed + counter * tAve[threadId]) / (counter + 1);
-#endif
-
     } // end of parallel region.
-
-#ifdef PPF_TIMER
-    cout << "-------------------------------------------------" << endl;
-    cout << "Iteration " << counter << endl;
-    for (unsigned i = 0; i < _nThreads; ++i) {
-        cout << "  Thread " << i << endl;
-        cout << "    Sum = " << tSum[i] << endl;
-        cout << "    Min = " << tMin[i] << endl;
-        cout << "    Max = " << tMax[i] << endl;
-        cout << "    Ave = " << tAve[i] << endl;
-    }
-    cout << endl;
-    ++counter;
-#endif
-
 }
 
 
@@ -298,9 +250,11 @@ void PPFChanneliser::_filter(const Complex* sampleBuffer, unsigned nTaps,
     float re, im, coeff;
     unsigned tId = omp_get_thread_num();
 
-    for (unsigned i = 0, t = 0; t < nTaps; ++t) {
+    for (unsigned i = 0, t = 0; t < nTaps; ++t)
+    {
         iBuffer = ((_iOldestSamples[tId] + t) % nTaps) * nChannels;
-        for (unsigned c = 0; c < nChannels; ++c) {
+        for (unsigned c = 0; c < nChannels; ++c)
+        {
             idx = iBuffer + c;
             coeff = coeffs[i];
             re = sampleBuffer[idx].real() * coeff;
@@ -326,7 +280,8 @@ void PPFChanneliser::_threadProcessingIndices(unsigned& start,
         throw _err("threadProcessingIndices(): threadId '%1' out of range for"
                 " nThreads = %2.").arg(threadId).arg(nThreads);
 
-    if (threadId >= nValues) {
+    if (threadId >= nValues)
+    {
         start = end = 0;
         return;
     }
@@ -351,8 +306,10 @@ unsigned PPFChanneliser::_setupWorkBuffers(unsigned nSubbands,
 {
     unsigned bufferSize = nChannels * nTaps;
     _workBuffer.resize(nSubbands * nPolarisations);
-    for (unsigned i = 0, s = 0; s < nSubbands; ++s) {
-        for (unsigned p = 0; p < nPolarisations; ++p) {
+    for (unsigned i = 0, s = 0; s < nSubbands; ++s)
+    {
+        for (unsigned p = 0; p < nPolarisations; ++p)
+        {
             _workBuffer[i].resize(bufferSize, Complex(0.0, 0.0));
             i++;
         }
