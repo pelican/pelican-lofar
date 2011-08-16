@@ -1,12 +1,13 @@
 #ifndef PPF_CHANNELISER_TEST_H_
 #define PPF_CHANNELISER_TEST_H_
 
-#include <cppunit/extensions/HelperMacros.h>
-#include "pelican/utility/ConfigNode.h"
-
 /**
  * @file PPFChanneliserTest.h
  */
+
+#include <cppunit/extensions/HelperMacros.h>
+
+#include <QtCore/QString>
 
 namespace pelican {
 namespace lofar {
@@ -15,10 +16,7 @@ namespace lofar {
  * @class PPFChanneliserTest
  *
  * @brief
- *
- * @details
- * Performs unit tests on the polyphase channeliser module using the
- * CppUnit framework.
+ * CppUnit testing for the PPF channeliser module.
  */
 
 class PPFChanneliserTest : public CppUnit::TestFixture
@@ -30,20 +28,18 @@ class PPFChanneliserTest : public CppUnit::TestFixture
     public:
         /// Register test methods.
         CPPUNIT_TEST_SUITE(PPFChanneliserTest);
-        //CPPUNIT_TEST(test_run);
+        CPPUNIT_TEST(test_run);
         CPPUNIT_TEST(test_channelProfile);
-        //CPPUNIT_TEST(test_makeSpectrum);
-
-        //CPPUNIT_TEST(test_configuration);
-        //CPPUNIT_TEST(test_threadAssign);
-        //CPPUNIT_TEST(test_updateBuffer);
-        //CPPUNIT_TEST(test_filter);
-        //CPPUNIT_TEST(test_fft);
+        CPPUNIT_TEST(test_makeSpectrum);
+        CPPUNIT_TEST(test_configuration);
+        CPPUNIT_TEST(test_threadAssign);
+        CPPUNIT_TEST(test_updateBuffer);
+        CPPUNIT_TEST(test_filter);
+        CPPUNIT_TEST(test_fft);
         CPPUNIT_TEST_SUITE_END();
 
     public:
         void setUp();
-        void tearDown() {}
 
         /// Test module configuration.
         void test_configuration();
@@ -75,7 +71,7 @@ class PPFChanneliserTest : public CppUnit::TestFixture
                 unsigned nTaps, const QString& windowType = "kaiser");
 
     private:
-        bool _verbose;
+        bool     _verbose;
         unsigned _nBlocks;
         unsigned _nSubbands;
         unsigned _nPols;
@@ -83,9 +79,8 @@ class PPFChanneliserTest : public CppUnit::TestFixture
         unsigned _nTaps;
 };
 
-
 } // namespace lofar
 } // namespace pelican
 
-
 #endif // PPF_CHANNELISER_TEST_H_
+

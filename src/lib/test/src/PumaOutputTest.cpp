@@ -30,7 +30,7 @@ PumaOutputTest::~PumaOutputTest()
 void PumaOutputTest::setUp()
 {
     _filename = QDir::tempPath() + "/_PumaOutputTest_";
-#ifdef QT_VERSION >= 0x040400
+#if QT_VERSION >= 0x040400
        _filename += QString().setNum( QCoreApplication::applicationPid() );
 #endif
     int argc = 1;

@@ -65,6 +65,12 @@ int main(int /*argc*/, char** /*argv*/)
     t.num_taps     = 8;
     t.test_channel_profiles();
 
+    // TODO: need to think about best way to visualise the results here.
+    // i.e. plot channel profiles or plot frequency response in each channel.
+    // white noise tests?
+
+    // Combine testing here with performance tests?
+
     return 0;
 }
 
@@ -85,7 +91,7 @@ void PPF_test::test_channel_profiles()
     double start_freq  = -(bandwidth / 2.0);   // Hz
     unsigned num_freq_steps = 512.0;
     double freq_inc    = bandwidth / num_freq_steps;
-    double end_freq    = start_freq + freq_inc * num_freq_steps;
+//    double end_freq    = start_freq + freq_inc * num_freq_steps;
     double sample_rate = bandwidth;  // Hz
 
     // Setup input and output data arrays.

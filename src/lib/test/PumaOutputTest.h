@@ -38,8 +38,8 @@ class PumaOutputTest : public CppUnit::TestFixture
         void test_configuration();
 
     public:
-        PumaOutputTest(  );
-        ~PumaOutputTest();
+        PumaOutputTest();
+        virtual ~PumaOutputTest();
 
     private:
       QString _filename;
