@@ -6,10 +6,10 @@
 #include "BinMap.h"
 #include "Range.h"
 
-#include <QVector>
-#include <QHash>
-#include <QPair>
-#include <QSet>
+#include <QtCore/QVector>
+#include <QtCore/QHash>
+#include <QtCore/QPair>
+#include <QtCore/QSet>
 
 /**
  * @file BandPass.h
@@ -21,7 +21,7 @@ namespace lofar {
 
 /**
  * @class BandPass
- *  
+ *
  * @brief
  *    Interface to the stations bandpass
  * @details
@@ -39,7 +39,7 @@ class BandPass : public DataBlob
         ~BandPass();
         void setData(const BinMap&,const QVector<float>& params );
         void setRMS(float);
-        /// set a new median and rescale the polynomial 
+        /// set a new median and rescale the polynomial
         //  appropriately. Does not rebin the hash
         void setMedian(float);
 
@@ -108,4 +108,4 @@ PELICAN_DECLARE_DATABLOB(BandPass)
 } // namespace pelican
 
 
-#endif // BANDPASS_H 
+#endif // BANDPASS_H

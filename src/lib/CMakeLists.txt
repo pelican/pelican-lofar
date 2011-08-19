@@ -1,7 +1,6 @@
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
-# Create the pelican-lofar library and set its install target.
-# ------------------------------------------------------------------------------
+# === Create the pelican-lofar library and set its install target.
 set(lib_src
     src/AdapterTimeSeriesDataSet.cpp
     src/BinMap.cpp
@@ -10,11 +9,13 @@ set(lib_src
     src/BandPassOutput.cpp
     src/BandPassRecorder.cpp
     src/BlobStatistics.cpp
+    src/EmbraceChunker.cpp
     src/FilterBankHeader.cpp
     src/FilterBankAdapter.cpp
     src/OutputHDF5Lofar.cpp
     src/LofarData.cpp
     src/LofarChunker.cpp
+    src/LofarPelicanClientApp.cpp
     src/LofarServerClient.cpp
     src/LofarStreamDataClient.cpp
     src/LofarStationConfiguration.cpp
@@ -23,6 +24,7 @@ set(lib_src
     src/PumaOutput.cpp
     src/PolyphaseCoefficients.cpp
     src/RFI_Clipper.cpp
+    src/RTMS_Data.cpp
     src/SpectrumDataSet.cpp
     src/TimeSeriesDataSet.cpp
     src/PPFChanneliser.cpp
@@ -33,7 +35,7 @@ set(lib_src
     src/WeightedSpectrumDataSet.cpp
 )
 
-# Create pelican-lofar library.
+# === Create pelican-lofar library.
 add_library(pelican-lofar_static STATIC ${lib_src})
 set_target_properties(pelican-lofar_static PROPERTIES CLEAN_DIRECT_OUTPUT 1)
 set_target_properties(pelican-lofar_static PROPERTIES OUTPUT_NAME pelican-lofar)
@@ -66,9 +68,7 @@ target_link_libraries(pelican-lofar ${pelican-lofar_externals})
 file(GLOB public_headers RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} "*.h")
 install(FILES ${public_headers} DESTINATION "${INCLUDE_INSTALL_DIR}")
 
-
-# Create the blob client binary.
-# ------------------------------------------------------------------------------
+# === Create the blob client binary.
 add_executable(blobClient blobClientMain.cpp)
 target_link_libraries(blobClient
     pelican-lofar_static

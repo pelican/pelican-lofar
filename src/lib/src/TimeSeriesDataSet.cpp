@@ -42,38 +42,41 @@ void TimeSeriesDataSetC32::deserialise(QIODevice& device, QSysInfo::Endian) {
      float real, imag;
      for( int i=0; i < size; ++i ) {
          in >> real;
-         in >> imag; 
+         in >> imag;
         _data[i] = std::complex<float>(real,imag);
      }
 }
 
 void TimeSeriesDataSetC32::write(const QString& fileName,
-        int s, int p, int b) const
+        int subband, int pol, int block) const
 {
     QFile file(fileName);
     if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) return;
 
     const std::complex<float> * times = 0;
 
-    unsigned sStart = (s == -1) ? 0 : s;
-    unsigned sEnd = (s == -1) ? nSubbands() : s + 1;
-    unsigned pStart = (p == -1) ? 0 : p;
-    unsigned pEnd = (p == -1) ? nPolarisations() : p + 1;
-    unsigned bStart = (b == -1) ? 0 : b;
-    unsigned bEnd = (b == -1) ? nTimeBlocks() : b + 1;
+    unsigned subband_start = (subband == -1) ? 0 : subband;
+    unsigned subband_end   = (subband == -1) ? nSubbands() : subband + 1;
+    unsigned pol_start     = (pol == -1)     ? 0 : pol;
+    unsigned pol_end       = (pol == -1)     ? nPolarisations() : pol + 1;
+    unsigned block_start   = (block == -1)   ? 0 : block;
+    unsigned block_end     = (block == -1)   ? nTimeBlocks() : block + 1;
 
     QTextStream out(&file);
-    for (unsigned s = sStart; s < sEnd; ++s) {
-        for (unsigned p = pStart; p < pEnd; ++p) {
-            for (unsigned b = bStart; b < bEnd; ++b) {
-
+    for (unsigned s = subband_start; s < subband_end; ++s)
+    {
+        for (unsigned p = pol_start; p < pol_end; ++p)
+        {
+            for (unsigned b = block_start; b < block_end; ++b)
+            {
                 // Get the pointer to the time series.
                 times = timeSeriesData(b, s, p);
 
                 for (unsigned t = 0; t < nTimesPerBlock(); ++t)
                 {
-                    out << QString::number(times[t].real(), 'g', 8) << " ";
-                    out << QString::number(times[t].imag(), 'g', 8);
+                    out << b * nTimesPerBlock() + t << " ";
+                    out << QString::number(times[t].real(), 'g', 6) << " ";
+                    out << QString::number(times[t].imag(), 'g', 6);
                     out << endl;
                 }
                 //out << endl;

@@ -1,5 +1,5 @@
 #include "BandPassRecorder.h"
-#include <QVector>
+#include <QtCore/QVector>
 #include <stdlib.h>
 //#include <clapack.h>
 #include "BandPass.h"
@@ -10,18 +10,18 @@ extern "C" void sgels_(const char*, const int*, const int*,const int*, float*,co
 namespace pelican {
 namespace lofar {
 
-int BandPassRecorder::sgels(int n, int m, int nrhs, 
-                        float *A, int lda, float *B, int ldb, 
+int BandPassRecorder::sgels(int n, int m, int nrhs,
+                        float *A, int lda, float *B, int ldb,
                         float *workSpace, int* work )
 {
     int info;
-    sgels_((const char*)'N', &n, &m, &nrhs, A, &lda, B, &ldb, workSpace, work, 
+    sgels_((const char*)'N', &n, &m, &nrhs, A, &lda, B, &ldb, workSpace, work,
             &info);
     return info;
 }
 
 /**
- *@details BandPassRecorder 
+ *@details BandPassRecorder
  */
 BandPassRecorder::BandPassRecorder( const ConfigNode& config )
     : AbstractModule( config )
@@ -85,9 +85,9 @@ bool BandPassRecorder::run( SpectrumDataSetStokes* stokesI, BandPass* bp ) {
         for (unsigned t = 0; t < nSamples; ++t) {
             for (unsigned s = 0; s < nSubbands; ++s) {
                 int bin = (s * nChannels) - 1;
-                long index = stokesI->index(s, nSubbands, 
+                long index = stokesI->index(s, nSubbands,
                         0, nPolarisations,
-                        t, nChannels ); 
+                        t, nChannels );
                 for (unsigned c = 0; c < nChannels; ++c) {
                     ++bin;
                     _sum[bin+c] += I[index + c];
@@ -108,7 +108,7 @@ bool BandPassRecorder::run( SpectrumDataSetStokes* stokesI, BandPass* bp ) {
         do {
             _polyFit(  &_sum[0], nBins );
             // trim away outliers and refit
-            // points > 2sigma 
+            // points > 2sigma
             float rsum = 0.0f;
             float rsumSquared = 0.0f;
             for (unsigned s = 0; s < nBins; ++s) {
@@ -149,38 +149,38 @@ float BandPassRecorder::_theFit(float v) const
 
 void BandPassRecorder::_polyFit( float* y, int nDataPoints )
 {
-    
+
     // make a copy of the input data
     for( int t=0; t < nDataPoints; ++t ) {
         _valueMatrix[t] = y[t];
     }
     int nrhs = 1, lda = nDataPoints, ldb = nDataPoints;
-     
+
     // Workspace and status variables:
     float wkopt;
     float *work; //= workSize;
     int lwork = -1;
     int info;
-    info = sgels( nDataPoints, _polyDegree, nrhs, 
-            &_freqMatrix[0], lda, &_valueMatrix[0], ldb, 
+    info = sgels( nDataPoints, _polyDegree, nrhs,
+            &_freqMatrix[0], lda, &_valueMatrix[0], ldb,
             &wkopt, &lwork );
     lwork = (int)wkopt;
     work = (float*)malloc( lwork*sizeof(float) );
 
     /* Solve the equations A*X = B */
-    info = sgels( nDataPoints, _polyDegree, nrhs, 
-            &_freqMatrix[0], lda, &_valueMatrix[0], ldb, 
+    info = sgels( nDataPoints, _polyDegree, nrhs,
+            &_freqMatrix[0], lda, &_valueMatrix[0], ldb,
             work, &lwork );
     free(work);
 
     /* Check for the full rank */
     if( info > 0 ) {
-            std::cerr << "The diagonal element %i of the triangular factor " 
+            std::cerr << "The diagonal element %i of the triangular factor "
                       << info;
             std::cerr << "of A is zero, so that A does not have full rank;\n"
                       << "the least squares solution could not be computed.\n";
             exit( 1 );
-    } 
+    }
     // answer has overwritten _valueMatrix
     //std::vector<float>(_polyDegree) w; w.assign(_valueMatrix,_valueMatrix+_polyDegree);
     _fit.assign(&_valueMatrix[0],&_valueMatrix[0]+_polyDegree);

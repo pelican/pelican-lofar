@@ -13,12 +13,7 @@
 
 #include <fftw3.h>
 
-using std::vector;
-using std::cout;
-using std::cerr;
-using std::endl;
-
-//#define PPF_TIMER
+using namespace std;
 
 namespace pelican {
 
@@ -98,12 +93,12 @@ class PPFChanneliser : public AbstractModule
         void _fft(const Complex* samples, Complex* spectrum);
 
         /// Returns the sub-band ID range to be processed.
-        void _threadProcessingIndices(unsigned& start, unsigned& end,
+        void _assign_threads(unsigned& start, unsigned& end,
                 unsigned nSubbands, unsigned nThreads, unsigned threadId);
 
         /// Set up processing buffers.
-        unsigned _setupWorkBuffers(unsigned nSubbands,
-                unsigned nPolariations, unsigned nChannels, unsigned nTaps);
+        unsigned _setupWorkBuffers(unsigned nSubbands, unsigned nPolariations,
+                unsigned nChannels, unsigned nTaps);
 
         /// Create the FFTW plan for use with the channeliser.
         void _createFFTWPlan(unsigned nChannels, fftwf_plan& plan);
@@ -143,7 +138,6 @@ inline void PPFChanneliser::_fft(const Complex* samples, Complex* spectrum)
 {
     fftwf_execute_dft(_fftPlan, (fftwf_complex*)samples, (fftwf_complex*)spectrum);
 }
-
 
 // Declare this class as a pelican module.
 PELICAN_DECLARE_MODULE(PPFChanneliser)

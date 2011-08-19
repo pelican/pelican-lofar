@@ -1,7 +1,7 @@
 #include "PumaOutputTest.h"
-#include <QFile>
-#include <QDir>
-#include <QCoreApplication>
+#include <QtCore/QFile>
+#include <QtCore/QDir>
+#include <QtCore/QCoreApplication>
 #include "PumaOutput.h"
 #include "pelican/utility/ClientTestServer.h"
 #include "pelican/utility/ConfigNode.h"
@@ -13,7 +13,7 @@ namespace lofar {
 
 CPPUNIT_TEST_SUITE_REGISTRATION( PumaOutputTest );
 /**
- *@details PumaOutputTest 
+ *@details PumaOutputTest
  */
 PumaOutputTest::PumaOutputTest()
     : CppUnit::TestFixture()
@@ -30,7 +30,7 @@ PumaOutputTest::~PumaOutputTest()
 void PumaOutputTest::setUp()
 {
     _filename = QDir::tempPath() + "/_PumaOutputTest_";
-#ifdef QT_VERSION >= 0x040400 
+#if QT_VERSION >= 0x040400
        _filename += QString().setNum( QCoreApplication::applicationPid() );
 #endif
     int argc = 1;
@@ -61,7 +61,7 @@ void PumaOutputTest::test_configuration()
       // Configuration with a file
       // Expect:
       // File to be generated
-      QString xml = "<PumaOutput>\n" 
+      QString xml = "<PumaOutput>\n"
                     "<file name=\"" + _filename + "\" />\n"
                     "</PumaOutput>";
       ConfigNode c;
@@ -79,8 +79,8 @@ void PumaOutputTest::test_configuration()
       // Expect:
       // Attempt to connect to host
       ClientTestServer testHost;
-      QString xml = "<PumaOutput>\n" 
-                    "<conncetion host=\"" + testHost.hostname() + "\" port=\"" 
+      QString xml = "<PumaOutput>\n"
+                    "<conncetion host=\"" + testHost.hostname() + "\" port=\""
                     + testHost.port() + "\" />\n"
                     "</PumaOutput>";
       ConfigNode c;
