@@ -3,11 +3,10 @@
 
 #include "pelican/core/AbstractStreamAdapter.h"
 #include "SpectrumDataSet.h"
-#include "file_handler.h"
 #include <complex>
 
-using namespace pelican;
-using namespace pelican::lofar;
+namespace pelican {
+namespace lofar {
 
 class SigprocAdapter: public AbstractStreamAdapter
 {
@@ -40,5 +39,8 @@ class SigprocAdapter: public AbstractStreamAdapter
 };
 
 PELICAN_DECLARE_ADAPTER(SigprocAdapter)
+
+} // lofar
+} // namespace
 
 #endif // SigprocAdapter_H
