@@ -1,5 +1,3 @@
-#include "test/PPFChanneliserTest.h"
-
 #include "PPFChanneliser.h"
 #include "SpectrumDataSet.h"
 #include "TimeSeriesDataSet.h"

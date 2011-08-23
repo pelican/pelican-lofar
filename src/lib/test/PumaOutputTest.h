@@ -1,6 +1,6 @@
 #ifndef PUMAOUTPUTTEST_H
 #define PUMAOUTPUTTEST_H
-#include <QString>
+#include <QtCore/QString>
 #include "SpectrumDataSet.h"
 class QCoreApplication;
 
@@ -16,11 +16,11 @@ namespace lofar {
 
 /**
  * @class PumaOutputTest
- *  
+ *
  * @brief
- * 
+ *
  * @details
- * 
+ *
  */
 
 class PumaOutputTest : public CppUnit::TestFixture
@@ -38,8 +38,8 @@ class PumaOutputTest : public CppUnit::TestFixture
         void test_configuration();
 
     public:
-        PumaOutputTest(  );
-        ~PumaOutputTest();
+        PumaOutputTest();
+        virtual ~PumaOutputTest();
 
     private:
       QString _filename;
@@ -49,4 +49,4 @@ class PumaOutputTest : public CppUnit::TestFixture
 
 } // namespace lofar
 } // namespace pelican
-#endif // PUMAOUTPUTTEST_H 
+#endif // PUMAOUTPUTTEST_H

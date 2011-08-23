@@ -1,6 +1,6 @@
 #include "SigprocAdapter.h"
 #include "LofarTypes.h"
-#include <QFile>
+#include <QtCore/QFile>
 
 namespace pelican {
 namespace lofar {

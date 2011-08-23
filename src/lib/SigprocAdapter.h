@@ -1,8 +1,9 @@
-#ifndef SigprocAdapter_H
-#define SigprocAdapter_H
+#ifndef SIGPROC_ADAPTER_H_
+#define SIGPROC_ADAPTER_H_
 
 #include "pelican/core/AbstractStreamAdapter.h"
 #include "SpectrumDataSet.h"
+//#include "file_handler.h" // FIXME what is this header?! (where from?)
 #include <complex>
 
 namespace pelican {
@@ -43,4 +44,4 @@ PELICAN_DECLARE_ADAPTER(SigprocAdapter)
 } // lofar
 } // namespace
 
-#endif // SigprocAdapter_H
+#endif // SIGPROC_ADAPTER_H_

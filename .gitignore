@@ -1,0 +1,8 @@
+# Eclipse project files
+src/.cproject
+src/.project
+.project
+.cproject
+
+# cmake build directory
+build

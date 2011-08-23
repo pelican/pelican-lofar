@@ -11,8 +11,6 @@
 
 #include <QtCore/QString>
 
-#include "pelican/utility/memCheck.h"
-
 namespace pelican {
 namespace lofar {
 

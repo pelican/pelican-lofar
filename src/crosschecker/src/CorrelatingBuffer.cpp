@@ -1,4 +1,5 @@
 #include "CorrelatingBuffer.h"
+#include "pelican/output/Stream.h"
 
 
 namespace pelican {
@@ -8,16 +9,11 @@ namespace lofar {
 
 /**
  *@details CorrelatingBuffer 
+ *    this is a proviate contructor, use newBuffer()
  */
-CorrelatingBuffer::CorrelatingBuffer( const QString& name, QMap<QString, CorrelatingBuffer*> bufferContainer, 
-                                      QObject* parent )
-    : QObject(parent), _name(name) 
+CorrelatingBuffer::CorrelatingBuffer( CorrelatedBufferManager* manager, QObject* parent )
+    : QObject(parent), _manager(manager)
 {
-       _correlatedBuffers = bufferContainer; 
-        _correlatedBuffers.insert(name,this);
-
-       // TODO initialise _delta
-       _delta = 0;
 }
 
 /**
@@ -30,39 +26,14 @@ CorrelatingBuffer::~CorrelatingBuffer()
 void CorrelatingBuffer::add(RTMS_Data& data) 
 {
      _buffer.insert(data.startTime(), data );
-     QMap<QString, RTMS_Data> corr = findCorrelated( data );
+     emit dataAdded(data);
+/*
+     QMap<QString, RTMS_Data> corr = _manager->findCorrelated( data );
      if( corr.size() > 0  ) {
         corr.insert(_name,data);
-        emit foundCorrelation(corr);
         doSomething(corr);
      }
-}
-
-QMap<QString, RTMS_Data> CorrelatingBuffer::findCorrelated(const RTMS_Data& d) const
-{
-     QMap<QString, RTMS_Data> data;
-     Timestamp_T startTime = d.startTime();
-     Timestamp_T endTime = d.endTime();
-     // iterate over all other telescope buffers
-     foreach( CorrelatingBuffer* buffer, _correlatedBuffers) {
-        if( buffer != this ) {
-            foreach( const RTMS_Data& bd, buffer->_buffer ) {
-                // check times of the two RTMS data to see if
-                // they are correlated
-                // TODO improve me
-                if( ( bd.startTime() - _delta < startTime 
-                        && startTime < bd.endTime() + _delta)
-                    || ( startTime - _delta < bd.startTime() 
-                        && bd.startTime() < endTime + _delta)
-                  )
-                {
-                     // we have a correlation! Add it to our return data
-                     data.insert(buffer->_name,bd);
-                }
-            }
-        }
-     }
-     return data;
+*/
 }
 
 void CorrelatingBuffer::doSomething(const QMap<QString, RTMS_Data>) const
@@ -70,5 +41,10 @@ void CorrelatingBuffer::doSomething(const QMap<QString, RTMS_Data>) const
      // TODO
 }
 
+void CorrelatingBuffer::newData(const Stream& stream)
+{
+    Q_ASSERT( stream.type() == "RTMS_Data" );
+    add(*(static_cast<RTMS_Data*>(stream.data().get())));
+}
 } // namespace lofar
 } // namespace pelican

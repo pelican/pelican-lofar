@@ -1,10 +1,10 @@
 #ifndef CORRELATINGBUFFER_H
 #define CORRELATINGBUFFER_H
 
-#include <QObject>
-#include <QString>
-#include <QMap>
-#include <QHash>
+#include <QtCore/QObject>
+#include <QtCore/QString>
+#include <QtCore/QMap>
+#include <QtCore/QHash>
 #include "../lib/RTMS_Data.h"
 
 /**
@@ -12,17 +12,19 @@
  */
 
 namespace pelican {
+class Stream;
 
 namespace lofar {
+class CorrelatedBufferManager;
 
 /**
  * @class CorrelatingBuffer
- *  
+ *
  * @brief
  *     Takes RTMS datablobs and correlates against the timestamps with
  *     other RTMS datablobs
  * @details
- * 
+ *
  */
 
 class RTMS_Data;
@@ -31,27 +33,32 @@ class CorrelatingBuffer : public QObject
 {
     Q_OBJECT
 
-    public:
-        CorrelatingBuffer( const QString& name, QMap<QString, CorrelatingBuffer*> buffers, QObject* parent = 0 );
-        ~CorrelatingBuffer();
+    private:
+        CorrelatingBuffer( CorrelatedBufferManager* _manager, 
+                           QObject* parent = 0 );
 
+    public:
+        ~CorrelatingBuffer();
         void add(RTMS_Data&);
-        QMap<QString, RTMS_Data> findCorrelated(const RTMS_Data&) const;
 
     protected:
         void doSomething(const QMap<QString, RTMS_Data>) const;
 
     signals:
-        void foundCorrelation(QMap<QString, RTMS_Data>);
+        void dataAdded(const RTMS_Data&);
+
+    protected slots:
+        void newData(const Stream& stream);
 
     private:
-        typedef long Timestamp_T; 
+        typedef long Timestamp_T;
         QString _name;
         QHash<Timestamp_T,RTMS_Data> _buffer;
-        int _delta;
-        QMap<QString, CorrelatingBuffer*> _correlatedBuffers;
+        CorrelatedBufferManager* _manager;
+
+    friend class CorrelatedBufferManager;
 };
 
 } // namespace lofar
 } // namespace pelican
-#endif // CORRELATINGBUFFER_H 
+#endif // CORRELATINGBUFFER_H

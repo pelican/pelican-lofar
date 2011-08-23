@@ -1,38 +1,37 @@
-include_directories(${CMAKE_CURRENT_SOURCE_DIR} ..)
+#
+# pelican-lofar/lib/test/CMakeLists.txt
+#
 
-# Create test utility library.
-# ------------------------------------------------------------------------------
+include_directories(${CMAKE_CURRENT_SOURCE_DIR})
+
+# ==== Create test utility library.
 set(lofarTestLib_src
     src/LofarUdpEmulator.cpp
     src/LofarEmulatorDataSim.cpp
 )
 add_library(lofarTestLib STATIC ${lofarTestLib_src})
 
-
-# Create test binary and add it to the cmake test framework.
-# ------------------------------------------------------------------------------
+# ==== Create test binary and add it to the cmake test framework.
 set(lofarTest_src
-    src/libTest.cpp
-    src/BinMapTest.cpp
-    src/BandPassTest.cpp
-    src/RFI_ClipperTest.cpp
-    src/PumaOutputTest.cpp
-    src/DataStreamingTest.cpp
-    ##src/FilterBankAdapterTest.cpp
-    ###src/PelicanBlobClientTest.cpp
-    src/PolyphaseCoefficientsTest.cpp
+    src/CppUnitMain.cpp
     src/AdapterTimeSeriesDataSetTest.cpp
-    src/SpectrumDataSetTest.cpp
-    src/PPFChanneliserTest.cpp
+    src/BandPassTest.cpp
+    src/BinMapTest.cpp
+    src/DataStreamingTest.cpp
+    #src/FilterBankAdapterTest.cpp
     src/LofarChunkerTest.cpp
     src/LofarDataSplittingChunkerTest.cpp
+    #src/PelicanBlobClientTest.cpp
+    src/PPF_ChanneliserTest.cpp
+    src/PPF_CoefficientsTest.cpp
+    src/PumaOutputTest.cpp
+    src/RFI_ClipperTest.cpp
+    src/SpectrumDataSetTest.cpp
 )
-
 add_executable(lofarTest ${lofarTest_src})
-set_target_properties(lofarTest PROPERTIES
+set_target_properties(lofarTest PROPERTIES 
     COMPILE_FLAGS "${OpenMP_CXX_FLAGS}"
-    LINK_FLAGS "${OpenMP_CXX_FLAGS}"
-)
+    LINK_FLAGS "${OpenMP_CXX_FLAGS}")
 target_link_libraries(lofarTest
     pelican-lofar_static
     lofarTestLib
@@ -43,14 +42,11 @@ target_link_libraries(lofarTest
     ${CPPUNIT_LIBRARIES}
     ${QT_QTCORE_LIBRARY}
     ${QT_QTNETWORK_LIBRARY}
-    ${QT_QTXML_LIBRARY}
-)
-
+    ${QT_QTXML_LIBRARY})
 add_test(lofarTest lofarTest)
 
 
-# Create the lofar udp emulator binary.
-# ------------------------------------------------------------------------------
+# ==== Create the lofar udp emulator binary.
 add_executable(lofarEmulator src/lofarEmulatorMain.cpp)
 target_link_libraries(lofarEmulator
     pelican-lofar_static
@@ -61,8 +57,7 @@ target_link_libraries(lofarEmulator
     lofarTestLib
 )
 
-# Create the lofar binary which sends simulated data.
-# ------------------------------------------------------------------------------
+# ==== Create the lofar binary which sends simulated data.
 add_executable(lofarEmulatorDataSim src/lofarEmulatorDataSimMain.cpp)
 target_link_libraries(lofarEmulatorDataSim
     pelican-lofar_static
@@ -74,16 +69,13 @@ target_link_libraries(lofarEmulatorDataSim
 )
 install(TARGETS "lofarEmulatorDataSim" DESTINATION ${BINARY_INSTALL_DIR})
 
-
-
-# Create a non cppunit PPF test binary
-# ------------------------------------------------------------------------------
-add_executable(ppfTest src/PPFChanneliserTestMain.cpp)
-set_target_properties(ppfTest PROPERTIES
+# ==== Create a non cppunit PPF test binary
+add_executable(ppf_performance_test src/PPF_PerformanceTest.cpp)
+set_target_properties(ppf_performance_test PROPERTIES
     COMPILE_FLAGS "${OpenMP_CXX_FLAGS}"
     LINK_FLAGS "${OpenMP_CXX_FLAGS}"
 )
-target_link_libraries(ppfTest
+target_link_libraries(ppf_performance_test
     pelican-lofar_static
     ${PELICAN_LIBRARY}
     ${QT_QTCORE_LIBRARY}
@@ -91,9 +83,20 @@ target_link_libraries(ppfTest
     ${QT_QTXML_LIBRARY}
 )
 
+# ==== Test the channel profile of the PPF channeliser.
+add_executable(ppf_profile_test src/PPF_ProfileTest.cpp)
+set_target_properties(ppf_profile_test PROPERTIES
+    COMPILE_FLAGS "${OpenMP_CXX_FLAGS}"
+    LINK_FLAGS "${OpenMP_CXX_FLAGS}"
+)
+target_link_libraries(ppf_profile_test
+    pelican-lofar_static
+    ${PELICAN_LIBRARY}
+    ${QT_QTCORE_LIBRARY}
+    ${QT_QTNETWORK_LIBRARY}
+    ${QT_QTXML_LIBRARY}
+)
 
-# Copy files required for testing to the build directory.
-# ------------------------------------------------------------------------------
+# ==== Copy files required for testing to the build directory.
 include(${CMAKE_SOURCE_DIR}/cmake/CopyFiles.cmake)
 copy_files(${CMAKE_CURRENT_SOURCE_DIR}/data/*.* . testLibFiles)
-

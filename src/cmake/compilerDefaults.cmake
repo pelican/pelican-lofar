@@ -12,6 +12,15 @@ if(NOT CMAKE_BUILD_TYPE MATCHES "^RELEASE|DEBUG|[Rr]elease|[Dd]ebug|[Pp]rofile|P
     message(FATAL_ERROR "## Unknown build type. Select 'debug','release' or 'profile'")
 endif(NOT CMAKE_BUILD_TYPE MATCHES "^RELEASE|DEBUG|[Rr]elease|[Dd]ebug|[Pp]rofile|PROFILE$")
 
+message("*****************************************************************")
+if (CMAKE_BUILD_TYPE MATCHES RELEASE|[Rr]elease)
+    message("** NOTE: Building in release mode!")
+else ()
+    message("** NOTE: Building in debug mode!")
+endif()
+message("*****************************************************************")
+
+
 #=== Set compiler flags.
 if(CMAKE_COMPILER_IS_GNUCXX)
     set(CMAKE_CXX_FLAGS_RELEASE "-O3 -DQT_NO_DEBUG -DNDEBUG")

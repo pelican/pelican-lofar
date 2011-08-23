@@ -2,7 +2,7 @@
 #define FILTERBANKHEADER_H
 
 class QIODevice;
-#include <QString>
+#include <QtCore/QString>
 
 /**
  * @file FilterBankHeader.h
@@ -14,11 +14,11 @@ namespace lofar {
 
 /**
  * @class FilterBankHeader
- *  
+ *
  * @brief
  *    FilterBank Format Header information
  * @details
- * 
+ *
  */
 
 class FilterBankHeader
@@ -65,4 +65,4 @@ class FilterBankHeader
 
 } // namespace lofar
 } // namespace pelican
-#endif // FILTERBANKHEADER_H 
+#endif // FILTERBANKHEADER_H

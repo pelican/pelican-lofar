@@ -1,7 +1,7 @@
 #include "BandPassTest.h"
 #include "BinMap.h"
 #include "BandPass.h"
-#include <QVector>
+#include <QtCore/QVector>
 
 
 namespace pelican {
@@ -10,7 +10,7 @@ namespace lofar {
 
 CPPUNIT_TEST_SUITE_REGISTRATION( BandPassTest );
 /**
- *@details BandPassTest 
+ *@details BandPassTest
  */
 BandPassTest::BandPassTest()
     : CppUnit::TestFixture()
@@ -48,14 +48,14 @@ void BandPassTest::test_reBin()
      bp.setRMS(rms);
      float median=1128.9281113;
      bp.setMedian(median);
-     
+
      // add a kill zone
      float killStart= start + 3*width;
      float killEnd= start + 15*width;
      bp.killBand( killStart, killEnd );
 
      float a = bp.intensityOfBin(0);
-     
+
      {  // Use Case:
         // rebin to twice as many bins over the same range
         BinMap map(7936*2);

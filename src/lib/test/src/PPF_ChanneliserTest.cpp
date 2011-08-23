@@ -1,4 +1,4 @@
-#include "test/PPFChanneliserTest.h"
+#include "PPF_ChanneliserTest.h"
 
 #include "PPFChanneliser.h"
 #include "SpectrumDataSet.h"
@@ -16,37 +16,27 @@
 #include <vector>
 #include <cmath>
 
-using std::cout;
-using std::endl;
-
-using std::cos;
-using std::sin;
-
-using std::vector;
+using namespace std;
 
 namespace pelican {
 namespace lofar {
 
 CPPUNIT_TEST_SUITE_REGISTRATION(PPFChanneliserTest);
 
-
 void PPFChanneliserTest::setUp()
 {
-    _verbose = true;
-
+    _verbose   = true;
     _nChannels = 16;
     _nSubbands = 62;
-    _nPols = 2;
-    _nTaps = 8;
-
-    unsigned timesPerChunk =  16 * 16384;
-
-    if (timesPerChunk%_nChannels) CPPUNIT_FAIL("Setup error");
-
+    _nPols     = 2;
+    _nTaps     = 8;
+    unsigned timesPerChunk = 16 * 16384;
     _nBlocks = timesPerChunk / _nChannels;
+
+    if (timesPerChunk % _nChannels)
+        CPPUNIT_FAIL("Setup error");
+
 }
-
-
 
 /**
  * @details
@@ -93,13 +83,11 @@ void PPFChanneliserTest::test_run()
         cout << "* Elapsed = " << elapsed << " ms. [" << nThreads << " threads]";
         cout << " (data time = " << _nBlocks * _nChannels * 5e-3 << " ms.)" << endl;
         cout << "-------------------------------------------------" << endl;
-
-//        spectra.write("spectraTest000.dat", 0, 0, 0);
     }
 
     catch (const QString& err)
     {
-        std::cout << err.toStdString() << std::endl;
+        cout << err.toStdString() << endl;
     }
     cout << endl << "***** PPFChanneliserTest::test_run() ***** " << endl;
 }
@@ -115,19 +103,20 @@ void PPFChanneliserTest::test_channelProfile()
 
     // Setup the channeliser.
     unsigned nSubbands = 1;
-    unsigned nPols = 1;
-    unsigned nThreads = 1;
-    unsigned nTaps = 8;
+    unsigned nPols     = 1;
+    unsigned nThreads  = 1;
+    unsigned nTaps     = 8;
     unsigned nChannels = 64;
+
     ConfigNode config(_configXml(nChannels, nThreads, nTaps, "kaiser"));
     PPFChanneliser channeliser(config);
     typedef PPFChanneliser::Complex Complex;
 
     double sampleRate = 50.0e6; // Hz
-    double startFreq = 8.0e6;   // Hz
-    unsigned nSteps = 1000;     // Number of steps in profile.
-    double freqInc = 0.01e6;    // Frequency increment of profile steps.
-    float endFreq = startFreq + freqInc * nSteps;
+    double startFreq  = 8.0e6;   // Hz
+    unsigned nSteps   = 1000;     // Number of steps in profile.
+    double freqInc    = 0.01e6;    // Frequency increment of profile steps.
+    float endFreq     = startFreq + freqInc * nSteps;
     float midTestFreq = startFreq + (endFreq - startFreq) / 2.0;
 
     cout << "Scanning freqs " << startFreq << " -> " << endFreq << " ("
@@ -152,7 +141,6 @@ void PPFChanneliserTest::test_channelProfile()
 
 
     // Generate channel profile by scanning though frequencies.
-    // ========================================================================
     vector<double> freqs(nSteps);
 
     for (unsigned k = 0; k < nSteps; ++k)
@@ -163,7 +151,8 @@ void PPFChanneliserTest::test_channelProfile()
         {
             Complex* timeData = data.timeSeriesData(t, 0, 0);
             double time, arg;
-            for (unsigned c = 0; c < nChannels; ++c) {
+            for (unsigned c = 0; c < nChannels; ++c)
+            {
                 time = double(i++) / sampleRate;
                 arg = 2.0 * math::pi * freqs[k] * time;
                 timeData[c] = Complex(cos(arg), sin(arg));
@@ -174,7 +163,8 @@ void PPFChanneliserTest::test_channelProfile()
 
         // Save the amplitude of the specified channel.
         Complex* spectrum = spectra.spectrumData(nBlocks-1, 0, 0);
-        for (unsigned p = 0; p < nProfiles; ++p) {
+        for (unsigned p = 0; p < nProfiles; ++p)
+        {
             channelProfile[p][k] = spectrum[testIndices[p]];
         }
     }
@@ -186,7 +176,8 @@ void PPFChanneliserTest::test_channelProfile()
     if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) return;
 
     QTextStream out(&file);
-    for (unsigned i = 0; i < nSteps; ++i) {
+    for (unsigned i = 0; i < nSteps; ++i)
+    {
         out << freqs[i] << " ";
         for (unsigned p = 0; p < nProfiles; ++p)
             out << 20 * std::log10(std::abs(channelProfile[p][i])) << " ";
@@ -207,19 +198,19 @@ void PPFChanneliserTest::test_makeSpectrum()
     cout << endl << "*** PPFChanneliserTest::test_makeSpectrum() ***" << endl;
 
     // Setup the channeliser.
-    unsigned nThreads = 1;
+    unsigned nThreads  = 1;
     unsigned nSubbands = 1;
-    unsigned nPols = 1;
+    unsigned nPols     = 1;
     unsigned nChannels = 128;
-    unsigned nTaps = 16;
-    unsigned nBlocks = nTaps + 1;
+    unsigned nTaps     = 16;
+    unsigned nBlocks   = nTaps + 1;
 
     ConfigNode config(_configXml(nChannels, nThreads, nTaps));
     PPFChanneliser channeliser(config);
     typedef PPFChanneliser::Complex Complex;
 
-    double freq = 12.50;      // Hz
-    double sampleRate = 50.0; // Hz
+    double freq       = 12.50; // Hz
+    double sampleRate = 50.0;  // Hz
 
     TimeSeriesDataSetC32 data;
     unsigned nTimes = nChannels;
@@ -230,7 +221,8 @@ void PPFChanneliserTest::test_makeSpectrum()
     {
         Complex* timeData = data.timeSeriesData(t, 0, 0);
         double time, arg;
-        for (unsigned c = 0; c < nChannels; ++c) {
+        for (unsigned c = 0; c < nChannels; ++c)
+        {
             time = double(i++) / sampleRate;
             arg = 2.0 * math::pi * freq * time;
             timeData[c] = Complex(cos(arg), sin(arg));
@@ -265,16 +257,6 @@ void PPFChanneliserTest::test_makeSpectrum()
 
 
 
-
-
-
-
-
-
-
-
-
-
 /**
  * @details
  * Method to test the module construction and configuration.
@@ -288,7 +270,7 @@ void PPFChanneliserTest::test_configuration()
         CPPUNIT_ASSERT_EQUAL(_nChannels, channeliser._nChannels);
         CPPUNIT_ASSERT_EQUAL(nThreads, channeliser._nThreads);
     }
-    catch (QString err) {
+    catch (QString const& err) {
         CPPUNIT_FAIL(err.toLatin1().data());
     }
 }
@@ -303,66 +285,67 @@ void PPFChanneliserTest::test_threadAssign()
     ConfigNode config(_configXml(_nChannels, nThreads, _nTaps));
     PPFChanneliser channeliser(config);
     try {
-        unsigned start = 0, end = 0;
+        unsigned start     = 0;
+        unsigned end       = 0;
         unsigned nSubbands = 62;
-        unsigned threadId = 0;
+        unsigned threadId  = 0;
 
-        channeliser._threadProcessingIndices(start, end, nSubbands, nThreads, threadId);
+        channeliser._assign_threads(start, end, nSubbands, nThreads, threadId);
         CPPUNIT_ASSERT_EQUAL(unsigned(0), start);
         CPPUNIT_ASSERT_EQUAL(unsigned(31), end);
 
         threadId = 1;
-        channeliser._threadProcessingIndices(start, end, nSubbands, nThreads, threadId);
+        channeliser._assign_threads(start, end, nSubbands, nThreads, threadId);
         CPPUNIT_ASSERT_EQUAL(unsigned(31), start);
         CPPUNIT_ASSERT_EQUAL(unsigned(62), end);
 
         nSubbands = 1;
-        threadId = 0;
-        channeliser._threadProcessingIndices(start, end, nSubbands, nThreads, threadId);
+        threadId  = 0;
+        channeliser._assign_threads(start, end, nSubbands, nThreads, threadId);
         CPPUNIT_ASSERT_EQUAL(unsigned(0), start);
         CPPUNIT_ASSERT_EQUAL(unsigned(1), end);
 
         threadId = 1;
-        channeliser._threadProcessingIndices(start, end, nSubbands, nThreads, threadId);
+        channeliser._assign_threads(start, end, nSubbands, nThreads, threadId);
         CPPUNIT_ASSERT_EQUAL(unsigned(0), start);
         CPPUNIT_ASSERT_EQUAL(unsigned(0), end);
 
         nSubbands = 3;
-        threadId = 0;
-        channeliser._threadProcessingIndices(start, end, nSubbands, nThreads, threadId);
+        threadId  = 0;
+        channeliser._assign_threads(start, end, nSubbands, nThreads, threadId);
         CPPUNIT_ASSERT_EQUAL(unsigned(0), start);
         CPPUNIT_ASSERT_EQUAL(unsigned(2), end);
 
         threadId = 1;
-        channeliser._threadProcessingIndices(start, end, nSubbands, nThreads, threadId);
+        channeliser._assign_threads(start, end, nSubbands, nThreads, threadId);
         CPPUNIT_ASSERT_EQUAL(unsigned(2), start);
         CPPUNIT_ASSERT_EQUAL(unsigned(3), end);
 
         nSubbands = 4;
-        threadId = 0;
-        channeliser._threadProcessingIndices(start, end, nSubbands, nThreads, threadId);
+        threadId  = 0;
+        channeliser._assign_threads(start, end, nSubbands, nThreads, threadId);
         CPPUNIT_ASSERT_EQUAL(unsigned(0), start);
         CPPUNIT_ASSERT_EQUAL(unsigned(2), end);
 
         threadId = 1;
-        channeliser._threadProcessingIndices(start, end, nSubbands, nThreads, threadId);
+        channeliser._assign_threads(start, end, nSubbands, nThreads, threadId);
         CPPUNIT_ASSERT_EQUAL(unsigned(2), start);
         CPPUNIT_ASSERT_EQUAL(unsigned(4), end);
 
         nSubbands = 4;
-        nThreads = 3;
-        threadId = 0;
-        channeliser._threadProcessingIndices(start, end, nSubbands, nThreads, threadId);
+        nThreads  = 3;
+        threadId  = 0;
+        channeliser._assign_threads(start, end, nSubbands, nThreads, threadId);
         CPPUNIT_ASSERT_EQUAL(unsigned(0), start);
         CPPUNIT_ASSERT_EQUAL(unsigned(2), end);
 
         threadId = 1;
-        channeliser._threadProcessingIndices(start, end, nSubbands, nThreads, threadId);
+        channeliser._assign_threads(start, end, nSubbands, nThreads, threadId);
         CPPUNIT_ASSERT_EQUAL(unsigned(2), start);
         CPPUNIT_ASSERT_EQUAL(unsigned(3), end);
 
         threadId = 2;
-        channeliser._threadProcessingIndices(start, end, nSubbands, nThreads, threadId);
+        channeliser._assign_threads(start, end, nSubbands, nThreads, threadId);
         CPPUNIT_ASSERT_EQUAL(unsigned(3), start);
         CPPUNIT_ASSERT_EQUAL(unsigned(4), end);
     }
@@ -454,15 +437,19 @@ void PPFChanneliserTest::test_filter()
     PPFChanneliser::Complex* workBuffer;
 
     double const* coeff = channeliser._ppfCoeffs.ptr();
-    unsigned nCoeffs =  channeliser._ppfCoeffs.size();
+    unsigned nCoeffs    = channeliser._ppfCoeffs.size();
     float* fCoeffs = new float[nCoeffs];
-    for (unsigned i = 0; i < nCoeffs; ++i) fCoeffs[i] = float(coeff[i]);
+    for (unsigned i = 0; i < nCoeffs; ++i)
+        fCoeffs[i] = float(coeff[i]);
 
     QTime timer;
     timer.start();
-    for (unsigned b = 0; b < _nBlocks; ++b) {
-        for (unsigned s = 0; s < _nSubbands; ++s) {
-            for (unsigned p = 0; p < _nPols; ++p) {
+    for (unsigned b = 0; b < _nBlocks; ++b)
+    {
+        for (unsigned s = 0; s < _nSubbands; ++s)
+        {
+            for (unsigned p = 0; p < _nPols; ++p)
+            {
                 workBuffer = &(channeliser._workBuffer[s * _nPols + p])[0];
                 channeliser._filter(workBuffer, _nTaps, _nChannels, fCoeffs,
                         filteredSamples);
@@ -475,7 +462,8 @@ void PPFChanneliserTest::test_filter()
     cout << "-------------------------------------------------" << endl;
     cout << "[PPFChanneliser]: _filter() " << endl;
     cout << "- nChan = " << _nChannels << endl << endl;
-    if (_verbose) {
+    if (_verbose)
+    {
         cout << "- nTaps = " << _nTaps << endl;
         cout << "- nBlocks = " << _nBlocks << endl;
         cout << "- nSubbands = " << _nSubbands << endl;
@@ -507,9 +495,12 @@ void PPFChanneliserTest::test_fft()
 
     QTime timer;
     timer.start();
-    for (unsigned b = 0; b < _nBlocks; ++b) {
-        for (unsigned s = 0; s < _nSubbands; ++s) {
-            for (unsigned p = 0; p < _nPols; ++p) {
+    for (unsigned b = 0; b < _nBlocks; ++b)
+    {
+        for (unsigned s = 0; s < _nSubbands; ++s)
+        {
+            for (unsigned p = 0; p < _nPols; ++p)
+            {
                 Complex* spectrumData = spectra.spectrumData(b, s, p);
                 channeliser._fft(filteredSamples, spectrumData);
             }
@@ -521,7 +512,8 @@ void PPFChanneliserTest::test_fft()
     cout << "-------------------------------------------------" << endl;
     cout << "[PPFChanneliser]: _fft() " << endl;
     cout << "- nChan = " << _nChannels << endl << endl;
-    if (_verbose) {
+    if (_verbose)
+    {
         cout << "- nTaps = " << _nTaps << endl;
         cout << "- nBlocks = " << _nBlocks << endl;
         cout << "- nSubbands = " << _nSubbands << endl;
@@ -551,6 +543,6 @@ QString PPFChanneliserTest::_configXml(unsigned nChannels,
     return xml;
 }
 
-
 } // namespace lofar
 } // namespace pelican
+

@@ -1,8 +1,8 @@
 #ifndef BINMAP_H
 #define BINMAP_H
 
-#include <QHash>
-#include <QMap>
+#include <QtCore/QHash>
+#include <QtCore/QMap>
 
 /**
  * @file BinMap.h
@@ -14,11 +14,11 @@ namespace lofar {
 
 /**
  * @class BinMap
- *  
+ *
  * @brief
  *    A description of the bins range and width for binned data
  * @details
- * 
+ *
  */
 
 class BinMap
@@ -72,4 +72,4 @@ class BinMap
 unsigned int qHash(const BinMap& key);
 } // namespace lofar
 } // namespace pelican
-#endif // BINMAP_H 
+#endif // BINMAP_H
