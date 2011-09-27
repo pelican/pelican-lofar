@@ -2,6 +2,8 @@
 #include "LofarTypes.h"
 #include <QtCore/QFile>
 
+namespace pelican {
+namespace lofar {
 /// Constructs a new SigprocAdapter.
 SigprocAdapter::SigprocAdapter(const ConfigNode& config)
     : AbstractStreamAdapter(config)
@@ -83,3 +85,7 @@ void SigprocAdapter::_checkData()
     _stokesData = static_cast<SpectrumDataSetStokes*>(_data);
     _stokesData->resize(_nSamples, _nSubbands, 1, 1); // 1 Channel per subband in this case (and only total power)
 }
+
+} // namespace lofar
+} // namespace pelican
+
