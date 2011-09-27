@@ -47,6 +47,8 @@ class RFI_Clipper : public AbstractModule
         int _badSpectra;
         int _num, _numChunks;// number of values in history
         int _maxHistory; // max size of history buffer
+// flag for removing median from each spectrum, equivalent to the zero-DMing technique
+        int _zeroDMing; 
 };
 
 PELICAN_DECLARE_MODULE(RFI_Clipper)

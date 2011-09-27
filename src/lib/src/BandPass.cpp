@@ -56,7 +56,7 @@ void BandPass::setMedian(float median) {
         _mean[_currentMapId] += delta;
         _mean[_primaryMapId] += delta / scale;
         _dataSets.clear();
-        _buildData(_currentMap, scale);
+        _buildData(_currentMap, scale, delta);
     }
 }
 
@@ -77,7 +77,7 @@ void BandPass::reBin(const BinMap& map)
         _median[mapId] = _median[_primaryMapId] * scale;
         _mean[mapId] = _mean[_primaryMapId] * scale;
         // scale and set the intensities
-        _buildData(_currentMap, scale);
+        _buildData(_currentMap, scale, 0.0);
         //for( unsigned int i=0; i < map.numberBins(); ++i ) {
         //   _dataSets[mapId][i] = scale * _evaluate(map.binAssignmentNumber(i));
         //}
@@ -85,11 +85,11 @@ void BandPass::reBin(const BinMap& map)
     }
 }
 
-void BandPass::_buildData(const BinMap& map, float scale) {
+void BandPass::_buildData(const BinMap& map, float scale, float offset) {
     int mapId = map.hash();
     _dataSets.insert(mapId, QVector<float>(map.numberBins()) );
     for( unsigned int i=0; i < map.numberBins(); ++i ) {
-        _dataSets[mapId][i] = scale * _evaluate(map.binAssignmentNumber(i));
+        _dataSets[mapId][i] = scale * _evaluate(map.binAssignmentNumber(i)) + offset;
     }
     _zeroChannelsMap(map);
 }

@@ -85,7 +85,7 @@ class BandPass : public DataBlob
         float _evaluate(float) const; // calculate value of parameterised eqn
         void _zeroChannelsMap(const BinMap& map);
         // build a data map, scaled appropriately
-        void _buildData(const BinMap& map, float scale);
+        void _buildData(const BinMap& map, float scale, float offset);
 
     private:
         int _nChannels;

@@ -54,9 +54,12 @@ RFI_Clipper::RFI_Clipper( const ConfigNode& config )
     _historyRMS.resize(_maxHistory);
     _medianFromFile = _bandPass.median();
     _rmsFromFile = _bandPass.rms();
-
+    _zeroDMing = 0;
     _num = 0; // _num is the number of points in the history
     _numChunks = 0; // _numChunks is the number of chunks in the history
+    if( config.getOption("zeroDMing", "active" ) == "true" ) {
+      _zeroDMing = 1;
+    }
     if( config.getOption("Band", "matching" ) == "true" ) {
         _startFrequency = _bandPass.startFrequency();
         _endFrequency = _bandPass.endFrequency();
@@ -167,12 +170,15 @@ void RFI_Clipper::run( WeightedSpectrumDataSet* weightedStokes )
     unsigned nPolarisations = stokesAll->nPolarisations();
     unsigned nBins = nChannels * nSubbands;
     unsigned goodSamples = 0;
-
+    float modelRMS = _bandPass.rms();
+    //    std::cout << "next chunk RMS: " << modelRMS << std::endl;
+    // What effect do the following lines have to the bandpass model?
     _map.reset( nBins );
     _map.setStart( _startFrequency );
     _map.setEnd( _endFrequency );
     _bandPass.reBin(_map);
     _copyI.resize(nBins - 2 * nSubbands);
+    // -------------------------------------------------------------
 
     for (unsigned t = 0; t < nSamples; ++t) {
       float margin = std::fabs(_crFactor * _bandPass.rms());
@@ -241,13 +247,15 @@ void RFI_Clipper::run( WeightedSpectrumDataSet* weightedStokes )
           }
           else{
             // Subtract the current model from the data
-            I[index+c] -= bandPass[bin] + medianDelta ;
+            I[index+c] -= bandPass[bin] + _zeroDMing * medianDelta ;
             // if the condition doesn't hold build up the statistical
             // description;
             spectrumSum += I[index+c];
 
-            // Use this for RMS calculation
+            // Use this for RMS calculation - This is the RMS in the reference frame of the input
             spectrumSumSq += pow(I[index+c],2);
+            // Scale the data by the RMS
+            I[index+c] /= modelRMS;
             ++goodChannels;
           }
         }
@@ -273,7 +281,9 @@ void RFI_Clipper::run( WeightedSpectrumDataSet* weightedStokes )
       // spectrumRMStolerance is the estimated varience of
       // spectrumSum. 
       
-      if (fabs(medianDelta) > spectrumRMStolerance || spectrumRMS < 0.7*_bandPass.rms()) {
+      //      if (fabs(medianDelta) > spectrumRMStolerance || spectrumRMS < 0.7*_bandPass.rms()) {
+      // This comparison is based on the values of the incoming data, i.e. before any scaling 
+      if (fabs(medianDelta) > spectrumRMStolerance) {
         if (_badSpectra == 0) {
           std::cout 
             << "-------- RFI_Clipper----- SpectrumSum: " << spectrumSum << std::endl
@@ -296,9 +306,10 @@ void RFI_Clipper::run( WeightedSpectrumDataSet* weightedStokes )
           //          std::cout << "------ RFI_Clipper ----- REVERTING TO BANDPASS FILE MODEL" << std::endl;
           //          _bandPass.setMedian(_medianFromFile);
           //          _bandPass.setRMS(_rmsFromFile);
-          std::cout << "------ RFI_Clipper ----- Accepted a jump in the bandpass model to: " << median << std::endl << std::endl;
+          std::cout << "------ RFI_Clipper ----- Accepted a jump in the bandpass model to: " 
+                    << median << " " << spectrumRMS * modelRMS << std::endl << std::endl;
           _bandPass.setMedian(median);
-          _bandPass.setRMS(spectrumRMS);
+          _bandPass.setRMS(spectrumRMS); // RMS in incoming reference frame
           _badSpectra = 0;
           // reset _num and _numChunks for the history calculations
           _num = 0 ;
@@ -336,6 +347,8 @@ void RFI_Clipper::run( WeightedSpectrumDataSet* weightedStokes )
         // current spectrum, since it has passed all the tests
         // and is good for comparison to the next spectrum
 
+        // the median is in the reference frame of the incoming data so ok!
+
         if (_num != _maxHistory ) ++_num;
         _history[_current] = median;
         _current = ++_current%_maxHistory;
@@ -362,6 +375,7 @@ void RFI_Clipper::run( WeightedSpectrumDataSet* weightedStokes )
                   << " spectrumSum:" << spectrumSum
                   << std::endl;*/
         _bandPass.setMedian(baselineLevel);
+        //        std::cout <<_bandPass.currentSet()[100] << std::endl;
       }
     }
 
@@ -374,6 +388,8 @@ void RFI_Clipper::run( WeightedSpectrumDataSet* weightedStokes )
 
     // If the first chunk is no good, set the statistics to mean = 0 , rms = very large
 
+    // These means and RMS's are all post scaling - do not use for
+    // comparison with incoming data
     float runningMean = 0.0;
     float runningRMS = 0.0;
     if (goodSamples !=0){
@@ -390,10 +406,12 @@ void RFI_Clipper::run( WeightedSpectrumDataSet* weightedStokes )
       }
       runningMean /= _numChunks;
       runningRMS /= _numChunks;
-      // Set the model RMS to the running RMS value
+      // Set the model RMS to the running RMS value, scaled to the
+      // number of bins and to the reference frame of the incoming
+      // data
       _bandPass.setRMS(runningRMS * sqrt(nBins));
-      weightedStokes->setRMS( runningRMS ); 
-      weightedStokes->setMean( runningMean ); 
+      weightedStokes->setRMS( runningRMS/modelRMS ); 
+      weightedStokes->setMean( runningMean/modelRMS ); 
     }
     else{
       std::cout << " RFI_Clipper ----- No good spectra in chunk " << _numChunks << std::endl;
