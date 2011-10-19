@@ -23,8 +23,9 @@ GPU_Job::~GPU_Job()
 
 void GPU_Job::addKernel( const GPU_Kernel& kernel )
 {
-    _kernels.append(kernel); 
+    _kernels.append(&kernel); 
 }
+
 
 } // namespace lofar
 } // namespace pelican

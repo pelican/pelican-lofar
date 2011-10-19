@@ -12,6 +12,7 @@ namespace pelican {
 namespace lofar {
 class GPU_Kernel;
 
+
 /**
  * @class GPU_Job
  *  
@@ -28,12 +29,12 @@ class GPU_Job
         ~GPU_Job();
         void memcpy( char* start, unsigned long size) { _mem=start; _memSize=size; };
         void addKernel( const GPU_Kernel& kernel );
-        const QList<GPU_Kernel>& kernels() { return _kernels; };
+        const QList<const GPU_Kernel*>& kernels() { return _kernels; };
         unsigned long memSize() const { return _memSize; };
         char* memStart() const { return _mem; };
 
     private:
-        QList<GPU_Kernel> _kernels;
+        QList<const GPU_Kernel*> _kernels;
         unsigned long _memSize;
         char* _mem;
 };

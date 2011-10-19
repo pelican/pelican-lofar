@@ -13,6 +13,10 @@ set(lib_src
     src/FilterBankHeader.cpp
     src/FilterBankAdapter.cpp
     src/OutputHDF5Lofar.cpp
+    src/GPU_Kernel.cpp
+    src/GPU_Job.cpp
+    src/GPU_Resource.cpp
+    src/GPU_Manager.cpp
     src/LofarData.cpp
     src/LofarChunker.cpp
     src/LofarPelicanClientApp.cpp
@@ -34,9 +38,14 @@ set(lib_src
     src/LofarDataSplittingChunker.cpp
     src/WeightedSpectrumDataSet.cpp
 )
+set(lib_moc_headers
+    GPU_Manager.h
+    GPU_Resource.h
+)
+QT4_WRAP_CPP(moc_src ${lib_moc_headers})
 
 # === Create pelican-lofar library.
-add_library(pelican-lofar_static STATIC ${lib_src})
+add_library(pelican-lofar_static STATIC ${moc_src} ${lib_src} )
 set_target_properties(pelican-lofar_static PROPERTIES CLEAN_DIRECT_OUTPUT 1)
 set_target_properties(pelican-lofar_static PROPERTIES OUTPUT_NAME pelican-lofar)
 set_target_properties(pelican-lofar_static PROPERTIES PREFIX lib)
@@ -46,7 +55,7 @@ set_target_properties(pelican-lofar_static PROPERTIES
 )
 install(TARGETS pelican-lofar_static DESTINATION ${LIBRARY_INSTALL_DIR})
 
-add_library(pelican-lofar SHARED ${lib_src})
+add_library(pelican-lofar SHARED ${moc_src} ${lib_src})
 set_target_properties(pelican-lofar PROPERTIES CLEAN_DIRECT_OUTPUT 1)
 set_target_properties(pelican-lofar PROPERTIES
     COMPILE_FLAGS "${OpenMP_CXX_FLAGS}"
