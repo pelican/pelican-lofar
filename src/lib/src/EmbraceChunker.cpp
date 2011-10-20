@@ -66,7 +66,7 @@ void EmbraceChunker::next(QIODevice* device)
     else {
         // TODO dump the data here
         std::cerr << "EmbraceChunker: "
-                "WritableData is not valid!" << endl;
+                "WritableData is not valid!" << std::endl;
     }
 }
 } // namespace lofar
