@@ -31,7 +31,7 @@ int main(int /*argc*/, char** /*argv*/)
     unsigned nPols = 2;
     unsigned nTaps = 8;
 
-    unsigned timesPerChunk =  512 * 1000;
+    unsigned timesPerChunk =  16 * 16384;
 
     if (timesPerChunk%nChannels)
     {
@@ -60,7 +60,7 @@ int main(int /*argc*/, char** /*argv*/)
     PL::PPFChanneliser channeliser(config);
     PL::SpectrumDataSetC32 spectra;
 
-    unsigned nIter = 5;
+    unsigned nIter = 10;
     // Run once to size up buffers etc.
     for (unsigned i = 0; i < nIter; ++i)
     {
