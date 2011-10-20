@@ -217,8 +217,8 @@ void PPFChanneliser::_checkData(const TimeSeriesDataSetC32* timeData)
 * @param samples
 * @param nSamples
 */
-void PPFChanneliser::_updateBuffer(const Complex* samples,
-        unsigned nSamples, unsigned nTaps, Complex* buffer)
+void PPFChanneliser::_updateBuffer(const Complex* samples, unsigned nSamples,
+        unsigned nTaps, Complex* buffer)
 {
     unsigned tId = omp_get_thread_num();
     size_t blockSize = nSamples * sizeof(Complex);

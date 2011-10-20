@@ -7,82 +7,101 @@
 #include <QtCore/QTime>
 #include <QtCore/QFile>
 #include <QtCore/QTextStream>
-#include <iostream>
+#include <cstdio>
+#include <cstdlib>
 #include <complex>
 #include <vector>
 #include <cmath>
 
-using std::cout;
-using std::endl;
-namespace P = pelican;
-namespace PL = pelican::lofar;
+using namespace pelican;
+using namespace pelican::lofar;
+using namespace std;
 
-// Forward declaration of function to create a configuration XML node for
-// the channeliser.
-QString createXMLConfig(unsigned nChannels, unsigned nThreads, unsigned nTaps,
+// Prototypes
+int run(unsigned num_threads, unsigned num_taps, unsigned num_channels,
+        unsigned num_subbands, unsigned num_polarisations, unsigned num_blocks,
+        unsigned num_iter);
+QString create_xml_config(unsigned nChannels, unsigned nThreads, unsigned nTaps,
         const QString& windowType = "kaiser");
 
 
+/*
+ * TODO:
+ *
+ * A. Work out number of approx. GFLOPS.
+ * B. Work out approx. memory bandwidth.
+ *
+ * 1. Check memory ordering of TimeSeriesDataSetC32.
+ * 2. Check memory ordering of SpectrumDataSetC32.
+ * 3. Graph timings for private methods on the channeliser.
+ * 4. profile using google-pprof?
+ */
 int main(int /*argc*/, char** /*argv*/)
 {
-    bool verbose = true;
-    unsigned nChannels = 16;
-    unsigned nSubbands = 62;
-    unsigned nPols = 2;
-    unsigned nTaps = 8;
+    // Configuration options.
+    unsigned num_times        = 262144; // 2^18
+    unsigned num_subbands     = 62;
+    unsigned num_channels     = 16;
+    unsigned num_polaristions = 2;
+    unsigned num_taps         = 4;
+    unsigned num_blocks       = num_times / num_channels;
 
-    unsigned timesPerChunk =  16 * 16384;
+    unsigned num_threads      = 4;
+    unsigned num_iter         = 3;
 
-    if (timesPerChunk%nChannels)
+    printf("---------------------------------------------------------------\n");
+    printf("- num_times        = %u\n", num_times);
+    printf("- data time (ms)   = %f\n", num_times * 5.0e-3);
+    printf("- num_subbands     = %u\n", num_subbands);
+    printf("- num_channels     = %u\n", num_channels);
+    printf("- num_polaristions = %u\n", num_polaristions);
+    printf("- num_taps         = %u\n", num_taps);
+    printf("- num_blocks       = %u\n", num_blocks);
+    printf("- num_iter         = %u\n", num_iter);
+    printf("---------------------------------------------------------------\n");
+
+    for (unsigned i = 1; i <= num_threads; ++i)
     {
-        cout << "Setup error" << endl;
-        return 1;
+        int time_taken = run(i, num_taps, num_channels, num_subbands,
+                num_polaristions, num_blocks, num_iter);
+        printf("[%i threads] time taken = %f ms.\n", i, time_taken / (double)num_iter);
     }
 
-    unsigned _nBlocks = timesPerChunk / nChannels;
-
-    cout << endl << "***** testing PPFChanneliser run() method ***** " << endl;
-    cout << endl;
-    cout << "-------------------------------------------------" << endl;
-    cout << "[PPFChanneliser]: run() " << endl;
-    cout << "- nChan = " << nChannels << endl;
-    if (verbose) {
-        cout << "- nTaps = " << nTaps << endl;
-        cout << "- nBlocks = " << _nBlocks << endl;
-        cout << "- nSubbands = " << nSubbands << endl;
-        cout << "- nPols = " << nPols << endl;
-    }
-
-    // Setup the channeliser.
-    unsigned nThreads = 2;
-    P::ConfigNode config(createXMLConfig(nChannels, nThreads, nTaps));
-
-    PL::PPFChanneliser channeliser(config);
-    PL::SpectrumDataSetC32 spectra;
-
-    unsigned nIter = 10;
-    // Run once to size up buffers etc.
-    for (unsigned i = 0; i < nIter; ++i)
-    {
-        PL::TimeSeriesDataSetC32 timeSeries;
-        timeSeries.resize(_nBlocks, nSubbands, nPols, nChannels);
-        QTime timer;
-        timer.start();
-        channeliser.run(&timeSeries, &spectra);
-        int elapsed = timer.elapsed();
-        cout << "* Run [" << i << "] time = " << elapsed << " ms. [" << nThreads << " threads]" << endl;
-    }
-
-
-    cout << endl;
-    cout << " (data time = " << _nBlocks * nChannels * 5e-3 << " ms.)" << endl;
-    cout << "-------------------------------------------------" << endl;
-
-    return 0;
+    return EXIT_SUCCESS;
 }
 
 
-QString createXMLConfig(unsigned nChannels, unsigned nThreads, unsigned nTaps,
+
+
+
+int run(unsigned num_threads, unsigned num_taps, unsigned num_channels,
+        unsigned num_subbands, unsigned num_polarisations, unsigned num_blocks,
+        unsigned num_iter)
+{
+    // Setup the channeliser.
+    ConfigNode config(create_xml_config(num_channels, num_threads, num_taps));
+
+    PPFChanneliser channeliser(config);
+    SpectrumDataSetC32 spectra;
+
+    TimeSeriesDataSetC32 time_series;
+    time_series.resize(num_blocks, num_subbands, num_polarisations, num_channels);
+
+    // Run once to initilise the buffers etc.
+    channeliser.run(&time_series, &spectra);
+
+    // Run num_iter times to time the channeliser.
+    QTime timer;
+    timer.start();
+    for (unsigned i = 0; i < num_iter; ++i)
+    {
+        channeliser.run(&time_series, &spectra);
+    }
+    return timer.elapsed();
+}
+
+
+QString create_xml_config(unsigned nChannels, unsigned nThreads, unsigned nTaps,
         const QString& windowType)
 {
     QString xml =

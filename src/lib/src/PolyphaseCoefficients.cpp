@@ -196,7 +196,7 @@ void PolyphaseCoefficients::_interpolate(const double* x,
 }
 
 
-unsigned  PolyphaseCoefficients::_nextPowerOf2(unsigned n)
+unsigned PolyphaseCoefficients::_nextPowerOf2(unsigned n)
 {
     unsigned res = 1;
     while(true) {
@@ -230,7 +230,7 @@ void PolyphaseCoefficients::_generateFirFilter(unsigned n, double w,
     double m[] = {1.0, 1.0, 0.0, 0.0, 0.0};
 
     // grid is a 1-D array with grid_n+1 points. Values are 1 in filter passband, 0 otherwise
-    double grid[grid_n + 1];
+    double* grid = (double*) malloc((grid_n + 1) * sizeof(double));
 
     // interpolate between grid points
     _interpolate(f, m, 5 /* length of f and m arrays */ , grid_n+1, grid);
@@ -299,6 +299,8 @@ void PolyphaseCoefficients::_generateFirFilter(unsigned n, double w,
     for(unsigned i=0; i<=n; i++) {
         result[i] /= factor;
     }
+
+    free(grid);
 }
 
 
