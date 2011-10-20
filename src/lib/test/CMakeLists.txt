@@ -51,8 +51,8 @@ add_executable(lofarEmulator src/lofarEmulatorMain.cpp)
 target_link_libraries(lofarEmulator
     pelican-lofar_static
     ${PELICAN_LIBRARY}
-    ${QT_QTCORE_LIBRARY}
     ${QT_QTNETWORK_LIBRARY}
+    ${QT_QTCORE_LIBRARY}
     ${QT_QTXML_LIBRARY}
     lofarTestLib
 )
