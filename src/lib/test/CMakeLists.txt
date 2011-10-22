@@ -10,6 +10,11 @@ set(lofarTestLib_src
     src/LofarEmulatorDataSim.cpp
 )
 add_library(lofarTestLib STATIC ${lofarTestLib_src})
+target_link_libraries(lofarTestLib
+    ${QT_QTNETWORK_LIBRARY}
+    ${QT_QTCORE_LIBRARY}
+    ${Boost_PROGRAM_OPTIONS_LIBRARY}
+)
 
 # ==== Create test binary and add it to the cmake test framework.
 set(lofarTest_src
@@ -49,8 +54,8 @@ add_test(lofarTest lofarTest)
 # ==== Create the lofar udp emulator binary.
 add_executable(lofarEmulator src/lofarEmulatorMain.cpp)
 target_link_libraries(lofarEmulator
-    pelican-lofar_static
     ${PELICAN_LIBRARY}
+    pelican-lofar_static
     ${QT_QTNETWORK_LIBRARY}
     ${QT_QTCORE_LIBRARY}
     ${QT_QTXML_LIBRARY}
@@ -60,8 +65,8 @@ target_link_libraries(lofarEmulator
 # ==== Create the lofar binary which sends simulated data.
 add_executable(lofarEmulatorDataSim src/lofarEmulatorDataSimMain.cpp)
 target_link_libraries(lofarEmulatorDataSim
-    pelican-lofar_static
     ${PELICAN_LIBRARY}
+    pelican-lofar_static
     ${QT_QTCORE_LIBRARY}
     ${QT_QTNETWORK_LIBRARY}
     ${QT_QTXML_LIBRARY}
