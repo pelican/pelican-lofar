@@ -6,3 +6,5 @@ src/.project
 
 # cmake build directory
 build
+release*
+debug*
