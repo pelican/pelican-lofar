@@ -30,17 +30,15 @@ class T_PolyphaseCoefficients : public DataBlob
 {
     public:
         /// Constructs a polyphase coefficients object.
-        T_PolyphaseCoefficients(const QString& type) : DataBlob(type) {
-            _nTaps = 0; _nChannels = 0;
-        }
+        T_PolyphaseCoefficients(const QString& type)
+        : DataBlob(type), _nTaps(0), _nChannels(0)
+        {}
 
         /// Constructs a polyphase coefficients object with the specified
         /// dimensions.
         T_PolyphaseCoefficients(unsigned nTaps, unsigned nChannels,
-                const QString& type)
-        : DataBlob(type) {
-            resize(nTaps, nChannels);
-        }
+                const QString& type) : DataBlob(type)
+        { resize(nTaps, nChannels); }
 
         /// Destroys the object.
         virtual ~T_PolyphaseCoefficients() {}
@@ -54,28 +52,33 @@ class T_PolyphaseCoefficients : public DataBlob
         }
 
         /// Resizes the coefficient vector for nTaps and nChannels.
-        void resize(unsigned nTaps, unsigned nChannels) {
-            _nTaps = nTaps; _nChannels = nChannels;
+        void resize(unsigned nTaps, unsigned nChannels)
+        {
+            _nTaps = nTaps;
+            _nChannels = nChannels;
             _coeff.resize(_nTaps * _nChannels);
         }
 
     public: // Accessor methods.
         /// Returns the number of coefficients.
-        unsigned size() const { return _coeff.size(); }
+        unsigned size() const
+        { return _coeff.size(); }
 
         /// Returns the number of filter taps.
-        unsigned nTaps() const { return _nTaps; }
+        unsigned nTaps() const
+        { return _nTaps; }
 
         /// Returns the number of channels.
-        unsigned nChannels() const { return _nChannels; }
+        unsigned nChannels() const
+        { return _nChannels; }
 
         /// Returns a pointer to the vector of coefficients.
-        T* ptr() { return _coeff.size() > 0 ? &_coeff[0] : NULL; }
+        T* ptr()
+        { return _coeff.size() > 0 ? &_coeff[0] : NULL; }
 
         /// Returns a pointer to the vector of coefficients (const overload).
-        const T* ptr() const {
-            return _coeff.size() > 0 ? &_coeff[0] : NULL;
-        }
+        const T* ptr() const
+        { return _coeff.size() > 0 ? &_coeff[0] : NULL; }
 
     protected:
         std::vector<T> _coeff;
