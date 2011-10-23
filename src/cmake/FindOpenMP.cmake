@@ -29,14 +29,14 @@ include(CheckCXXSourceCompiles)
 include(FindPackageHandleStandardArgs)
 
 set(OpenMP_C_FLAG_CANDIDATES
-  #Gnu
-  "-fopenmp"
   #Microsoft Visual Studio
   "/openmp"
   #Intel windows
   "-Qopenmp"
   #Intel
   "-openmp"
+  #Gnu
+  "-fopenmp"
   #Empty, if compiler automatically accepts openmp
   " "
   #Sun
