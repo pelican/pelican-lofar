@@ -30,10 +30,20 @@ if(CMAKE_COMPILER_IS_GNUCXX)
     add_definitions(-Wno-deprecated -Wno-unknown-pragmas)
     list(APPEND CPP_PLATFORM_LIBS util dl)
 elseif(CMAKE_CXX_COMPILER MATCHES icpc)
-    add_definitions(-Wall -Wcheck)
-    add_definitions(-wd383 -wd981 -wd444)  # Suppress remarks / warnings.
-    add_definitions(-ww111 -ww1572) # Promote remarks to warnings.
-    set(CMAKE_CXX_FLAGS_RELEASE "-O3 -DQT_NO_DEBUG -DNDEBUG")
+    set(CMAKE_CXX_FLAGS_RELEASE "-O3 -DNDEBUG -DQT_NO_DEBUG -DQT_NO_DEBUG_OUTPUT")
+    add_definitions(-Wall)
+    add_definitions(-Wcheck)
+    add_definitions(-wd1125) # virtual override intended warning
+    add_definitions(-wd1572) # remove floating-pointe equality warning.
+    add_definitions(-wd2259) # remove non-pointer conversion
+    add_definitions(-wd1418) # External function with no prior declaration.
+    add_definitions(-wd1419) # External declaration in primary source file.
+    add_definitions(-wd383)  # Value copied to temporary, reference to temporary used.
+    #add_definitions(-wd444)  # Destructor for base class not virtual.
+    add_definitions(-wd981)  # Operands are evaluated in unspecified order.
+    add_definitions(-wd177)  # Variable declared by never referenced.
+    add_definitions(-ww111)  # Promote remark 111 to warning.
+    add_definitions(-ww1572) # Promote remark 1572 to warning.
 else(CMAKE_COMPILER_IS_GNUCXX)
     # use defaults (and pray it works...)
     set(CMAKE_CXX_FLAGS_RELEASE "-O3 -DQT_NO_DEBUG -DNDEBUG")
