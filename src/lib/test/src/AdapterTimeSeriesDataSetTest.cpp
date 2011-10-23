@@ -101,7 +101,7 @@ void AdapterTimeSeriesDataSetTest::test_checkDataFixedPacket()
         CPPUNIT_ASSERT_EQUAL(nTimeBlocks, adapter._timeData->nTimeBlocks());
         CPPUNIT_ASSERT_EQUAL(nTimeSeries, adapter._timeData->size());
     }
-    catch (QString err) {
+    catch (const QString& err) {
         CPPUNIT_FAIL(err.toStdString().data());
     }
 }
@@ -157,7 +157,7 @@ void AdapterTimeSeriesDataSetTest::test_checkDataVariablePacket()
         CPPUNIT_ASSERT_EQUAL(nTimeSeries, adapter._timeData->size());
 
     }
-    catch (QString err) {
+    catch (const QString& err) {
         CPPUNIT_FAIL(err.toStdString().data());
     }
 }
@@ -234,7 +234,7 @@ void AdapterTimeSeriesDataSetTest::test_deserialise()
 
         adapter.deserialise(&buffer);
     }
-    catch (QString err) {
+    catch (const QString& err) {
         CPPUNIT_FAIL(err.toStdString().data());
     }
 }
@@ -328,7 +328,7 @@ void AdapterTimeSeriesDataSetTest::test_deserialise_timing()
         cout << "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@" << endl;
 
     }
-    catch (QString err) {
+    catch (const QString& err) {
         CPPUNIT_FAIL(err.toStdString().data());
     }
 }
