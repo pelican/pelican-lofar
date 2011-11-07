@@ -37,7 +37,7 @@ void LofarTestClient::startup()
 
 void LofarTestClient::run()
 {
-    int argc=2;
+    const int argc=2;
     char* argv[argc];
     argv[0] = (char*)"LofarTestClient";
     std::string file = _configFile.fileName().toStdString();
