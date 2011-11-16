@@ -9,7 +9,7 @@ set(pipeline_lib_src
     src/StokesOnlyPipeline.cpp
     src/SigProcPipeline.cpp
     src/BandPassPipeline.cpp
-    src/DedispersionPipeline.cpp
+    #src/DedispersionPipeline.cpp
 )
 add_library(pelicanMdsm ${pipeline_lib_src})
 
