@@ -37,12 +37,32 @@ set(lib_src
     src/SigprocStokesWriter.cpp
     src/LofarDataSplittingChunker.cpp
     src/WeightedSpectrumDataSet.cpp
+    src/AsyncronousTask.cpp
+    src/AsyncronousJob.cpp
 )
+if(CUDA_FOUND)
+    list(APPEND lib_src
+            src/GPU_NVidia.cpp
+        )
+endif(CUDA_FOUND)
+
 set(lib_moc_headers
     GPU_Manager.h
     GPU_Resource.h
+    AsyncronousTask.h
 )
 QT4_WRAP_CPP(moc_src ${lib_moc_headers})
+
+set(lib_cuda_src
+   )
+if(CUDA_FOUND)
+    include_directories(${CUDA_INCLUDE_DIRS})
+#    CUDA_ADD_LIBRARY(ampp-cuda STATIC ${lib_cuda_src})
+#   set(cuda_libs ampp-cuda ${CUDA_LIBRARIES} )
+    set(cuda_libs ${CUDA_LIBRARIES} )
+else(CUDA_FOUND)
+    set(cuda_libs)
+endif(CUDA_FOUND)
 
 # === Create pelican-lofar library.
 add_library(pelican-lofar_static STATIC ${moc_src} ${lib_src} )
@@ -67,6 +87,7 @@ set(pelican-lofar_externals
     ${FFTW3_FFTW_LIBRARY}
     ${FFTW3_FFTWF_LIBRARY}
     ${LAPACK_LIBRARIES}
+    ${cuda_libs}
 )
 
 target_link_libraries(pelican-lofar_static ${pelican-lofar_externals})
