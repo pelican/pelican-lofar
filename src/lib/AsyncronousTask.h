@@ -44,6 +44,7 @@ class AsyncronousTask : public QObject
                 void operator()(DataBlob* blob, AsyncronousJob* job ) const;
         };
         friend class DataBlobFunctorMonitor;
+        friend class AsyncronousJob;
 
     public:
         AsyncronousTask(  );
