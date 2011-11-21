@@ -33,17 +33,17 @@ class SpectrumDataSetC32;
  * @details
  * Channelises time stream data using a polyphase channelising filter.
  *
- * @section Configuration:
+ * \section Configuration:
  *
  * Example configuration node.
  *
- * @verbatim
+ * \verbatim
  * 		<PPFChanneliser name="">
  * 			<channels number="512"/>
  * 			<processingThreads number="2"/>
  * 			<filter nTaps="8" filterWindow="kaiser"/>
  * 		</PPFChanneliser>
- * @verbatim
+ * \verbatim
  *
  * - channels: The number of channels generated in the spectra.
  * - processingThreads: The number of threads to parallelise over.

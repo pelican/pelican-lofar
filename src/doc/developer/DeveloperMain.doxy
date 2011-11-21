@@ -1,0 +1,14 @@
+/**
+
+@mainpage Pelican Developer Guide
+
+@section intro Introduction
+
+This document provides a developer guide for Pelican.
+
+@li @subpage developer_codeConventions
+@li @subpage developer_build
+@li @subpage developer_regressionTesting
+@li @subpage dev_server
+
+*/

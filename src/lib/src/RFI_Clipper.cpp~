@@ -13,7 +13,7 @@ namespace pelican {
 namespace lofar {
 
 /**
- *@details RFI_Clipper constructor
+ *@details RFI_Clipper
  */
 RFI_Clipper::RFI_Clipper( const ConfigNode& config )
   : AbstractModule( config ), _active(true), _crFactor(10.0),_srFactor(4.0), _current(0), _currentChunk(0),
@@ -80,7 +80,7 @@ RFI_Clipper::RFI_Clipper( const ConfigNode& config )
 }
 
 /**
- *@details RFI_Clipper destructor
+ *@details
  */
 RFI_Clipper::~RFI_Clipper()
 {

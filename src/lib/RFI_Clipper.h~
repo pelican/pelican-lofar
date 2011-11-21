@@ -19,7 +19,7 @@ namespace lofar {
  * @class RFI_Clipper
  *  
  * @brief
- *    Remove any Radio Frequency Interference by comparision with a bandpass filter
+ *    Remove any Radio Frequency Iinterference by comparision with a bandpass filter
  * @details
  * 
  */
