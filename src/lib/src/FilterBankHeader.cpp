@@ -43,13 +43,15 @@ unsigned int FilterBankHeader::deserialise(QIODevice* device)
         return 0;
      }
      int bufsize = 12 + sizeof(c);
-     char temp[bufsize+1];
+     char* temp = new char[bufsize+1];
      device->peek( &temp[0], bufsize );
      temp[bufsize]='\0';
      if (QString("HEADER_START") != QString(&temp[sizeof(int)])) {
+        delete[] temp;
         // not a header
         return 0;
      }
+     delete[] temp;
 
      // We have determined its a header we can now start parsing it
      device->read( bufsize );
