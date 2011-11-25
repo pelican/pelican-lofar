@@ -40,7 +40,7 @@ set(lib_src
     src/WeightedSpectrumDataSet.cpp
     src/AsyncronousTask.cpp
     src/GPU_Task.cpp
-    src/AbstractGPU_Module.cpp
+#    src/AbstractGPU_Module.cpp
 )
 if(CUDA_FOUND)
     list(APPEND lib_src
