@@ -14,14 +14,13 @@
 namespace pelican {
 
 namespace lofar {
-class AsyncronousJob;
 
 /**
  * @class AsyncronousTask
  *
  * @brief
  *   Base class for all Asyncronous Tasks
- *   This acts as the template for creating AsyncronousJobs
+ *   This acts as the template for creating Asyncronous Jobs
  *   and provides monitoring of the whole chain of events
  * @details
  *   Note that there is an assumption that the Task will not be executed
@@ -41,33 +40,29 @@ class AsyncronousTask : public QObject
               AsyncronousTask* _task;
               public:
                 DataBlobFunctorMonitor(const DataBlobFunctorT&, AsyncronousTask* task);
-                void operator()(DataBlob* blob, AsyncronousJob* job ) const;
+                DataBlobFunctorMonitor() {};
+                void operator()(DataBlob* blob) const;
         };
         friend class DataBlobFunctorMonitor;
-        friend class AsyncronousJob;
 
     public:
-        AsyncronousTask(  );
+        AsyncronousTask( const boost::function1<DataBlob*, DataBlob*>& workload );
         virtual ~AsyncronousTask();
+
+        void run(DataBlob* data);
 
         /// schedule the provided task to be executed upon completion
         /// of this task
-        //void link( AsyncronousTask* task );
-        void link( const boost::function1<DataBlob*, DataBlob*>& functor );
-
+//        void link( AsyncronousTask* task );
+//        void link( const boost::function1<DataBlob*, DataBlob*>& functor );
         void onChainCompletion( const boost::function1<void, DataBlob*>& functor );
-
-    protected:
-        ///  create a suitable asycronous job object to be associated
-        //   with this task
-        virtual AsyncronousJob* createJob( const DataBlobFunctorMonitor& , DataBlob* data ) = 0;
 
     signals:
         void finished( DataBlob* inputData );
 
     private:
         // called via functors
-        void jobFinished( DataBlob* inputData, DataBlob* outputData, AsyncronousJob* job );
+        void jobFinished( DataBlob* inputData, DataBlob* outputData );
         void taskFinished( DataBlob* );
 
     protected:
@@ -78,9 +73,9 @@ class AsyncronousTask : public QObject
     private:
         QHash<DataBlob*, int> _dataLocker; // keep a track of subprocessing using
                                            // a specific DataBlob
+        DataBlobFunctorMonitor _task;
         QList<DataBlobFunctorMonitor> _linkedFunctors;
         QList<CallBackT> _callBacks;
-        QList<AsyncronousJob*> _jobs;
 };
 
 } // namespace lofar

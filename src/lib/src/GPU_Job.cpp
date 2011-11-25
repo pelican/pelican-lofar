@@ -35,5 +35,22 @@ void GPU_Job::setOutputMap( const boost::shared_ptr<GPU_MemoryMap>& map ) {
     _outputMaps.append(map);
 }
 
+void GPU_Job::wait() const {
+    QMutexLocker lock(&_mutex);
+    while( _processing  ) 
+        _waitCondition.wait(&_mutex);
+}
+
+void GPU_Job::setAsRunning() {
+    QMutexLocker lock(&_mutex);
+    _processing = true;
+}
+
+void GPU_Job::emitFinished() {
+    QMutexLocker lock(&_mutex);
+    _processing = false;
+    Q_EMIT jobFinished();
+}
+
 } // namespace lofar
 } // namespace pelican

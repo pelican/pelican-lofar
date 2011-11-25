@@ -9,6 +9,7 @@ set(lib_src
     src/BandPassOutput.cpp
     src/BandPassRecorder.cpp
     src/BlobStatistics.cpp
+#    src/DedispersionModule.cpp
     src/EmbraceChunker.cpp
     src/FilterBankHeader.cpp
     src/FilterBankAdapter.cpp
@@ -38,7 +39,8 @@ set(lib_src
     src/LofarDataSplittingChunker.cpp
     src/WeightedSpectrumDataSet.cpp
     src/AsyncronousTask.cpp
-    src/AsyncronousJob.cpp
+    src/GPU_Task.cpp
+    src/AbstractGPU_Module.cpp
 )
 if(CUDA_FOUND)
     list(APPEND lib_src
@@ -48,8 +50,10 @@ endif(CUDA_FOUND)
 
 set(lib_moc_headers
     GPU_Manager.h
+    GPU_Job.h
     GPU_Resource.h
     AsyncronousTask.h
+    GPU_Task.h
 )
 QT4_WRAP_CPP(moc_src ${lib_moc_headers})
 

@@ -1,4 +1,5 @@
 #include "GPU_Resource.h"
+#include "GPU_Job.h"
 
 
 namespace pelican {
@@ -20,10 +21,11 @@ GPU_Resource::~GPU_Resource()
 {
 }
 
-void GPU_Resource::exec(const GPU_Job& job)
+void GPU_Resource::exec(GPU_Job* job)
 {
     run(job);
-    emit ready();
+    job->emitFinished();
+    emit finished();
 }
 
 } // namespace lofar

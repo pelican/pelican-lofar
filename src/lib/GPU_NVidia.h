@@ -31,7 +31,7 @@ class GPU_NVidia : public GPU_Resource
     public:
         GPU_NVidia( unsigned int id );
         ~GPU_NVidia();
-        virtual void run( const GPU_Job& job );
+        virtual void run( GPU_Job* job );
 
         static void initialiseResources(GPU_Manager* manager);
 

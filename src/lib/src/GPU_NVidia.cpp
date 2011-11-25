@@ -22,10 +22,10 @@ GPU_NVidia::~GPU_NVidia()
 {
 }
 
-void GPU_NVidia::run( const GPU_Job& job )
+void GPU_NVidia::run( GPU_Job* job )
 {
      // copy from host to device memory
-     foreach( const boost::shared_ptr<GPU_MemoryMap>& map, job.inputMemoryMaps() ) {
+     foreach( const boost::shared_ptr<GPU_MemoryMap>& map, job->inputMemoryMaps() ) {
          cudaMemcpy( map->start(), map->destination(), map->size(), cudaMemcpyHostToDevice );
      }
 
@@ -35,7 +35,7 @@ void GPU_NVidia::run( const GPU_Job& job )
      //}
 
      // copy device to host
-     foreach( const boost::shared_ptr<GPU_MemoryMap>& map, job.outputMemoryMaps() ) {
+     foreach( const boost::shared_ptr<GPU_MemoryMap>& map, job->outputMemoryMaps() ) {
          cudaMemcpy( map->start() , map->destination(), map->size(), cudaMemcpyDeviceToHost );
      }
 }
