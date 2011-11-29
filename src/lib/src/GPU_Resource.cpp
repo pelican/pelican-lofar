@@ -21,11 +21,9 @@ GPU_Resource::~GPU_Resource()
 {
 }
 
-void GPU_Resource::exec(GPU_Job* job)
+void GPU_Resource::exec(GPU_Job* job )
 {
     run(job);
-    job->emitFinished();
-    emit finished();
 }
 
 } // namespace lofar

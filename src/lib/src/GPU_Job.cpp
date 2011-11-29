@@ -11,6 +11,7 @@ namespace lofar {
  *@details GPU_Job 
  */
 GPU_Job::GPU_Job()
+    : _processing(false), _waitCondition(0)
 {
 }
 
@@ -19,6 +20,7 @@ GPU_Job::GPU_Job()
  */
 GPU_Job::~GPU_Job()
 {
+    if( _waitCondition ) delete _waitCondition;
 }
 
 void GPU_Job::addKernel( const GPU_Kernel& kernel )
@@ -37,8 +39,12 @@ void GPU_Job::setOutputMap( const boost::shared_ptr<GPU_MemoryMap>& map ) {
 
 void GPU_Job::wait() const {
     QMutexLocker lock(&_mutex);
-    while( _processing  ) 
-        _waitCondition.wait(&_mutex);
+    if( _processing  ) {
+        _waitCondition=new QWaitCondition;
+        _waitCondition->wait(&_mutex);
+        delete _waitCondition;
+        _waitCondition = 0;
+    }
 }
 
 void GPU_Job::setAsRunning() {
@@ -47,9 +53,14 @@ void GPU_Job::setAsRunning() {
 }
 
 void GPU_Job::emitFinished() {
-    QMutexLocker lock(&_mutex);
-    _processing = false;
-    Q_EMIT jobFinished();
+    {
+        QMutexLocker lock(&_mutex);
+        setStatus( GPU_Job::Finished );
+        _processing = false;
+    }
+    if( _waitCondition ) { 
+        _waitCondition->wakeAll();
+    }
 }
 
 } // namespace lofar

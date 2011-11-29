@@ -2,8 +2,6 @@
 #define GPU_MANAGER_H
 
 
-#include <QtCore/QThread>
-#include <QtCore/QObject>
 #include <QtCore/QList>
 #include <QtCore/QSet>
 #include <QtCore/QMutex>
@@ -27,29 +25,35 @@ class GPU_Job;
  * 
  */
 
-class GPU_Manager : public QThread
+class GPU_Manager
 {
-    Q_OBJECT
 
     public:
-        GPU_Manager( QObject* parent=0 );
+        GPU_Manager();
         ~GPU_Manager();
 
         void submit( GPU_Job* job ); 
         void addResource(GPU_Resource* r);
+        /// return the number of idle GPU resources
+        ///  available
+        int freeResources() const;
+        /// return the number of jobs that are in the queue
+        int jobsQueued() const;
 
     protected:
-        virtual void run();
         void _matchResources();
 
-    protected slots:
-        void _resourceFree();
+    private:
+        void _runJob( GPU_Resource*, GPU_Job* );
+        void _resourceFree( GPU_Resource* );
 
     private:
-        QMutex _resourceMutex;
+        mutable QMutex _resourceMutex;
         QList<GPU_Job*> _queue;
         QList<GPU_Resource*> _resources;
         QList<GPU_Resource*> _freeResource;
+        bool _destructor;
+
 };
 
 } // namespace lofar

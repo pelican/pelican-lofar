@@ -1,11 +1,16 @@
 #include <cppunit/CompilerOutputter.h>
 #include <cppunit/extensions/TestFactoryRegistry.h>
 #include <cppunit/ui/text/TestRunner.h>
+#include <QCoreApplication>
 
 using namespace CppUnit;
 
 int main(int /*argc*/, char** /*argv*/)
 {
+    int argc = 1;
+    char *argv[] = {(char*)"pelican"};
+    QCoreApplication* app = new QCoreApplication(argc, argv);
+
     // Get the top level suite from the registry
     Test* suite = TestFactoryRegistry::getRegistry().makeTest();
 
@@ -20,5 +25,6 @@ int main(int /*argc*/, char** /*argv*/)
     bool wasSucessful = runner.run();
 
     // Return error code 1 if the one of test failed.
+    delete app;
     return wasSucessful ? 0 : 1;
 }

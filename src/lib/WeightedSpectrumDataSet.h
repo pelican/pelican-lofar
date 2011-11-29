@@ -7,6 +7,7 @@
  * @file WeightedSpectrumDataSet.h
  */
 #include "SpectrumDataSet.h"
+#include "pelican/data/DataBlob.h"
 
 namespace pelican {
 

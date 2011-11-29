@@ -5,6 +5,7 @@
 #include "GPU_Resource.h"
 #include "GPU_Job.h"
 #include "GPU_NVidia.h"
+#include <iostream>
 
 namespace pelican {
 namespace lofar {
@@ -12,9 +13,9 @@ namespace lofar {
 /**
  *@details GPU_Manager 
  */
-GPU_Manager::GPU_Manager(QObject* parent)
-    : QThread(parent)
+GPU_Manager::GPU_Manager()
 {
+    _destructor = false;
 }
 
 /**
@@ -22,64 +23,66 @@ GPU_Manager::GPU_Manager(QObject* parent)
  */
 GPU_Manager::~GPU_Manager()
 {
-     // clean up the resources
-     foreach(GPU_Resource* r, _resources) {
-         delete r;
-     }
+    _destructor = true;
+    QMutexLocker lock(&_resourceMutex);
+    // clean up the resources
+    foreach(GPU_Resource* r, _resources) {
+        delete r;
+    }
+    _resources.clear();
+    _freeResource.clear();
+    _queue.clear();
 }
 
 void GPU_Manager::addResource(GPU_Resource* r) {
-     _resources.append(r);
-     connect(r, SIGNAL(finished()), this, SLOT( _resourceFree() ) );
-     _freeResource.append(r);
-     _matchResources();
-}
-
-void GPU_Manager::run() {
-    // Thread is staring up here
-    // It is important that these objects are instantiated
-    // in this thread.
-    // Instantiate the cards e.g.
-    // addResource(new GPU_NVidia);
-    // import NVidia cards
-#ifdef CUDA_FOUND
-    // We will take all the available NVidia cards for now
-    // This should really be made configurable in the future
-    GPU_NVidia::initialiseResources(this);
-#endif
-
-    // Start processing
-    exec();
-
-    // remove resources
-     foreach(GPU_Resource* r, _resources) {
-         delete r;
-     }
-     _resources.clear();
-     _freeResource.clear();
+    QMutexLocker lock(&_resourceMutex);
+    _resources.append(r);
+    _freeResource.append(r);
+    _matchResources();
 }
 
 void GPU_Manager::_matchResources() {
+     // ensure _resourceMutex is locked before calling this 
+     // function
      if( _queue.size() > 0 ) {
-        QMutexLocker lock(&_resourceMutex);
         if( _freeResource.size() > 0 ) {
-            QtConcurrent::run( boost::bind( &GPU_Resource::exec, _freeResource.takeFirst(),  _queue.takeFirst())  );
+            QtConcurrent::run( this, &GPU_Manager::_runJob, _freeResource.takeFirst(), _queue.takeFirst() );
         }
      }
 }
 
+void GPU_Manager::_runJob( GPU_Resource* r, GPU_Job* job ) {
+    job->setStatus( GPU_Job::Running );
+    r->exec(job);
+    job->setStatus( GPU_Job::Finished );
+    job->emitFinished();
+    _resourceFree( r );
+}
+
+int GPU_Manager::freeResources() const {
+    QMutexLocker lock(&_resourceMutex);
+    return _freeResource.size();
+}
+
+int GPU_Manager::jobsQueued() const {
+    QMutexLocker lock(&_resourceMutex);
+    return _queue.size();
+}
+
 void GPU_Manager::submit( GPU_Job* job) {
-     job->setAsRunning(); // mark job as being dealt with
-     _queue.append(job);
-     _matchResources();
+    job->setStatus( GPU_Job::Queued );
+    job->setAsRunning(); // mark job as being dealt with
+    QMutexLocker lock(&_resourceMutex);
+    _queue.append(job);
+    _matchResources();
 } 
 
-void GPU_Manager::_resourceFree() {
-     {
+void GPU_Manager::_resourceFree( GPU_Resource* res) {
+    if( ! _destructor ) {
         QMutexLocker lock(&_resourceMutex);
-        _freeResource.append((GPU_Resource*)sender());
-     }
-     _matchResources();
+        _freeResource.append(res);
+        _matchResources();
+    }
 }
 
 } // namespace lofar

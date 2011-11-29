@@ -1,6 +1,7 @@
 #include "AsyncronousTask.h"
 #include <boost/bind.hpp>
 #include <QtConcurrentRun>
+#include <QMutexLocker>
 
 
 namespace pelican {
@@ -46,19 +47,43 @@ void AsyncronousTask::taskFinished( DataBlob* data ) {
      }
 }
 
+void AsyncronousTask::submit( DataBlob* data ) {
+     QtConcurrent::run( this, &AsyncronousTask::run, data );
+}
+
 void AsyncronousTask::run( DataBlob* data ) {
     _task( data );
+     // wait for any sub-tasks launched by task to finish 
+     QMutexLocker lock(&_subTaskMutex);
+     while( _subTaskCount )
+        _subTaskWaitCondition.wait(&_subTaskMutex);
+}
+
+void AsyncronousTask::submit( AsyncronousTask* task, DataBlob* data ) {
+     task->onChainCompletion( boost::bind(&AsyncronousTask::subTaskFinished, this, task, _1) );
+     QMutexLocker lock(&_subTaskMutex);
+     ++_subTaskCount;
+     task->submit(data);
+}
+
+void AsyncronousTask::subTaskFinished( AsyncronousTask*, DataBlob* data ) {
+     QMutexLocker lock(&_subTaskMutex);
+     if( ! --_subTaskCount ) {
+        _subTaskWaitCondition.wakeAll();
+     }
+
 }
 
 /*
 void AsyncronousTask::link( AsyncronousTask* task ) {
-     link( boost::bind( &AsyncronousTask::run, &task, _1) );
+     link( boost::bind( &AsyncronousTask::run, task, _1) );
 }
+*/
+
 
 void AsyncronousTask::link( const boost::function1<DataBlob*, DataBlob*>& functor ) {
      _linkedFunctors.append( DataBlobFunctorMonitor(functor, this) );
 }
-*/
 
 void AsyncronousTask::onChainCompletion( const boost::function1<void, DataBlob*>& functor ) {
     _callBacks.append(functor);

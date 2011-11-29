@@ -40,6 +40,7 @@ set(lib_src
     src/WeightedSpectrumDataSet.cpp
     src/AsyncronousTask.cpp
     src/GPU_Task.cpp
+    src/GPU_MemoryMap.cpp
 #    src/AbstractGPU_Module.cpp
 )
 if(CUDA_FOUND)
@@ -49,9 +50,6 @@ if(CUDA_FOUND)
 endif(CUDA_FOUND)
 
 set(lib_moc_headers
-    GPU_Manager.h
-    GPU_Job.h
-    GPU_Resource.h
     AsyncronousTask.h
     GPU_Task.h
 )

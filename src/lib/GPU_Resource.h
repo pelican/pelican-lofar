@@ -1,7 +1,8 @@
 #ifndef GPU_RESOURCE_H
 #define GPU_RESOURCE_H
 #include <QObject>
-
+#include <QMutex>
+#include <QWaitCondition>
 
 /**
  * @file GPU_Resource.h
@@ -20,9 +21,8 @@ class GPU_Job;
  * 
  */
 
-class GPU_Resource : public QObject
+class GPU_Resource
 {
-    Q_OBJECT
 
     public:
         GPU_Resource();
@@ -32,10 +32,8 @@ class GPU_Resource : public QObject
     protected:
         virtual void run( GPU_Job* job) = 0;
 
-    signals:
-        void finished();
-
     private:
+
 };
 
 } // namespace lofar

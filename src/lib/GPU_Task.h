@@ -31,14 +31,19 @@ class GPU_Task : public AsyncronousTask
     Q_OBJECT
 
     public:
-        GPU_Task( GPU_Manager* manager );
+        typedef boost::function2<void, GPU_Job*, DataBlob*> preprocessingFunctorT;
+        typedef boost::function1<DataBlob*, const GPU_Job* > postprocessingFunctorT;
+
+    public:
+        GPU_Task( GPU_Manager* manager, const preprocessingFunctorT&, 
+                  const postprocessingFunctorT& );
         ~GPU_Task();
         DataBlob* runJob( DataBlob* data );
 
     private:
         GPU_Manager* _manager;
-        boost::function2<void, GPU_Job*, DataBlob*> _pre;
-        boost::function1<DataBlob*, GPU_Job* > _postProcessingTask;
+        preprocessingFunctorT _pre;
+        postprocessingFunctorT _postProcessingTask;
 
 };
 

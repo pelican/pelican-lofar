@@ -8,6 +8,7 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 set(lofarTestLib_src
     src/LofarUdpEmulator.cpp
     src/LofarEmulatorDataSim.cpp
+    src/GPU_TestCard.cpp
 )
 add_library(lofarTestLib STATIC ${lofarTestLib_src})
 target_link_libraries(lofarTestLib
@@ -19,12 +20,13 @@ target_link_libraries(lofarTestLib
 # ==== Create test binary and add it to the cmake test framework.
 set(lofarTest_src
     src/CppUnitMain.cpp
+    src/GPU_ManagerTest.cpp
     src/AdapterTimeSeriesDataSetTest.cpp
     src/BandPassTest.cpp
     src/BinMapTest.cpp
     src/DataStreamingTest.cpp
     #src/FilterBankAdapterTest.cpp
-    src/LofarChunkerTest.cpp
+    #src/LofarChunkerTest.cpp
     src/LofarDataSplittingChunkerTest.cpp
     #src/PelicanBlobClientTest.cpp
     src/PPF_ChanneliserTest.cpp

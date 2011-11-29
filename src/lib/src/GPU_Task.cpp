@@ -11,9 +11,11 @@ namespace lofar {
 /**
  *@details GPU_Task 
  */
-GPU_Task::GPU_Task( GPU_Manager* manager )
+GPU_Task::GPU_Task( GPU_Manager* manager, const preprocessingFunctorT& pre, const postprocessingFunctorT& post )
     : AsyncronousTask( boost::bind( &GPU_Task::runJob, this, _1 ) ), _manager(manager)
 {
+    _pre = pre;
+    _postProcessingTask = post;
 }
 
 /**
