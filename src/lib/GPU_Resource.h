@@ -27,13 +27,13 @@ class GPU_Resource : public QObject
     public:
         GPU_Resource();
         virtual ~GPU_Resource();
-        void exec(const GPU_Job&);
+        void exec(GPU_Job*);
 
     protected:
-        virtual void run( const GPU_Job& job) = 0;
+        virtual void run( GPU_Job* job) = 0;
 
     signals:
-        void ready();
+        void finished();
 
     private:
 };

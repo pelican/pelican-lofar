@@ -6,6 +6,7 @@
 #include <QtCore/QObject>
 #include <QtCore/QList>
 #include <QtCore/QSet>
+#include <QtCore/QMutex>
 #include "GPU_Resource.h"
 
 /**
@@ -34,7 +35,7 @@ class GPU_Manager : public QThread
         GPU_Manager( QObject* parent=0 );
         ~GPU_Manager();
 
-        void submit( const GPU_Job& job ); 
+        void submit( GPU_Job* job ); 
         void addResource(GPU_Resource* r);
 
     protected:
@@ -45,7 +46,8 @@ class GPU_Manager : public QThread
         void _resourceFree();
 
     private:
-        QList<GPU_Job> _queue;
+        QMutex _resourceMutex;
+        QList<GPU_Job*> _queue;
         QList<GPU_Resource*> _resources;
         QList<GPU_Resource*> _freeResource;
 };

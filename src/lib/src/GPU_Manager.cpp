@@ -1,4 +1,7 @@
 #include "GPU_Manager.h"
+#include <QMutexLocker>
+#include <QtConcurrentRun>
+#include <boost/bind.hpp>
 #include "GPU_Resource.h"
 #include "GPU_Job.h"
 #include "GPU_NVidia.h"
@@ -27,7 +30,7 @@ GPU_Manager::~GPU_Manager()
 
 void GPU_Manager::addResource(GPU_Resource* r) {
      _resources.append(r);
-     connect(r, SIGNAL(ready()), this, SLOT( _resourceFree() ) );
+     connect(r, SIGNAL(finished()), this, SLOT( _resourceFree() ) );
      _freeResource.append(r);
      _matchResources();
 }
@@ -40,6 +43,8 @@ void GPU_Manager::run() {
     // addResource(new GPU_NVidia);
     // import NVidia cards
 #ifdef CUDA_FOUND
+    // We will take all the available NVidia cards for now
+    // This should really be made configurable in the future
     GPU_NVidia::initialiseResources(this);
 #endif
 
@@ -56,19 +61,24 @@ void GPU_Manager::run() {
 
 void GPU_Manager::_matchResources() {
      if( _queue.size() > 0 ) {
+        QMutexLocker lock(&_resourceMutex);
         if( _freeResource.size() > 0 ) {
-            _freeResource.takeFirst()->exec( _queue.takeFirst() );
+            QtConcurrent::run( boost::bind( &GPU_Resource::exec, _freeResource.takeFirst(),  _queue.takeFirst())  );
         }
      }
 }
 
-void GPU_Manager::submit( const GPU_Job& job) {
+void GPU_Manager::submit( GPU_Job* job) {
+     job->setAsRunning(); // mark job as being dealt with
      _queue.append(job);
      _matchResources();
 } 
 
 void GPU_Manager::_resourceFree() {
-     _freeResource.append((GPU_Resource*)sender());
+     {
+        QMutexLocker lock(&_resourceMutex);
+        _freeResource.append((GPU_Resource*)sender());
+     }
      _matchResources();
 }
 
