@@ -12,8 +12,10 @@
 namespace pelican {
 namespace lofar {
 
+// constructor
 /**
- *@details RFI_Clipper
+ * @details Reads the xml config files and picks up the bandbass data.
+ *
  */
 RFI_Clipper::RFI_Clipper( const ConfigNode& config )
   : AbstractModule( config ), _active(true), _crFactor(10.0),_srFactor(4.0), _current(0), _currentChunk(0),
@@ -55,7 +57,7 @@ RFI_Clipper::RFI_Clipper( const ConfigNode& config )
     _medianFromFile = _bandPass.median();
     _rmsFromFile = _bandPass.rms();
     _zeroDMing = 0;
-    _num = 0; // _num is the number of points in the history
+    _num = 0; // _num is the number of spectra in the history
     _numChunks = 0; // _numChunks is the number of chunks in the history
     if( config.getOption("zeroDMing", "active" ) == "true" ) {
       _zeroDMing = 1;
@@ -79,85 +81,46 @@ RFI_Clipper::RFI_Clipper( const ConfigNode& config )
     }
 }
 
-/**
- *@details
- */
+// destructor
 RFI_Clipper::~RFI_Clipper()
 {
 }
 
-/*
-void RFI_Clipper::run( WeightedSpectrumDataSet* weightedStokes )
-{
-    if( _active ) {
-        SpectrumDataSetStokes* stokesAll =
-            static_cast<SpectrumDataSetStokes*>(weightedStokes->dataSet());
-        SpectrumDataSet<float>* weights = weightedStokes->weights();
-        float* I;
-        unsigned nSamples = stokesAll->nTimeBlocks();
-        unsigned nSubbands = stokesAll->nSubbands();
-        unsigned nChannels = stokesAll->nChannels();
-        unsigned nPolarisations = stokesAll->nPolarisations();
-        unsigned nBins = nChannels * nSubbands;
-
-        _map.reset( nBins );
-        _map.setStart( _startFrequency );
-        _map.setEnd( _endFrequency );
-        _bandPass.reBin(_map);
-
-        // create an ordered copy of the data
-        _copyI.resize(nBins);
-        for (unsigned t = 0; t < nSamples; ++t) {
-            int bin = -1;
-            for (unsigned s = 0; s < nSubbands; ++s) {
-                I = stokesAll -> spectrumData(t, s, 0);
-                for (unsigned c = 0; c < nChannels; ++c) {
-                    _copyI[++bin]=I[c];
-                }
-            }
-        }
-
-        // calculate the DC offset between bandpass description and current spectrum
-        std::nth_element(_copyI.begin(), _copyI.begin()+_copyI.size()/2, _copyI.end());
-
-        // --- .50 microseconds to here (10000 iterations) ----------------
-v        float median = (float)*(_copyI.begin()+_copyI.size()/2);
-        float medianDelta = median - _bandPass.median();
-        // readjust relative to median
-        float margin = std::fabs(_rFactor * _bandPass.rms());
-        I = stokesAll->data();
-        float *W = weights->data();
-        for (unsigned t = 0; t < nSamples; ++t) {
-#pragma omp parallel for
-            for (unsigned s = 0; s < nSubbands; ++s) {
-                int bin = (s * nChannels) - 1;
-                long index = stokesAll->index(s, nSubbands,
-                        0, nPolarisations,
-                        t, nChannels );
-
-                //float *I = stokesAll -> spectrumData(t, s, 0);
-                //float *W = weights -> spectrumData(t, s, 0);
-                for (unsigned c = 0; c < nChannels; ++c) {
-                    ++bin;
-                    float bandpass = _bandPass.intensityOfBin( bin );
-                    float res = I[index +c] - medianDelta - bandpass;
-                    if ( res > margin ) {
-                        W[index +c] = 0.0;
-                    }
-                    I[index +c] *= W[index +c];
-                }
-            }
-            // loop takes from 7millsecs (first iteration) to 7 microsecs (over 1000 samples)
-        }
-    }
-}
-*/
-
 /**
- * @details RFI clipper to be used with Stokes-I out of Stokes Generator
+ * @details The following if statement from RFI_Clipper.cpp tests the channels for abnormal intensity spikes.
+ * @verbatim
+  if (I[index + c] - medianDelta > margin ) {
+            I[index + c] = 0.0;
+            W[index +c] = 0.0;
+            for(unsigned int pol = 1; pol < nPolarisations; ++pol ) {
+              long index = stokesAll->index(s, nSubbands,
+                                          pol, nPolarisations, t, nChannels );
+              I[index + c] = 0.0;
+              W[index +c] = 0.0;
+            }
+          }
+          else{
+            // Subtract the current model from the data
+            I[index+c] -= bandPass[bin] + _zeroDMing * medianDelta ;
+            // if the condition doesn't hold build up the statistical
+            // description;
+            spectrumSum += I[index+c];
+
+            // Use this for RMS calculation - This is the RMS in the reference frame of the input
+            spectrumSumSq += pow(I[index+c],2);
+            // Scale the data by the RMS
+            I[index+c] /= modelRMS;
+            ++goodChannels;
+          }
+ * @endverbatim
+ *
+ * The next statements check the entire spectra against the current model. Discarding bad data and keeping good data, using it to update the bandpass model used by the clipper.
+ * 
+ * Lastly the RFI Clipper computes the RFI stats for each blob so that they are available for use.
+ *
  */
-//void RFI_Clipper::run(SpectrumDataSetStokes* stokesAll)
-void RFI_Clipper::run( WeightedSpectrumDataSet* weightedStokes )
+
+void RFI_Clipper::run( WeightedSpectrumDataSet* weightedStokes ) // RFI clipper to be used with Stokes-I out of Stokes Generator 
 {
   if( _active ) {
     float blobRMS = 0.0f;

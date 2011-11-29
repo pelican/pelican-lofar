@@ -32,10 +32,10 @@ class SpectrumDataSetStokes;
 class StokesIntegrator : public AbstractModule
 {
     public:
-        /// Constructor
+        ///
         StokesIntegrator(const ConfigNode& config);
 
-        /// Destructor
+        ///
         ~StokesIntegrator();
 
         ///

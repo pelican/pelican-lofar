@@ -23,6 +23,14 @@ For more verbose documentation on how to use Pelican, please refer to our
 
 
 
+
+
+
+
+
+
+
+
 \defgroup c Pelican modules
 \defgroup c_core Core
 \ingroup c

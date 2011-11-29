@@ -32,10 +32,17 @@ class SpectrumDataSetC32;
  *
  * @details
  * Channelises time stream data using a polyphase channelising filter.
+ * For configuration info see @ref page0
  *
- * @section Configuration:
+ */
+
+/*
+ * @page page0 PPFChanneliser
  *
- * Example configuration node.
+ * @section config Configuration
+ */
+
+/** @details Example configuration node.
  *
  * @verbatim
  * 		<PPFChanneliser name="">
@@ -43,15 +50,18 @@ class SpectrumDataSetC32;
  * 			<processingThreads number="2"/>
  * 			<filter nTaps="8" filterWindow="kaiser"/>
  * 		</PPFChanneliser>
- * @verbatim
+ * @endverbatim
  *
  * - channels: The number of channels generated in the spectra.
+ *
  * - processingThreads: The number of threads to parallelise over.
+ *
  * - filter: Options for FIR filer coefficients.
  *     - nTaps: Number of filter taps in the PPF coefficient data
  *     - filterWindow: The filter window type used in generating FIR filer
  *       coefficients. Possible options are: "kaiser" (default), "gaussian",
  *       "blackman" and "hamming".
+ *
  *
  */
 

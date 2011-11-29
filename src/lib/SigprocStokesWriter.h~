@@ -1,10 +1,6 @@
 #ifndef SIGPROCSTOKESWRITER_H
 #define SIGPROCSTOKESWRITER_H
 
-/**
- * @file SigprocStokesWriter.h
- */
-
 #include "pelican/output/AbstractOutputStream.h"
 #include "pelican/utility/ConfigNode.h"
 #include "pelican/data/DataBlob.h"
@@ -17,26 +13,11 @@ namespace pelican {
 namespace lofar {
 
 class SpectrumDataSetStokes;
-
-/**
- * @class SigprocStokesWriter
- *
- * @brief
- *
- * @details
- *
- */
-
 class SigprocStokesWriter : public AbstractOutputStream
 {
     public:
-	/// Constructor
         SigprocStokesWriter( const ConfigNode& config );
-
-	/// Destructor
         ~SigprocStokesWriter();
-
-	/// File path
         QString filepath() { return _filepath; }
 
     protected:

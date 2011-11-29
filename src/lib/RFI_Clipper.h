@@ -27,10 +27,17 @@ namespace lofar {
 class RFI_Clipper : public AbstractModule
 {
     public:
+	/// Constructor
         RFI_Clipper( const ConfigNode& config );
+
+	/// Destructor
         ~RFI_Clipper();
+
+	/// RFI clipper to be used with Stokes-I out of Stokes Generator 
         void run( WeightedSpectrumDataSet* weightedStokes );
-        const BandPass& bandPass() const { return _bandPass; }; // return the BandPass Filter in use
+
+	/// Return the BandPass Filter in use
+        const BandPass& bandPass() const { return _bandPass; }; 
 
     private:
         BinMap  _map;
