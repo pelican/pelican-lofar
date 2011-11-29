@@ -20,9 +20,19 @@ class GPU_Job;
  * @class GPU_Manager
  *  
  * @brief
- *    A GPU Reosurce Manager and Job Queue
+ *    A GPU Resource Manager and Job Queue
  * @details
- * 
+ *    Allows you to submit jobs to a queue of GPU resources
+ *    As the resource becomes available, the next item from the queue
+ *    is taken and executed.
+ *
+ *    Use the @code addResource() method to add GPU cards to be managed. Note that
+ *    all the resources should be compatible with the types of jobs to be
+ *    submitted - there is no checking of job suitability.
+ *
+ *    call @code submit() to add a job to be processed. All job status 
+ *    information/callbacks etc can be found through the GPU_Job interface.
+ *
  */
 
 class GPU_Manager
@@ -32,18 +42,22 @@ class GPU_Manager
         GPU_Manager();
         ~GPU_Manager();
 
+        /// submit a job to the queue
         void submit( GPU_Job* job ); 
+
+        /// add a GPU resource (e.g. an NVidia card) to manage
+        //  ownership is transferred to the manager
         void addResource(GPU_Resource* r);
+
         /// return the number of idle GPU resources
         ///  available
         int freeResources() const;
+
         /// return the number of jobs that are in the queue
         int jobsQueued() const;
 
-    protected:
-        void _matchResources();
-
     private:
+        void _matchResources();
         void _runJob( GPU_Resource*, GPU_Job* );
         void _resourceFree( GPU_Resource* );
 
