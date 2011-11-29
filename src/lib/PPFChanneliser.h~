@@ -36,13 +36,12 @@ class SpectrumDataSetC32;
  *
  */
 
-/*
+/**
  * @page page0 PPFChanneliser
  *
  * @section config Configuration
- */
-
-/** @details Example configuration node.
+ *
+ * Example configuration node.
  *
  * @verbatim
  * 		<PPFChanneliser name="">

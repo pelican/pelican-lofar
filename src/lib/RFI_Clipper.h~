@@ -33,7 +33,7 @@ class RFI_Clipper : public AbstractModule
 	/// Destructor
         ~RFI_Clipper();
 
-	/// RFI clipper to be used with Stokes-I out of Stokes Generator 
+	
         void run( WeightedSpectrumDataSet* weightedStokes );
 
 	/// Return the BandPass Filter in use

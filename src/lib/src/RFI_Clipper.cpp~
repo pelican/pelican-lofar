@@ -103,7 +103,7 @@ RFI_Clipper::~RFI_Clipper()
             // Subtract the current model from the data
             I[index+c] -= bandPass[bin] + _zeroDMing * medianDelta ;
             // if the condition doesn't hold build up the statistical
-            // description.
+            // description;
             spectrumSum += I[index+c];
 
             // Use this for RMS calculation - This is the RMS in the reference frame of the input
