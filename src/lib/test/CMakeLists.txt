@@ -10,8 +10,20 @@ set(lofarTestLib_src
     src/LofarEmulatorDataSim.cpp
     src/GPU_TestCard.cpp
 )
-add_library(lofarTestLib STATIC ${lofarTestLib_src})
+# CUDA routines
+set(cuda_src
+   CudaVectorAdd.cu
+   )
+if( CUDA_FOUND )
+    CUDA_COMPILE( cuda_obj ${cuda_src} )
+    list(APPEND lofarTestLib_src 
+         src/TestCudaVectorAdd.cpp
+        )
+endif( CUDA_FOUND )
+
+add_library(lofarTestLib STATIC ${lofarTestLib_src} ${cuda_obj} )
 target_link_libraries(lofarTestLib
+    pelican-lofar
     ${QT_QTNETWORK_LIBRARY}
     ${QT_QTCORE_LIBRARY}
     ${Boost_PROGRAM_OPTIONS_LIBRARY}
@@ -21,20 +33,26 @@ target_link_libraries(lofarTestLib
 set(lofarTest_src
     src/CppUnitMain.cpp
     src/GPU_ManagerTest.cpp
-    src/AdapterTimeSeriesDataSetTest.cpp
-    src/BandPassTest.cpp
-    src/BinMapTest.cpp
-    src/DataStreamingTest.cpp
+#    src/AdapterTimeSeriesDataSetTest.cpp
+#    src/BandPassTest.cpp
+#   src/BinMapTest.cpp
+#   src/DataStreamingTest.cpp
     #src/FilterBankAdapterTest.cpp
     #src/LofarChunkerTest.cpp
-    src/LofarDataSplittingChunkerTest.cpp
+#   src/LofarDataSplittingChunkerTest.cpp
     #src/PelicanBlobClientTest.cpp
-    src/PPF_ChanneliserTest.cpp
-    src/PPF_CoefficientsTest.cpp
-    src/PumaOutputTest.cpp
-    src/RFI_ClipperTest.cpp
-    src/SpectrumDataSetTest.cpp
+#   src/PPF_ChanneliserTest.cpp
+#   src/PPF_CoefficientsTest.cpp
+#   src/PumaOutputTest.cpp
+#   src/RFI_ClipperTest.cpp
+#   src/SpectrumDataSetTest.cpp
 )
+if(CUDA_FOUND)
+    list(APPEND lofarTest_src
+            src/GPU_NVidiaTest.cpp
+        )
+endif(CUDA_FOUND)
+
 add_executable(lofarTest ${lofarTest_src})
 set_target_properties(lofarTest PROPERTIES 
     COMPILE_FLAGS "${OpenMP_CXX_FLAGS}"

@@ -23,17 +23,17 @@ GPU_Job::~GPU_Job()
     if( _waitCondition ) delete _waitCondition;
 }
 
-void GPU_Job::addKernel( const GPU_Kernel& kernel )
+void GPU_Job::addKernel( GPU_Kernel* kernel )
 {
-    _kernels.append(&kernel); 
+    _kernels.append(kernel); 
 }
 
 
-void GPU_Job::setInputMap( const boost::shared_ptr<GPU_MemoryMap>& map ) {
+void GPU_Job::addInputMap( const GPU_MemoryMap& map ) {
     _inputMaps.append(map);
 }
 
-void GPU_Job::setOutputMap( const boost::shared_ptr<GPU_MemoryMap>& map ) {
+void GPU_Job::addOutputMap( const GPU_MemoryMap& map ) {
     _outputMaps.append(map);
 }
 

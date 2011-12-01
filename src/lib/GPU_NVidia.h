@@ -4,8 +4,10 @@
 #ifdef CUDA_FOUND
 
 #include "GPU_Resource.h"
+#include "GPU_MemoryMap.h"
 #include <cuda.h>
 #include <cuda_runtime_api.h>
+#include <QHash>
 
 /**
  * @file GPU_NVidia.h
@@ -37,6 +39,7 @@ class GPU_NVidia : public GPU_Resource
 
     private:
         cudaDeviceProp _deviceProp;
+        QHash<GPU_MemoryMap, void*> _memPointers;
 };
 
 } // namespace lofar

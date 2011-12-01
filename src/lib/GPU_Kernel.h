@@ -1,6 +1,6 @@
 #ifndef GPU_KERNEL_H
 #define GPU_KERNEL_H
-
+#include <vector>
 
 /**
  * @file GPU_Kernel.h
@@ -24,7 +24,7 @@ class GPU_Kernel
     public:
         GPU_Kernel(  );
         virtual ~GPU_Kernel();
-        virtual void run() = 0;
+        virtual void run( const std::vector<void*>& devicePointers ) = 0;
 
     private:
 };
