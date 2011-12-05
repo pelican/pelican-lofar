@@ -27,17 +27,10 @@ namespace lofar {
 class RFI_Clipper : public AbstractModule
 {
     public:
-	/// Constructor
         RFI_Clipper( const ConfigNode& config );
-
-	/// Destructor
         ~RFI_Clipper();
-
-	/// RFI clipper to be used with Stokes-I out of Stokes Generator 
         void run( WeightedSpectrumDataSet* weightedStokes );
-
-	/// Return the BandPass Filter in use
-        const BandPass& bandPass() const { return _bandPass; }; 
+        const BandPass& bandPass() const { return _bandPass; }; // return the BandPass Filter in use
 
     private:
         BinMap  _map;
@@ -49,13 +42,16 @@ class RFI_Clipper : public AbstractModule
         float _medianFromFile;
         float _rmsFromFile;
         float _crFactor, _srFactor; // scale factor for rejection (multiples of RMS)
-        QVector<float> _history, _historyMean, _historyRMS;
-        int _current, _currentChunk; // history pointers
+        QVector<float> _history, _historyMean, _historyRMS, _historyNewSum;
+        int _current; // history pointer
         int _badSpectra;
         int _num, _numChunks;// number of values in history
         int _maxHistory; // max size of history buffer
 // flag for removing median from each spectrum, equivalent to the zero-DMing technique
         int _zeroDMing; 
+        float _runningMedian; // the running average of the median
+        float _integratedNewSum; // the integrated value of the sum of the spectrum
+        float _integratedNewSumSq; // the integrated value of the sum of the spectrum
 };
 
 PELICAN_DECLARE_MODULE(RFI_Clipper)
