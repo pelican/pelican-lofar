@@ -23,15 +23,14 @@ namespace lofar {
 class GPU_MemoryMap
 {
     public:
-        GPU_MemoryMap(  );
+        GPU_MemoryMap( void* host_address, unsigned long bytes );
         virtual ~GPU_MemoryMap();
-        inline char* start() { return _start; };
-        inline char* destination() { return _destination; };
+        inline void* hostPtr() { return _host; };
         inline unsigned long size() { return _size; }
+        bool operator==(const GPU_MemoryMap&);
 
     private:
-        char* _start;
-        char* _destination;
+        void* _host;
         unsigned long _size;
 };
 
