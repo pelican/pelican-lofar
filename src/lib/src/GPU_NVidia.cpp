@@ -50,8 +50,9 @@ void GPU_NVidia::run( GPU_Job* job )
 }
 
 void GPU_NVidia::initialiseResources(GPU_Manager* manager) {
-     int num_devices;
+     int num_devices=0;
      cudaGetDeviceCount(&num_devices);
+std::cout << "nVidia cards found: " << num_devices << std::endl;
      for(int i = 0; i < num_devices; i++) {
         manager->addResource( new GPU_NVidia( i ) );
      }
