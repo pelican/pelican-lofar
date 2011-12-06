@@ -35,7 +35,15 @@ SigprocStokesWriter::SigprocStokesWriter(const ConfigNode& configNode )
     _filepath = configNode.getOption("file", "filepath");
     _topsubband     = configNode.getOption("topSubbandIndex", "value", "150").toFloat();
     _lbahba     = configNode.getOption("LBA_0_or_HBA_1", "value", "1").toFloat();
-    _fch1     = _lbahba * 100 + _clock / (_nRawPols * _nTotalSubbands) * _topsubband;
+    if (_lbahba == 0) {
+      _fch1     = _clock / (_nRawPols * _nTotalSubbands) * _topsubband;
+    }
+    else{
+      if (_clock == 200)
+        _fch1     = 100 + _clock / (_nRawPols * _nTotalSubbands) * _topsubband;
+      if (_clock == 160)
+        _fch1     = 160 + _clock / (_nRawPols * _nTotalSubbands) * _topsubband;
+    }
     _foff     = -_clock / (_nRawPols * _nTotalSubbands) / float(_nChannels);
     _tsamp    = (_nRawPols * _nTotalSubbands) * _nChannels * _integration / _clock/ 1e6;
     _nPols    = configNode.getOption("params", "nPolsToWrite", "1").toUInt();
