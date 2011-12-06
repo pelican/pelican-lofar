@@ -9,7 +9,7 @@ set(lib_src
     src/BandPassOutput.cpp
     src/BandPassRecorder.cpp
     src/BlobStatistics.cpp
-    src/DedispersionModule.cpp
+#    src/DedispersionModule.cpp
     src/EmbraceChunker.cpp
     src/FilterBankHeader.cpp
     src/FilterBankAdapter.cpp
@@ -41,7 +41,7 @@ set(lib_src
     src/GPU_Task.cpp
     src/GPU_Kernel.cpp
     src/GPU_MemoryMap.cpp
-    src/AbstractGPU_Module.cpp
+#    src/AbstractGPU_Module.cpp
 )
 if(CUDA_FOUND)
     list(APPEND lib_src
