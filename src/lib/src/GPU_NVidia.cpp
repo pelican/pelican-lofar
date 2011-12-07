@@ -3,6 +3,7 @@
 #include "GPU_Kernel.h"
 #include "GPU_Job.h"
 #include "GPU_MemoryMap.h"
+#include "GPU_NVidiaConfiguration.h"
 #include <iostream>
 #include <vector>
 
@@ -14,6 +15,7 @@ namespace lofar {
  *@details GPU_NVidia 
  */
 GPU_NVidia::GPU_NVidia( unsigned int id )
+     : _currentConfig(0), _deviceId(id)
 {
     cudaGetDeviceProperties(&_deviceProp, id);
 }
@@ -23,36 +25,72 @@ GPU_NVidia::GPU_NVidia( unsigned int id )
  */
 GPU_NVidia::~GPU_NVidia()
 {
+    freeMem( _currentDevicePointers );
     //cutilDeviceReset();
 }
 
 void GPU_NVidia::run( GPU_Job* job )
 {
-     // copy from host to device memory
-     std::vector<void*> devicePointers;
-     //foreach( const boost::shared_ptr<GPU_MemoryMap>& map, job->inputMemoryMaps() ) {
-         // Allocate memory if required
-         //if( ! _memPointers.contains(map.get()) ) {
-         //    cudaMalloc( &_memPointer[map] , map->size() );
-         //}
-         //cudaMemcpy( map->start(), _memPointers[map], map->size(), cudaMemcpyHostToDevice );
-     //}
-
+     // set to this device
+     cudaSetDevice( _deviceId );
      // execute the kernels
      foreach( GPU_Kernel* kernel, job->kernels() ) {
-        kernel->run( devicePointers );
+        setupConfiguration( kernel->configuration() );
+        kernel->run( _currentDevicePointers );
+        cudaDeviceSynchronize();
+        if( ! cudaPeekAtLastError() ) {
+            // copy device memory to host
+            foreach( const GPU_MemoryMap& map, _currentConfig->outputMaps() ) {
+                if( map.hostPtr() ) {
+                    cudaMemcpy( map.hostPtr(), _memPointers[map],
+                                map.size(), cudaMemcpyDeviceToHost );
+                }
+            }
+        }
+        else {
+             throw( cudaGetErrorString( cudaPeekAtLastError() ) );
+        }
      }
+}
 
-     // copy device to host
-     //foreach( const boost::shared_ptr<GPU_MemoryMap>& map, job->outputMemoryMaps() ) {
-         //cudaMemcpy( map->hostPtr() , map->destination(), map->size(), cudaMemcpyDeviceToHost );
-     //}
+void GPU_NVidia::setupConfiguration ( const GPU_NVidiaConfiguration* c )
+{
+     if( _currentConfig != c ) {
+         // free memory from existing job
+         // TODO write code to test for overlapping mem
+         // requirements for different configurations
+         // to avoid unnesasary deallocations/allocations
+         freeMem( _currentDevicePointers );
+         _currentDevicePointers.clear();
+
+         // allocate gpu memory
+         foreach( const GPU_MemoryMap& map, c->allMaps() ) {
+             if( ! _memPointers.contains(map) ) {
+                 cudaMalloc( &(_memPointers[map]) , map.size() );
+             }
+             _currentDevicePointers.append( _memPointers[map] );
+         }
+         // upload input data from host
+         foreach( const GPU_MemoryMap& map, c->inputMaps() ) {
+             if( map.hostPtr() ) {
+                 cudaMemcpy( _memPointers[map], map.hostPtr(),
+                             map.size(), cudaMemcpyHostToDevice );
+            cudaDeviceSynchronize();
+             }
+         }
+         _currentConfig = c;
+     }
+}
+
+void GPU_NVidia::freeMem( const QList<void*>& pointers ) {
+     foreach( void* p, pointers ) {
+        cudaFree( p );
+     }
 }
 
 void GPU_NVidia::initialiseResources(GPU_Manager* manager) {
      int num_devices=0;
      cudaGetDeviceCount(&num_devices);
-std::cout << "nVidia cards found: " << num_devices << std::endl;
      for(int i = 0; i < num_devices; i++) {
         manager->addResource( new GPU_NVidia( i ) );
      }

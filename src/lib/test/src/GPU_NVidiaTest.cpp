@@ -4,6 +4,7 @@
 #include "GPU_Job.h"
 #include "GPU_MemoryMap.h"
 #include "TestCudaVectorAdd.h"
+#include "GPU_NVidiaConfiguration.h"
 #include <string>
 
 
@@ -44,25 +45,32 @@ void GPU_NVidiaTest::test_managedCard()
        CPPUNIT_FAIL( msg );
     }
     // set up a GPU vector addition job
-    int size = 2;
+    int size = 2 ;
     std::vector<float> vec1(size);
-    vec1.push_back(1.0);
-    vec1.push_back(2.0);
+    vec1[0]=1.0;
+    vec1[1]=2.0;
     std::vector<float> vec2(size);
-    vec2.push_back(100.0);
-    vec2.push_back(102.0);
+    vec2[0]=100.0;
+    vec2[1]=102.0;
     std::vector<float> result(size);
+    CPPUNIT_ASSERT( vec1[0] + vec2[0] != result[0] );
+    CPPUNIT_ASSERT( vec1[1] + vec2[1] != result[1] );
     GPU_Job job;
-    GPU_MemoryMap vec1map( &vec1[0], size );
-    GPU_MemoryMap vec2map( &vec2[0], size );
-    GPU_MemoryMap resultmap( &result[0], size );
+    GPU_MemoryMap vec1map( vec1 );
+    CPPUNIT_ASSERT( vec1[0] == 1.0  );
+    GPU_MemoryMap vec2map( vec2 );
+    GPU_MemoryMap resultmap( result );
     TestCudaVectorAdd testKernel;
-    job.addInputMap(vec1map);
-    job.addInputMap(vec2map);
-    job.addOutputMap(resultmap);
+    GPU_NVidiaConfiguration config;
+    config.addInputMap( vec1map );
+    config.addInputMap( vec2map );
+    config.addOutputMap( resultmap );
+    testKernel.setConfiguration( &config );
     job.addKernel( &testKernel );
     m.submit(&job);
     job.wait();
+    CPPUNIT_ASSERT_EQUAL( vec1[0] + vec2[0] , result[0] );
+    CPPUNIT_ASSERT_EQUAL( vec1[1] + vec2[1] , result[1] );
     CPPUNIT_ASSERT_EQUAL( GPU_Job::Finished, job.status() );
 }
 

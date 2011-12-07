@@ -36,11 +36,7 @@ class GPU_Job
         ~GPU_Job();
         void addKernel( GPU_Kernel* kernel );
         const QList<GPU_Kernel*>& kernels() { return _kernels; };
-        void addInputMap( const GPU_MemoryMap& map );
-        void addOutputMap( const GPU_MemoryMap& map );
         inline void setStatus( const JobStatus& status ) { _status = status; };
-        const QList<GPU_MemoryMap>& inputMemoryMaps() const { return _inputMaps; };
-        const QList<GPU_MemoryMap>& outputMemoryMaps() const { return _outputMaps; };
         void setAsRunning();
         inline JobStatus status() const { return _status; };
         void emitFinished();
@@ -48,8 +44,6 @@ class GPU_Job
 
     private:
         QList<GPU_Kernel*> _kernels;
-        QList<GPU_MemoryMap> _outputMaps;
-        QList<GPU_MemoryMap> _inputMaps;
         // status variables
         bool _processing;
         mutable QMutex _mutex;
