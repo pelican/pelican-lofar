@@ -89,7 +89,7 @@ void BandPass::_buildData(const BinMap& map, float scale, float offset) {
     int mapId = map.hash();
     _dataSets.insert(mapId, QVector<float>(map.numberBins()) );
     for( unsigned int i=0; i < map.numberBins(); ++i ) {
-        _dataSets[mapId][i] = scale * _evaluate(map.binAssignmentNumber(i)) + offset;
+        _dataSets[mapId][i] = scale * _evaluate(map.binAssignmentNumber(i));
     }
     _zeroChannelsMap(map);
 }

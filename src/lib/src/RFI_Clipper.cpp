@@ -295,7 +295,7 @@ void RFI_Clipper::run( WeightedSpectrumDataSet* weightedStokes )
         _badSpectra ++;
         if (_badSpectra == _history.size()){
           std::cout << "------ RFI_Clipper ----- Accepted a jump in the bandpass model to: " 
-                    << medianDelta << " " << spectrumRMS * modelRMS << std::endl << std::endl;
+                    << medianDelta << " " << spectrumRMS  << std::endl << std::endl;
           _bandPass.setMedian(medianDelta);
           _bandPass.setRMS(spectrumRMS); // RMS in incoming reference frame
           _badSpectra = 0;
@@ -335,7 +335,7 @@ void RFI_Clipper::run( WeightedSpectrumDataSet* weightedStokes )
               for (unsigned c = 0; c < nChannels; ++c) {
                 // if the channel hasn't been clipped already, remove the spectrum average
                 if (W[index+c] != 0.0){
-                  I[index+c] -= spectrumSum/modelRMS;
+                  I[index+c] -= spectrumSum/spectrumRMS;//modelRMS;
                   newSum += I[index+c];
                 }
               }
@@ -389,7 +389,7 @@ void RFI_Clipper::run( WeightedSpectrumDataSet* weightedStokes )
       }
     }
     
-    // Now the chunk has finished. All the remains is to pass on the stats of the chunk
+    // Now the chunk has finished. All that remains is to pass on the stats of the chunk
     // 1. update the model RMS first
     if (goodSamples !=0){
       blobRMS /= goodSamples;
