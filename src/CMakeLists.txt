@@ -33,6 +33,8 @@ endif(NOT BINARY_INSTALL_DIR)
 include(compilerDefaults)
 include(cmake/tags.cmake)
 
+set(CUDA_PROPAGATE_HOST_FLAGS OFF)
+
 # === Find Dependencies.
 find_package(Pelican REQUIRED)
 find_package(CppUnit REQUIRED)
