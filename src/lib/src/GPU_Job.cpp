@@ -29,14 +29,6 @@ void GPU_Job::addKernel( GPU_Kernel* kernel )
 }
 
 
-void GPU_Job::addInputMap( const GPU_MemoryMap& map ) {
-    _inputMaps.append(map);
-}
-
-void GPU_Job::addOutputMap( const GPU_MemoryMap& map ) {
-    _outputMaps.append(map);
-}
-
 void GPU_Job::wait() const {
     QMutexLocker lock(&_mutex);
     if( _processing  ) {

@@ -46,6 +46,7 @@ set(lib_src
 if(CUDA_FOUND)
     list(APPEND lib_src
             src/GPU_NVidia.cpp
+            src/GPU_NVidiaConfiguration.cpp
         )
 endif(CUDA_FOUND)
 

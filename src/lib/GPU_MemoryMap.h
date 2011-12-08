@@ -1,5 +1,7 @@
 #ifndef GPU_MEMORYMAP_H
 #define GPU_MEMORYMAP_H
+#include <vector>
+#include <QVector>
 
 
 /**
@@ -24,16 +26,30 @@ class GPU_MemoryMap
 {
     public:
         GPU_MemoryMap( void* host_address, unsigned long bytes );
+        template<typename T>
+        GPU_MemoryMap( std::vector<T>& vec ) {
+            _set(_host=&vec[0], vec.size() * sizeof(T) );
+        }
+        template<typename T>
+        GPU_MemoryMap( QVector<T>& vec ) {
+            _set(_host=&vec[0], vec.size() * sizeof(T) );
+        }
         virtual ~GPU_MemoryMap();
-        inline void* hostPtr() { return _host; };
-        inline unsigned long size() { return _size; }
-        bool operator==(const GPU_MemoryMap&);
+        inline void* hostPtr() const { return _host; };
+        inline unsigned long size() const { return _size; }
+        bool operator==(const GPU_MemoryMap&) const;
+        inline unsigned int qHash() const { return _hash; }
+
+    protected:
+        void _set(void* host_address, unsigned long bytes);
 
     private:
         void* _host;
         unsigned long _size;
+        unsigned int _hash;
 };
 
+unsigned int qHash(const GPU_MemoryMap& key);
 } // namespace lofar
 } // namespace pelican
 #endif // GPU_MEMORYMAP_H 

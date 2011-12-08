@@ -33,19 +33,19 @@ target_link_libraries(lofarTestLib
 set(lofarTest_src
     src/CppUnitMain.cpp
     src/GPU_ManagerTest.cpp
-#    src/AdapterTimeSeriesDataSetTest.cpp
-#    src/BandPassTest.cpp
-#   src/BinMapTest.cpp
-#   src/DataStreamingTest.cpp
+    src/AdapterTimeSeriesDataSetTest.cpp
+    src/BandPassTest.cpp
+    src/BinMapTest.cpp
+    src/DataStreamingTest.cpp
     #src/FilterBankAdapterTest.cpp
     #src/LofarChunkerTest.cpp
-#   src/LofarDataSplittingChunkerTest.cpp
+    src/LofarDataSplittingChunkerTest.cpp
     #src/PelicanBlobClientTest.cpp
-#   src/PPF_ChanneliserTest.cpp
-#   src/PPF_CoefficientsTest.cpp
-#   src/PumaOutputTest.cpp
-#   src/RFI_ClipperTest.cpp
-#   src/SpectrumDataSetTest.cpp
+    src/PPF_ChanneliserTest.cpp
+    src/PPF_CoefficientsTest.cpp
+    src/PumaOutputTest.cpp
+    src/RFI_ClipperTest.cpp
+    src/SpectrumDataSetTest.cpp
 )
 if(CUDA_FOUND)
     list(APPEND lofarTest_src

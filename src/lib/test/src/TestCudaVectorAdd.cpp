@@ -1,6 +1,6 @@
 #include "TestCudaVectorAdd.h"
 
-extern "C" void vecAdd( float*, float*, float* );
+extern "C" void vecAdd( const float*, const float*, float*, int );
 
 namespace pelican {
 
@@ -22,8 +22,8 @@ TestCudaVectorAdd::~TestCudaVectorAdd()
 {
 }
 
-void TestCudaVectorAdd::run( const std::vector<void*>&  ) {
-//     vecAdd( (float*)arg[0], (float*)arg[1], (float*)arg[2] );
+void TestCudaVectorAdd::run( const QList<void*>& args  ) {
+     vecAdd( (const float*)args[0], (const float*)args[1], (float*)args[2], 2 );
 }
 
 } // namespace lofar

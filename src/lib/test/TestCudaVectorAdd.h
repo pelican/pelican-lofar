@@ -1,7 +1,7 @@
 #ifndef TESTCUDAVECTORADD_H
 #define TESTCUDAVECTORADD_H
 
-
+#include <QList>
 #include "GPU_Kernel.h"
 
 /**
@@ -26,7 +26,7 @@ class TestCudaVectorAdd : public GPU_Kernel
     public:
         TestCudaVectorAdd();
         virtual ~TestCudaVectorAdd();
-        virtual void run( const std::vector<void*>& devicePointers );
+        virtual void run( const QList<void*>& devicePointers );
 
     private:
 };
