@@ -399,12 +399,12 @@ void RFI_Clipper::run( WeightedSpectrumDataSet* weightedStokes )
     blobSum = _integratedNewSum / _num;
     blobRMS = sqrt( _integratedNewSumSq / _num - pow(blobSum,2));
 
-    // This noise is the approximate value for a non-central
-    // chi-squared distribution with 2N degrees of freedom, where N is
-    // the number of channels
-    // It only works if the data have been scaled to RMS=1
+    // The dedisperser sums nChannels * nSubbands channels. The noise
+    // rms of the sum is very close to sqrt(N) if the noise in each
+    // spectrum is 1. The following only works if the data have been
+    // scaled to RMS=1
     if (_zeroDMing == 1){
-      blobRMS = 2.0*sqrt(nChannels * nSubbands);
+      blobRMS = sqrt(nChannels * nSubbands);
     }
     if (goodSamples !=0){
     weightedStokes->setRMS( blobRMS ); 
