@@ -220,7 +220,6 @@ void RFI_Clipper::run( WeightedSpectrumDataSet* weightedStokes )
             
             // Subtract the current model from the data 
             I[index+c] -= bandPass[bin]; //+ _zeroDMing * median ;
-            
             // if the condition doesn't hold build up the statistical
             // description;
             spectrumSum += I[index+c];
@@ -228,9 +227,6 @@ void RFI_Clipper::run( WeightedSpectrumDataSet* weightedStokes )
             // in the reference frame of the input
             spectrumSumSq += pow(I[index+c],2);
             ++goodChannels;
-            // Scale the data by the RMS (this is potentially the last
-            // place the data gets fiddled with, so must be done here)
-            I[index+c] /= modelRMS;
           }
         }
       }
@@ -327,23 +323,24 @@ void RFI_Clipper::run( WeightedSpectrumDataSet* weightedStokes )
         // the data. Problem is, the data have been scaled by the
         // modelRMS, so spectrumSum needs to be scaled too, and a new
         // sum is computed
-        if (_zeroDMing == 1){
-            for (unsigned s = 0; s < nSubbands; ++s) {
-              long index = stokesAll->index(s, nSubbands,
-                                            0, nPolarisations,
-                                            t, nChannels );
-              for (unsigned c = 0; c < nChannels; ++c) {
-                // if the channel hasn't been clipped already, remove the spectrum average
-                if (W[index+c] != 0.0){
-                  I[index+c] -= spectrumSum/spectrumRMS;//modelRMS;
-                  newSum += I[index+c];
-                }
+        for (unsigned s = 0; s < nSubbands; ++s) {
+          long index = stokesAll->index(s, nSubbands,
+                                        0, nPolarisations,
+                                        t, nChannels );
+          for (unsigned c = 0; c < nChannels; ++c) {
+            // if the channel hasn't been clipped already, remove the spectrum average
+            if (W[index+c] != 0.0){
+              if (_zeroDMing == 1){
+                I[index+c] -= spectrumSum;//spectrumRMS;//modelRMS;
               }
+              // Scale the data by the RMS (this is potentially the last
+              // place the data gets fiddled with, so must be done here)
+              I[index+c] /= spectrumRMS;//spectrumRMS;//modelRMS;
+              newSum += I[index+c];
             }
-            // newSum contains the scaled and integrated spectrum, as a diagnostic
+          }
         }
-        // now using the variable newSum for spectrumSum scaled to output reference frame
-        newSum = spectrumSum/modelRMS;
+        // newSum contains the scaled and integrated spectrum, as a diagnostic
         // Yey! This spectrum has made it out of the clipper so consider it in the noise statistics
         _badSpectra = 0;
         ++goodSamples;
@@ -398,17 +395,25 @@ void RFI_Clipper::run( WeightedSpectrumDataSet* weightedStokes )
     // 2. Use the history of NewSum to compute a running blobSum and
     // blobRMS; blobSum is the value of the running mean of newSum, in
     // the output reference frame
-    if (_zeroDMing != 1){
-      blobSum = _integratedNewSum / _num;
-    }
-    else {
-      blobSum = 0;
-    }
     // Re-use the variable blobRMS to send out the integrated RMS value
+    blobSum = _integratedNewSum / _num;
     blobRMS = sqrt( _integratedNewSumSq / _num - pow(blobSum,2));
+
+    // This noise is the approximate value for a non-central
+    // chi-squared distribution with 2N degrees of freedom, where N is
+    // the number of channels
+    // It only works if the data have been scaled to RMS=1
+    if (_zeroDMing == 1){
+      blobRMS = 2.0*sqrt(nChannels * nSubbands);
+    }
+    if (goodSamples !=0){
     weightedStokes->setRMS( blobRMS ); 
     weightedStokes->setMean( blobSum);
-                    
+    }
+    else {
+      weightedStokes->setRMS( 1e+6 ); 
+      weightedStokes->setMean( 0.0);
+    }      
   }
 }
 } // namespace lofar
