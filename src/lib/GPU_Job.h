@@ -5,6 +5,7 @@
 #include <QtCore/QMutex>
 #include <QtCore/QWaitCondition>
 #include <boost/shared_ptr.hpp>
+#include <boost/function.hpp>
 #include "GPU_MemoryMap.h"
 
 /**
@@ -41,6 +42,8 @@ class GPU_Job
         inline JobStatus status() const { return _status; };
         void emitFinished();
         void wait() const;
+        void addCallBack( const boost::function0<void>& fn ) { _callbacks.append(fn); };
+        const QList<boost::function0<void> > callBacks() { return _callbacks; };
 
     private:
         QList<GPU_Kernel*> _kernels;
@@ -48,6 +51,7 @@ class GPU_Job
         bool _processing;
         mutable QMutex _mutex;
         mutable QWaitCondition* _waitCondition;
+        QList<boost::function0<void> > _callbacks;
         JobStatus _status;
 };
 

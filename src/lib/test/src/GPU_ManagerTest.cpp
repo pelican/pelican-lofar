@@ -2,6 +2,7 @@
 #include "GPU_Manager.h"
 #include "GPU_Job.h"
 #include "GPU_TestCard.h"
+#include <boost/bind.hpp>
 
 
 namespace pelican {
@@ -48,6 +49,8 @@ void GPU_ManagerTest::test_submit()
      CPPUNIT_ASSERT_EQUAL( 1, m.freeResources() );
      GPU_Job testJob1;
      GPU_Job testJob2;
+     testJob2.addCallBack( boost::bind( &GPU_ManagerTest::callBackTest,this ) );
+     _callbackCount = 0;
      m.submit(&testJob1);
      do{ sleep(1); } while( testJob1.status() == GPU_Job::Queued );
      CPPUNIT_ASSERT_EQUAL( 0, m.jobsQueued() );
@@ -63,9 +66,14 @@ void GPU_ManagerTest::test_submit()
      CPPUNIT_ASSERT_EQUAL( &testJob2, card->currentJob() );
      card->completeJob();
      do{ sleep(1); } while( testJob2.status() != GPU_Job::Finished );
+     CPPUNIT_ASSERT_EQUAL( 1, _callbackCount );
      CPPUNIT_ASSERT_EQUAL( 1, m.freeResources() );
      CPPUNIT_ASSERT_EQUAL( 0, m.jobsQueued() );
 
+}
+
+void GPU_ManagerTest::callBackTest() {
+     ++_callbackCount;
 }
 
 void GPU_ManagerTest::test_submitMultiCards()
