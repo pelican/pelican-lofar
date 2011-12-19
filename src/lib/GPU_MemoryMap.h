@@ -25,7 +25,7 @@ namespace lofar {
 class GPU_MemoryMap
 {
     public:
-        GPU_MemoryMap( void* host_address, unsigned long bytes );
+        GPU_MemoryMap( void* host_address = 0 , unsigned long bytes = 0 );
         template<typename T>
         GPU_MemoryMap( std::vector<T>& vec ) {
             _set(_host=&vec[0], vec.size() * sizeof(T) );

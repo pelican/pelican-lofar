@@ -47,6 +47,7 @@ class AsyncronousTask : public QObject
         friend class DataBlobFunctorMonitor;
 
     public:
+        AsyncronousTask();
         AsyncronousTask( const boost::function1<DataBlob*, DataBlob*>& workload );
         virtual ~AsyncronousTask();
 

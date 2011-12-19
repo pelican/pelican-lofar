@@ -35,12 +35,16 @@ class GPU_ManagerTest : public CppUnit::TestFixture
         // Test Methods
         void test_submit();
         void test_submitMultiCards();
+       
+        // test aids
+        void callBackTest();
 
     public:
         GPU_ManagerTest(  );
         ~GPU_ManagerTest();
 
     private:
+        int _callbackCount;
 };
 
 } // namespace lofar

@@ -3,13 +3,15 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 # === Create the pelican-lofar library and set its install target.
 set(lib_src
     src/AdapterTimeSeriesDataSet.cpp
+    src/AsyncronousModule.cpp
     src/BinMap.cpp
     src/BandPassAdapter.cpp
     src/BandPass.cpp
     src/BandPassOutput.cpp
     src/BandPassRecorder.cpp
     src/BlobStatistics.cpp
-#    src/DedispersionModule.cpp
+    src/DedispersionModule.cpp
+    src/DedispersionBuffer.cpp
     src/EmbraceChunker.cpp
     src/FilterBankHeader.cpp
     src/FilterBankAdapter.cpp
@@ -41,7 +43,6 @@ set(lib_src
     src/GPU_Task.cpp
     src/GPU_Kernel.cpp
     src/GPU_MemoryMap.cpp
-#    src/AbstractGPU_Module.cpp
 )
 if(CUDA_FOUND)
     list(APPEND lib_src

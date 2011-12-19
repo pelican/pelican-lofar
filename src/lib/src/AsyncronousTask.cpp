@@ -9,9 +9,10 @@ namespace pelican {
 namespace lofar {
 
 
-/**
- *@details AsyncronousTask 
- */
+AsyncronousTask::AsyncronousTask()
+{
+}
+
 AsyncronousTask::AsyncronousTask( const boost::function1<DataBlob*, DataBlob*>& task )
     : _task(task, this)
 {
@@ -66,7 +67,7 @@ void AsyncronousTask::submit( AsyncronousTask* task, DataBlob* data ) {
      task->submit(data);
 }
 
-void AsyncronousTask::subTaskFinished( AsyncronousTask*, DataBlob* data ) {
+void AsyncronousTask::subTaskFinished( AsyncronousTask*, DataBlob* /*data*/ ) {
      QMutexLocker lock(&_subTaskMutex);
      if( ! --_subTaskCount ) {
         _subTaskWaitCondition.wakeAll();

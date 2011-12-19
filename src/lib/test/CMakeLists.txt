@@ -39,6 +39,7 @@ set(lofarTest_src
     src/DataStreamingTest.cpp
     #src/FilterBankAdapterTest.cpp
     #src/LofarChunkerTest.cpp
+    src/LockingContainerTest.cpp;
     src/LofarDataSplittingChunkerTest.cpp
     #src/PelicanBlobClientTest.cpp
     src/PPF_ChanneliserTest.cpp
