@@ -17,7 +17,8 @@ namespace lofar {
  * @class UdpBFApplication
  *  
  * @brief
- *    class for defining the main runtime and pipelines for ther udpBf use case
+ *    Class for defining the main runtime and pipelines for their UdpBF use case.
+ *
  * @details
  * 
  */
@@ -25,7 +26,9 @@ namespace lofar {
 class UdpBFApplication
 {
     public:
+	/// Constructor
         UdpBFApplication( int argc, char** argv, const QString& streamId  );
+	/// Destructor
         ~UdpBFApplication();
 
     private:

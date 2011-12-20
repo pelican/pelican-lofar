@@ -2,7 +2,7 @@
 #define SPECTRUM_DATA_SET_H
 
 /**
- * @file SpectrumDataSet
+ * @file SpectrumDataSet.h
  */
 
 #include "pelican/data/DataBlob.h"
@@ -21,11 +21,7 @@ namespace lofar {
 /**
  * @class SpectrumDataSet
  *
- * @brief
- * Container class to hold a buffer of blocks of spectra ordered by time,
- * sub-band and polarisation.
- *
- * @details
+ * @brief Container class to hold a buffer of blocks of spectra ordered by time, sub-band and polarisation.
  *
  * @details
  */
@@ -43,10 +39,10 @@ class SpectrumDataSet : public DataBlob
         virtual ~SpectrumDataSet() {}
 
     public:
-        /// Clears the data.
+        /// Clear the data.
         void clear();
 
-        /// initialise the data
+        /// Initialise the data
         void init( const T& value);
 
         /// Resizes the spectrum data blob to the specified dimensions.
@@ -74,8 +70,7 @@ class SpectrumDataSet : public DataBlob
         /// Returns the number of polarisations in the data.
         unsigned nPolarisations() const { return _nPolarisations; }
 
-        /// Return the number of channels for the spectrum specified by
-        /// index \p i
+        /// Return the number of channels for the spectrum specified by index @p i
         unsigned nChannels() const
         { return _nChannels; }
 
@@ -93,7 +88,7 @@ class SpectrumDataSet : public DataBlob
         void setLofarTimestamp(double timestamp)
         { _lofarTimestamp = timestamp; }
 
-        /// return the overall size of the data
+        /// Return the overall size of the data
         int size() const;
 
         /// Returns a pointer to the data.
@@ -108,33 +103,29 @@ class SpectrumDataSet : public DataBlob
         /// Return an iterator over the data starting at the end
         typename std::vector<T>::const_iterator end() const { return _data.end(); }
 
-        /// Returns a pointer to the spectrum data at index i.
+        /// Returns a pointer to the spectrum data at index @p i.
         T * spectrumData(unsigned i)
         { return &_data[i * _nChannels]; }
 
-        /// Returns a pointer to the spectrum data at index i (const overload).
+        /// Returns a pointer to the spectrum data at index @p i (const overload).
         T const * spectrumData(unsigned i) const
         { return &_data[i * _nChannels]; }
 
-        /// Returns a pointer to the spectrum data for the specified time block
-        /// \p b, sub-band \p s, and polarisation \p p (const overload).
+        /// Returns a pointer to the spectrum data for the specified time block @p b, sub-band @p s, and polarisation @p p (const overload).
         T * spectrumData(unsigned b, unsigned s, unsigned p)
         { return &_data[_index(s, p, b)]; }
 
-        /// Returns a pointer to the spectrum data for the specified time block
-        /// \p b, sub-band \p s, and polarisation \p p (const overload).
+        /// Returns a pointer to the spectrum data for the specified time block @p b, sub-band @p s, and polarisation @p p (const overload).
         T const * spectrumData(unsigned b, unsigned s, unsigned p) const
         { return &_data[_index(s, p, b)]; }
 
-        /// calculates what the index should be given the block, subband,
-        /// polarisation (primarily used as an aid to optimisation).
+        /// calculates what the index should be given the block, subband, polarisation (primarily used as an aid to optimisation).
         static inline long index(unsigned subband, unsigned numSubbands,
                    unsigned polarisation, unsigned numPolarisations,
                    unsigned block, unsigned numChannels);
 
     private:
-        /// Returns the data index for a given time block \b, sub-band \s and
-        /// polarisation.
+        /// Returns the data index for a given time block @p b, sub-band @p s and polarisation @p p
         unsigned long _index(unsigned s, unsigned p, unsigned b) const;
 
     protected:
@@ -220,12 +211,10 @@ unsigned long SpectrumDataSet<T>::_index(unsigned s, unsigned p, unsigned b) con
 /**
  * @class SubbandSpectraC32
  *
- * @brief
- * Data blob to hold a buffer of sub-band spectra in single precision complex
- * format.
+ * @brief Data blob to hold a buffer of sub-band spectra in single precision complex format.
  *
- * @details
- * Inherits from the SubbandSpectra template class.
+ * @details Inherits from the SubbandSpectra template class.
+ *
  */
 
 class SpectrumDataSetC32 : public SpectrumDataSet<std::complex<float> >
@@ -256,9 +245,11 @@ class SpectrumDataSetC32 : public SpectrumDataSet<std::complex<float> >
 
 
 /**
- * @class
- * @brief
- * @details
+ * @class SpectrumDataSetStokes
+ *
+ * @brief Data blob to hold a buffer of sub-band spectra in stokes format.
+ *
+ * @details 
  */
 
 class SpectrumDataSetStokes : public SpectrumDataSet<float>

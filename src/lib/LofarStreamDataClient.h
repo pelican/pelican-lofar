@@ -4,19 +4,19 @@
 #include "pelican/core/DirectStreamDataClient.h"
 
 /**
- * @file LofarStreamDataClientNew.h
+ * @file LofarStreamDataClient.h
  */
 
 namespace pelican {
 namespace lofar {
 
 /**
- * @class LofarStreamDataClientNew
+ * @class LofarStreamDataClient
  *
  * @ingroup pelican_lofar
  *
  * @brief
- *    Lofar Data Client to Connect directly to the LOFAR station
+ *    Lofar data client to connect directly to the LOFAR station
  *    output stream.
  *
  * @details

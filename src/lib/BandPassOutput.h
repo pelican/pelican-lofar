@@ -20,24 +20,28 @@ namespace lofar {
 /**
  * @class BandPassOutput
  *
- * @configuration
- * <BandPassOutput>
- *  <file name="somefilename" />
- * </BandPassOutput>
- *
  * @brief
- *    creates a bandpass file
- * @details
+ *    Creates a bandpass file
+ *
+ * @details Configuration option :
+ @verbatim
+<BandPassOutput>
+  <file name="somefilename" />
+</BandPassOutput>
+ @endverbatim
  *
  */
 
 class BandPassOutput : public AbstractOutputStream
 {
     public:
+	/// Constructor
         BandPassOutput( const ConfigNode& configNode  );
+
+	/// Destructor
         ~BandPassOutput();
 
-        /// write out to a file with the specified name
+        /// Write out to a file with the specified name
         void addFile(const QString& filename);
 
     protected:

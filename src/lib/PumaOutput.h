@@ -11,11 +11,6 @@ class QIODevice;
 
 /**
  * @file PumaOutput.h
- * @configuration
- * <PumaOutput>
- *   <connection host="somehost" port="someport" />
- *  <file name="somefilename" />
- * </PumaOutput>
  */
 
 namespace pelican {
@@ -28,10 +23,15 @@ class DedispersedTimeSeriesF32;
 /**
  * @class PumaOutput
  *  
- * @brief
- *   Converts a Spectrum DataBlob into a TCP stream 
- *   suitable for the puma server
- * @details
+ * @brief Converts a Spectrum DataBlob into a TCP stream suitable for the puma server.
+ *
+ * @details Configuration options : 
+@verbatim
+ <PumaOutput>
+   <connection host="somehost" port="someport" />
+  <file name="somefilename" />
+ </PumaOutput>
+@endverbatim
  * 
  */
 

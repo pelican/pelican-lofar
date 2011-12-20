@@ -24,29 +24,32 @@ namespace lofar {
  *
  * @brief
  *    Interface to the stations bandpass
+ *
  * @details
- *    Takes a description of the bandpass as a polynomial
- * and allows rescaling etc. appropriately. The polynomial
- * is always linked to a primary BinMap and all conversions
- * are done relative to this primary map
+ *    Takes a description of the bandpass as a polynomial and allows rescaling etc. The polynomial is always linked to a primary BinMap and all conversions are done relative to this primary map.
+ *
  */
 class BinnedData;
 
 class BandPass : public DataBlob
 {
     public:
+	/// Constructor
         BandPass(  );
+
+	/// Destructor
         ~BandPass();
+
         void setData(const BinMap&,const QVector<float>& params );
         void setRMS(float);
-        /// set a new median and rescale the polynomial
-        //  appropriately. Does not rebin the hash
+
+        /// Set a new median and rescale the polynomial appropriately. Does not rebin the hash
         void setMedian(float);
 
-        /// return the coefficients of the underlying polynomial
+        /// Return the coefficients of the underlying polynomial
         const QVector<float>& params() const { return _params; };
 
-        // rest object to use the primary binning map
+        /// Reset object to use the primary binning map
         void resetMap();
         const BinMap& primaryMap() const { return _primaryMap; };
 
@@ -55,36 +58,40 @@ class BandPass : public DataBlob
         float endFrequency() const;
         float intensity(float frequency) const;
 
-        /// return a reference to the binned data corresponding to the current bin mapping
+        /// Return a reference to the binned data corresponding to the current bin mapping
         //  (call to reBin)
         const QVector<float>& currentSet() { return _dataSets[_currentMapId]; };
 
         inline float intensityOfBin(unsigned int index) const {
             return _dataSets[_currentMapId][index];
         };
-        /// return the median for the current bin mapping
+        /// Return the median for the current bin mapping
         inline float median() const { return _median[_currentMapId]; }
 
-        /// return the median for the primary bin mapping
+        /// Return the median for the primary bin mapping
         inline float primaryMedian() const { return _median[_primaryMapId]; }
 
-        /// return the rms for the current bin mapping
+        /// Return the rms for the current bin mapping
         inline float rms() const { return _rms[_currentMapId]; }
 
-        /// return the rms for the primary bin mapping
+        /// Return the rms for the primary bin mapping
         inline float primaryRms() const { return _rms[_primaryMapId]; }
 
-        // Mark channels to be killed (set to 0)
+        /// Mark channels to be killed (set to 0)
         void killChannel(unsigned int index);
+
         void killBand(float startFreq, float endFreq);
 
-        // return true if bin has been killed
+        /// Return true if bin has been killed
         bool filterBin( unsigned int i ) const;
 
     protected:
-        float _evaluate(float) const; // calculate value of parameterised eqn
+	/// Calculate value of parameterised eqn
+        float _evaluate(float) const; 
+
         void _zeroChannelsMap(const BinMap& map);
-        // build a data map, scaled appropriately
+
+        /// Build a data map, scaled appropriately
         void _buildData(const BinMap& map, float scale, float offset);
 
     private:

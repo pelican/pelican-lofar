@@ -23,7 +23,8 @@ class SpectrumDataSetStokes;
  * @class BandPassPipeline
  *  
  * @brief
- *    pipeline to run a bandpass calibration, producing a suitable BandPass object
+ *    Pipeline to run a bandpass calibration, producing a suitable BandPass object
+ *
  * @details
  * 
  */
@@ -31,7 +32,9 @@ class SpectrumDataSetStokes;
 class BandPassPipeline : public AbstractPipeline
 {
     public:
+	/// Constructor
         BandPassPipeline( const QString& streamIdentifier  );
+	/// Destructor
         ~BandPassPipeline();
 
         /// Initialises the pipeline.

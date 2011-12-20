@@ -17,11 +17,9 @@ namespace lofar {
 /**
  * @class WeightedSpectrumDataSet
  *  
- * @brief
- *    Class that provides weights for each
- *    element in an associated SpectrumDataSet
- * @details
- *    The Associated dataset is modified 
+ * @brief Class that provides weights for each element in an associated SpectrumDataSet.
+ *
+ * @details The Associated dataset is modified 
  * 
  */
 
