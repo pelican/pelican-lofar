@@ -6,6 +6,10 @@
 #include <cstdio>
 #include <boost/cstdint.hpp>
 
+/**
+ * @file LofarTypes.h
+ */
+
 namespace pelican {
 namespace lofar {
 
@@ -46,28 +50,23 @@ typedef std::complex<int16>  i16complex;
  *
  * @ingroup pelican_lofar
  *
- * @brief
- * Container class for 8bit signed packed complex numbers.
+ * @brief Container class for 8bit signed packed complex numbers.
  *
- * @details
- * This class stores complex numbers in a packed 8 bit format where the real
- * and imaginary parts are each signed 4bit integers.
+ * @details This class stores complex numbers in a packed 8 bit format where the real and imaginary parts are each signed 4bit integers.
  *
- * In this format real and imaginary numbers are represented by 16 discrete
- * values.
+ * In this format real and imaginary numbers are represented by 16 discrete values.
  *
- * @ref
- * Not sure this is right but the class seems to come from here:
- * http://www.lofar.org/software/docxxhtml/classLOFAR_1_1TYPES_1_1i4complex.html
+ *(Not sure this is right but the class seems to come from here :
+ * http://www.lofar.org/software/docxxhtml/classLOFAR_1_1TYPES_1_1i4complex.html )
  */
 class i4complex
 {
     public:
-		/// Default Constructor.
+	/// Default Constructor.
         i4complex() {}
 
-        /// Constructs a complex number from the specified real and imaginary
-        /// parts. (TODO: is rint() portable?)
+        /// Constructs a complex number from the specified real and imaginary parts. 
+	// (TODO: is rint() portable?)
         i4complex(double real, double imag) {
             value = ((int) rint(real - .5) & 0xF) | (((int) rint(imag - .5) & 0xF) << 4);
         }
@@ -143,9 +142,7 @@ inline TYPES::i16complex conj (TYPES::i16complex x)
  *
  * @brief
  *
- *
  * @details
- *
  */
 class TimeStamp {
 

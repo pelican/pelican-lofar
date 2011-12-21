@@ -26,9 +26,9 @@ StokesGenerator::~StokesGenerator()
 
 /**
  * @details
- * Converts a collection of spectra from x,y polarisation to stokes
- * parameters.
+ *
  */
+
 void StokesGenerator::run(const SpectrumDataSetC32* channeliserOutput,
         SpectrumDataSetStokes* stokes)
 {

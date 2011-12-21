@@ -2,7 +2,7 @@
 #define TIME_SERIES_DATA_SET_H_
 
 /**
- * @file SubbandTimeSeries.h
+ * @file TimeSeriesDataSet.h
  */
 
 #include "pelican/data/DataBlob.h"
@@ -71,13 +71,11 @@ class TimeSeriesDataSet : public DataBlob
         void setLofarTimestamp(double timestamp) { _lofarTimestamp = timestamp; }
 
     public:
-        /// Returns a pointer to start of the time series for the specified
-        /// time block \p b, sub-band \p s, and polarisation \p p.
+        /// Returns a pointer to start of the time series for the specified time block @p b, sub-band @p s, and polarisation @p p.
         T * timeSeriesData(unsigned b, unsigned s, unsigned p)
         { return &_data[_index(s, p, b)]; }
 
-        /// Returns a pointer to start of the time series for the specified
-        /// time block \p b, sub-band \p s, and polarisation \p p.
+        /// Returns a pointer to start of the time series for the specified time block @p b, sub-band @p s, and polarisation @p p.
         T const * timeSeriesData(unsigned b, unsigned s, unsigned p) const
         { return &_data[_index(s, p, b)]; }
 
@@ -85,8 +83,7 @@ class TimeSeriesDataSet : public DataBlob
         T * data() { return &_data[0]; }
         const T* constData() const { return &_data[0]; }
 
-        /// calculates what the index should be given the block, subband, polarisation
-        //  primarily used as an aid to optimisation
+        /// Calculates what the index should be given the block, subband, polarisation. Primarily used as an aid to optimisation
         static inline long index( unsigned subband, unsigned numTimesPerBlock,
                    unsigned polarisation, unsigned numPolarisations,
                    unsigned block, unsigned numTimeBlocks);
@@ -162,9 +159,9 @@ inline unsigned long TimeSeriesDataSet<T>::_index(unsigned s, unsigned p,
 
 /**
  * @class SubbandTimeSeriesC32
- * @brief
- * Data container holding a complex floating point time series data cube used
- * in the PPF channeliser.
+ *
+ * @brief Data container holding a complex floating point time series data cube used in the PPF channeliser.
+ *
  */
 
 class TimeSeriesDataSetC32 : public TimeSeriesDataSet<std::complex<float> >

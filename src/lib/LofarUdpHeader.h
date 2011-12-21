@@ -3,6 +3,10 @@
 
 #include <boost/cstdint.hpp>
 
+/**
+ * @file LofarUdpHeader.h
+ */
+
 namespace pelican {
 namespace lofar {
 

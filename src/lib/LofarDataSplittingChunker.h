@@ -32,10 +32,10 @@ class DataManager;
 class LofarDataSplittingChunker : public AbstractChunker
 {
     public:
-        /// Constructs a new LofarChunker.
+        /// Constructor
         LofarDataSplittingChunker(const ConfigNode& config);
 
-        /// Destroys the LofarChunker.
+        /// Destructor
         ~LofarDataSplittingChunker() {}
 
         /// Creates the socket to use for the incoming data stream.
