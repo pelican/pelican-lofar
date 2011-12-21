@@ -70,16 +70,23 @@ void GPU_NVidia::setupConfiguration ( const GPU_NVidiaConfiguration* c )
              }
              _currentDevicePointers.append( _memPointers[map] );
          }
-         // upload input data from host
-         foreach( const GPU_MemoryMap& map, c->inputMaps() ) {
+         // deal with constant symbols - upload only once
+         foreach( const GPU_MemoryMap& map, c->constants() ) {
              if( map.hostPtr() ) {
                  cudaMemcpy( _memPointers[map], map.hostPtr(),
-                             map.size(), cudaMemcpyHostToDevice );
-            cudaDeviceSynchronize();
+                         map.size(), cudaMemcpyHostToDevice );
              }
          }
          _currentConfig = c;
      }
+     // upload input data from host
+     foreach( const GPU_MemoryMap& map, c->inputMaps() ) {
+         if( map.hostPtr() ) {
+             cudaMemcpy( _memPointers[map], map.hostPtr(),
+                     map.size(), cudaMemcpyHostToDevice );
+         }
+     }
+     cudaDeviceSynchronize();
 }
 
 void GPU_NVidia::freeMem( const QList<void*>& pointers ) {

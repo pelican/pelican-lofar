@@ -10,7 +10,6 @@ namespace lofar {
  *@details GPU_Kernel 
  */
 GPU_Kernel::GPU_Kernel()
-    : _config(0)
 {
 }
 
@@ -21,7 +20,7 @@ GPU_Kernel::~GPU_Kernel()
 {
 }
 
-void GPU_Kernel::setConfiguration( const GPU_NVidiaConfiguration* config )
+void GPU_Kernel::setConfiguration( const GPU_NVidiaConfiguration& config )
 {
     _config = config;
 }

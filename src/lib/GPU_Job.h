@@ -35,6 +35,10 @@ class GPU_Job
     public:
         GPU_Job();
         ~GPU_Job();
+        GPU_Job( const GPU_Job& job );
+
+        const GPU_Job& operator=(const GPU_Job& job);
+
         void addKernel( GPU_Kernel* kernel );
         const QList<GPU_Kernel*>& kernels() { return _kernels; };
         inline void setStatus( const JobStatus& status ) { _status = status; };
@@ -44,6 +48,7 @@ class GPU_Job
         void wait() const;
         void addCallBack( const boost::function0<void>& fn ) { _callbacks.append(fn); };
         const QList<boost::function0<void> > callBacks() { return _callbacks; };
+        void reset();
 
     private:
         QList<GPU_Kernel*> _kernels;

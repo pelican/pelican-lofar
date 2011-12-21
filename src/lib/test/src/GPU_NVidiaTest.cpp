@@ -65,7 +65,7 @@ void GPU_NVidiaTest::test_managedCard()
     config.addInputMap( vec1map );
     config.addInputMap( vec2map );
     config.addOutputMap( resultmap );
-    testKernel.setConfiguration( &config );
+    testKernel.setConfiguration( config );
     job.addKernel( &testKernel );
     m.submit(&job);
     job.wait();
