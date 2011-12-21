@@ -131,7 +131,8 @@ void DedispersionModule::gpuJobFinished( GPU_Job* job, DedispersionBuffer** buff
      (*kernel)->reset();
      _kernels.unlock( kernel ); // give up the kernel
      job->reset();
-     _jobBuffer.unlock(job); // return the job to the pool
+     _jobBuffer.unlock(job); // return the job to the pool, ready for the next
+     //exportData( data );     // send out the finished data product to our customers
 }
 
 DedispersedTimeSeries<float>* DedispersionModule::dataExtract( const float* /*gpuData*/ , DedispersedTimeSeries<float>* data )
@@ -158,7 +159,7 @@ void DedispersionModule::DedispersionKernel::run(const QList<void*>& /*param*/) 
      //cudaMemset((float*)param[0], 0, size(param[0]) );
      //cache_dedisperse_loop( float *outbuff, float *buff, float mstartdm, float mdmstep )
      /*
-     cache_dedisperse_loop( (float*)param[0] , (float*)param[1], _startdm/_tsamp, _dmstep/_tsamp,
+     cacheDedisperseLoop( (float*)param[0] , (float*)param[1], _startdm/_tsamp, _dmstep/_tsamp,
                             (const float*)param[2], (const float*)param[3], (const float*)param[4],
                             (const float*)param[5]
                           );

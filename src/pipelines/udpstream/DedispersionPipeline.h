@@ -12,6 +12,9 @@
 #include "TimeSeriesDataSet.h"
 #include "SpectrumDataSet.h"
 #include "SigprocStokesWriter.h"
+#include "DedispersionModule.h"
+#include "DedispersedTimeSeries.h"
+#include "DedispersionAnalyser.h"
 
 
 /**
@@ -26,7 +29,7 @@ namespace lofar {
  * @class DedispersionPipeline
  *  
  * @brief
- *     A deeispersion pipeline for streaming TimeSeries bemaformed Data
+ *     A dedispersion pipeline for streaming TimeSeries bemaformed Data
  * @details
  * 
  */
@@ -43,6 +46,9 @@ class DedispersionPipeline : public AbstractPipeline
         /// Runs the pipeline.
         void run(QHash<QString, DataBlob*>& remoteData);
 
+        /// called internally to free up DataBlobs after they are finished with
+        void updateBufferLock();
+
     private:
         QString _streamIdentifier;
 
@@ -51,16 +57,21 @@ class DedispersionPipeline : public AbstractPipeline
         StokesGenerator* _stokesGenerator;
         StokesIntegrator* _stokesIntegrator;
         RFI_Clipper* _rfiClipper;
+        DedispersionModule* _dedispersionModule;
+        DedispersionAnalyser* _dedispersionAnalyser;
 
         /// Local data blobs
         SpectrumDataSetC32* spectra;
         QList<SpectrumDataSetC32*> _spectraBuffer;
+        QList<DedispersedTimeSeries<float>*> _dedispersedData;
+        LockingCircularBuffer<DedispersedTimeSeries<float>* >* _dedispersedDataBuffer;
+        DedispersedTimeSeries<float>* _currentDedispersedData;
         TimeSeriesDataSetC32* timeSeries;
-        SpectrumDataSetStokes* stokes;
         QList<SpectrumDataSetStokes*> _stokesData;
         LockingCircularBuffer<SpectrumDataSetStokes*>* _stokesBuffer;
         SpectrumDataSetStokes* intStokes;
         WeightedSpectrumDataSet* weightedIntStokes;
+
 };
 
 } // namespace lofar

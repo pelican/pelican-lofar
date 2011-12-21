@@ -58,12 +58,13 @@ set(lib_moc_headers
 QT4_WRAP_CPP(moc_src ${lib_moc_headers})
 
 set(lib_cuda_src
+    DedispersionKernel.cu
    )
 if(CUDA_FOUND)
     include_directories(${CUDA_INCLUDE_DIRS})
-#    CUDA_ADD_LIBRARY(ampp-cuda STATIC ${lib_cuda_src})
-#   set(cuda_libs ampp-cuda ${CUDA_LIBRARIES} )
-    set(cuda_libs ${CUDA_LIBRARIES} )
+    CUDA_ADD_LIBRARY(ampp-cuda STATIC ${lib_cuda_src})
+   set(cuda_libs ampp-cuda ${CUDA_LIBRARIES} )
+#    set(cuda_libs ${CUDA_LIBRARIES} )
 else(CUDA_FOUND)
     set(cuda_libs)
 endif(CUDA_FOUND)

@@ -1,5 +1,7 @@
 #include "DedispersionPipeline.h"
 #include "WeightedSpectrumDataSet.h"
+#include "DedispersedTimeSeries.h"
+#include <boost/bind.hpp>
 
 
 namespace pelican {
@@ -21,7 +23,11 @@ DedispersionPipeline::DedispersionPipeline( const QString& streamIdentifier )
 DedispersionPipeline::~DedispersionPipeline()
 {
     delete _stokesBuffer;
+    delete _dedispersedDataBuffer;
     foreach(SpectrumDataSetStokes* d, _stokesData ) {
+        delete d;
+    }
+    foreach(DedispersedTimeSeries<float>* d, _dedispersedData ) {
         delete d;
     }
 }
@@ -35,14 +41,22 @@ void DedispersionPipeline::init()
     _stokesGenerator = (StokesGenerator *) createModule("StokesGenerator");
     _rfiClipper = (RFI_Clipper *) createModule("RFI_Clipper");
     _stokesIntegrator = (StokesIntegrator *) createModule("StokesIntegrator");
+     _dedispersionModule = (DedispersionModule*) createModule("DedispersionModule");
+     _dedispersionAnalyser = (DedispersionAnalyser*) createModule("DedispersionAnalyser");
+     //_dedispersionModule->link( boost::bind( &DedispersionAnalyser::run, &_dedispersionAnalyser, _1 ) );
+     _dedispersionModule->onChainCompletion( boost::bind( &DedispersionPipeline::updateBufferLock, this ) );
 
     // Create local datablobs
     spectra = (SpectrumDataSetC32*) createBlob("SpectrumDataSetC32");
     _stokesData = createBlobs<SpectrumDataSetStokes>("SpectrumDataSetStokes", history);
     _stokesBuffer = new LockingCircularBuffer<SpectrumDataSetStokes*>(&_stokesData);
+    _dedispersedData = createBlobs<DedispersedTimeSeries<float> >("DedispersedTimeSeriesF32", history);
+    _dedispersedDataBuffer = new LockingCircularBuffer<DedispersedTimeSeries<float>* >(&_dedispersedData);
+    _currentDedispersedData = _dedispersedDataBuffer->next();
     intStokes = (SpectrumDataSetStokes*) createBlob("SpectrumDataSetStokes");
-    
+
     weightedIntStokes = (WeightedSpectrumDataSet*) createBlob("WeightedSpectrumDataSet");
+
 
     // Request remote data
     requestRemoteData(_streamIdentifier, history );
@@ -63,14 +77,23 @@ void DedispersionPipeline::run(QHash<QString, DataBlob*>& remoteData)
     _ppfChanneliser->run(timeSeries, spectra);
 
     // Convert spectra in X, Y polarisation into spectra with stokes parameters.
-    stokes=_stokesBuffer->next();
+    SpectrumDataSetStokes* stokes=_stokesBuffer->next();
     _stokesGenerator->run(spectra, stokes);
+
     // Clips RFI and modifies blob in place
     weightedIntStokes->reset(stokes);
 
     _rfiClipper->run(weightedIntStokes);
     dataOutput(&(weightedIntStokes->stats()), "RFI_Stats");
 
+    // TODO need to pass the Locking Buffer of output data instead of individual objects
+    _dedispersionModule->dedisperse(weightedIntStokes, _currentDedispersedData );
+
+}
+
+void DedispersionPipeline::updateBufferLock( ) {
+     _stokesBuffer->shiftLock();
+     _currentDedispersedData = _dedispersedDataBuffer->next(); // TODO remove from here
 }
 
 } // namespace lofar
