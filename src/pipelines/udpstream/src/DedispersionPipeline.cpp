@@ -43,7 +43,7 @@ void DedispersionPipeline::init()
     _stokesIntegrator = (StokesIntegrator *) createModule("StokesIntegrator");
      _dedispersionModule = (DedispersionModule*) createModule("DedispersionModule");
      _dedispersionAnalyser = (DedispersionAnalyser*) createModule("DedispersionAnalyser");
-     //_dedispersionModule->link( boost::bind( &DedispersionAnalyser::run, &_dedispersionAnalyser, _1 ) );
+     _dedispersionModule->connect( boost::bind( &DedispersionAnalyser::run, _dedispersionAnalyser, _1 ) );
      _dedispersionModule->onChainCompletion( boost::bind( &DedispersionPipeline::updateBufferLock, this ) );
 
     // Create local datablobs
@@ -52,8 +52,6 @@ void DedispersionPipeline::init()
     _stokesBuffer = new LockingCircularBuffer<SpectrumDataSetStokes*>(&_stokesData);
     _dedispersedData = createBlobs<DedispersedTimeSeries<float> >("DedispersedTimeSeriesF32", history);
     _dedispersedDataBuffer = new LockingCircularBuffer<DedispersedTimeSeries<float>* >(&_dedispersedData);
-    _currentDedispersedData = _dedispersedDataBuffer->next();
-    intStokes = (SpectrumDataSetStokes*) createBlob("SpectrumDataSetStokes");
 
     weightedIntStokes = (WeightedSpectrumDataSet*) createBlob("WeightedSpectrumDataSet");
 
@@ -86,14 +84,13 @@ void DedispersionPipeline::run(QHash<QString, DataBlob*>& remoteData)
     _rfiClipper->run(weightedIntStokes);
     dataOutput(&(weightedIntStokes->stats()), "RFI_Stats");
 
-    // TODO need to pass the Locking Buffer of output data instead of individual objects
-    _dedispersionModule->dedisperse(weightedIntStokes, _currentDedispersedData );
+    // start the asyncronous chain of events
+    _dedispersionModule->dedisperse(weightedIntStokes, _dedispersedDataBuffer );
 
 }
 
 void DedispersionPipeline::updateBufferLock( ) {
      _stokesBuffer->shiftLock();
-     _currentDedispersedData = _dedispersedDataBuffer->next(); // TODO remove from here
 }
 
 } // namespace lofar

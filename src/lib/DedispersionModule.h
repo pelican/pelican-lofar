@@ -6,6 +6,7 @@
 #include <QVector>
 #include <QList>
 #include "pelican/core/AbstractModule.h"
+#include "pelican/utility/LockingCircularBuffer.hpp"
 #include "LockingContainer.hpp"
 #include "DedispersedTimeSeries.h"
 #include "AsyncronousModule.h"
@@ -56,10 +57,14 @@ class DedispersionModule : public AsyncronousModule
         DedispersedTimeSeries<float>* dedisperse( DataBlob* incoming );
         /// processing the incoming data, filling the provided DedispersedTimeSeries
         DedispersedTimeSeries<float>* dedisperse( DataBlob* incoming, 
-                                                  DedispersedTimeSeries<float>* dataOut );
-        DedispersedTimeSeries<float>* dedisperse( WeightedSpectrumDataSet* incoming, DedispersedTimeSeries<float>* dataOut );
+                                 LockingCircularBuffer<DedispersedTimeSeries<float>* >* dataOut );
+        DedispersedTimeSeries<float>* dedisperse( WeightedSpectrumDataSet* incoming,
+                                 LockingCircularBuffer<DedispersedTimeSeries<float>* >* dataOut );
 
-        void gpuJobFinished( GPU_Job* job,  DedispersionBuffer** buffer, DedispersionKernel** kernel );
+        void gpuJobFinished( GPU_Job* job,  
+                             DedispersionBuffer** buffer, 
+                             DedispersionKernel** kernel,
+                             DedispersedTimeSeries<float>* dataOut );
         DedispersedTimeSeries<float>* dataExtract( const float* outputData, DedispersedTimeSeries<float>* dataBlob );
 
      protected:

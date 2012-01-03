@@ -77,11 +77,8 @@ DedispersionModule::~DedispersionModule()
     }
 }
 
-DedispersedTimeSeries<float>* DedispersionModule::dedisperse( DataBlob* incoming ) {
-    return dedisperse( static_cast<WeightedSpectrumDataSet*>(incoming), new DedispersedTimeSeries<float> );
-}
-
-DedispersedTimeSeries<float>* DedispersionModule::dedisperse( WeightedSpectrumDataSet* weightedData, DedispersedTimeSeries<float>* dataOut )
+DedispersedTimeSeries<float>* DedispersionModule::dedisperse( WeightedSpectrumDataSet* weightedData, 
+                        LockingCircularBuffer<DedispersedTimeSeries<float>* >* dataOut )
 {
     // transfer weighted data to host memory buffer
     //
@@ -99,13 +96,13 @@ DedispersedTimeSeries<float>* DedispersionModule::dedisperse( WeightedSpectrumDa
     unsigned int sampleNumber = 0; // marker to indicate the number of samples succesfully 
                                    // transferred to the buffer from the Datablob
     while( (*_currentBuffer)->addSamples( weightedData, &sampleNumber ) ) {
-        dedisperse( _currentBuffer, dataOut );
+        dedisperse( _currentBuffer, dataOut->next() );
         DedispersionBuffer** next = _buffers.next();
         (*_currentBuffer)->copy( *next, _maxshift );
         sampleNumber = 0;
         _currentBuffer = next;
     }
-    return dataOut;
+    return dataOut->current();
 }
 
 void DedispersionModule::dedisperse( DedispersionBuffer** buffer, DedispersedTimeSeries<float>* dataOut )
@@ -121,18 +118,17 @@ void DedispersionModule::dedisperse( DedispersionBuffer** buffer, DedispersedTim
     GPU_MemoryMap in( *buffer, (*buffer)->size() );
     (*kernelPtr)->addInputMap( GPU_MemoryMap( (*buffer)->getData(), (*buffer)->size()) );
     //job->addKernel( *kernelPtr );
-    //job->addCallBack( boost::bind( &DedispersionModule::dataExtract, this, out, dataOut) );
-    //job->addCallBack( boost::bind( &DedispersionModule::gpuJobFinished, this, job, buffer, kernelPtr) );
+    job->addCallBack( boost::bind( &DedispersionModule::gpuJobFinished, this, job, buffer, kernelPtr, dataOut ) );
     submit( job );
 }
 
-void DedispersionModule::gpuJobFinished( GPU_Job* job, DedispersionBuffer** buffer, DedispersionKernel** kernel ) {
+void DedispersionModule::gpuJobFinished( GPU_Job* job, DedispersionBuffer** buffer, DedispersionKernel** kernel, DedispersedTimeSeries<float>* dataOut ) {
      _buffers.unlock( buffer ); // give up the buffer
      (*kernel)->reset();
      _kernels.unlock( kernel ); // give up the kernel
      job->reset();
      _jobBuffer.unlock(job); // return the job to the pool, ready for the next
-     //exportData( data );     // send out the finished data product to our customers
+     exportData( dataOut );  // send out the finished data product to our customers
 }
 
 DedispersedTimeSeries<float>* DedispersionModule::dataExtract( const float* /*gpuData*/ , DedispersedTimeSeries<float>* data )

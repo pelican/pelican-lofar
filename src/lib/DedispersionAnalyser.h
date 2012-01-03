@@ -28,7 +28,6 @@ class DedispersionAnalyser : public AbstractModule
         DedispersionAnalyser( const ConfigNode& config );
         ~DedispersionAnalyser();
         void run( DataBlob* ) {};
-        //AsyncronousJob* createJob( const DataBlobFunctorMonitor&,  DataBlob* );
 
     private:
 };
