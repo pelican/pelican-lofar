@@ -89,7 +89,6 @@ void DedispersionModule::resize( const SpectrumDataSet<float>* streamData ) {
     unsigned int nSubbands = streamData->nSubbands();
     unsigned int nPolarisations = streamData->nPolarisations();
     unsigned sampleSize = nSubbands * nChannels * nPolarisations;
-    std::cout << "resize() : sampleSize=" << sampleSize << std::endl;
     if( sampleSize != (*_currentBuffer)->sampleSize() ) {
         unsigned maxBuffers = _buffersList.size();
         unsigned maxSamples = (*_currentBuffer)->maxSamples();
@@ -138,7 +137,6 @@ DedispersedTimeSeries<float>* DedispersionModule::dedisperse( WeightedSpectrumDa
         } 
     }
     while( sampleNumber != maxSamples );
-    std::cout << "done" << (*_currentBuffer)->spaceRemaining() << std::endl;
     return dataOut->current();
 }
 

@@ -35,7 +35,7 @@ void DedispersionBuffer::setSampleCapacity(unsigned int maxSamples)
 void DedispersionBuffer::copy( DedispersionBuffer* buf, unsigned int offset )
 {
     Q_ASSERT( buf->size() >= size() );
-    unsigned s = _data.size() - offset;
+    int s = _data.size() - offset;
     if( s > 0 ) 
         memcpy( &(buf->_data[0]), &_data[offset] , s );
     //buf->_rms = _rms;

@@ -51,6 +51,8 @@ set(lofarTest_src
 if(CUDA_FOUND)
     list(APPEND lofarTest_src
             src/GPU_NVidiaTest.cpp
+            src/DedispersionBufferTest.cpp
+            src/DedispersionModuleTest.cpp
         )
 endif(CUDA_FOUND)
 
