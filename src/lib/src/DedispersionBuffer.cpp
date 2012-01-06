@@ -12,7 +12,8 @@ namespace lofar {
 /**
  *@details DedispersionBuffer 
  */
-DedispersionBuffer::DedispersionBuffer( unsigned int size )
+DedispersionBuffer::DedispersionBuffer( unsigned int size, unsigned int sampleSize )
+   : _sampleSize(sampleSize)
 {
     setSampleCapacity(size);
     clear();
@@ -48,7 +49,8 @@ unsigned DedispersionBuffer::addSamples( WeightedSpectrumDataSet* weightedData, 
     SpectrumDataSet<float>* streamData = weightedData->dataSet();
     unsigned int nChannels = streamData->nChannels();
     unsigned int nSubbands = streamData->nSubbands();
-    Q_ASSERT( nSubbands * nChannels == _sampleSize );
+    unsigned int nPolarisations = streamData->nPolarisations();
+    Q_ASSERT( nSubbands * nChannels * nPolarisations == _sampleSize );
  
     unsigned maxSamples = std::min( streamData->nTimeBlocks(), spaceRemaining() + *sampleNumber );
     for(unsigned t = *sampleNumber; t < maxSamples; ++t) {

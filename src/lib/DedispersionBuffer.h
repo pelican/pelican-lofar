@@ -24,24 +24,26 @@ class WeightedSpectrumDataSet;
 class DedispersionBuffer
 {
     public:
-        DedispersionBuffer( unsigned int size = 0 );
+        DedispersionBuffer( unsigned int size = 0, unsigned int sampleSize = 0 );
         ~DedispersionBuffer();
 
-        // return the size of the buffer
+        /// return the number of samples currently stored in the buffer
         unsigned int numSamples() const { return _sampleCount; };
+
         size_t size() const { return _data.size() * sizeof(float); };
         void setSampleCapacity(unsigned int maxSamples);
         
         // remove current data and reset the buffer
         void clear();
 
-        /// import as many samples as poosibkle into the buffer from the 
-        // provided data set. The return value represents the remaining samples
+        /// import as many samples as possible into the buffer from the 
+        // provided data set staring at the sample given by sampleNumber. 
+        // The return value represents the remaining samples
         // for which there was no space.
-        // the sampleNumber is updated to be the last sample number that was included
+        // sampleNumber is updated to the last sample number that was included
         unsigned int addSamples( WeightedSpectrumDataSet* weightedData, unsigned *sampleNumber );
 
-        /// return the amount of empty space in the buffer
+        /// return the amount of empty space in the buffer (in samples)
         unsigned int spaceRemaining() const;
 
         /// copy data from this object to the supplied DataBuffer object
