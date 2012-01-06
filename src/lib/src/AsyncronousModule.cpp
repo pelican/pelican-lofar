@@ -38,6 +38,10 @@ AsyncronousModule::~AsyncronousModule()
 {
 }
 
+void AsyncronousModule::connect( const boost::function1<void, DataBlob*>& functor ) {
+    _linkedFunctors.append(functor);
+}
+
 GPU_Job* AsyncronousModule::submit(GPU_Job* job) {
     return gpuManager()->submit(job);
 }

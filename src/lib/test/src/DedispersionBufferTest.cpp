@@ -38,8 +38,8 @@ void DedispersionBufferTest::test_sizing()
      unsigned nSamples = 10;
      unsigned nChannels = 10;
      unsigned nPolarisations=2;
-     unsigned sampleSize = nChannels * nPolarisations * nChannels;
      unsigned nSubbands=2;
+     unsigned sampleSize = nSubbands * nPolarisations * nChannels;
      SpectrumDataSet<float> spectrumData;
      spectrumData.resize( nSamples, nSubbands, nPolarisations, nChannels );
      WeightedSpectrumDataSet data( &spectrumData );
@@ -53,25 +53,26 @@ void DedispersionBufferTest::test_sizing()
        CPPUNIT_ASSERT_EQUAL(0, (int)b.size() );
        CPPUNIT_ASSERT_EQUAL((unsigned int)0, b.numSamples() );
        CPPUNIT_ASSERT_EQUAL((unsigned int)0, b.spaceRemaining() );
-       CPPUNIT_ASSERT_EQUAL( nSamples , b.addSamples( &data, &sampleNumber ));
+       CPPUNIT_ASSERT_EQUAL( b.maxSamples() , b.addSamples( &data, &sampleNumber ));
        CPPUNIT_ASSERT_EQUAL( (unsigned)0, sampleNumber );
      }
      { // Use Case:
        // constructor with fixed size of samples, sized correctly
-       // addSamples with buffer maximum
+       // addSamples supplied with samples to exactly fill the buffer
        // Expect:
        // size as set, addSamples to complete OK, with 0 space left
        DedispersionBuffer b(nSamples,sampleSize );
+       CPPUNIT_ASSERT_EQUAL( (unsigned)0, sampleNumber );
        CPPUNIT_ASSERT_EQUAL(nSamples * sampleSize* sizeof(float), b.size() );
        CPPUNIT_ASSERT_EQUAL((unsigned int)0, b.numSamples() );
-       CPPUNIT_ASSERT_EQUAL((unsigned int)10, b.spaceRemaining() );
+       CPPUNIT_ASSERT_EQUAL(nSamples, b.spaceRemaining() );
        CPPUNIT_ASSERT_EQUAL( (unsigned)0 , b.addSamples( &data, &sampleNumber ));
        CPPUNIT_ASSERT_EQUAL( nSamples, b.numSamples() );
        CPPUNIT_ASSERT_EQUAL((unsigned int)0, b.spaceRemaining() );
        CPPUNIT_ASSERT_EQUAL( nSamples, sampleNumber );
        // we should not be able to add any more data as the buffer is full
        sampleNumber = 0;
-       CPPUNIT_ASSERT_EQUAL( nSamples , b.addSamples( &data, &sampleNumber ));
+       CPPUNIT_ASSERT_EQUAL( (unsigned)0 , b.addSamples( &data, &sampleNumber ));
        CPPUNIT_ASSERT_EQUAL( (unsigned)0, sampleNumber );
        // clear it and we should be able to use it again
        b.clear();
@@ -89,7 +90,7 @@ void DedispersionBufferTest::test_sizing()
        unsigned samples = nSamples -2;
        DedispersionBuffer b( samples, sampleSize );
        sampleNumber = 0;
-       CPPUNIT_ASSERT_EQUAL( (unsigned)2 , b.addSamples( &data, &sampleNumber ));
+       CPPUNIT_ASSERT_EQUAL( (unsigned)0 , b.addSamples( &data, &sampleNumber ));
        CPPUNIT_ASSERT_EQUAL((unsigned int)0, b.spaceRemaining() );
        CPPUNIT_ASSERT_EQUAL( samples, sampleNumber );
      }
@@ -101,9 +102,48 @@ void DedispersionBufferTest::test_sizing()
        unsigned samples = nSamples + 2;
        DedispersionBuffer b( samples,sampleSize );
        sampleNumber = 0;
-       CPPUNIT_ASSERT_EQUAL( (unsigned)0 , b.addSamples( &data, &sampleNumber ));
+       CPPUNIT_ASSERT_EQUAL( (unsigned)2 , b.addSamples( &data, &sampleNumber ));
        CPPUNIT_ASSERT_EQUAL((unsigned int)2, b.spaceRemaining() );
        CPPUNIT_ASSERT_EQUAL( nSamples , sampleNumber );
+     }
+}
+
+void DedispersionBufferTest::test_copy() {
+     unsigned nSamples = 10;
+     unsigned nChannels = 10;
+     unsigned nPolarisations=2;
+     unsigned nSubbands=2;
+     unsigned sampleSize = nSubbands * nPolarisations * nChannels;
+     SpectrumDataSet<float> spectrumData;
+     spectrumData.resize( nSamples, nSubbands, nPolarisations, nChannels );
+     WeightedSpectrumDataSet data( &spectrumData );
+     { // Use Case:
+       // copy from on identical buffer to the next, zero offset
+       // Expect:
+       // identical data throughout
+       DedispersionBuffer b1( nSamples,sampleSize );
+       DedispersionBuffer b2( nSamples,sampleSize );
+       b2.copy(&b1,0);
+       
+       //TODO verify data pattern
+     }
+     { // Use Case:
+       // copy from on identical buffer to the next, last byte
+       // Expect:
+       // copy only the last sample
+       DedispersionBuffer b1( nSamples,sampleSize );
+       DedispersionBuffer b2( nSamples,sampleSize );
+       b2.copy(&b1,sampleSize * nSamples- 1);
+       //TODO verify data pattern
+     }
+     { // Use Case:
+       // copy from on identical buffer to the next, end of data offset
+       // Expect:
+       // copy nothing, without crashing
+       DedispersionBuffer b1( nSamples,sampleSize );
+       DedispersionBuffer b2( nSamples,sampleSize );
+       b2.copy(&b1, sampleSize*nSamples);
+       //TODO verify data pattern
      }
 }
 

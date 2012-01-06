@@ -12,6 +12,7 @@
 #include "AsyncronousModule.h"
 #include "GPU_Kernel.h"
 #include "GPU_MemoryMap.h"
+#include "SpectrumDataSet.h"
 
 /**
  * @file DedispersionModule.h
@@ -67,8 +68,14 @@ class DedispersionModule : public AsyncronousModule
                              DedispersedTimeSeries<float>* dataOut );
         DedispersedTimeSeries<float>* dataExtract( const float* outputData, DedispersedTimeSeries<float>* dataBlob );
 
+        /// resize the buffers if necessary to accomodate the provided streamData
+        //  If a resize is required any existing data in the buffers
+        //  will be lost.
+        void resize( const SpectrumDataSet<float>* streamData );
+
      protected:
         void dedisperse( DedispersionBuffer** buffer, DedispersedTimeSeries<float>* dataOut );
+        void _cleanBuffers();
 
     private:
         QVector<float> _means;

@@ -15,7 +15,7 @@ namespace lofar {
  * @class DedispersionBufferTest
  *  
  * @brief
- * 
+ *  unit test for DedispersionBuffer
  * @details
  * 
  */
@@ -25,6 +25,7 @@ class DedispersionBufferTest : public CppUnit::TestFixture
     public:
         CPPUNIT_TEST_SUITE( DedispersionBufferTest );
         CPPUNIT_TEST( test_sizing );
+        CPPUNIT_TEST( test_copy );
         CPPUNIT_TEST_SUITE_END();
 
     public:
@@ -33,6 +34,7 @@ class DedispersionBufferTest : public CppUnit::TestFixture
 
         // Test Methods
         void test_sizing();
+        void test_copy();
 
     public:
         DedispersionBufferTest(  );

@@ -32,15 +32,22 @@ class DedispersionBuffer
 
         size_t size() const { return _data.size() * sizeof(float); };
         void setSampleCapacity(unsigned int maxSamples);
-        
+
+        /// return the max number of samples that can be fitted in the buffer
+        //  set with setSampleCapacity
+        unsigned maxSamples() const { return _nsamp; }
+
+        /// return the number of elements in each sample
+        unsigned sampleSize() const { return _sampleSize; }
+
         // remove current data and reset the buffer
         void clear();
 
         /// import as many samples as possible into the buffer from the 
         // provided data set staring at the sample given by sampleNumber. 
-        // The return value represents the remaining samples
-        // for which there was no space.
-        // sampleNumber is updated to the last sample number that was included
+        // The space remaining in the boffer is provided in return value 
+        // sampleNumber is updated to the last sample number from
+        // the dataset that was included
         unsigned int addSamples( WeightedSpectrumDataSet* weightedData, unsigned *sampleNumber );
 
         /// return the amount of empty space in the buffer (in samples)
@@ -49,6 +56,7 @@ class DedispersionBuffer
         /// copy data from this object to the supplied DataBuffer object
         //  data is taken from the offset position to the end and
         //  inserted at the beginning of the provided object
+        //  offset indicates the number of float values
         void copy( DedispersionBuffer* buf, unsigned int offset = 0 );
 
         float* getData() { return &_data[0]; };

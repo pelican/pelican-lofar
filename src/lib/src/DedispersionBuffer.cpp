@@ -34,8 +34,10 @@ void DedispersionBuffer::setSampleCapacity(unsigned int maxSamples)
 
 void DedispersionBuffer::copy( DedispersionBuffer* buf, unsigned int offset )
 {
-    Q_ASSERT( buf->size() > size() );
-    memcpy( &(buf->_data[0]), &_data[0] + offset * sizeof(float) , (size() - offset) * sizeof(float) );
+    Q_ASSERT( buf->size() >= size() );
+    unsigned s = _data.size() - offset;
+    if( s > 0 ) 
+        memcpy( &(buf->_data[0]), &_data[offset] , s );
     //buf->_rms = _rms;
     //buf->_mean = _mean;
 }
@@ -47,12 +49,18 @@ unsigned DedispersionBuffer::spaceRemaining() const {
 unsigned DedispersionBuffer::addSamples( WeightedSpectrumDataSet* weightedData, unsigned *sampleNumber ) {
 
     SpectrumDataSet<float>* streamData = weightedData->dataSet();
+    Q_ASSERT( streamData != 0 );
     unsigned int nChannels = streamData->nChannels();
     unsigned int nSubbands = streamData->nSubbands();
     unsigned int nPolarisations = streamData->nPolarisations();
-    Q_ASSERT( nSubbands * nChannels * nPolarisations == _sampleSize );
+    unsigned int numSamples = streamData->nTimeBlocks();
+    if( nSubbands * nChannels * nPolarisations != _sampleSize ) {
+        std::cerr  << "DedispersionBuffer: input data sample size(" <<  nSubbands * nChannels * nPolarisations
+                   << ") does not match buffer sample size (" << _sampleSize << ")" << std::endl;
+        return spaceRemaining();
+    }
  
-    unsigned maxSamples = std::min( streamData->nTimeBlocks(), spaceRemaining() + *sampleNumber );
+    unsigned maxSamples = std::min( numSamples, spaceRemaining() + *sampleNumber );
     for(unsigned t = *sampleNumber; t < maxSamples; ++t) {
         for (unsigned s = 0; s < nSubbands; ++s) {
             for (unsigned c = 0; c < nChannels; ++c) {
@@ -63,7 +71,7 @@ unsigned DedispersionBuffer::addSamples( WeightedSpectrumDataSet* weightedData, 
         ++_sampleCount;
     }
     *sampleNumber = maxSamples;
-    return streamData->nTimeBlocks() - maxSamples;
+    return spaceRemaining();
 }
 
 void DedispersionBuffer::clear() {
