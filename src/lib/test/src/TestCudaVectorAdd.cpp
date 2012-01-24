@@ -22,8 +22,8 @@ TestCudaVectorAdd::~TestCudaVectorAdd()
 {
 }
 
-void TestCudaVectorAdd::run( const QList<void*>& args  ) {
-     vecAdd( (const float*)args[0], (const float*)args[1], (float*)args[2], 2 );
+void TestCudaVectorAdd::run( const QList<GPU_Param*>& args  ) {
+     vecAdd( (const float*)args[0]->device(), (const float*)args[1]->device(), (float*)args[2]->device(), 2 );
 }
 
 } // namespace lofar

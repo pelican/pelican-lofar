@@ -69,7 +69,6 @@ void GPU_Job::setAsRunning() {
 void GPU_Job::emitFinished() {
     {
         QMutexLocker lock(&_mutex);
-        setStatus( GPU_Job::Finished );
         _processing = false;
     }
     if( _waitCondition ) { 

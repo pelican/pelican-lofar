@@ -11,6 +11,7 @@
 namespace pelican {
 
 namespace lofar {
+class GPU_Param;
 
 /**
  * @class TestCudaVectorAdd
@@ -26,7 +27,7 @@ class TestCudaVectorAdd : public GPU_Kernel
     public:
         TestCudaVectorAdd();
         virtual ~TestCudaVectorAdd();
-        virtual void run( const QList<void*>& devicePointers );
+        virtual void run( const QList<GPU_Param*>& devicePointers );
 
     private:
 };

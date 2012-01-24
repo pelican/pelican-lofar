@@ -33,6 +33,27 @@ void GPU_ManagerTest::tearDown()
 {
 }
 
+void GPU_ManagerTest::test_throw()
+{
+     // Use Case:
+     // Single gpu card
+     // Sumbit a single job that throws
+     // Expect:
+     // throw to be trapped and passed in the Job info
+     GPU_Manager m; // a single Test card
+     GPU_TestCard* card = new GPU_TestCard;
+     m.addResource( card );
+     CPPUNIT_ASSERT_EQUAL( 1, m.freeResources() );
+     GPU_Job testJob1;
+     m.submit(&testJob1);
+     do{ sleep(1); } while( testJob1.status() == GPU_Job::Queued );
+     CPPUNIT_ASSERT_EQUAL( 0, m.freeResources() );
+     QString errorMsg("Job Throwing");
+     card->throwJob( errorMsg );
+     do{ sleep(1); } while( testJob1.status() != GPU_Job::Failed );
+     CPPUNIT_ASSERT_EQUAL( errorMsg.toStdString() , testJob1.error() );
+}
+
 void GPU_ManagerTest::test_submit()
 {
      // Use Case:

@@ -11,9 +11,8 @@ namespace lofar {
  *@details GPU_TestCard 
  */
 GPU_TestCard::GPU_TestCard()
-    : _current(0)
+    : _current(0), _doThrow(false)
 {
-   
 }
 
 /**
@@ -28,6 +27,9 @@ void GPU_TestCard::run( GPU_Job* job ) {
     QMutexLocker loc(&_mutex);
    _current = job;
    _waitCondition.wait(&_mutex);
+   if( _doThrow ) {
+       _object();
+   }
 }
 
 void GPU_TestCard::completeJob() {
@@ -43,7 +45,7 @@ void GPU_TestCard::completeJob() {
 }
 
 GPU_Job* GPU_TestCard::currentJob() const {
-   return _current;
+    return _current;
 }
 
 } // namespace lofar

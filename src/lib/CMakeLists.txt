@@ -45,6 +45,8 @@ if(CUDA_FOUND)
     list(APPEND lib_src
             src/AsyncronousModule.cpp
             src/DedispersionModule.cpp
+            src/DedispersionModule.cpp
+            src/GPU_Param.cpp
             src/GPU_NVidia.cpp
             src/GPU_NVidiaConfiguration.cpp
             src/GPU_Kernel.cpp

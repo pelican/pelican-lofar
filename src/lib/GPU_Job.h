@@ -30,7 +30,7 @@ class GPU_Kernel;
 class GPU_Job
 {
     public:
-        typedef enum{ None, Queued, Running, Finished } JobStatus;
+        typedef enum{ None, Queued, Running, Finished, Failed } JobStatus;
 
     public:
         GPU_Job();
@@ -44,6 +44,8 @@ class GPU_Job
         inline void setStatus( const JobStatus& status ) { _status = status; };
         void setAsRunning();
         inline JobStatus status() const { return _status; };
+        const std::string& error() const { return _errorMsg; }
+        void setError( const std::string& msg ) { _errorMsg = msg; }
         void emitFinished();
         void wait() const;
         void addCallBack( const boost::function0<void>& fn ) { _callbacks.append(fn); };
@@ -51,6 +53,7 @@ class GPU_Job
         void reset();
 
     private:
+        std::string _errorMsg;
         QList<GPU_Kernel*> _kernels;
         // status variables
         bool _processing;

@@ -25,6 +25,7 @@ namespace lofar {
 class WeightedSpectrumDataSet;
 class GPU_DataMapping;
 class GPU_Job;
+class GPU_Param;
 class DedispersionBuffer;
 
 /**
@@ -46,7 +47,7 @@ class DedispersionModule : public AsyncronousModule
               float _tsamp;
            public:
               DedispersionKernel( float, float, float );
-              void run(const QList<void*>& params);
+              void run(const QList<GPU_Param*>& param );
               void reset();
         };
 
@@ -80,6 +81,7 @@ class DedispersionModule : public AsyncronousModule
     private:
         QVector<float> _means;
         QVector<float> _rmss;
+        unsigned int _tdms;
         QList<DedispersionBuffer*> _buffersList;
         LockingContainer<DedispersionBuffer*> _buffers;
         QList<GPU_Job> _jobs;

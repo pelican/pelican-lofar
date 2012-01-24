@@ -2,6 +2,7 @@
 #define GPU_KERNEL_H
 #include <QList>
 #include "GPU_NVidiaConfiguration.h"
+#include <GPU_Param.h>
 
 /**
  * @file GPU_Kernel.h
@@ -26,7 +27,7 @@ class GPU_Kernel
         GPU_Kernel(  );
         virtual ~GPU_Kernel();
         const GPU_NVidiaConfiguration* configuration() const { return &_config; };
-        virtual void run( const QList<void*>& devicePointers ) = 0;
+        virtual void run( const QList<GPU_Param*>& devicePointers ) = 0;
         void setConfiguration( const GPU_NVidiaConfiguration& config );
         inline void addConstant( const GPU_MemoryMap& map ) { _config.addConstant(map); };
         inline void addInputMap( const GPU_MemoryMap& map ) { _config.addInputMap(map); };

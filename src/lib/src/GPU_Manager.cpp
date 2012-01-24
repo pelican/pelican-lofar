@@ -57,8 +57,18 @@ void GPU_Manager::_matchResources() {
 
 void GPU_Manager::_runJob( GPU_Resource* r, GPU_Job* job ) {
     job->setStatus( GPU_Job::Running );
-    r->exec(job);
-    job->setStatus( GPU_Job::Finished );
+    try {
+        r->exec(job);
+        job->setStatus( GPU_Job::Finished );
+    } 
+    catch( const QString& e ) {
+        job->setError( e.toStdString() );
+        job->setStatus( GPU_Job::Failed );
+    }
+    catch( const std::string& e ) {
+        job->setError( e );
+        job->setStatus( GPU_Job::Failed );
+    }
     job->emitFinished();
     _resourceFree( r );
     // execute any job callbacks

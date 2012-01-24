@@ -9,6 +9,13 @@
 #include "GPU_NVidiaConfiguration.h"
 #include "GPU_Job.h"
 #include "GPU_Kernel.h"
+#include "GPU_Param.h"
+
+extern "C" void cacheDedisperseLoop( float *outbuff, long outbufSize, float *buff, float mstartdm,
+                                     float mdmstep, int tdms, int numSamples,
+                                     const float* dmShift,
+                                     const int* i_nsamp, const int* i_maxshift,
+                                     const int* i_nchans );
 
 
 namespace pelican {
@@ -25,6 +32,7 @@ DedispersionModule::DedispersionModule( const ConfigNode& config )
     unsigned int nChannels = config.getOption("outputChannelsPerSubband", "value", "512").toUInt();
     unsigned int bufferSize = config.getOption("dedispersionSampleNumber", "value", "512").toUInt();
     unsigned int sampleSize = config.getOption("dedispersionSampleSize", "value", "512").toUInt();
+    _tdms = config.getOption("dedispersionParameters", "value", "1984").toUInt();
     float dmLow = config.getOption("dispersionMinimum", "value", "0").toFloat();
     float dmStep = config.getOption("dispersionStepSize", "value", "0.1").toFloat();
     unsigned int dmNumber = config.getOption("dispersionSteps", "value", "100").toUInt();
@@ -143,13 +151,15 @@ DedispersedTimeSeries<float>* DedispersionModule::dedisperse( WeightedSpectrumDa
 void DedispersionModule::dedisperse( DedispersionBuffer** buffer, DedispersedTimeSeries<float>* dataOut )
 {
     // prepare the output data datablob
-    dataOut->resize( (*buffer)->numSamples() );
+    unsigned int nsamp = (*buffer)->numSamples();
+    dataOut->resize( nsamp );
     // Set up a job for the GPU processing kernel
     GPU_Job* job = _jobBuffer.next();
     DedispersionKernel** kernelPtr = _kernels.next();
     //unsigned int outputSize;
-    //GPU_MemoryMap out( &dataOut, outputSize * sizeof(float) );
-    //config.addOutputMap( out );
+    size_t outputSize = nsamp * _tdms * sizeof(float);
+    GPU_MemoryMap out( &dataOut, outputSize );
+    (*kernelPtr)->addOutputMap( out );
     GPU_MemoryMap in( *buffer, (*buffer)->size() );
     (*kernelPtr)->addInputMap( GPU_MemoryMap( (*buffer)->getData(), (*buffer)->size()) );
     job->addKernel( *kernelPtr );
@@ -186,15 +196,20 @@ DedispersionModule::DedispersionKernel::DedispersionKernel( float start, float s
 {
 }
 
-void DedispersionModule::DedispersionKernel::run(const QList<void*>& /*param*/) {
-     //cudaMemset((float*)param[0], 0, size(param[0]) );
+void DedispersionModule::DedispersionKernel::run(const QList<GPU_Param*>& param ) {
+     Q_ASSERT( param.size() == 6 );
+     //cudaMemset((float*)param[0], 0, param[0]->size() );
      //cache_dedisperse_loop( float *outbuff, float *buff, float mstartdm, float mdmstep )
-     /*
-     cacheDedisperseLoop( (float*)param[0] , (float*)param[1], _startdm/_tsamp, _dmstep/_tsamp,
-                            (const float*)param[2], (const float*)param[3], (const float*)param[4],
-                            (const float*)param[5]
-                          );
-     */
+std::cout << "DedispersionModule::DedispersionKernel::run: " << std::endl;
+     cacheDedisperseLoop( (float*)param[0]->device() , param[0]->size(),
+                          (float*)param[1]->device(), _startdm,
+                          (int)(_startdm/_tsamp), (int)(_dmstep/_tsamp),
+                          param[3]->value<int>(),
+                          (const float*)param[2]->device(),
+                          (const int*)param[3]->device(),
+                          (const int*)param[4]->device(),
+                          (const int*)param[5]->device()
+                        );
 }
 
 void DedispersionModule::DedispersionKernel::reset() {

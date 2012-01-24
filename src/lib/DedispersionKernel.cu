@@ -64,12 +64,13 @@ __global__ void cache_dedisperse_loop(float *outbuff, float *buff, float mstartd
 }
 
 /// C Wrapper for brute-force algo
-extern "C" void cacheDedisperseLoop( float *outbuff, float *buff, float mstartdm, 
+extern "C" void cacheDedisperseLoop( float *outbuff, long outbufSize, float *buff, float mstartdm,
                                      float mdmstep, int tdms, int numSamples, 
                                      const float* dmShift,
                                      const int* i_nsamp, const int* i_maxshift, 
                                      const int* i_nchans ) {
 
+    cudaMemset(outbuff, 0, outbufSize );
     int divisions_in_t  = DIVINT;
     int divisions_in_dm = DIVINDM;
     int num_reg = NUMREG;
@@ -78,7 +79,7 @@ extern "C" void cacheDedisperseLoop( float *outbuff, float *buff, float mstartdm
 
     dim3 threads_per_block(divisions_in_t, divisions_in_dm);
     dim3 num_blocks(num_blocks_t,num_blocks_dm);
-    cache_dedisperse_loop<<<  num_blocks, threads_per_block >>>( outbuff, buff, 
+    cache_dedisperse_loop<<< num_blocks, threads_per_block >>>( outbuff, buff, 
                 mstartdm, mdmstep, dmShift, i_nsamp, i_maxshift, i_nchans );
 }
 

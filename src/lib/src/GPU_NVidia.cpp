@@ -1,5 +1,6 @@
 #include "GPU_NVidia.h"
 #include "GPU_Manager.h"
+#include "GPU_Param.h"
 #include "GPU_Kernel.h"
 #include "GPU_Job.h"
 #include "GPU_MemoryMap.h"
@@ -25,7 +26,7 @@ GPU_NVidia::GPU_NVidia( unsigned int id )
  */
 GPU_NVidia::~GPU_NVidia()
 {
-    freeMem( _currentDevicePointers );
+    freeMem( _params.values() );
     //cutilDeviceReset();
 }
 
@@ -36,15 +37,12 @@ void GPU_NVidia::run( GPU_Job* job )
      // execute the kernels
      foreach( GPU_Kernel* kernel, job->kernels() ) {
         setupConfiguration( kernel->configuration() );
-        kernel->run( _currentDevicePointers );
+        kernel->run( _currentParams );
         cudaDeviceSynchronize();
         if( ! cudaPeekAtLastError() ) {
             // copy device memory to host
             foreach( const GPU_MemoryMap& map, _currentConfig->outputMaps() ) {
-                if( map.hostPtr() ) {
-                    cudaMemcpy( map.hostPtr(), _memPointers[map],
-                                map.size(), cudaMemcpyDeviceToHost );
-                }
+                _params.value(map)->syncDeviceToHost();
             }
         }
         else {
@@ -60,6 +58,18 @@ void GPU_NVidia::setupConfiguration ( const GPU_NVidiaConfiguration* c )
          // TODO write code to test for overlapping mem
          // requirements for different configurations
          // to avoid unnesasary deallocations/allocations
+         freeMem(_currentParams); // quickfix: delete everything for now
+         _currentParams.clear();
+         foreach( const GPU_MemoryMap& map, c->allMaps() ) {
+             _params.insert( map, new GPU_Param( &map ) );
+             _currentParams.append( _params[map] );
+         }
+         // sync constants only on creation
+         foreach( const GPU_MemoryMap& map, c->constants() ) {
+             _params.value(map)->syncHostToDevice();
+         }
+         _currentConfig = c;
+/*
          freeMem( _currentDevicePointers );
          _currentDevicePointers.clear();
 
@@ -69,6 +79,7 @@ void GPU_NVidia::setupConfiguration ( const GPU_NVidiaConfiguration* c )
                  cudaMalloc( &(_memPointers[map]) , map.size() );
              }
              _currentDevicePointers.append( _memPointers[map] );
+             _currentParams.append( GPU_Param(map,_memPointers[map]) );
          }
          // deal with constant symbols - upload only once
          foreach( const GPU_MemoryMap& map, c->constants() ) {
@@ -77,21 +88,18 @@ void GPU_NVidia::setupConfiguration ( const GPU_NVidiaConfiguration* c )
                          map.size(), cudaMemcpyHostToDevice );
              }
          }
-         _currentConfig = c;
+        */
      }
-     // upload input data from host
+     // upload non-constant input data from host
      foreach( const GPU_MemoryMap& map, c->inputMaps() ) {
-         if( map.hostPtr() ) {
-             cudaMemcpy( _memPointers[map], map.hostPtr(),
-                     map.size(), cudaMemcpyHostToDevice );
-         }
+         _params.value(map)->syncHostToDevice();
      }
      cudaDeviceSynchronize();
 }
 
-void GPU_NVidia::freeMem( const QList<void*>& pointers ) {
-     foreach( void* p, pointers ) {
-        cudaFree( p );
+void GPU_NVidia::freeMem( const QList<GPU_Param*>& list ) {
+     foreach( GPU_Param* p, list ) {
+        delete p;
      }
 }
 
