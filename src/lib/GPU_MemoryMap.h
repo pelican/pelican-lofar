@@ -39,7 +39,7 @@ class GPU_MemoryMap
         inline unsigned long size() const { return _size; }
         bool operator==(const GPU_MemoryMap&) const;
         inline unsigned int qHash() const { return _hash; }
-        //template<typename T> value() const { return static_cast<T>(*_host) };
+        template<typename T> T value() const { return *(static_cast<T*>(_host)); }
 
     protected:
         void _set(void* host_address, unsigned long bytes);

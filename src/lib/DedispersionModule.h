@@ -44,9 +44,9 @@ class DedispersionModule : public AsyncronousModule
         class DedispersionKernel : public GPU_Kernel { 
               float _startdm;
               float _dmstep;
-              float _tsamp;
+              int _nSamp;
            public:
-              DedispersionKernel( float, float, float );
+              DedispersionKernel( float, float, int numSamples );
               void run(const QList<GPU_Param*>& param );
               void reset();
         };
@@ -82,15 +82,19 @@ class DedispersionModule : public AsyncronousModule
         QVector<float> _means;
         QVector<float> _rmss;
         unsigned int _tdms;
+        unsigned _numSamplesBuffer;
+        float _dmStep;
+        float _dmLow;
+        unsigned int _dmNumber;
+        double _fch1;
+        double _foff;
         QList<DedispersionBuffer*> _buffersList;
         LockingContainer<DedispersionBuffer*> _buffers;
         QList<GPU_Job> _jobs;
         LockingContainer<GPU_Job> _jobBuffer; // collection of job objects
-        unsigned int _nsamp; // number of samples per processing block
         int _maxshift; // number of samples to overlap between processes
         int _nChannels; // number of Channels per sample
         DedispersionBuffer** _currentBuffer;
-        GPU_MemoryMap _i_nsamp;
         GPU_MemoryMap _i_chans;
         GPU_MemoryMap _i_maxshift;
         GPU_MemoryMap _f_dmshifts;

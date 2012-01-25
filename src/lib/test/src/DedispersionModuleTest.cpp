@@ -52,7 +52,7 @@ void DedispersionModuleTest::test_method()
           // returned output blob should be the same as that passed
           // to any connected functions
           ConfigNode config;
-          QString configString = QString("<DedispersionModule><dedispersionSampleNumber value=\"%1\" /></DedispersionModule>").arg(nSamples);
+          QString configString = QString("<DedispersionModule><dedispersionSampleNumber value=\"%1\" /><frequencyChannel1 value=\"100\"/></DedispersionModule>").arg(nSamples);
           config.setFromString(configString);
           DedispersionModule dm(config);
           LockingCircularBuffer<DedispersedTimeSeries<float>* >* buffer = outputBuffer(2);

@@ -47,6 +47,7 @@ void GPU_Job::addKernel( GPU_Kernel* kernel )
 void GPU_Job::reset() {
     _processing = false;
     setStatus( GPU_Job::None );
+    setError("");
     _kernels.clear();
     _callbacks.clear();
 }

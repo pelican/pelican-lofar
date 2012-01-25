@@ -69,6 +69,10 @@ void GPU_Manager::_runJob( GPU_Resource* r, GPU_Job* job ) {
         job->setError( e );
         job->setStatus( GPU_Job::Failed );
     }
+    catch( const char* e ) {
+        job->setError( std::string(e) );
+        job->setStatus( GPU_Job::Failed );
+    }
     job->emitFinished();
     _resourceFree( r );
     // execute any job callbacks
