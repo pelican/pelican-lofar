@@ -107,5 +107,48 @@ void DedispersionModuleTest::destroyBuffer(
     }
 }
 
+void DedispersionModuleTest::_deleteStokesData( QList<SpectrumDataSetStokes*>& data ) {
+    foreach( SpectrumDataSetStokes* d, data ) {
+        delete d;
+    }
+}
+
+QList<SpectrumDataSetStokes*> DedispersionModuleTest::_generateStokesData(int numberOfBlocks, float dm ) {
+    unsigned nSamples = 16; // samples per blob
+    unsigned nSubbands = 32;
+    unsigned nChannels = 64; // 2048 total channels (32x64)
+
+    double fch1 = 150;
+    double foff = -6.0/2048.0;
+    double tsamp = 327.68; // time sample length
+    QList<SpectrumDataSetStokes*> data;
+
+    for( int i=0; i < numberOfBlocks; ++i ) {
+        SpectrumDataSetStokes* stokes = new SpectrumDataSetStokes;
+        stokes->resize(nSamples, nSubbands, 1, nChannels);
+        data.append(stokes);
+
+        int offset = (i - 1) * nSamples;
+        //stokes->setLofarTimestamp(channeliserOutput->getLofarTimestamp());
+        for (unsigned int t = 0; t < nSamples; ++t ) {
+            for (unsigned s = 0; s < nSubbands; ++s ) {
+                for (unsigned c = 0; c < nChannels; ++c) {
+                    int absChannel = nSubbands * nChannels + nChannels;
+                    int index = (int)(dm * (4148.741601 * ((1.0 / (fch1 + (foff * absChannel)) /
+                                    (fch1 + (foff * absChannel))) - (1.0 / fch1 / fch1))) /tsamp);
+                    int sampleNumber = index - offset;
+                    float* I = stokes->spectrumData(t, s, 0);
+                    if( sampleNumber == (int)t ) {
+                        I[c] = 1.0;
+                    } else {
+                        I[c] = 0.0;
+                    }
+                }
+            }
+        }
+    }
+    return data;
+}
+
 } // namespace lofar
 } // namespace pelican

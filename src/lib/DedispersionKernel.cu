@@ -81,6 +81,11 @@ extern "C" void cacheDedisperseLoop( float *outbuff, long outbufSize, float *buf
     std::cout << "\nnsamp\t" << numSamples;
     //printf("\ndm_step\t%f", dm_step);
     std::cout << "\ntdms\t" << tdms << std::endl;
+    //std::cout << "\nmaxshift\t" << *i_maxshift << std::endl;
+    //std::cout << "\nnchans\t" << *i_nchans << std::endl;
+    //std::cout << "\ndmshift\t" << *dmShift << std::endl;
+    //std::cout << "\nmdmstep\t" << mdmstep << std::endl;
+    //std::cout << "\nmstartdm\t" << mstartdm << std::endl;
 
     dim3 threads_per_block(divisions_in_t, divisions_in_dm);
     dim3 num_blocks(num_blocks_t,num_blocks_dm);

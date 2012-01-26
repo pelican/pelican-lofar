@@ -37,8 +37,8 @@ DedispersionModule::DedispersionModule( const ConfigNode& config )
     _dmNumber = config.getOption("dispersionSteps", "value", "100").toUInt();
     _fch1 = config.getOption("frequencyChannel1", "value", "0.0").toDouble();
     _foff = config.getOption("channelBandwidth", "value", "1.0").toDouble();
-    if( _foff <= 0 ) { throw QString("DedispersionModule: channelBandwidth must be a positve number"); }
-    if( _fch1 <= 0 ) { throw QString("DedispersionModule: frequencyChannel1 must be a positve number"); }
+    if( _foff == 0 ) { throw QString("DedispersionModule: channelBandwidth must be a positve number"); }
+    if( _fch1 == 0 ) { throw QString("DedispersionModule: frequencyChannel1 must be a positve number"); }
 
     unsigned int maxBuffers = config.getOption("numberOfBuffers", "value", "2").toUInt();
     if( maxBuffers < 1 ) throw(QString("DedispersionModule: Must have at least one buffer"));

@@ -15,6 +15,7 @@ class ConfigNode;
 class DataBlob;
 
 namespace lofar {
+class SpectrumDataSetStokes;
 
 /**
  * @class DedispersionModuleTest
@@ -51,6 +52,10 @@ class DedispersionModuleTest : public CppUnit::TestFixture
         LockingCircularBuffer<DedispersedTimeSeries<float>* >* outputBuffer(int size);
         void destroyBuffer(LockingCircularBuffer<DedispersedTimeSeries<float>* >* b);
         QList<DedispersedTimeSeries<float>* > _outputData;
+        // generate data with a corresponding dispersion signal across the specified number of
+        // blocks
+        QList<SpectrumDataSetStokes*> _generateStokesData(int numberOfBlocks, float dm );
+        void _deleteStokesData( QList<SpectrumDataSetStokes*>& data );
 
     private:
         int _connectCount;
