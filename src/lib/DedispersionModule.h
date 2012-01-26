@@ -44,9 +44,10 @@ class DedispersionModule : public AsyncronousModule
         class DedispersionKernel : public GPU_Kernel { 
               float _startdm;
               float _dmstep;
-              int _nSamp;
+              float _tsamp;
+              unsigned _tdms;
            public:
-              DedispersionKernel( float, float, int numSamples );
+              DedispersionKernel( float, float, float, float );
               void run(const QList<GPU_Param*>& param );
               void reset();
         };
@@ -81,11 +82,11 @@ class DedispersionModule : public AsyncronousModule
     private:
         QVector<float> _means;
         QVector<float> _rmss;
-        unsigned int _tdms;
+        unsigned _tdms; 
+        double _tsamp; // the time delta that is represented by each sample
         unsigned _numSamplesBuffer;
         float _dmStep;
         float _dmLow;
-        unsigned int _dmNumber;
         double _fch1;
         double _foff;
         QList<DedispersionBuffer*> _buffersList;

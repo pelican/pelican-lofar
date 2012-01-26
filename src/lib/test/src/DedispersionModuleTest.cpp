@@ -37,14 +37,10 @@ void DedispersionModuleTest::tearDown()
 
 void DedispersionModuleTest::test_method()
 {
-    unsigned nSamples = 10;
-    unsigned nChannels = 10;
-    unsigned nPolarisations=2;
-    unsigned nSubbands=2;
     try {
-        SpectrumDataSet<float> spectrumData;
-        spectrumData.resize( nSamples, nSubbands, nPolarisations, nChannels );
-        WeightedSpectrumDataSet weightedData(&spectrumData);
+        float dm = 10.5;
+        QList<SpectrumDataSetStokes*> spectrumData = _generateStokesData( 1, dm );
+        WeightedSpectrumDataSet weightedData(spectrumData[0]);
         { // Use Case:
           // Single Data Blob as input, of same size as the buffer
           // Expect:
@@ -52,7 +48,13 @@ void DedispersionModuleTest::test_method()
           // returned output blob should be the same as that passed
           // to any connected functions
           ConfigNode config;
-          QString configString = QString("<DedispersionModule><dedispersionSampleNumber value=\"%1\" /><frequencyChannel1 value=\"100\"/></DedispersionModule>").arg(nSamples);
+          unsigned nSamples=spectrumData[0]->nTimeBlocks();
+          QString configString = QString("<DedispersionModule>"
+                                         " <dedispersionSampleNumber value=\"%1\" />"
+                                         " <frequencyChannel1 value=\"150\"/>"
+                                         " <channelBandwidth value=\"-0.00292969\"/>"
+                                         " <sampleTime value=\"327.68\"/>"
+                                         "</DedispersionModule>").arg(nSamples);
           config.setFromString(configString);
           DedispersionModule dm(config);
           LockingCircularBuffer<DedispersedTimeSeries<float>* >* buffer = outputBuffer(2);
@@ -64,6 +66,7 @@ void DedispersionModuleTest::test_method()
           CPPUNIT_ASSERT_EQUAL( 1, _connectCount );
           CPPUNIT_ASSERT_EQUAL( data, _connectData );
           destroyBuffer( buffer );
+          _deleteStokesData(spectrumData);
         }
     }
     catch( QString s )
@@ -75,7 +78,6 @@ void DedispersionModuleTest::test_method()
 void DedispersionModuleTest::connected( DataBlob* dataOut ) {
     ++_connectCount;
     _connectData = 0;
-std::cout << "connected" << std::endl;
     CPPUNIT_ASSERT( ( _connectData = dynamic_cast<DedispersedTimeSeries<float>* >(dataOut) ) );
 }
 

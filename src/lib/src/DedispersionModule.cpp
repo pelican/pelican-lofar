@@ -34,10 +34,11 @@ DedispersionModule::DedispersionModule( const ConfigNode& config )
     _tdms = config.getOption("dedispersionParameters", "value", "1984").toUInt();
     _dmLow = config.getOption("dispersionMinimum", "value", "0").toFloat();
     _dmStep = config.getOption("dispersionStepSize", "value", "0.1").toFloat();
-    _dmNumber = config.getOption("dispersionSteps", "value", "100").toUInt();
     _fch1 = config.getOption("frequencyChannel1", "value", "0.0").toDouble();
     _foff = config.getOption("channelBandwidth", "value", "1.0").toDouble();
-    if( _foff == 0 ) { throw QString("DedispersionModule: channelBandwidth must be a positve number"); }
+    _tsamp = config.getOption("sampleTime", "value", "0.0").toDouble();
+    if( _tsamp == 0.000 ) { throw QString("DedispersionModule: must specify a sampleTime"); }
+    if( _foff >= 0 ) { throw QString("DedispersionModule: channelBandwidth must be a negative number"); }
     if( _fch1 == 0 ) { throw QString("DedispersionModule: frequencyChannel1 must be a positve number"); }
 
     unsigned int maxBuffers = config.getOption("numberOfBuffers", "value", "2").toUInt();
@@ -93,20 +94,20 @@ void DedispersionModule::resize( const SpectrumDataSet<float>* streamData ) {
         _buffers.reset( &_buffersList );
         _currentBuffer = _buffers.next();
 
-        _nChannels = nChannels;
+        _nChannels = nChannels * nSubbands;
         std::cout << "resize: nChannels = " << _nChannels << std::endl;
         // calculate dispersion measure shifts
         _dmshifts.clear();
-        for ( unsigned int c = 0; c < nChannels; ++c ) {
+        for ( int c = 0; c < _nChannels; ++c ) {
             _dmshifts.append(  4148.741601 * ((1.0 / (_fch1 + (_foff * c)) / 
                                (_fch1 + (_foff * c))) - (1.0 / _fch1 / _fch1)) );
         }
-        _maxshift = ((_dmLow + _dmStep * (_dmNumber - 1)) * _dmshifts[nChannels - 1])/maxSamples;
-        std::cout << "resize: dmShifts[nChannels-1] = " << _dmshifts[nChannels - 1] << std::endl;
+        _maxshift = ((_dmLow + _dmStep * (_tdms - 1)) * _dmshifts[nChannels - 1])/_tsamp;
         std::cout << "resize: maxSamples = " << maxSamples << std::endl;
         std::cout << "resize: dmLow = " << _dmLow << std::endl;
+        std::cout << "resize: mshift = " << _dmLow + _dmStep * (_tdms - 1) * _dmshifts[nChannels - 1] << std::endl;
         std::cout << "resize: dmStep = " << _dmStep << std::endl;
-        std::cout << "resize: dmNumber = " << _dmNumber << std::endl;
+        std::cout << "resize: tdms = " << _tdms << std::endl;
         std::cout << "resize: foff = " << _foff << std::endl;
         std::cout << "resize: fch1 = " << _fch1 << std::endl;
         std::cout << "resize: maxShift = " << _maxshift << std::endl;
@@ -118,7 +119,7 @@ void DedispersionModule::resize( const SpectrumDataSet<float>* streamData ) {
         _kernelList.clear();
         _f_dmshifts = GPU_MemoryMap( _dmshifts );
         for( unsigned int i=0; i < maxBuffers; ++i ) {
-            DedispersionKernel* kernel = new DedispersionKernel( _dmLow, _dmStep, maxSamples );
+            DedispersionKernel* kernel = new DedispersionKernel( _dmLow, _dmStep, _tsamp, _tdms );
             _kernelList.append( kernel ); 
             kernel->addConstant( _f_dmshifts );
             kernel->addConstant( _i_maxshift );
@@ -212,8 +213,8 @@ DedispersedTimeSeries<float>* DedispersionModule::dataExtract( const float* /*gp
     return data;
 }
 
-DedispersionModule::DedispersionKernel::DedispersionKernel( float start, float step, int nSamp ) 
-   : _startdm( start ), _dmstep( step ), _nSamp( nSamp )
+DedispersionModule::DedispersionKernel::DedispersionKernel( float start, float step, float tsamp, float tdms )
+   : _startdm( start ), _dmstep( step ), _tsamp(tsamp), _tdms(tdms)
 {
 }
 
@@ -224,10 +225,9 @@ void DedispersionModule::DedispersionKernel::run(const QList<GPU_Param*>& param 
 std::cout << "DedispersionModule::DedispersionKernel::run: " << std::endl;
 std::cout << " maxShift =" << param[2]->value<int>() << std::endl;
 std::cout << " nchans =" << param[3]->value<int>() << std::endl;
-     cacheDedisperseLoop( (float*)param[4]->device() , param[0]->size(),
+     cacheDedisperseLoop( (float*)param[4]->device() , param[4]->size(),
                           (float*)param[0]->device(), _startdm,
-                          (int)(_startdm/_nSamp), (int)(_dmstep/_nSamp),
-                          _nSamp,
+                          (float)(_startdm/_tsamp), _tdms, (float)(_dmstep/_tsamp),
                           (const float*)param[1]->device(),
                           (const int*)param[2]->device(),
                           (const int*)param[3]->device()
