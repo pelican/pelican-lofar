@@ -27,7 +27,7 @@ DedispersionPipeline::~DedispersionPipeline()
     foreach(SpectrumDataSetStokes* d, _stokesData ) {
         delete d;
     }
-    foreach(DedispersedTimeSeries<float>* d, _dedispersedData ) {
+    foreach(DedispersionSpectra* d, _dedispersedData ) {
         delete d;
     }
 }
@@ -50,8 +50,8 @@ void DedispersionPipeline::init()
     spectra = (SpectrumDataSetC32*) createBlob("SpectrumDataSetC32");
     _stokesData = createBlobs<SpectrumDataSetStokes>("SpectrumDataSetStokes", history);
     _stokesBuffer = new LockingCircularBuffer<SpectrumDataSetStokes*>(&_stokesData);
-    _dedispersedData = createBlobs<DedispersedTimeSeries<float> >("DedispersedTimeSeriesF32", history);
-    _dedispersedDataBuffer = new LockingCircularBuffer<DedispersedTimeSeries<float>* >(&_dedispersedData);
+    _dedispersedData = createBlobs<DedispersionSpectra >("DedispersionSpectra", history);
+    _dedispersedDataBuffer = new LockingCircularBuffer<DedispersionSpectra* >(&_dedispersedData);
 
     weightedIntStokes = (WeightedSpectrumDataSet*) createBlob("WeightedSpectrumDataSet");
 

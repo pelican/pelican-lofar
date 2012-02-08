@@ -63,7 +63,7 @@ void GPU_NVidiaTest::test_managedCard()
     TestCudaVectorAdd testKernel;
     GPU_NVidiaConfiguration config;
     config.addInputMap( vec1map );
-    config.addInputMap( vec2map );
+    config.addConstant( vec2map ); // add as a constant
     config.addOutputMap( resultmap );
     testKernel.setConfiguration( config );
     job.addKernel( &testKernel );

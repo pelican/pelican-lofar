@@ -37,6 +37,7 @@ set(lib_src
     src/SigprocStokesWriter.cpp
     src/LofarDataSplittingChunker.cpp
     src/WeightedSpectrumDataSet.cpp
+    src/DedispersionSpectra.cpp
     src/AsyncronousTask.cpp
     src/GPU_Task.cpp
     src/GPU_MemoryMap.cpp

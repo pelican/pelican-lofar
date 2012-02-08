@@ -1,7 +1,6 @@
 #ifndef DEDISPERSE_KERNEL_H_
 #define DEDISPERSE_KERNEL_H_
 
-#define ARRAYSIZE DIVINT * DIVINDM
 
 // Shared memory 
 //#define NUMREG 10
@@ -11,7 +10,9 @@
 // L1 cache
 #define NUMREG 15
 #define DIVINT 15
-#define DIVINDM 57
+//#define DIVINDM 57
+#define DIVINDM 2
+#define ARRAYSIZE DIVINT * DIVINDM
 
 #include <iostream>
 
@@ -24,7 +25,7 @@ __device__ __shared__ float f_line[ARRAYSIZE];
 //{{{ global_for_time_dedisperse_loop
 __global__ void cache_dedisperse_loop(float *outbuff, float *buff, float mstartdm,
                                       float mdmstep, const float* dm_shifts,
-                                      int i_nsamp, const int* i_maxshift,
+                                      const int i_nsamp, const int* i_maxshift,
                                       const int* i_nchans )
 {
 
@@ -61,7 +62,6 @@ __global__ void cache_dedisperse_loop(float *outbuff, float *buff, float mstartd
     for(int i = 0; i < NUMREG; i++) {
         outbuff[((blockIdx.y * DIVINDM) + threadIdx.y)* (i_nsamp-*i_maxshift) + (i * DIVINT) + (NUMREG * DIVINT * blockIdx.x) + threadIdx.x] = local_kernel_t[i];
     }
-
 }
 
 /// C Wrapper for brute-force algo
@@ -75,10 +75,16 @@ extern "C" void cacheDedisperseLoop( float *outbuff, long outbufSize, float *buf
     int divisions_in_t  = DIVINT;
     int divisions_in_dm = DIVINDM;
     int num_reg = NUMREG;
-    int num_blocks_t = numSamples/(divisions_in_t * num_reg);
+    int num_blocks_t = numSamples/(divisions_in_t * num_reg) || 1 ;
     int num_blocks_dm = tdms/divisions_in_dm;
 
-    std::cout << "\nnsamp\t" << numSamples;
+
+    std::cout << "\nnumSamples\t" << numSamples;
+    std::cout << "\ndivisions_in_t\t" << divisions_in_t;
+    std::cout << "\ndivisions_in_dm\t" << divisions_in_dm;
+    std::cout << "\nnum_reg\t" << num_reg;
+    std::cout << "\nnum_blocks\t" << num_blocks_t;
+    std::cout << "\nnum_blocks_dm\t" << num_blocks_dm;
     //printf("\ndm_step\t%f", dm_step);
     std::cout << "\ntdms\t" << tdms << std::endl;
     //std::cout << "\nmaxshift\t" << *i_maxshift << std::endl;
@@ -86,11 +92,14 @@ extern "C" void cacheDedisperseLoop( float *outbuff, long outbufSize, float *buf
     //std::cout << "\ndmshift\t" << *dmShift << std::endl;
     std::cout << "mdmstep\t" << mdmstep << std::endl;
     std::cout << "mstartdm\t" << mstartdm << std::endl;
+    std::cout << "buff\t" << buff << std::endl;
+    std::cout << "outbuff\t" << outbuff << std::endl;
 
     dim3 threads_per_block(divisions_in_t, divisions_in_dm);
     dim3 num_blocks(num_blocks_t,num_blocks_dm);
+    
     cache_dedisperse_loop<<< num_blocks, threads_per_block >>>( outbuff, buff, 
-                mstartdm, mdmstep, dmShift, numSamples , i_maxshift, i_nchans );
+                mstartdm, mdmstep, dmShift, numSamples, i_maxshift, i_nchans );
 }
 
 //}}}

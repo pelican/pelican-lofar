@@ -4,7 +4,7 @@
 #include <cppunit/extensions/HelperMacros.h>
 #include <QString>
 #include "pelican/utility/LockingCircularBuffer.hpp"
-#include "DedispersedTimeSeries.h"
+#include "DedispersionSpectra.h"
 
 /**
  * @file DedispersionModuleTest.h
@@ -49,9 +49,9 @@ class DedispersionModuleTest : public CppUnit::TestFixture
 
     protected:
         ConfigNode testConfig(QString file = QString() ) const;
-        LockingCircularBuffer<DedispersedTimeSeries<float>* >* outputBuffer(int size);
-        void destroyBuffer(LockingCircularBuffer<DedispersedTimeSeries<float>* >* b);
-        QList<DedispersedTimeSeries<float>* > _outputData;
+        LockingCircularBuffer<DedispersionSpectra* >* outputBuffer(int size);
+        void destroyBuffer(LockingCircularBuffer<DedispersionSpectra* >* b);
+        QList<DedispersionSpectra* > _outputData;
         // generate data with a corresponding dispersion signal across the specified number of
         // blocks
         QList<SpectrumDataSetStokes*> _generateStokesData(int numberOfBlocks, float dm );
@@ -59,7 +59,7 @@ class DedispersionModuleTest : public CppUnit::TestFixture
 
     private:
         int _connectCount;
-        DedispersedTimeSeries<float>* _connectData;
+        DedispersionSpectra* _connectData;
         
 };
 

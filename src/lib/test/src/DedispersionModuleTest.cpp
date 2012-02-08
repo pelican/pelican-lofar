@@ -38,7 +38,7 @@ void DedispersionModuleTest::tearDown()
 void DedispersionModuleTest::test_method()
 {
     try {
-        float dm = 10.5;
+        float dm = 35.5;
         QList<SpectrumDataSetStokes*> spectrumData = _generateStokesData( 1, dm );
         WeightedSpectrumDataSet weightedData(spectrumData[0]);
         { // Use Case:
@@ -57,9 +57,9 @@ void DedispersionModuleTest::test_method()
                                          "</DedispersionModule>").arg(nSamples);
           config.setFromString(configString);
           DedispersionModule dm(config);
-          LockingCircularBuffer<DedispersedTimeSeries<float>* >* buffer = outputBuffer(2);
+          LockingCircularBuffer<DedispersionSpectra* >* buffer = outputBuffer(2);
           dm.connect( boost::bind( &DedispersionModuleTest::connected, this, _1 ) );
-          DedispersedTimeSeries<float>* data = dm.dedisperse( &weightedData, buffer ); // asynchronous task
+          DedispersionSpectra* data = dm.dedisperse( &weightedData, buffer ); // asynchronous task
           _connectData = 0;
           _connectCount = 0;
           while( ! _connectCount ) { sleep(1); };
@@ -78,7 +78,7 @@ void DedispersionModuleTest::test_method()
 void DedispersionModuleTest::connected( DataBlob* dataOut ) {
     ++_connectCount;
     _connectData = 0;
-    CPPUNIT_ASSERT( ( _connectData = dynamic_cast<DedispersedTimeSeries<float>* >(dataOut) ) );
+    CPPUNIT_ASSERT( ( _connectData = dynamic_cast<DedispersionSpectra* >(dataOut) ) );
 }
 
 ConfigNode DedispersionModuleTest::testConfig(QString xml) const
@@ -93,18 +93,18 @@ ConfigNode DedispersionModuleTest::testConfig(QString xml) const
     return node;
 }
 
-LockingCircularBuffer<DedispersedTimeSeries<float>* >* DedispersionModuleTest::outputBuffer(int size) {
-     QList<DedispersedTimeSeries<float>* >* buffer = new QList< DedispersedTimeSeries<float>* >;
+LockingCircularBuffer<DedispersionSpectra* >* DedispersionModuleTest::outputBuffer(int size) {
+     QList<DedispersionSpectra* >* buffer = new QList< DedispersionSpectra* >;
      for(int i=0; i < size; ++i ) {
-        buffer->append( new DedispersedTimeSeries<float> );
+        buffer->append( new DedispersionSpectra );
      }
-     return new LockingCircularBuffer<DedispersedTimeSeries<float>* >( buffer );
+     return new LockingCircularBuffer<DedispersionSpectra* >( buffer );
 }
 
 void DedispersionModuleTest::destroyBuffer(
-        LockingCircularBuffer<DedispersedTimeSeries<float>* >* b) 
+        LockingCircularBuffer<DedispersionSpectra* >* b) 
 {
-    foreach( DedispersedTimeSeries<float>* d, *(b->rawBuffer()) ) {
+    foreach( DedispersionSpectra* d, *(b->rawBuffer()) ) {
         delete d;
     }
 }
@@ -122,7 +122,7 @@ QList<SpectrumDataSetStokes*> DedispersionModuleTest::_generateStokesData(int nu
 
     double fch1 = 150;
     double foff = -6.0/2048.0;
-    double tsamp = 327.68; // time sample length
+    double tsamp = 0.00032768; // time sample length
     QList<SpectrumDataSetStokes*> data;
 
     for( int i=0; i < numberOfBlocks; ++i ) {
@@ -135,9 +135,9 @@ QList<SpectrumDataSetStokes*> DedispersionModuleTest::_generateStokesData(int nu
         for (unsigned int t = 0; t < nSamples; ++t ) {
             for (unsigned s = 0; s < nSubbands; ++s ) {
                 for (unsigned c = 0; c < nChannels; ++c) {
-                    int absChannel = nSubbands * nChannels + nChannels;
-                    int index = (int)(dm * (4148.741601 * ((1.0 / (fch1 + (foff * absChannel)) /
-                                    (fch1 + (foff * absChannel))) - (1.0 / fch1 / fch1))) /tsamp);
+                    int absChannel = s * nChannels + c;
+                    int index = (int)( (4148.741601 * ((1.0 / (fch1 + (foff * absChannel)) /
+                                    (fch1 + (foff * absChannel))) - (1.0 / fch1 / fch1)))/tsamp );
                     int sampleNumber = index - offset;
                     float* I = stokes->spectrumData(t, s, 0);
                     if( sampleNumber == (int)t ) {

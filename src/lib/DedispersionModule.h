@@ -8,7 +8,7 @@
 #include "pelican/core/AbstractModule.h"
 #include "pelican/utility/LockingCircularBuffer.hpp"
 #include "LockingContainer.hpp"
-#include "DedispersedTimeSeries.h"
+#include "DedispersionSpectra.h"
 #include "AsyncronousModule.h"
 #include "GPU_Kernel.h"
 #include "GPU_MemoryMap.h"
@@ -55,20 +55,20 @@ class DedispersionModule : public AsyncronousModule
     public:
         DedispersionModule( const ConfigNode& config );
         ~DedispersionModule();
-        /// processing the incoming data, generating a new DedispersedTimeSeries in
+        /// processing the incoming data, generating a new DedispersedSpectra in
         /// the process
-        DedispersedTimeSeries<float>* dedisperse( DataBlob* incoming );
-        /// processing the incoming data, filling the provided DedispersedTimeSeries
-        DedispersedTimeSeries<float>* dedisperse( DataBlob* incoming, 
-                                 LockingCircularBuffer<DedispersedTimeSeries<float>* >* dataOut );
-        DedispersedTimeSeries<float>* dedisperse( WeightedSpectrumDataSet* incoming,
-                                 LockingCircularBuffer<DedispersedTimeSeries<float>* >* dataOut );
+        DedispersionSpectra* dedisperse( DataBlob* incoming );
+        /// processing the incoming data, filling the provided DedispersedSpectra
+        DedispersionSpectra* dedisperse( DataBlob* incoming, 
+                                 LockingCircularBuffer<DedispersionSpectra* >* dataOut );
+        DedispersionSpectra* dedisperse( WeightedSpectrumDataSet* incoming,
+                                 LockingCircularBuffer<DedispersionSpectra* >* dataOut );
 
         void gpuJobFinished( GPU_Job* job,  
                              DedispersionBuffer** buffer, 
                              DedispersionKernel** kernel,
-                             DedispersedTimeSeries<float>* dataOut );
-        DedispersedTimeSeries<float>* dataExtract( const float* outputData, DedispersedTimeSeries<float>* dataBlob );
+                             DedispersionSpectra* dataOut );
+        DedispersionSpectra* dataExtract( const float* outputData, DedispersionSpectra* dataBlob );
 
         /// resize the buffers if necessary to accomodate the provided streamData
         //  If a resize is required any existing data in the buffers
@@ -76,7 +76,7 @@ class DedispersionModule : public AsyncronousModule
         void resize( const SpectrumDataSet<float>* streamData );
 
      protected:
-        void dedisperse( DedispersionBuffer** buffer, DedispersedTimeSeries<float>* dataOut );
+        void dedisperse( DedispersionBuffer** buffer, DedispersionSpectra* dataOut );
         void _cleanBuffers();
 
     private:

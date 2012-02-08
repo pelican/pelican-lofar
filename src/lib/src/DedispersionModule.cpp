@@ -3,13 +3,13 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/bind.hpp>
 #include "GPU_MemoryMap.h"
-#include "DedispersedTimeSeries.h"
 #include "DedispersionBuffer.h"
 #include "WeightedSpectrumDataSet.h"
 #include "GPU_NVidiaConfiguration.h"
 #include "GPU_Job.h"
 #include "GPU_Kernel.h"
 #include "GPU_Param.h"
+#include "stdio.h"
 
 extern "C" void cacheDedisperseLoop( float *outbuff, long outbufSize, float *buff, float mstartdm,
                                      float mdmstep, int tdms, int numSamples,
@@ -32,8 +32,9 @@ DedispersionModule::DedispersionModule( const ConfigNode& config )
     _numSamplesBuffer = config.getOption("dedispersionSampleNumber", "value", "512").toUInt();
     unsigned int sampleSize = config.getOption("dedispersionSampleSize", "value", "512").toUInt();
     _tdms = config.getOption("dedispersionParameters", "value", "1984").toUInt();
-    _dmLow = config.getOption("dispersionMinimum", "value", "0").toFloat();
     _dmStep = config.getOption("dispersionStepSize", "value", "0.1").toFloat();
+    _dmLow = config.getOption("dispersionMinimum", "value", "0").toFloat();
+    if( _dmLow <= 0.0 ) { _dmLow = _dmStep; }
     _fch1 = config.getOption("frequencyChannel1", "value", "0.0").toDouble();
     _foff = config.getOption("channelBandwidth", "value", "1.0").toDouble();
     _tsamp = config.getOption("sampleTime", "value", "0.0").toDouble();
@@ -129,13 +130,13 @@ void DedispersionModule::resize( const SpectrumDataSet<float>* streamData ) {
     }
 }
 
-DedispersedTimeSeries<float>* DedispersionModule::dedisperse( DataBlob* incoming,
-                                 LockingCircularBuffer<DedispersedTimeSeries<float>* >* dataOut ) {
+DedispersionSpectra* DedispersionModule::dedisperse( DataBlob* incoming,
+                                 LockingCircularBuffer<DedispersionSpectra* >* dataOut ) {
     return dedisperse( dynamic_cast<WeightedSpectrumDataSet*>(incoming), dataOut );
 }
 
-DedispersedTimeSeries<float>* DedispersionModule::dedisperse( WeightedSpectrumDataSet* weightedData, 
-                        LockingCircularBuffer<DedispersedTimeSeries<float>* >* dataOut )
+DedispersionSpectra* DedispersionModule::dedisperse( WeightedSpectrumDataSet* weightedData, 
+                        LockingCircularBuffer<DedispersionSpectra* >* dataOut )
 {
     // transfer weighted data to host memory buffer
     //
@@ -168,17 +169,17 @@ DedispersedTimeSeries<float>* DedispersionModule::dedisperse( WeightedSpectrumDa
     return dataOut->current();
 }
 
-void DedispersionModule::dedisperse( DedispersionBuffer** buffer, DedispersedTimeSeries<float>* dataOut )
+void DedispersionModule::dedisperse( DedispersionBuffer** buffer, DedispersionSpectra* dataOut )
 {
     // prepare the output data datablob
     unsigned int nsamp = (*buffer)->numSamples();
-    dataOut->resize( nsamp );
+    dataOut->resize( nsamp, _tdms );
     // Set up a job for the GPU processing kernel
     GPU_Job* job = _jobBuffer.next();
     DedispersionKernel** kernelPtr = _kernels.next();
     //unsigned int outputSize;
-    size_t outputSize = nsamp * _tdms * sizeof(float);
-    GPU_MemoryMap out( dataOut->samples(0)->getData(), outputSize );
+    //size_t outputSize = nsamp * _tdms * sizeof(float);
+    GPU_MemoryMap out( dataOut->data() );
     (*kernelPtr)->addOutputMap( out );
     (*kernelPtr)->addInputMap( GPU_MemoryMap( (*buffer)->getData(), (*buffer)->size()) );
     job->addKernel( *kernelPtr );
@@ -186,7 +187,7 @@ void DedispersionModule::dedisperse( DedispersionBuffer** buffer, DedispersedTim
     submit( job );
 }
 
-void DedispersionModule::gpuJobFinished( GPU_Job* job, DedispersionBuffer** buffer, DedispersionKernel** kernel, DedispersedTimeSeries<float>* dataOut ) {
+void DedispersionModule::gpuJobFinished( GPU_Job* job, DedispersionBuffer** buffer, DedispersionKernel** kernel, DedispersionSpectra* dataOut ) {
      Q_ASSERT( job->status() != GPU_Job::Failed ||
         std::cerr << "DedispersionModule: " << job->error() << std::endl
      );
@@ -198,7 +199,7 @@ void DedispersionModule::gpuJobFinished( GPU_Job* job, DedispersionBuffer** buff
      exportData( dataOut );  // send out the finished data product to our customers
 }
 
-DedispersedTimeSeries<float>* DedispersionModule::dataExtract( const float* /*gpuData*/ , DedispersedTimeSeries<float>* data )
+DedispersionSpectra* DedispersionModule::dataExtract( const float* /*gpuData*/ , DedispersionSpectra* data )
 {
     // copy gpu results into an appropriate datablob
     //unsigned int nsamp = samples / _binsize;
@@ -220,14 +221,23 @@ DedispersionModule::DedispersionKernel::DedispersionKernel( float start, float s
 
 void DedispersionModule::DedispersionKernel::run(const QList<GPU_Param*>& param ) {
      Q_ASSERT( param.size() == 5 );
-     //cudaMemset((float*)param[0], 0, param[0]->size() );
      //cache_dedisperse_loop( float *outbuff, float *buff, float mstartdm, float mdmstep )
 std::cout << "DedispersionModule::DedispersionKernel::run: " << std::endl;
 std::cout << " maxShift =" << param[2]->value<int>() << std::endl;
 std::cout << " nchans =" << param[3]->value<int>() << std::endl;
+std::cout << " tsamp =" << _tsamp << std::endl;
+std::cout << " dmShift size =" << param[1]->size() << std::endl;
+     unsigned nsamples = param[4]->size()/_tdms;
+    //FILE *fp_in;
+    //fp_in=fopen("./input.txt","w+");
+ 
+    //float* tmp = (float*)param[0]->host();
+    //for(int c = 0; c <  param[0]->size(); ++c ) {
+    //    fprintf(fp_in, "%f\t", tmp[c] );
+   // }
      cacheDedisperseLoop( (float*)param[4]->device() , param[4]->size(),
                           (float*)param[0]->device(), _startdm,
-                          (float)(_startdm/_tsamp), _tdms, (float)(_dmstep/_tsamp),
+                          _dmstep, _tdms, nsamples,
                           (const float*)param[1]->device(),
                           (const int*)param[2]->device(),
                           (const int*)param[3]->device()

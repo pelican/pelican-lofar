@@ -13,7 +13,7 @@
 #include "SpectrumDataSet.h"
 #include "SigprocStokesWriter.h"
 #include "DedispersionModule.h"
-#include "DedispersedTimeSeries.h"
+#include "DedispersionSpectra.h"
 #include "DedispersionAnalyser.h"
 
 
@@ -63,8 +63,8 @@ class DedispersionPipeline : public AbstractPipeline
         /// Local data blobs
         SpectrumDataSetC32* spectra;
         QList<SpectrumDataSetC32*> _spectraBuffer;
-        QList<DedispersedTimeSeries<float>*> _dedispersedData;
-        LockingCircularBuffer<DedispersedTimeSeries<float>* >* _dedispersedDataBuffer;
+        QList<DedispersionSpectra*> _dedispersedData;
+        LockingCircularBuffer<DedispersionSpectra* >* _dedispersedDataBuffer;
         TimeSeriesDataSetC32* timeSeries;
         QList<SpectrumDataSetStokes*> _stokesData;
         LockingCircularBuffer<SpectrumDataSetStokes*>* _stokesBuffer;
