@@ -1,5 +1,6 @@
 #include "viewer/SpectrumDataSetWidget.h"
 #include "lib/SpectrumDataSet.h"
+#include <algorithm>
 
 #include <iostream>
 
@@ -11,53 +12,70 @@ namespace lofar {
 
 SpectrumDataSetWidget::SpectrumDataSetWidget(const ConfigNode& config,
         QWidget* parent)
-: DataBlobWidget(config, parent), _integrationCount(0)
+: DataBlobWidget(config, parent), _integrationCount(1)
 {
     setupUi(this);
     plot->setXLabel("Frequency Index");
     plot->setYLabel("Amplitude");
     plot->showGrid(true);
+
+    // make some connections
+    // these should only really be active in "paused" mode
+    connect( spinBox_subband, SIGNAL( valueChanged(int) ), this, SLOT( doPlot() ) );
+    connect( spinBox_polarisation, SIGNAL( valueChanged(int) ), this, SLOT( doPlot() ) );
+    connect( spinBox_timeBlock, SIGNAL( valueChanged(int) ), this, SLOT( doPlot() ) );
+    connect( spinBox_integrationCount, SIGNAL( valueChanged(int) ), this, SLOT( doPlot() ) );
 }
 
 
 void SpectrumDataSetWidget::updateData(DataBlob* data)
 {
-//    cout << "SpectrumDataSetWidget::updateData()" << endl;
-
-    // Get data selection from widget controls.
-    unsigned subband = spinBox_subband->value() - 1;
-    unsigned polarisation = spinBox_polarisation->value() - 1;
-    unsigned timeSample = spinBox_timeBlock->value() - 1;
-    unsigned integrationMax = spinBox_integrationCount->value();
+    cout << "SpectrumDataSetWidget::updateData()" << endl;
 
     // Extra plot data from the data blob.
     SpectrumDataSetStokes* spectra = (SpectrumDataSetStokes*)data;
     unsigned nTimeBlocks = spectra->nTimeBlocks();
     unsigned nSubbands = spectra->nSubbands();
     unsigned nPolarisations = spectra->nPolarisations();
-    unsigned nChannels = spectra->nChannels();
+    //unsigned nChannels = spectra->nChannels();
+    spinBox_subband->setMaximum( nSubbands  );
+    spinBox_subband->setMinimum( 1 );
+    spinBox_polarisation->setMaximum( nPolarisations );
+    spinBox_polarisation->setMinimum( 1 );
+    spinBox_timeBlock->setMaximum( nTimeBlocks );
+    spinBox_timeBlock->setMinimum( 1 );
+    _spectra = spectra;
+    doPlot();
+}
 
-    if (subband >= nSubbands || polarisation >= nPolarisations || timeSample >= nTimeBlocks) {
-        plot->clear();
-        return;
-    }
+void SpectrumDataSetWidget::doPlot() {
+    unsigned nTimeBlocks = _spectra->nTimeBlocks();
+    unsigned nSubbands = _spectra->nSubbands();
+    unsigned nPolarisations = _spectra->nPolarisations();
+    unsigned nChannels = _spectra->nChannels();
 
-    if (_spectrumAmp.size() != nChannels)
-    {
-        plot->setTitle(QString("Spectrum "
+    // Get data selection from widget controls.
+    unsigned subband = std::min((unsigned)spinBox_subband->value() , nSubbands) - 1;
+    unsigned polarisation = std::min((unsigned) spinBox_polarisation->value() , nPolarisations) - 1;
+    unsigned timeSample = std::min((unsigned) spinBox_timeBlock->value() , nTimeBlocks) - 1;
+    unsigned integrationMax = spinBox_integrationCount->value();
+
+    plot->setTitle(QString("Spectrum "
                 "(sample %1/%2, sub-band %3/%4, polarisation %5/%6)")
-                .arg(timeSample + 1).arg(nTimeBlocks)
-                .arg(subband + 1).arg(nSubbands)
-                .arg(polarisation + 1).arg(nPolarisations));
-        _plot(_spectrumAmp);
-        _spectrumAmp.resize(nChannels);
+            .arg(timeSample + 1).arg(nTimeBlocks)
+            .arg(subband+1).arg(nSubbands)
+            .arg(polarisation +1).arg(nPolarisations));
+    _spectrumAmp.resize(nChannels);
+
+    float* spectrum = _spectra->spectrumData(timeSample, subband, polarisation);
+
+    for (unsigned i = 0u; i < nChannels; ++i) {
+        _spectrumAmp[i] = (double)spectrum[i];
+        std::cout << "spectrumAmp[" << i << "] = " << _spectrumAmp[i] << std::endl;
     }
+    _plot(_spectrumAmp);
 
-    float* spectrum = spectra->spectrumData(timeSample, subband, polarisation);
-
-    for (unsigned i = 0u; i < nChannels; ++i)
-        _spectrumAmp[i] += (double)spectrum[i];
-
+/*
     if (++_integrationCount >= integrationMax)
     {
         cout << "max=" << integrationMax << " iteration=" <<  _integrationCount << endl;
@@ -70,6 +88,7 @@ void SpectrumDataSetWidget::updateData(DataBlob* data)
         _spectrumAmp.clear();
         _integrationCount = 0;
     }
+*/
 }
 
 
