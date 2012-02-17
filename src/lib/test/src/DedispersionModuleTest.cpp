@@ -5,6 +5,8 @@
 #include "WeightedSpectrumDataSet.h"
 #include <boost/bind.hpp>
 #include <iostream>
+#include "pelican/utility/ConfigNode.h"
+#include "pelican/output/DataBlobFile.h"
 
 
 namespace pelican {
@@ -38,8 +40,9 @@ void DedispersionModuleTest::tearDown()
 void DedispersionModuleTest::test_method()
 {
     try {
-        float dm = 35.5;
+        float dm = 3.55;
         QList<SpectrumDataSetStokes*> spectrumData = _generateStokesData( 1, dm );
+        
         WeightedSpectrumDataSet weightedData(spectrumData[0]);
         { // Use Case:
           // Single Data Blob as input, of same size as the buffer
@@ -121,8 +124,8 @@ QList<SpectrumDataSetStokes*> DedispersionModuleTest::_generateStokesData(int nu
     unsigned nChannels = 64; // 2048 total channels (32x64)
 
     double fch1 = 150;
-    double foff = -6.0/2048.0;
-    double tsamp = 0.00032768; // time sample length
+    double foff = -6.0/(double)(nSubbands*nChannels);
+    double tsamp = 0.00032768; // time sample length (seconds)
     QList<SpectrumDataSetStokes*> data;
 
     for( int i=0; i < numberOfBlocks; ++i ) {
@@ -130,15 +133,16 @@ QList<SpectrumDataSetStokes*> DedispersionModuleTest::_generateStokesData(int nu
         stokes->resize(nSamples, nSubbands, 1, nChannels);
         data.append(stokes);
 
-        int offset = (i - 1) * nSamples;
+        int offset = i * nSamples;
         //stokes->setLofarTimestamp(channeliserOutput->getLofarTimestamp());
         for (unsigned int t = 0; t < nSamples; ++t ) {
             for (unsigned s = 0; s < nSubbands; ++s ) {
                 for (unsigned c = 0; c < nChannels; ++c) {
                     int absChannel = s * nChannels + c;
-                    int index = (int)( (4148.741601 * ((1.0 / (fch1 + (foff * absChannel)) /
-                                    (fch1 + (foff * absChannel))) - (1.0 / fch1 / fch1)))/tsamp );
+                    int index = (int)( dm * (4148.741601 * ((1.0 / (fch1 + (foff * absChannel)) /
+                        (fch1 + (foff * absChannel))) - (1.0 / fch1 / fch1))/tsamp ) );
                     int sampleNumber = index - offset;
+
                     float* I = stokes->spectrumData(t, s, 0);
                     if( sampleNumber == (int)t ) {
                         I[c] = 1.0;
@@ -149,6 +153,14 @@ QList<SpectrumDataSetStokes*> DedispersionModuleTest::_generateStokesData(int nu
             }
         }
     }
+    // write out the data to a file (tmp for debugging)
+    ConfigNode dummy;
+    DataBlobFile writer(dummy);
+    writer.addFile(QString("input_%1_blocks.blob").arg(numberOfBlocks),DataBlobFileType::Homogeneous);
+    foreach( const SpectrumDataSetStokes* d, data ) {
+        writer.send( QString("input"), d );
+    }
+
     return data;
 }
 
