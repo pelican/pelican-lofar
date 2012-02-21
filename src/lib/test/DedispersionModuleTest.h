@@ -52,10 +52,6 @@ class DedispersionModuleTest : public CppUnit::TestFixture
         LockingCircularBuffer<DedispersionSpectra* >* outputBuffer(int size);
         void destroyBuffer(LockingCircularBuffer<DedispersionSpectra* >* b);
         QList<DedispersionSpectra* > _outputData;
-        // generate data with a corresponding dispersion signal across the specified number of
-        // blocks
-        QList<SpectrumDataSetStokes*> _generateStokesData(int numberOfBlocks, float dm );
-        void _deleteStokesData( QList<SpectrumDataSetStokes*>& data );
 
     private:
         int _connectCount;

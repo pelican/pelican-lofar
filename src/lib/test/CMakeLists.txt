@@ -9,6 +9,7 @@ set(lofarTestLib_src
     src/LofarUdpEmulator.cpp
     src/LofarEmulatorDataSim.cpp
     src/GPU_TestCard.cpp
+    src/DedispersionDataGenerator.cpp
 )
 # CUDA routines
 set(cuda_src
@@ -33,6 +34,7 @@ target_link_libraries(lofarTestLib
 set(lofarTest_src
     src/CppUnitMain.cpp
     src/GPU_ManagerTest.cpp
+    src/GPU_MemoryMapTest.cpp
     src/AdapterTimeSeriesDataSetTest.cpp
     src/BandPassTest.cpp
     src/BinMapTest.cpp
@@ -52,7 +54,7 @@ if(CUDA_FOUND)
     list(APPEND lofarTest_src
             src/GPU_NVidiaTest.cpp
             src/DedispersionBufferTest.cpp
-#            src/DedispersionModuleTest.cpp
+            src/DedispersionModuleTest.cpp
         )
 endif(CUDA_FOUND)
 

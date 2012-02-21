@@ -3,10 +3,11 @@
 #include "pelican/utility/ConfigNode.h"
 #include "SpectrumDataSet.h"
 #include "WeightedSpectrumDataSet.h"
+#include "DedispersionDataGenerator.h"
 #include <boost/bind.hpp>
 #include <iostream>
 #include "pelican/utility/ConfigNode.h"
-#include "pelican/output/DataBlobFile.h"
+#include <QDebug>
 
 
 namespace pelican {
@@ -40,8 +41,14 @@ void DedispersionModuleTest::tearDown()
 void DedispersionModuleTest::test_method()
 {
     try {
-        float dm = 3.55;
-        QList<SpectrumDataSetStokes*> spectrumData = _generateStokesData( 1, dm );
+        float dm = 10.0;
+        unsigned ddSamples = 200;
+        unsigned nBlocks = 1;
+        unsigned nSamples = 6400;
+        DedispersionDataGenerator stokesData;
+        stokesData.setTimeSamplesPerBlock( nSamples );
+        QList<SpectrumDataSetStokes*> spectrumData = stokesData.generate( nBlocks, dm );
+        stokesData.writeToFile( "inputStokes.data", spectrumData );
         
         WeightedSpectrumDataSet weightedData(spectrumData[0]);
         { // Use Case:
@@ -51,25 +58,39 @@ void DedispersionModuleTest::test_method()
           // returned output blob should be the same as that passed
           // to any connected functions
           ConfigNode config;
-          unsigned nSamples=spectrumData[0]->nTimeBlocks();
+          CPPUNIT_ASSERT_EQUAL( nSamples, spectrumData[0]->nTimeBlocks() );
           QString configString = QString("<DedispersionModule>"
-                                         " <dedispersionSampleNumber value=\"%1\" />"
-                                         " <frequencyChannel1 value=\"150\"/>"
-                                         " <channelBandwidth value=\"-0.00292969\"/>"
-                                         " <sampleTime value=\"327.68\"/>"
-                                         "</DedispersionModule>").arg(nSamples);
+                                         " <sampleNumber value=\"%1\" />"
+                                         " <frequencyChannel1 value=\"%2\"/>"
+                                         " <sampleTime value=\"%3\"/>"
+                                         " <channelBandwidth value=\"%4\"/>"
+                                         " <dedispersionSamples value=\"%5\" />"
+                                         "</DedispersionModule>")
+                                        .arg( nSamples )
+                                        .arg( stokesData.startFrequency())
+                                        .arg( stokesData.timeOfSample())
+                                        .arg( stokesData.bandwidthOfSample())
+                                        .arg( ddSamples );
           config.setFromString(configString);
-          DedispersionModule dm(config);
+          DedispersionModule ddm(config);
           LockingCircularBuffer<DedispersionSpectra* >* buffer = outputBuffer(2);
-          dm.connect( boost::bind( &DedispersionModuleTest::connected, this, _1 ) );
-          DedispersionSpectra* data = dm.dedisperse( &weightedData, buffer ); // asynchronous task
+          ddm.connect( boost::bind( &DedispersionModuleTest::connected, this, _1 ) );
+          DedispersionSpectra* data = ddm.dedisperse( &weightedData, buffer ); // asynchronous task
           _connectData = 0;
           _connectCount = 0;
           while( ! _connectCount ) { sleep(1); };
           CPPUNIT_ASSERT_EQUAL( 1, _connectCount );
           CPPUNIT_ASSERT_EQUAL( data, _connectData );
+          CPPUNIT_ASSERT_EQUAL( (int)(((nSamples - ddm.maxshift() )*ddSamples)), buffer->current()->data().size() );
+          //foreach( float d, buffer->current()->data() ) {
+          //      if( d > 1.0 ) { std::cout << d << ","; }
+          //}
+          //std::cout << std::endl;
+
+          float expectedDMIntentsity = spectrumData[0]->nSubbands() * spectrumData[0]->nChannels();
+          CPPUNIT_ASSERT_EQUAL( expectedDMIntentsity , buffer->current()->dm( 0, dm ) );
           destroyBuffer( buffer );
-          _deleteStokesData(spectrumData);
+          stokesData.deleteData(spectrumData);
         }
     }
     catch( QString s )
@@ -82,6 +103,7 @@ void DedispersionModuleTest::connected( DataBlob* dataOut ) {
     ++_connectCount;
     _connectData = 0;
     CPPUNIT_ASSERT( ( _connectData = dynamic_cast<DedispersionSpectra* >(dataOut) ) );
+    // check the dedispersion values
 }
 
 ConfigNode DedispersionModuleTest::testConfig(QString xml) const
@@ -110,58 +132,6 @@ void DedispersionModuleTest::destroyBuffer(
     foreach( DedispersionSpectra* d, *(b->rawBuffer()) ) {
         delete d;
     }
-}
-
-void DedispersionModuleTest::_deleteStokesData( QList<SpectrumDataSetStokes*>& data ) {
-    foreach( SpectrumDataSetStokes* d, data ) {
-        delete d;
-    }
-}
-
-QList<SpectrumDataSetStokes*> DedispersionModuleTest::_generateStokesData(int numberOfBlocks, float dm ) {
-    unsigned nSamples = 16; // samples per blob
-    unsigned nSubbands = 32;
-    unsigned nChannels = 64; // 2048 total channels (32x64)
-
-    double fch1 = 150;
-    double foff = -6.0/(double)(nSubbands*nChannels);
-    double tsamp = 0.00032768; // time sample length (seconds)
-    QList<SpectrumDataSetStokes*> data;
-
-    for( int i=0; i < numberOfBlocks; ++i ) {
-        SpectrumDataSetStokes* stokes = new SpectrumDataSetStokes;
-        stokes->resize(nSamples, nSubbands, 1, nChannels);
-        data.append(stokes);
-
-        int offset = i * nSamples;
-        //stokes->setLofarTimestamp(channeliserOutput->getLofarTimestamp());
-        for (unsigned int t = 0; t < nSamples; ++t ) {
-            for (unsigned s = 0; s < nSubbands; ++s ) {
-                for (unsigned c = 0; c < nChannels; ++c) {
-                    int absChannel = s * nChannels + c;
-                    int index = (int)( dm * (4148.741601 * ((1.0 / (fch1 + (foff * absChannel)) /
-                        (fch1 + (foff * absChannel))) - (1.0 / fch1 / fch1))/tsamp ) );
-                    int sampleNumber = index - offset;
-
-                    float* I = stokes->spectrumData(t, s, 0);
-                    if( sampleNumber == (int)t ) {
-                        I[c] = 1.0;
-                    } else {
-                        I[c] = 0.0;
-                    }
-                }
-            }
-        }
-    }
-    // write out the data to a file (tmp for debugging)
-    ConfigNode dummy;
-    DataBlobFile writer(dummy);
-    writer.addFile(QString("input_%1_blocks.blob").arg(numberOfBlocks),DataBlobFileType::Homogeneous);
-    foreach( const SpectrumDataSetStokes* d, data ) {
-        writer.send( QString("input"), d );
-    }
-
-    return data;
 }
 
 } // namespace lofar

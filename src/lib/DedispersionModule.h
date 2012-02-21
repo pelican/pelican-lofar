@@ -75,6 +75,9 @@ class DedispersionModule : public AsyncronousModule
         //  will be lost.
         void resize( const SpectrumDataSet<float>* streamData );
 
+        /// deprecated
+        int maxshift() const { return _maxshift; }
+
      protected:
         void dedisperse( DedispersionBuffer** buffer, DedispersionSpectra* dataOut );
         void _cleanBuffers();
@@ -96,6 +99,7 @@ class DedispersionModule : public AsyncronousModule
         int _maxshift; // number of samples to overlap between processes
         int _nChannels; // number of Channels per sample
         DedispersionBuffer** _currentBuffer;
+        GPU_MemoryMap _i_nSamples;
         GPU_MemoryMap _i_chans;
         GPU_MemoryMap _i_maxshift;
         GPU_MemoryMap _f_dmshifts;
