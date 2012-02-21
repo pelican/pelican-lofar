@@ -59,9 +59,11 @@ class DedispersionBuffer
         //  offset indicates the number of float values
         void copy( DedispersionBuffer* buf, unsigned int offset = 0 );
 
-        float* getData() { return &_data[0]; };
+        QVector<float>& getData() { return _data; };
         inline float rms() const { return _rms; };
         inline float mean() const { return _mean; };
+
+        void dump( const QString& fileName ) const;
 
     private:
         QVector<float> _data;
