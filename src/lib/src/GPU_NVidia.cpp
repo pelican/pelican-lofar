@@ -1,3 +1,4 @@
+#include <QDebug>
 #include "GPU_NVidia.h"
 #include "GPU_Manager.h"
 #include "GPU_Param.h"
@@ -7,6 +8,7 @@
 #include "GPU_NVidiaConfiguration.h"
 #include <iostream>
 #include <vector>
+#include "stdio.h"
 
 namespace pelican {
 
@@ -41,8 +43,14 @@ void GPU_NVidia::run( GPU_Job* job )
         cudaDeviceSynchronize();
         if( ! cudaPeekAtLastError() ) {
             // copy device memory to host
+    //FILE *fp_out;
+    //fp_out=fopen("./output.txt","w+");
             foreach( const GPU_MemoryMap& map, _currentConfig->outputMaps() ) {
                 _params.value(map)->syncDeviceToHost();
+         //       float* tmp = (float*)_params.value(map)->host();
+          //      for( unsigned int c=0; c < _params.value(map)->size(); ++c ) {
+           //         fprintf(fp_out, "%f\t", tmp[c]);
+           //     }
             }
         }
         else {
@@ -57,12 +65,13 @@ void GPU_NVidia::setupConfiguration ( const GPU_NVidiaConfiguration* c )
          // free memory from existing job
          // TODO write code to test for overlapping mem
          // requirements for different configurations
-         // to avoid unnesasary deallocations/allocations
-         freeMem(_currentParams); // quickfix: delete everything for now
+         // to avoid unnessasary deallocations/allocations
+         freeMem(_currentParams ); // quickfix: delete everything for now
          _currentParams.clear();
          foreach( const GPU_MemoryMap& map, c->allMaps() ) {
              _params.insert( map, new GPU_Param( &map ) );
-             _currentParams.append( _params[map] );
+             _currentParams.append( _params.value(map) );
+
          }
          // sync constants only on creation
          foreach( const GPU_MemoryMap& map, c->constants() ) {
@@ -100,6 +109,7 @@ void GPU_NVidia::setupConfiguration ( const GPU_NVidiaConfiguration* c )
 void GPU_NVidia::freeMem( const QList<GPU_Param*>& list ) {
      foreach( GPU_Param* p, list ) {
         delete p;
+        _params.remove(_params.key(p));
      }
 }
 

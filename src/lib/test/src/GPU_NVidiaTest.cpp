@@ -5,6 +5,7 @@
 #include "GPU_MemoryMap.h"
 #include "TestCudaVectorAdd.h"
 #include "GPU_NVidiaConfiguration.h"
+#include <QVector>
 #include <string>
 
 
@@ -46,32 +47,62 @@ void GPU_NVidiaTest::test_managedCard()
     }
     // set up a GPU vector addition job
     int size = 2 ;
-    std::vector<float> vec1(size);
-    vec1[0]=1.0;
-    vec1[1]=2.0;
-    std::vector<float> vec2(size);
-    vec2[0]=100.0;
-    vec2[1]=102.0;
-    std::vector<float> result(size);
-    CPPUNIT_ASSERT( vec1[0] + vec2[0] != result[0] );
-    CPPUNIT_ASSERT( vec1[1] + vec2[1] != result[1] );
-    GPU_Job job;
-    GPU_MemoryMap vec1map( vec1 );
-    CPPUNIT_ASSERT( vec1[0] == 1.0  );
-    GPU_MemoryMap vec2map( vec2 );
-    GPU_MemoryMap resultmap( result );
-    TestCudaVectorAdd testKernel;
-    GPU_NVidiaConfiguration config;
-    config.addInputMap( vec1map );
-    config.addConstant( vec2map ); // add as a constant
-    config.addOutputMap( resultmap );
-    testKernel.setConfiguration( config );
-    job.addKernel( &testKernel );
-    m.submit(&job);
-    job.wait();
-    CPPUNIT_ASSERT_EQUAL( vec1[0] + vec2[0] , result[0] );
-    CPPUNIT_ASSERT_EQUAL( vec1[1] + vec2[1] , result[1] );
-    CPPUNIT_ASSERT_EQUAL( GPU_Job::Finished, job.status() );
+    {
+        // Use case: using std::vector
+        std::vector<float> vec1(size);
+        vec1[0]=1.0;
+        vec1[1]=2.0;
+        std::vector<float> vec2(size);
+        vec2[0]=100.0;
+        vec2[1]=102.0;
+        std::vector<float> result(size);
+        CPPUNIT_ASSERT( vec1[0] + vec2[0] != result[0] );
+        CPPUNIT_ASSERT( vec1[1] + vec2[1] != result[1] );
+        GPU_Job job;
+        GPU_MemoryMap vec1map( vec1 );
+        CPPUNIT_ASSERT( vec1[0] == 1.0  );
+        GPU_MemoryMap vec2map( vec2 );
+        GPU_MemoryMap resultmap( result );
+        TestCudaVectorAdd testKernel;
+        GPU_NVidiaConfiguration config;
+        config.addInputMap( vec1map );
+        config.addConstant( vec2map ); // add as a constant
+        config.addOutputMap( resultmap );
+        testKernel.setConfiguration( config );
+        job.addKernel( &testKernel );
+        m.submit(&job);
+        job.wait();
+        CPPUNIT_ASSERT_EQUAL( vec1[0] + vec2[0] , result[0] );
+        CPPUNIT_ASSERT_EQUAL( vec1[1] + vec2[1] , result[1] );
+        CPPUNIT_ASSERT_EQUAL( GPU_Job::Finished, job.status() );
+    }
+    {
+        // Use case: using QVector
+        QVector<float> vec1(size);
+        vec1[0]=1.0;
+        vec1[1]=2.0;
+        QVector<float> vec2(size);
+        vec2[0]=100.0;
+        vec2[1]=102.0;
+        QVector<float> result(size);
+        GPU_Job job;
+        GPU_MemoryMap vec1map( vec1 );
+        CPPUNIT_ASSERT( vec1[0] == 1.0  );
+        GPU_MemoryMap vec2map( vec2 );
+        GPU_MemoryMap resultmap( result );
+        TestCudaVectorAdd testKernel;
+        GPU_NVidiaConfiguration config;
+        config.addInputMap( vec1map );
+        config.addConstant( vec2map ); // add as a constant
+        config.addOutputMap( resultmap );
+        testKernel.setConfiguration( config );
+        job.addKernel( &testKernel );
+        m.submit(&job);
+        job.wait();
+        CPPUNIT_ASSERT_EQUAL( vec1[0] + vec2[0] , result[0] );
+        CPPUNIT_ASSERT_EQUAL( vec1[1] + vec2[1] , result[1] );
+        CPPUNIT_ASSERT_EQUAL( GPU_Job::Finished, job.status() );
+    }
 }
 
 } // namespace lofar
