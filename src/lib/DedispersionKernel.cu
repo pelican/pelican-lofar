@@ -43,7 +43,7 @@ __global__ void cache_dedisperse_loop(float *outbuff, float *buff, float mstartd
     float shift_temp = mstartdm + ((blockIdx.y * DIVINDM + threadIdx.y) * mdmstep);
     
     // Loop over the frequency channels.
-        for(int c = 0; c < *i_nchans; c++) {
+    for(int c = 0; c < *i_nchans; c++) {
 
 
         // Calculate the initial shift for this given frequency
@@ -61,6 +61,7 @@ __global__ void cache_dedisperse_loop(float *outbuff, float *buff, float mstartd
     #pragma unroll
     for(int i = 0; i < NUMREG; i++) {
         outbuff[((blockIdx.y * DIVINDM) + threadIdx.y)* (i_nsamp-*i_maxshift) + (i * DIVINT) + (NUMREG * DIVINT * blockIdx.x) + threadIdx.x] = local_kernel_t[i];
+       //outbuff[((blockIdx.y * DIVINDM) + threadIdx.y)* (i_nsamp) + (i * DIVINT) + (NUMREG * DIVINT * blockIdx.x) + threadIdx.x] = local_kernel_t[i];
     }
 }
 
@@ -97,7 +98,7 @@ extern "C" void cacheDedisperseLoop( float *outbuff, long outbufSize, float *buf
 
     dim3 threads_per_block(divisions_in_t, divisions_in_dm);
     dim3 num_blocks(num_blocks_t,num_blocks_dm);
-    
+
     cache_dedisperse_loop<<< num_blocks, threads_per_block >>>( outbuff, buff, 
                 mstartdm, mdmstep, dmShift, numSamples, i_maxshift, i_nchans );
 }

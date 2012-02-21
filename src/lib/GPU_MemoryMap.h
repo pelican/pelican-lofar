@@ -32,7 +32,7 @@ class GPU_MemoryMap
         }
         template<typename T>
         GPU_MemoryMap( QVector<T>& vec ) {
-            _set(_host=&vec[0], vec.size() * sizeof(T) );
+            _set(_host=vec.data(), vec.size() * sizeof(T) );
         }
         virtual ~GPU_MemoryMap();
         inline void* hostPtr() const { return _host; };

@@ -1,3 +1,5 @@
+#include <QFile>
+#include <QTextStream>
 #include "DedispersionBuffer.h"
 #include <algorithm>
 #include "SpectrumDataSet.h"
@@ -30,6 +32,18 @@ void DedispersionBuffer::setSampleCapacity(unsigned int maxSamples)
 {
     _nsamp = maxSamples;
     _data.resize( _nsamp * _sampleSize );
+}
+
+void DedispersionBuffer::dump( const QString& fileName ) const {
+    QFile file(fileName);
+    if (QFile::exists(fileName)) QFile::remove(fileName);
+    if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) return;
+    QTextStream out(&file);
+     
+    for (int c = 0; c < _data.size(); ++c) {
+        out << QString::number(_data[c], 'g' ) << " ";
+    }
+    file.close();
 }
 
 void DedispersionBuffer::copy( DedispersionBuffer* buf, unsigned int offset )
@@ -65,6 +79,7 @@ unsigned DedispersionBuffer::addSamples( WeightedSpectrumDataSet* weightedData, 
         for (unsigned s = 0; s < nSubbands; ++s) {
             for (unsigned c = 0; c < nChannels; ++c) {
                 float* data = streamData->spectrumData(t, s, 0);
+                // rearrange to have time sameples in inner loop
                 _data[ ((s * nChannels) + c ) * _nsamp  + _sampleCount ] = data[c];
             }
         }
