@@ -65,6 +65,7 @@ void DedispersionModuleTest::test_method()
                                          " <sampleTime value=\"%3\"/>"
                                          " <channelBandwidth value=\"%4\"/>"
                                          " <dedispersionSamples value=\"%5\" />"
+                                         " <dedispersionStepSize value=\"0.1\" />"
                                          "</DedispersionModule>")
                                         .arg( nSamples )
                                         .arg( stokesData.startFrequency())
@@ -81,11 +82,14 @@ void DedispersionModuleTest::test_method()
           while( ! _connectCount ) { sleep(1); };
           CPPUNIT_ASSERT_EQUAL( 1, _connectCount );
           CPPUNIT_ASSERT_EQUAL( data, _connectData );
-          CPPUNIT_ASSERT_EQUAL( (int)(((nSamples - ddm.maxshift() )*ddSamples)), buffer->current()->data().size() );
+          int outputSampleSize = (int)(((nSamples - ddm.maxshift() )));
+          CPPUNIT_ASSERT_EQUAL( (int)(outputSampleSize*ddSamples), buffer->current()->data().size() );
+          std::ofstream file("output.data");
           //foreach( float d, buffer->current()->data() ) {
-          //      if( d > 1.0 ) { std::cout << d << ","; }
-          //}
-          //std::cout << std::endl;
+          for( int i=0; i < buffer->current()->data().size(); ++i ) {
+                file << (buffer->current()->data())[i] << std::string(((i+1)%outputSampleSize)?" ":"\n");
+          }
+          std::cout << std::endl;
 
           float expectedDMIntentsity = spectrumData[0]->nSubbands() * spectrumData[0]->nChannels();
           CPPUNIT_ASSERT_EQUAL( expectedDMIntentsity , buffer->current()->dm( 0, dm ) );

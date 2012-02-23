@@ -41,7 +41,7 @@ void DedispersionBuffer::dump( const QString& fileName ) const {
     QTextStream out(&file);
      
     for (int c = 0; c < _data.size(); ++c) {
-        out << QString::number(_data[c], 'g' ) << " ";
+        out << QString::number(_data[c], 'g' ) << QString(((c+1)%_nsamp == 0)?"\n":" ");
     }
     file.close();
 }

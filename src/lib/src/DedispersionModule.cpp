@@ -10,7 +10,7 @@
 #include "GPU_Job.h"
 #include "GPU_Kernel.h"
 #include "GPU_Param.h"
-#include "stdio.h"
+#include <fstream>
 
 extern "C" void cacheDedisperseLoop( float *outbuff, long outbufSize, float *buff, float mstartdm,
                                      float mdmstep, int tdms, int numSamples,
@@ -32,8 +32,8 @@ DedispersionModule::DedispersionModule( const ConfigNode& config )
     //unsigned int nChannels = config.getOption("outputChannelsPerSubband", "value", "512").toUInt();
     _numSamplesBuffer = config.getOption("sampleNumber", "value", "512").toUInt();
     _tdms = config.getOption("dedispersionSamples", "value", "1984").toUInt();
-    _dmStep = config.getOption("dispersionStepSize", "value", "0.1").toFloat();
-    _dmLow = config.getOption("dispersionMinimum", "value", "0").toFloat();
+    _dmStep = config.getOption("dedispersionStepSize", "value", "0.1").toFloat();
+    _dmLow = config.getOption("dedispersionMinimum", "value", "0").toFloat();
     if( _dmLow <= 0.0 ) { _dmLow = _dmStep; }
     _fch1 = config.getOption("frequencyChannel1", "value", "0.0").toDouble();
     _foff = config.getOption("channelBandwidth", "value", "1.0").toDouble();

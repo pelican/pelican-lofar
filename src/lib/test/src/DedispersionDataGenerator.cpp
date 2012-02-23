@@ -2,6 +2,7 @@
 #include "pelican/utility/ConfigNode.h"
 #include "pelican/output/DataBlobFile.h"
 #include "SpectrumDataSet.h"
+#include <fstream>
 
 
 namespace pelican {
@@ -51,7 +52,8 @@ QList<SpectrumDataSetStokes*> DedispersionDataGenerator::generate( int numberOfB
                     int sampleNumber = index - offset;
 
                     float* I = stokes->spectrumData(t, s, 0);
-                    if( sampleNumber == (int)t ) {
+                    // add a signal of bandwidth 10
+                    if( (int)t >= sampleNumber && (int)t < sampleNumber + 10 ) {
                         I[c] = 1.0;
                     } else {
                         I[c] = 0.0;

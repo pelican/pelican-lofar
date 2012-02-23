@@ -10,8 +10,10 @@
 // L1 cache
 #define NUMREG 15
 #define DIVINT 15
+//#define NUMREG 1
+//#define DIVINT 1
 //#define DIVINDM 57
-#define DIVINDM 2
+#define DIVINDM 4
 #define ARRAYSIZE DIVINT * DIVINDM
 
 #include <iostream>
@@ -76,7 +78,7 @@ extern "C" void cacheDedisperseLoop( float *outbuff, long outbufSize, float *buf
     int divisions_in_t  = DIVINT;
     int divisions_in_dm = DIVINDM;
     int num_reg = NUMREG;
-    int num_blocks_t = numSamples/(divisions_in_t * num_reg) || 1 ;
+    int num_blocks_t = numSamples/(divisions_in_t * num_reg);
     int num_blocks_dm = tdms/divisions_in_dm;
 
 
