@@ -32,7 +32,7 @@ void DedispersionSpectra::resize( unsigned timebins, unsigned dedispersionBins,
 
 float DedispersionSpectra::dm( unsigned timeSlice, float dm ) const {
     unsigned dm_index = dmIndex(dm);
-    return _data[timeSlice*_dedispersionBins + dm_index];
+    return _data[timeSlice + _timeBins * dm_index];
 }
 
 unsigned DedispersionSpectra::dmIndex( float dm ) const {

@@ -19,6 +19,8 @@ DedispersionDataGenerator::DedispersionDataGenerator()
     nSamples = 16; // samples per blob
     nSubbands = 32;
     nChannels = 64; // 2048 total channels (32x64)
+    startBin = 0; // offset bin (time) to start the dedispersion
+    signalWidth = 10; // width of the dedispersion signal
 
     fch1 = 150;
     foff = -6.0/(double)(nSubbands*nChannels);
@@ -48,12 +50,12 @@ QList<SpectrumDataSetStokes*> DedispersionDataGenerator::generate( int numberOfB
                 for (unsigned c = 0; c < nChannels; ++c) {
                     int absChannel = s * nChannels + c;
                     int index = (int)( dm * (4148.741601 * ((1.0 / (fch1 + (foff * absChannel)) /
-                        (fch1 + (foff * absChannel))) - (1.0 / fch1 / fch1))/tsamp ) );
+                        (fch1 + (foff * absChannel))) - (1.0 / fch1 / fch1))/tsamp ) ) + startBin;
                     int sampleNumber = index - offset;
 
                     float* I = stokes->spectrumData(t, s, 0);
-                    // add a signal of bandwidth 10
-                    if( (int)t >= sampleNumber && (int)t < sampleNumber + 10 ) {
+                    // add a signal of bandwidth signalWidth
+                    if( (int)t >= sampleNumber && (int)t < sampleNumber + signalWidth ) {
                         I[c] = 1.0;
                     } else {
                         I[c] = 0.0;

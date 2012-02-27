@@ -53,6 +53,8 @@ class DedispersionDataGenerator
         unsigned nSamples; // number of samples per DataBlob
         unsigned nSubbands;
         unsigned nChannels; 
+        unsigned startBin; 
+        unsigned signalWidth;
 
         double fch1; // frequency of channel 1
         double foff; // frequency delta (assumed to be -ve)

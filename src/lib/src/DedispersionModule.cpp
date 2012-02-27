@@ -14,7 +14,7 @@
 
 extern "C" void cacheDedisperseLoop( float *outbuff, long outbufSize, float *buff, float mstartdm,
                                      float mdmstep, int tdms, int numSamples,
-                                     const float* dmShift, const int* i_maxshift,
+                                     const float* dmShift, const int i_maxshift,
                                      const int* i_nchans );
 
 
@@ -32,9 +32,9 @@ DedispersionModule::DedispersionModule( const ConfigNode& config )
     //unsigned int nChannels = config.getOption("outputChannelsPerSubband", "value", "512").toUInt();
     _numSamplesBuffer = config.getOption("sampleNumber", "value", "512").toUInt();
     _tdms = config.getOption("dedispersionSamples", "value", "1984").toUInt();
-    _dmStep = config.getOption("dedispersionStepSize", "value", "0.1").toFloat();
+    _dmStep = config.getOption("dedispersionStepSize", "value", "0.0").toFloat();
     _dmLow = config.getOption("dedispersionMinimum", "value", "0").toFloat();
-    if( _dmLow <= 0.0 ) { _dmLow = _dmStep; }
+    if( _dmLow < 0.0 ) { _dmLow = 0.0; }
     _fch1 = config.getOption("frequencyChannel1", "value", "0.0").toDouble();
     _foff = config.getOption("channelBandwidth", "value", "1.0").toDouble();
     _tsamp = config.getOption("sampleTime", "value", "0.0").toDouble();
@@ -163,7 +163,7 @@ DedispersionSpectra* DedispersionModule::dedisperse( WeightedSpectrumDataSet* we
     unsigned int maxSamples = streamData->nTimeBlocks();
     do {
         if( (*_currentBuffer)->addSamples( weightedData, &sampleNumber ) == 0 ) {
-            (*_currentBuffer)->dump("input.data");
+            //(*_currentBuffer)->dump("input.data");
             dedisperse( _currentBuffer, dataOut->next() );
             DedispersionBuffer** next = _buffers.next();
             (*_currentBuffer)->copy( *next, _maxshift );
@@ -228,15 +228,14 @@ DedispersionModule::DedispersionKernel::DedispersionKernel( float start, float s
 void DedispersionModule::DedispersionKernel::run(const QList<GPU_Param*>& param ) {
      Q_ASSERT( param.size() == 6 );
      //cache_dedisperse_loop( float *outbuff, float *buff, float mstartdm, float mdmstep )
-std::cout << "DedispersionModule::DedispersionKernel::run: " << std::endl;
-std::cout << " maxShift =" << param[2]->value<int>() << std::endl;
-std::cout << " nchans =" << param[3]->value<int>() << std::endl;
-std::cout << " tsamp =" << _tsamp << std::endl;
-std::cout << " input buffer size =" << param[0]->size() << std::endl;
-std::cout << " dmShift size =" << param[1]->size() << std::endl;
-     //unsigned nsamples = param[4]->size()/_tdms;
-     unsigned nsamples = param[4]->value<int>();
-std::cout << " nSamples =" << nsamples << std::endl;
+    unsigned maxshift = param[2]->value<int>();
+    unsigned nsamples = param[4]->value<int>();
+//std::cout << " maxShift =" << maxshift << std::endl;
+//std::cout << " nchans =" << param[3]->value<int>() << std::endl;
+//std::cout << " tsamp =" << _tsamp << std::endl;
+//std::cout << " input buffer size =" << param[0]->size() << std::endl;
+//std::cout << " dmShift size =" << param[1]->size() << std::endl;
+//std::cout << " nSamples =" << nsamples << std::endl;
     //FILE *fp_in;
     //fp_in=fopen("./input.txt","w+");
  
@@ -245,10 +244,10 @@ std::cout << " nSamples =" << nsamples << std::endl;
     //    fprintf(fp_in, "%f\t", tmp[c] );
    // }
      cacheDedisperseLoop( (float*)param[5]->device() , param[5]->size(),
-                          (float*)param[0]->device(), _startdm,
-                          _dmstep, _tdms, nsamples,
+                          (float*)param[0]->device(), (_startdm/_tsamp),
+                          (_dmstep/_tsamp), _tdms, nsamples,
                           (const float*)param[1]->device(),
-                          (const int*)param[2]->device(),
+                          maxshift,
                           (const int*)param[3]->device()
                         );
 }

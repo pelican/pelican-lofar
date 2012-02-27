@@ -84,12 +84,12 @@ void DedispersionModuleTest::test_method()
           CPPUNIT_ASSERT_EQUAL( data, _connectData );
           int outputSampleSize = (int)(((nSamples - ddm.maxshift() )));
           CPPUNIT_ASSERT_EQUAL( (int)(outputSampleSize*ddSamples), buffer->current()->data().size() );
-          std::ofstream file("output.data");
-          //foreach( float d, buffer->current()->data() ) {
-          for( int i=0; i < buffer->current()->data().size(); ++i ) {
-                file << (buffer->current()->data())[i] << std::string(((i+1)%outputSampleSize)?" ":"\n");
-          }
-          std::cout << std::endl;
+// Print out the resulting data
+//          std::ofstream file("output.data");
+//          for( int i=0; i < buffer->current()->data().size(); ++i ) {
+//                file << (buffer->current()->data())[i] << std::string(((i+1)%outputSampleSize)?" ":"\n");
+//          }
+//          std::cout << std::endl;
 
           float expectedDMIntentsity = spectrumData[0]->nSubbands() * spectrumData[0]->nChannels();
           CPPUNIT_ASSERT_EQUAL( expectedDMIntentsity , buffer->current()->dm( 0, dm ) );

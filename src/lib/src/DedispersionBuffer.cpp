@@ -79,8 +79,8 @@ unsigned DedispersionBuffer::addSamples( WeightedSpectrumDataSet* weightedData, 
         for (unsigned s = 0; s < nSubbands; ++s) {
             for (unsigned c = 0; c < nChannels; ++c) {
                 float* data = streamData->spectrumData(t, s, 0);
-                // rearrange to have time sameples in inner loop
-                _data[ ((s * nChannels) + c ) * _nsamp  + _sampleCount ] = data[c];
+                // rearrange to have time samples in inner loop
+               _data[ ((s * nChannels) + c ) * _nsamp + _sampleCount ] = data[c];
             }
         }
         ++_sampleCount;
