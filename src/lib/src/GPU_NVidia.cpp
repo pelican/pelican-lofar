@@ -38,19 +38,13 @@ void GPU_NVidia::run( GPU_Job* job )
      cudaSetDevice( _deviceId );
      // execute the kernels
      foreach( GPU_Kernel* kernel, job->kernels() ) {
-        setupConfiguration( kernel->configuration() );
+        setupConfiguration( &(kernel->configuration()) );
         kernel->run( _currentParams );
         cudaDeviceSynchronize();
         if( ! cudaPeekAtLastError() ) {
             // copy device memory to host
-    //FILE *fp_out;
-    //fp_out=fopen("./output.txt","w+");
             foreach( const GPU_MemoryMap& map, _currentConfig->outputMaps() ) {
                 _params.value(map)->syncDeviceToHost();
-         //       float* tmp = (float*)_params.value(map)->host();
-          //      for( unsigned int c=0; c < _params.value(map)->size(); ++c ) {
-           //         fprintf(fp_out, "%f\t", tmp[c]);
-           //     }
             }
         }
         else {
@@ -69,7 +63,7 @@ void GPU_NVidia::setupConfiguration ( const GPU_NVidiaConfiguration* c )
          freeMem(_currentParams ); // quickfix: delete everything for now
          _currentParams.clear();
          foreach( const GPU_MemoryMap& map, c->allMaps() ) {
-             _params.insert( map, new GPU_Param( &map ) );
+             _params.insert( map, new GPU_Param( map ) );
              _currentParams.append( _params.value(map) );
 
          }
@@ -78,26 +72,6 @@ void GPU_NVidia::setupConfiguration ( const GPU_NVidiaConfiguration* c )
              _params.value(map)->syncHostToDevice();
          }
          _currentConfig = c;
-/*
-         freeMem( _currentDevicePointers );
-         _currentDevicePointers.clear();
-
-         // allocate gpu memory
-         foreach( const GPU_MemoryMap& map, c->allMaps() ) {
-             if( ! _memPointers.contains(map) ) {
-                 cudaMalloc( &(_memPointers[map]) , map.size() );
-             }
-             _currentDevicePointers.append( _memPointers[map] );
-             _currentParams.append( GPU_Param(map,_memPointers[map]) );
-         }
-         // deal with constant symbols - upload only once
-         foreach( const GPU_MemoryMap& map, c->constants() ) {
-             if( map.hostPtr() ) {
-                 cudaMemcpy( _memPointers[map], map.hostPtr(),
-                         map.size(), cudaMemcpyHostToDevice );
-             }
-         }
-        */
      }
      // upload non-constant input data from host
      foreach( const GPU_MemoryMap& map, c->inputMaps() ) {

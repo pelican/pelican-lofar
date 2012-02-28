@@ -32,9 +32,9 @@ class GPU_NVidiaConfiguration
             _constants.append( param );
         }
         void addOutputMap( const GPU_MemoryMap& param ) { _out.append(param); };
-        const QList<GPU_MemoryMap> outputMaps() const { return _out; };
-        const QList<GPU_MemoryMap> inputMaps() const { return _in; };
-        const QList<GPU_MemoryMap> constants() const { return _constants; };
+        const QList<GPU_MemoryMap>& outputMaps() const { return _out; };
+        const QList<GPU_MemoryMap>& inputMaps() const { return _in; };
+        const QList<GPU_MemoryMap>& constants() const { return _constants; };
         const QList<GPU_MemoryMap> allMaps() const { return _in + _constants + _out; };
         void clearInputMaps() { _in.clear(); }
         void clearOutputMaps() { _out.clear(); }

@@ -6,6 +6,8 @@
  * @file GPU_Param.h
  */
 
+#include "GPU_MemoryMap.h"
+
 namespace pelican {
 
 namespace lofar {
@@ -24,7 +26,7 @@ class GPU_MemoryMap;
 class GPU_Param
 {
     public:
-        GPU_Param( const GPU_MemoryMap* map );
+        GPU_Param( const GPU_MemoryMap& map );
         virtual ~GPU_Param();
         unsigned long size() const;
         void syncHostToDevice();
@@ -40,7 +42,7 @@ class GPU_Param
         GPU_Param( const GPU_Param& ) {};
 
     protected:
-        const GPU_MemoryMap* _map;
+        const GPU_MemoryMap _map;
         void* _devicePtr;
 };
 

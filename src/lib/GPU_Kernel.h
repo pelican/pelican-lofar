@@ -26,7 +26,7 @@ class GPU_Kernel
     public:
         GPU_Kernel(  );
         virtual ~GPU_Kernel();
-        const GPU_NVidiaConfiguration* configuration() const { return &_config; };
+        const GPU_NVidiaConfiguration& configuration() const { return _config; };
         virtual void run( const QList<GPU_Param*>& devicePointers ) = 0;
         void setConfiguration( const GPU_NVidiaConfiguration& config );
         inline void addConstant( const GPU_MemoryMap& map ) { _config.addConstant(map); };
