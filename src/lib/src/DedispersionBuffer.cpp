@@ -62,6 +62,7 @@ unsigned DedispersionBuffer::spaceRemaining() const {
 
 unsigned DedispersionBuffer::addSamples( WeightedSpectrumDataSet* weightedData, unsigned *sampleNumber ) {
 
+    _inputBlobs.append(weightedData);
     SpectrumDataSet<float>* streamData = weightedData->dataSet();
     Q_ASSERT( streamData != 0 );
     unsigned int nChannels = streamData->nChannels();
@@ -91,6 +92,7 @@ unsigned DedispersionBuffer::addSamples( WeightedSpectrumDataSet* weightedData, 
 
 void DedispersionBuffer::clear() {
     _sampleCount = 0;
+    _inputBlobs.clear();
 }
 
 } // namespace lofar

@@ -39,5 +39,9 @@ unsigned DedispersionSpectra::dmIndex( float dm ) const {
     return _dmBin.binIndex(dm);
 }
 
+void DedispersionSpectra::setInputDataBlobs( const QList< WeightedSpectrumDataSet* >& blobs ) {
+    _inputBlobs = blobs;
+}
+
 } // namespace lofar
 } // namespace pelican

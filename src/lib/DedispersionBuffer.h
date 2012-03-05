@@ -59,6 +59,11 @@ class DedispersionBuffer
         //  offset indicates the number of float values
         void copy( DedispersionBuffer* buf, unsigned int offset = 0 );
 
+        /// return the list of input data Blobs used to construct
+        //  the data buffer
+        inline const QList< WeightedSpectrumDataSet* >& inputDataBlobs() const { 
+                return _inputBlobs; };
+
         QVector<float>& getData() { return _data; };
         inline float rms() const { return _rms; };
         inline float mean() const { return _mean; };
@@ -66,6 +71,7 @@ class DedispersionBuffer
         void dump( const QString& fileName ) const;
 
     private:
+        QList<WeightedSpectrumDataSet* > _inputBlobs;
         QVector<float> _data;
         unsigned int _nsamp;
         unsigned int _sampleCount;

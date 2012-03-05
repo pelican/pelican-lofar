@@ -5,6 +5,7 @@
 #include "pelican/data/DataBlob.h"
 #include "BinMap.h"
 #include <QVector>
+#include <QList>
 
 /**
  * @file DedispersionSpectra.h
@@ -13,6 +14,7 @@
 namespace pelican {
 
 namespace lofar {
+class WeightedSpectrumDataSet;
 
 /**
  * @class DedispersionSpectra
@@ -47,11 +49,18 @@ class DedispersionSpectra : public DataBlob
         /// return the index of the bin for a given dm value
         unsigned int dmIndex( float dm ) const;
 
+        /// return a list of pointers to the objects representing input data
+        const QList< WeightedSpectrumDataSet* >& inputDataBlobs() const {
+                return _inputBlobs;
+        }
+        void setInputDataBlobs( const QList< WeightedSpectrumDataSet* >& );
+
     private:
         BinMap _dmBin;
         unsigned _timeBins;
         unsigned _dedispersionBins;
         QVector<float> _data;
+        QList< WeightedSpectrumDataSet* > _inputBlobs;
 };
 
 } // namespace lofar

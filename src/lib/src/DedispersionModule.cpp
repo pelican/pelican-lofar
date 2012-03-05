@@ -168,7 +168,7 @@ DedispersionSpectra* DedispersionModule::dedisperse( WeightedSpectrumDataSet* we
             DedispersionBuffer** next = _buffers.next();
             (*_currentBuffer)->copy( *next, _maxshift );
             _currentBuffer = next;
-        } 
+        }
     }
     while( sampleNumber != maxSamples );
     return dataOut->current();
@@ -197,11 +197,12 @@ void DedispersionModule::gpuJobFinished( GPU_Job* job, DedispersionBuffer** buff
      Q_ASSERT( job->status() != GPU_Job::Failed ||
         std::cerr << "DedispersionModule: " << job->error() << std::endl
      );
-     _buffers.unlock( buffer ); // give up the buffer
+     dataOut->setInputDataBlobs( (*buffer)->inputDataBlobs() );
      (*kernel)->reset();
      _kernels.unlock( kernel ); // give up the kernel
      job->reset();
      _jobBuffer.unlock(job); // return the job to the pool, ready for the next
+     _buffers.unlock( buffer ); // give up the buffer
      exportData( dataOut );  // send out the finished data product to our customers
 }
 
@@ -236,13 +237,6 @@ void DedispersionModule::DedispersionKernel::run(const QList<GPU_Param*>& param 
 //std::cout << " input buffer size =" << param[0]->size() << std::endl;
 //std::cout << " dmShift size =" << param[1]->size() << std::endl;
 //std::cout << " nSamples =" << nsamples << std::endl;
-    //FILE *fp_in;
-    //fp_in=fopen("./input.txt","w+");
- 
-    //float* tmp = (float*)param[0]->host();
-    //for(int c = 0; c <  param[0]->size(); ++c ) {
-    //    fprintf(fp_in, "%f\t", tmp[c] );
-   // }
      cacheDedisperseLoop( (float*)param[5]->device() , param[5]->size(),
                           (float*)param[0]->device(), (_startdm/_tsamp),
                           (_dmstep/_tsamp), _tdms, nsamples,
