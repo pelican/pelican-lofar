@@ -55,7 +55,7 @@ void GPU_NVidia::run( GPU_Job* job )
 
 void GPU_NVidia::setupConfiguration ( const GPU_NVidiaConfiguration* c )
 {
-     if( _currentConfig != c ) {
+     if( _currentConfig != c ) { // ! assumes config does not change between invoca.
          // free memory from existing job
          // TODO write code to test for overlapping mem
          // requirements for different configurations
@@ -63,9 +63,9 @@ void GPU_NVidia::setupConfiguration ( const GPU_NVidiaConfiguration* c )
          freeMem(_currentParams ); // quickfix: delete everything for now
          _currentParams.clear();
          foreach( const GPU_MemoryMap& map, c->allMaps() ) {
-             _params.insert( map, new GPU_Param( map ) );
-             _currentParams.append( _params.value(map) );
-
+             GPU_Param* p = new GPU_Param( map ) ;
+             _params.insert( map, p );
+             _currentParams.append( p );
          }
          // sync constants only on creation
          foreach( const GPU_MemoryMap& map, c->constants() ) {

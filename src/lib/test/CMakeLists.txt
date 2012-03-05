@@ -47,12 +47,13 @@ set(lofarTest_src
     src/PPF_ChanneliserTest.cpp
     src/PPF_CoefficientsTest.cpp
     src/PumaOutputTest.cpp
-    src/RFI_ClipperTest.cpp
+#    src/RFI_ClipperTest.cpp
     src/SpectrumDataSetTest.cpp
 )
 if(CUDA_FOUND)
     list(APPEND lofarTest_src
             src/GPU_NVidiaTest.cpp
+            src/GPU_ParamTest.cpp
             src/DedispersionBufferTest.cpp
             src/DedispersionModuleTest.cpp
         )
