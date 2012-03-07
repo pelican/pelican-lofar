@@ -46,8 +46,10 @@ class DedispersionModule : public AsyncronousModule
               float _dmstep;
               float _tsamp;
               unsigned _tdms;
+              unsigned _nChans;
+              unsigned _maxshift;
            public:
-              DedispersionKernel( float, float, float, float );
+              DedispersionKernel( float, float, float, float, unsigned, unsigned );
               void run(const QList<GPU_Param*>& param );
               void reset();
         };
@@ -68,7 +70,6 @@ class DedispersionModule : public AsyncronousModule
                              DedispersionBuffer** buffer, 
                              DedispersionKernel** kernel,
                              DedispersionSpectra* dataOut );
-        DedispersionSpectra* dataExtract( const float* outputData, DedispersionSpectra* dataBlob );
 
         /// resize the buffers if necessary to accomodate the provided streamData
         //  If a resize is required any existing data in the buffers
@@ -100,11 +101,8 @@ class DedispersionModule : public AsyncronousModule
         int _nChannels; // number of Channels per sample
         DedispersionBuffer** _currentBuffer;
         GPU_MemoryMap _i_nSamples;
-        GPU_MemoryMap _i_chans;
-        GPU_MemoryMap _i_maxshift;
         GPU_MemoryMap _f_dmshifts;
         QVector<float> _dmshifts;
-
 
         QList<DedispersionKernel*> _kernelList; // collection of pre-configured kernels
         LockingContainer<DedispersionKernel*> _kernels;

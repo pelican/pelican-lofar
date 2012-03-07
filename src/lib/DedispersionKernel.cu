@@ -42,7 +42,7 @@
 __global__ void cache_dedisperse_loop(float *outbuff, float *buff, float mstartdm,
                                       float mdmstep, const float* dm_shifts,
                                       const int i_nsamp, const int i_maxshift,
-                                      const int* i_nchans )
+                                      const int i_nchans )
 {
 
     int   shift;    
@@ -56,7 +56,7 @@ __global__ void cache_dedisperse_loop(float *outbuff, float *buff, float mstartd
     float shift_temp = mstartdm + ((blockIdx.y * DIVINDM + threadIdx.y) * mdmstep);
     
     // Loop over the frequency channels.
-    for(int c = 0; c < *i_nchans; c++) {
+    for(int c = 0; c < i_nchans; c++) {
 
 
         // Calculate the initial shift for this given frequency
@@ -82,7 +82,7 @@ extern "C" void cacheDedisperseLoop( float *outbuff, long outbufSize, float *buf
                                      float mdmstep, int tdms, int numSamples, 
                                      const float* dmShift,
                                      const int maxshift, 
-                                     const int* i_nchans ) {
+                                     const int i_nchans ) {
 
     cudaMemset(outbuff, 0, outbufSize );
     int divisions_in_t  = DIVINT;
