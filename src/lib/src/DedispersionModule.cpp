@@ -84,9 +84,9 @@ void DedispersionModule::resize( const SpectrumDataSet<float>* streamData ) {
     unsigned int nSubbands = streamData->nSubbands();
     unsigned int nPolarisations = streamData->nPolarisations();
     unsigned sampleSize = nSubbands * nChannels * nPolarisations;
-    if( sampleSize != (*_currentBuffer)->sampleSize() ) {
+    if( sampleSize != _currentBuffer->sampleSize() ) {
         unsigned maxBuffers = _buffersList.size();
-        unsigned maxSamples = (*_currentBuffer)->maxSamples();
+        unsigned maxSamples = _currentBuffer->maxSamples();
         _cleanBuffers();
         for( unsigned int i=0; i < maxBuffers; ++i ) {
             _buffersList.append( new DedispersionBuffer(maxSamples, sampleSize) );
@@ -159,10 +159,10 @@ DedispersionSpectra* DedispersionModule::dedisperse( WeightedSpectrumDataSet* we
                                    // transferred to the buffer from the Datablob
     unsigned int maxSamples = streamData->nTimeBlocks();
     do {
-        if( (*_currentBuffer)->addSamples( weightedData, &sampleNumber ) == 0 ) {
+        if( _currentBuffer->addSamples( weightedData, &sampleNumber ) == 0 ) {
             //(*_currentBuffer)->dump("input.data");
-            DedispersionBuffer** next = _buffers.next();
-            (*_currentBuffer)->copy( *next, _maxshift );
+            DedispersionBuffer* next = _buffers.next();
+            _currentBuffer->copy( next, _maxshift );
             dedisperse( _currentBuffer, dataOut->next() );
             _currentBuffer = next;
         }
@@ -171,31 +171,31 @@ DedispersionSpectra* DedispersionModule::dedisperse( WeightedSpectrumDataSet* we
     return dataOut->current();
 }
 
-void DedispersionModule::dedisperse( DedispersionBuffer** buffer, DedispersionSpectra* dataOut )
+void DedispersionModule::dedisperse( DedispersionBuffer* buffer, DedispersionSpectra* dataOut )
 {
     // prepare the output data datablob
-    unsigned int nsamp = (*buffer)->numSamples() - _maxshift;
+    unsigned int nsamp = buffer->numSamples() - _maxshift;
     dataOut->resize( nsamp, _tdms, _dmLow, _dmStep );
     // Set up a job for the GPU processing kernel
     GPU_Job* job = _jobBuffer.next();
-    DedispersionKernel** kernelPtr = _kernels.next();
+    DedispersionKernel* kernelPtr = _kernels.next();
     //unsigned int outputSize;
     //size_t outputSize = nsamp * _tdms * sizeof(float);
     GPU_MemoryMap out( dataOut->data() );
-    (*kernelPtr)->addOutputMap( out );
-    (*kernelPtr)->addInputMap( GPU_MemoryMap( (*buffer)->getData() ) );
-    //qDebug() << "input buffer:" << (*buffer)->getData();
-    job->addKernel( *kernelPtr );
+    kernelPtr->addOutputMap( out );
+    kernelPtr->addInputMap( GPU_MemoryMap( buffer->getData() ) );
+    //qDebug() << "input buffer:" << buffer->getData();
+    job->addKernel( kernelPtr );
     job->addCallBack( boost::bind( &DedispersionModule::gpuJobFinished, this, job, buffer, kernelPtr, dataOut ) );
     submit( job );
 }
 
-void DedispersionModule::gpuJobFinished( GPU_Job* job, DedispersionBuffer** buffer, DedispersionKernel** kernel, DedispersionSpectra* dataOut ) {
+void DedispersionModule::gpuJobFinished( GPU_Job* job, DedispersionBuffer* buffer, DedispersionKernel* kernel, DedispersionSpectra* dataOut ) {
      Q_ASSERT( job->status() != GPU_Job::Failed ||
         std::cerr << "DedispersionModule: " << job->error() << std::endl
      );
-     dataOut->setInputDataBlobs( (*buffer)->inputDataBlobs() );
-     (*kernel)->reset();
+     dataOut->setInputDataBlobs( buffer->inputDataBlobs() );
+     kernel->reset();
      _kernels.unlock( kernel ); // give up the kernel
      job->reset();
      _jobBuffer.unlock(job); // return the job to the pool, ready for the next

@@ -8,6 +8,7 @@
 #include "pelican/core/AbstractModule.h"
 #include "pelican/utility/LockingCircularBuffer.hpp"
 #include "LockingContainer.hpp"
+#include "LockingPtrContainer.hpp"
 #include "DedispersionSpectra.h"
 #include "AsyncronousModule.h"
 #include "GPU_Kernel.h"
@@ -67,8 +68,8 @@ class DedispersionModule : public AsyncronousModule
                                  LockingCircularBuffer<DedispersionSpectra* >* dataOut );
 
         void gpuJobFinished( GPU_Job* job,  
-                             DedispersionBuffer** buffer, 
-                             DedispersionKernel** kernel,
+                             DedispersionBuffer* buffer, 
+                             DedispersionKernel* kernel,
                              DedispersionSpectra* dataOut );
 
         /// resize the buffers if necessary to accomodate the provided streamData
@@ -80,7 +81,7 @@ class DedispersionModule : public AsyncronousModule
         int maxshift() const { return _maxshift; }
 
      protected:
-        void dedisperse( DedispersionBuffer** buffer, DedispersionSpectra* dataOut );
+        void dedisperse( DedispersionBuffer* buffer, DedispersionSpectra* dataOut );
         void _cleanBuffers();
 
     private:
@@ -94,18 +95,18 @@ class DedispersionModule : public AsyncronousModule
         double _fch1;
         double _foff;
         QList<DedispersionBuffer*> _buffersList;
-        LockingContainer<DedispersionBuffer*> _buffers;
+        LockingPtrContainer<DedispersionBuffer*> _buffers;
         QList<GPU_Job> _jobs;
         LockingContainer<GPU_Job> _jobBuffer; // collection of job objects
         int _maxshift; // number of samples to overlap between processes
         int _nChannels; // number of Channels per sample
-        DedispersionBuffer** _currentBuffer;
+        DedispersionBuffer* _currentBuffer;
         GPU_MemoryMap _i_nSamples;
         GPU_MemoryMap _f_dmshifts;
         QVector<float> _dmshifts;
 
         QList<DedispersionKernel*> _kernelList; // collection of pre-configured kernels
-        LockingContainer<DedispersionKernel*> _kernels;
+        LockingPtrContainer<DedispersionKernel*> _kernels;
 };
 
 PELICAN_DECLARE_MODULE(DedispersionModule)
