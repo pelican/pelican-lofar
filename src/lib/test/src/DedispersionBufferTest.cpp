@@ -115,34 +115,63 @@ void DedispersionBufferTest::test_copy() {
      unsigned nSubbands=2;
      unsigned sampleSize = nSubbands * nPolarisations * nChannels;
      SpectrumDataSet<float> spectrumData;
+     SpectrumDataSet<float> spectrumData2;
      spectrumData.resize( nSamples, nSubbands, nPolarisations, nChannels );
+     spectrumData2.resize( nSamples, nSubbands, nPolarisations, nChannels );
      WeightedSpectrumDataSet data( &spectrumData );
+     WeightedSpectrumDataSet data2( &spectrumData2 );
      { // Use Case:
        // copy from on identical buffer to the next, zero offset
+       // single datablobi, complete
        // Expect:
-       // identical data throughout
+       // Same datablobs in each, same number of samples in each
        DedispersionBuffer b1( nSamples,sampleSize );
+       unsigned nSamp = 0;
+       b1.addSamples( &data, &nSamp );
+       CPPUNIT_ASSERT_EQUAL( 1, b1.inputDataBlobs().size() );
        DedispersionBuffer b2( nSamples,sampleSize );
-       b2.copy(&b1,0);
-       
+       b1.copy(&b2,nSamples);
+       CPPUNIT_ASSERT_EQUAL( 1, b2.inputDataBlobs().size() );
+       CPPUNIT_ASSERT_EQUAL( b1.numberOfSamples(), b2.numberOfSamples() );
+       CPPUNIT_ASSERT_EQUAL( &data, b2.inputDataBlobs()[0] );
        //TODO verify data pattern
      }
      { // Use Case:
-       // copy from on identical buffer to the next, last byte
+       // copy a complete single blob sampleset when mutliple blobs are in the buffer
        // Expect:
        // copy only the last sample
-       DedispersionBuffer b1( nSamples,sampleSize );
-       DedispersionBuffer b2( nSamples,sampleSize );
-       b2.copy(&b1,sampleSize * nSamples- 1);
+       DedispersionBuffer b1( 2*nSamples,sampleSize );
+       unsigned nSamp = 0;
+       b1.addSamples( &data, &nSamp );
+       nSamp = 0;
+       b1.addSamples( &data2, &nSamp );
+       CPPUNIT_ASSERT_EQUAL( 2 * nSamples , b1.numberOfSamples() );
+       DedispersionBuffer b2( 2 * nSamples,sampleSize );
+       b1.copy(&b2, nSamples);
+       CPPUNIT_ASSERT_EQUAL( 2, b1.inputDataBlobs().size() );
+       CPPUNIT_ASSERT_EQUAL( 1, b2.inputDataBlobs().size() );
+       CPPUNIT_ASSERT_EQUAL( 2 * nSamples , b1.numberOfSamples() );
+       CPPUNIT_ASSERT_EQUAL( &data2, b2.inputDataBlobs()[0] );
        //TODO verify data pattern
      }
      { // Use Case:
-       // copy from on identical buffer to the next, end of data offset
+       // Copy a number of samples that do not correspond to 
+       // an exact buffer.
        // Expect:
-       // copy nothing, without crashing
-       DedispersionBuffer b1( nSamples,sampleSize );
-       DedispersionBuffer b2( nSamples,sampleSize );
-       b2.copy(&b1, sampleSize*nSamples);
+       // expect correct number of samples, samples taken from
+       // the end of the first blob data.
+       DedispersionBuffer b1( 2 * nSamples,sampleSize );
+       unsigned nSamp = 0;
+       b1.addSamples( &data, &nSamp );
+       nSamp = 0;
+       b1.addSamples( &data2, &nSamp );
+       CPPUNIT_ASSERT_EQUAL( 2 * nSamples , b1.numberOfSamples() );
+       DedispersionBuffer b2( 2 * nSamples ,sampleSize );
+       b1.copy(&b2, nSamples + 1 );
+       CPPUNIT_ASSERT_EQUAL( 2, b2.inputDataBlobs().size() );
+       CPPUNIT_ASSERT_EQUAL( nSamples + 1, b2.numberOfSamples() );
+       CPPUNIT_ASSERT_EQUAL( &data, b2.inputDataBlobs()[0] );
+       CPPUNIT_ASSERT_EQUAL( &data2, b2.inputDataBlobs()[1] );
        //TODO verify data pattern
      }
 }

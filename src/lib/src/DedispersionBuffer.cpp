@@ -46,14 +46,29 @@ void DedispersionBuffer::dump( const QString& fileName ) const {
     file.close();
 }
 
-void DedispersionBuffer::copy( DedispersionBuffer* buf, unsigned int offset )
+void DedispersionBuffer::copy( DedispersionBuffer* buf, unsigned int samples )
 {
-    Q_ASSERT( buf->size() >= size() );
-    int s = _data.size() - offset;
-    if( s > 0 ) 
-        memcpy( &(buf->_data[0]), &_data[offset] , s );
-    //buf->_rms = _rms;
-    //buf->_mean = _mean;
+    unsigned int count = 0;
+    unsigned int blobIndex = _inputBlobs.size();
+    unsigned int sampleNum;
+    unsigned int blobSample = 0;
+    while( count < samples ) {
+        Q_ASSERT( blobIndex > 0 );
+        WeightedSpectrumDataSet* blob = _inputBlobs[--blobIndex];
+        unsigned s = blob->dataSet()->nTimeBlocks();
+        sampleNum = samples - count; // remaining samples
+        if( sampleNum <= s ) {
+            buf->_sampleCount = 0;// ofset position to write to
+            blobSample = s - sampleNum;
+        } else {
+            buf->_sampleCount = sampleNum - s;// ofset position to write to
+        }
+        buf->_addSamples( blob, &blobSample, s - blobSample );
+        buf->_inputBlobs.push_front( blob );
+        count += s;
+    } 
+    buf->_sampleCount = samples;
+    //Q_ASSERT( count == samples );
 }
 
 unsigned DedispersionBuffer::spaceRemaining() const {
@@ -61,14 +76,18 @@ unsigned DedispersionBuffer::spaceRemaining() const {
 }
 
 unsigned DedispersionBuffer::addSamples( WeightedSpectrumDataSet* weightedData, unsigned *sampleNumber ) {
-
     _inputBlobs.append(weightedData);
+    unsigned int numSamples = weightedData->dataSet()->nTimeBlocks();
+    return _addSamples( weightedData, sampleNumber, numSamples );
+}
+
+unsigned DedispersionBuffer::_addSamples( WeightedSpectrumDataSet* weightedData, 
+                                          unsigned *sampleNumber, unsigned numSamples ) {
     SpectrumDataSet<float>* streamData = weightedData->dataSet();
     Q_ASSERT( streamData != 0 );
     unsigned int nChannels = streamData->nChannels();
     unsigned int nSubbands = streamData->nSubbands();
     unsigned int nPolarisations = streamData->nPolarisations();
-    unsigned int numSamples = streamData->nTimeBlocks();
     if( nSubbands * nChannels * nPolarisations != _sampleSize ) {
         std::cerr  << "DedispersionBuffer: input data sample size(" <<  nSubbands * nChannels * nPolarisations
                    << ") does not match buffer sample size (" << _sampleSize << ")" << std::endl;

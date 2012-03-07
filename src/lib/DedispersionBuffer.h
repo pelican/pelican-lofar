@@ -52,12 +52,12 @@ class DedispersionBuffer
 
         /// return the amount of empty space in the buffer (in samples)
         unsigned int spaceRemaining() const;
+        unsigned int numberOfSamples() const { return _sampleCount; };
 
         /// copy data from this object to the supplied DataBuffer object
-        //  data is taken from the offset position to the end and
-        //  inserted at the beginning of the provided object
-        //  offset indicates the number of float values
-        void copy( DedispersionBuffer* buf, unsigned int offset = 0 );
+        //  data is taken from the last offset samples in the 
+        //  buffer
+        void copy( DedispersionBuffer* buf, unsigned int samples = 0 );
 
         /// return the list of input data Blobs used to construct
         //  the data buffer
@@ -71,6 +71,8 @@ class DedispersionBuffer
         void dump( const QString& fileName ) const;
 
     private:
+        unsigned int _addSamples( WeightedSpectrumDataSet* data, unsigned *sampleOffset,
+                                  unsigned numSamples /* max number fo samples to insert */ );
         QList<WeightedSpectrumDataSet* > _inputBlobs;
         QVector<float> _data;
         unsigned int _nsamp;
