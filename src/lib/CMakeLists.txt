@@ -25,6 +25,7 @@ set(lib_src
     src/LofarStationConfiguration.cpp
     src/LofarStationConfigurationAdapter.cpp
     src/PelicanBlobClient.cpp
+    src/ProcessingChain.cpp
     src/PumaOutput.cpp
     src/PolyphaseCoefficients.cpp
     src/RFI_Clipper.cpp

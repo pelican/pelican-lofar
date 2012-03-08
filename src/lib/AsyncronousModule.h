@@ -4,6 +4,7 @@
 #include <QMutex>
 #include "pelican/core/AbstractModule.h"
 #include <boost/function.hpp>
+#include "ProcessingChain.h"
 
 /**
  * @file AsyncronousModule.h
@@ -39,6 +40,7 @@ class AsyncronousModule : public AbstractModule
         /// queue a GPU_Job for submission
         GPU_Job* submit(GPU_Job*);
         void exportData( DataBlob* data );
+        void exportDataTrial( DataBlob* data );
         // mark DataBlob as being in use
         void lock( const DataBlob* );
 
@@ -53,6 +55,9 @@ class AsyncronousModule : public AbstractModule
         // returns the number of locks remaining ( 0 = unlocked )
         int unlock( const DataBlob* );
         void unlock( const QList<DataBlob*>& data );
+
+    protected:
+        ProcessingChain _chain;
 
     private:
         void _runTask( const CallBackT& functor, DataBlob* inputData );

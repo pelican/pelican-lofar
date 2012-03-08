@@ -2,6 +2,7 @@
 #include <QtConcurrentRun>
 #include "GPU_Manager.h"
 #include "GPU_NVidia.h"
+#include <boost/bind.hpp>
 
 
 namespace pelican {
@@ -44,6 +45,14 @@ void AsyncronousModule::connect( const boost::function1<void, DataBlob*>& functo
 
 GPU_Job* AsyncronousModule::submit(GPU_Job* job) {
     return gpuManager()->submit(job);
+}
+
+void AsyncronousModule::exportDataTrial( DataBlob* data ) {
+     QList< boost::function0<void> > functors;
+     foreach( const CallBackT& functor,_linkedFunctors ) {
+        functors.append( boost::bind( &CallBackT::operator(), &functor, data ) );
+     }
+     _chain.exec(functors, _callbacks);
 }
 
 void AsyncronousModule::exportData( DataBlob* data ) {
