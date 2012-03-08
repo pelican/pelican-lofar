@@ -4,6 +4,7 @@
 #include <cppunit/extensions/HelperMacros.h>
 #include <QString>
 #include "pelican/utility/LockingCircularBuffer.hpp"
+#include "LockingPtrContainer.hpp"
 #include "DedispersionSpectra.h"
 
 /**
@@ -51,8 +52,8 @@ class DedispersionModuleTest : public CppUnit::TestFixture
 
     protected:
         ConfigNode testConfig(QString file = QString() ) const;
-        LockingCircularBuffer<DedispersionSpectra* >* outputBuffer(int size);
-        void destroyBuffer(LockingCircularBuffer<DedispersionSpectra* >* b);
+        LockingPtrContainer<DedispersionSpectra* >* outputBuffer(int size);
+        void destroyBuffer(LockingPtrContainer<DedispersionSpectra* >* b);
         QList<DedispersionSpectra* > _outputData;
 
     private:

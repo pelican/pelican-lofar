@@ -28,6 +28,7 @@ class GPU_DataMapping;
 class GPU_Job;
 class GPU_Param;
 class DedispersionBuffer;
+class LockingBuffer;
 
 /**
  * @class DedispersionModule
@@ -60,17 +61,20 @@ class DedispersionModule : public AsyncronousModule
         ~DedispersionModule();
         /// processing the incoming data, generating a new DedispersedSpectra in
         /// the process
-        DedispersionSpectra* dedisperse( DataBlob* incoming );
+        //DedispersionSpectra* dedisperse( DataBlob* incoming );
         /// processing the incoming data, filling the provided DedispersedSpectra
-        DedispersionSpectra* dedisperse( DataBlob* incoming, 
-                                 LockingCircularBuffer<DedispersionSpectra* >* dataOut );
-        DedispersionSpectra* dedisperse( WeightedSpectrumDataSet* incoming,
-                                 LockingCircularBuffer<DedispersionSpectra* >* dataOut );
+        void dedisperse( DataBlob* incoming, 
+                                 LockingPtrContainer<DedispersionSpectra* >* dataOut );
+        void dedisperse( WeightedSpectrumDataSet* incoming,
+                                 LockingPtrContainer<DedispersionSpectra* >* dataOut );
 
+        /// clean up after gpu task is finished
         void gpuJobFinished( GPU_Job* job,  
                              DedispersionBuffer* buffer, 
                              DedispersionKernel* kernel,
                              DedispersionSpectra* dataOut );
+        /// clean up after asyncronous task is finished
+        void unlockData( DedispersionSpectra* data );
 
         /// resize the buffers if necessary to accomodate the provided streamData
         //  If a resize is required any existing data in the buffers
@@ -107,6 +111,7 @@ class DedispersionModule : public AsyncronousModule
 
         QList<DedispersionKernel*> _kernelList; // collection of pre-configured kernels
         LockingPtrContainer<DedispersionKernel*> _kernels;
+        QHash< DataBlob*, LockingPtrContainer<DedispersionSpectra*>* > _dedispersionBuffer;
 };
 
 PELICAN_DECLARE_MODULE(DedispersionModule)

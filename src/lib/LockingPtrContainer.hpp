@@ -33,6 +33,7 @@ class LockingPtrContainer
 
         /// set the dataBuffer to manage
         void reset(QList<T>* dataBuffer ) {
+             _dataBuffer = dataBuffer;
              _available.clear();
              for(int i=0; i < dataBuffer->size(); ++i ) {
                 _available.append( (*dataBuffer)[i] );
@@ -56,7 +57,16 @@ class LockingPtrContainer
            _waitCondition.wakeOne();
         }
 
+        QList<T>* rawBuffer() const {
+           return _dataBuffer;
+        }
+
+        int numberAvailable() const {
+           return _available.size();
+        }
+
     private:
+        QList<T>* _dataBuffer;
         QWaitCondition _waitCondition;
         QMutex _mutex;
         QList<T> _available; // array of available pointers

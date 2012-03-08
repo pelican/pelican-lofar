@@ -4,6 +4,7 @@
 #include <QtCore/QList>
 #include "pelican/core/AbstractPipeline.h"
 #include "pelican/utility/LockingCircularBuffer.hpp"
+#include "LockingPtrContainer.hpp"
 #include "PPFChanneliser.h"
 #include "StokesGenerator.h"
 #include "RFI_Clipper.h"
@@ -64,7 +65,7 @@ class DedispersionPipeline : public AbstractPipeline
         SpectrumDataSetC32* spectra;
         QList<SpectrumDataSetC32*> _spectraBuffer;
         QList<DedispersionSpectra*> _dedispersedData;
-        LockingCircularBuffer<DedispersionSpectra* >* _dedispersedDataBuffer;
+        LockingPtrContainer<DedispersionSpectra* >* _dedispersedDataBuffer;
         TimeSeriesDataSetC32* timeSeries;
         QList<SpectrumDataSetStokes*> _stokesData;
         LockingCircularBuffer<SpectrumDataSetStokes*>* _stokesBuffer;

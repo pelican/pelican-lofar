@@ -46,7 +46,7 @@ void DedispersionBuffer::dump( const QString& fileName ) const {
     file.close();
 }
 
-void DedispersionBuffer::copy( DedispersionBuffer* buf, unsigned int samples )
+const QList<WeightedSpectrumDataSet*>& DedispersionBuffer::copy( DedispersionBuffer* buf, unsigned int samples )
 {
     unsigned int count = 0;
     unsigned int blobIndex = _inputBlobs.size();
@@ -68,7 +68,7 @@ void DedispersionBuffer::copy( DedispersionBuffer* buf, unsigned int samples )
         count += s;
     } 
     buf->_sampleCount = samples;
-    //Q_ASSERT( count == samples );
+    return _inputBlobs;
 }
 
 unsigned DedispersionBuffer::spaceRemaining() const {

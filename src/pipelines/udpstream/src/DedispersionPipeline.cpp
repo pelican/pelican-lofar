@@ -51,7 +51,7 @@ void DedispersionPipeline::init()
     _stokesData = createBlobs<SpectrumDataSetStokes>("SpectrumDataSetStokes", history);
     _stokesBuffer = new LockingCircularBuffer<SpectrumDataSetStokes*>(&_stokesData);
     _dedispersedData = createBlobs<DedispersionSpectra >("DedispersionSpectra", history);
-    _dedispersedDataBuffer = new LockingCircularBuffer<DedispersionSpectra* >(&_dedispersedData);
+    _dedispersedDataBuffer = new LockingPtrContainer<DedispersionSpectra* >(&_dedispersedData);
 
     weightedIntStokes = (WeightedSpectrumDataSet*) createBlob("WeightedSpectrumDataSet");
 
@@ -90,7 +90,10 @@ void DedispersionPipeline::run(QHash<QString, DataBlob*>& remoteData)
 }
 
 void DedispersionPipeline::updateBufferLock( ) {
+     // find WeightedDataBlobs that can be unlocked
      _stokesBuffer->shiftLock();
+     //_stokesBuffer->setLock( _dedispersionModule->currentlyLockedDataBlobs() );
+ 
 }
 
 } // namespace lofar

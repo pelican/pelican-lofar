@@ -131,13 +131,13 @@ void DedispersionModule::resize( const SpectrumDataSet<float>* streamData ) {
     }
 }
 
-DedispersionSpectra* DedispersionModule::dedisperse( DataBlob* incoming,
-                                 LockingCircularBuffer<DedispersionSpectra* >* dataOut ) {
-    return dedisperse( dynamic_cast<WeightedSpectrumDataSet*>(incoming), dataOut );
+void DedispersionModule::dedisperse( DataBlob* incoming,
+                                 LockingPtrContainer<DedispersionSpectra* >* dataOut ) {
+    dedisperse( dynamic_cast<WeightedSpectrumDataSet*>(incoming), dataOut );
 }
 
-DedispersionSpectra* DedispersionModule::dedisperse( WeightedSpectrumDataSet* weightedData, 
-                        LockingCircularBuffer<DedispersionSpectra* >* dataOut )
+void DedispersionModule::dedisperse( WeightedSpectrumDataSet* weightedData, 
+                        LockingPtrContainer<DedispersionSpectra* >* dataOut )
 {
     // transfer weighted data to host memory buffer
     //
@@ -151,6 +151,7 @@ DedispersionSpectra* DedispersionModule::dedisperse( WeightedSpectrumDataSet* we
     //_means[_counter % _stages][index] = blobMean * nChannels;
     //_rmss[_counter % _stages][index] = blobRMS * nChannels;
 
+    lock( weightedData );
     // --------- copy spectrum data to buffer -----------------
     SpectrumDataSet<float>* streamData = weightedData->dataSet();
     resize( streamData ); // ensure we have buffers scaled appropriately
@@ -162,13 +163,14 @@ DedispersionSpectra* DedispersionModule::dedisperse( WeightedSpectrumDataSet* we
         if( _currentBuffer->addSamples( weightedData, &sampleNumber ) == 0 ) {
             //(*_currentBuffer)->dump("input.data");
             DedispersionBuffer* next = _buffers.next();
-            _currentBuffer->copy( next, _maxshift );
-            dedisperse( _currentBuffer, dataOut->next() );
+            lock( _currentBuffer->copy( next, _maxshift ) );
+            DedispersionSpectra* dedispersionObj = dataOut->next();
+            _dedispersionBuffer.insert(dedispersionObj, dataOut); // record lock manager for dd data
+            dedisperse( _currentBuffer, dedispersionObj );
             _currentBuffer = next;
         }
     }
     while( sampleNumber != maxSamples );
-    return dataOut->current();
 }
 
 void DedispersionModule::dedisperse( DedispersionBuffer* buffer, DedispersionSpectra* dataOut )
@@ -201,6 +203,15 @@ void DedispersionModule::gpuJobFinished( GPU_Job* job, DedispersionBuffer* buffe
      _jobBuffer.unlock(job); // return the job to the pool, ready for the next
      _buffers.unlock( buffer ); // give up the buffer
      exportData( dataOut );  // send out the finished data product to our customers
+}
+
+void DedispersionModule::unlockData( DedispersionSpectra* data ) {
+    // unlock Spectrum Data blobs
+    foreach( WeightedSpectrumDataSet* d, data->inputDataBlobs() ) {
+        unlock( d );
+    }
+    // unlock the dedispersion datablob
+    _dedispersionBuffer[data]->unlock(data);
 }
 
 DedispersionModule::DedispersionKernel::DedispersionKernel( float start, float step, float tsamp, float tdms , unsigned nChans, unsigned maxshift )

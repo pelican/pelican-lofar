@@ -61,6 +61,25 @@ void AsyncronousModule::exportData( DataBlob* data ) {
      }
 }
 
+void AsyncronousModule::lock( const DataBlob* data ) {
+    ++_dataLocker[data];
+}
+
+
+int AsyncronousModule::unlock( const DataBlob* data ) {
+    QMutexLocker lock(&_lockerMutex);
+    Q_ASSERT( _dataLocker[data] > 0 );
+    return --_dataLocker[data];
+}
+
+void AsyncronousModule::unlock( const QList<DataBlob*>& data ) {
+    QMutexLocker lock(&_lockerMutex);
+    foreach( const DataBlob* d, data ) {
+        --_dataLocker[d];
+        Q_ASSERT( _dataLocker[d] >= 0 );
+    }
+}
+
 void AsyncronousModule::_runTask( const CallBackT& functor, DataBlob* data ) {
      functor(data);
      if( --_dataLocker[data] == 0) {

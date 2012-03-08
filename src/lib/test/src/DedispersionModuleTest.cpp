@@ -65,6 +65,7 @@ void DedispersionModuleTest::test_multipleBlobs ()
         stokesData.writeToFile( "inputStokes.data", spectrumData );
 
         WeightedSpectrumDataSet weightedData(spectrumData[0]);
+        WeightedSpectrumDataSet weightedData2(spectrumData[1]);
         ConfigNode config;
         CPPUNIT_ASSERT_EQUAL( nSamples, spectrumData[0]->nTimeBlocks() );
         // setup configuration
@@ -85,18 +86,21 @@ void DedispersionModuleTest::test_multipleBlobs ()
           config.setFromString(configString);
 
           DedispersionModule ddm(config);
-          LockingCircularBuffer<DedispersionSpectra* >* buffer = outputBuffer(2);
+          LockingPtrContainer<DedispersionSpectra* >* buffer = outputBuffer(2);
           ddm.connect( boost::bind( &DedispersionModuleTest::connected, this, _1 ) );
           _connectData = 0;
           _connectCount = 0;
-          DedispersionSpectra* data = ddm.dedisperse( &weightedData, buffer ); // asynchronous task
-          DedispersionSpectra* data2 = ddm.dedisperse( &weightedData, buffer ); // asynchronous task
-          CPPUNIT_ASSERT( data != data2 );
+          ddm.dedisperse( &weightedData, buffer ); // asynchronous task
+          CPPUNIT_ASSERT_EQUAL( 1, buffer->numberAvailable() );
+          while( _connectCount != 1 ) { sleep(1); };
+          float expectedDMIntentsity = spectrumData[0]->nSubbands() * spectrumData[0]->nChannels();
+          CPPUNIT_ASSERT_EQUAL( expectedDMIntentsity , _connectData->dm( 0, dm ) );
+          ddm.dedisperse( &weightedData2, buffer ); // asynchronous task
           while( _connectCount != 2 ) { sleep(1); };
           destroyBuffer( buffer );
           stokesData.deleteData(spectrumData);
      }
-    catch( QString s )
+    catch( const QString& s )
     {
         CPPUNIT_FAIL(s.toStdString());
     }
@@ -138,16 +142,15 @@ void DedispersionModuleTest::test_method()
                                         .arg( ddSamples );
           config.setFromString(configString);
           DedispersionModule ddm(config);
-          LockingCircularBuffer<DedispersionSpectra* >* buffer = outputBuffer(2);
+          LockingPtrContainer<DedispersionSpectra* >* buffer = outputBuffer(2);
           ddm.connect( boost::bind( &DedispersionModuleTest::connected, this, _1 ) );
           _connectData = 0;
           _connectCount = 0;
-          DedispersionSpectra* data = ddm.dedisperse( &weightedData, buffer ); // asynchronous task
+          ddm.dedisperse( &weightedData, buffer ); // asynchronous task
           while( ! _connectCount ) { sleep(1); };
           CPPUNIT_ASSERT_EQUAL( 1, _connectCount );
-          CPPUNIT_ASSERT_EQUAL( data, _connectData );
           int outputSampleSize = (int)(((nSamples - ddm.maxshift() )));
-          CPPUNIT_ASSERT_EQUAL( (int)(outputSampleSize*ddSamples), buffer->current()->data().size() );
+          CPPUNIT_ASSERT_EQUAL( (int)(outputSampleSize*ddSamples), _connectData->data().size() );
 // Print out the resulting data
 //          std::ofstream file("output.data");
 //          for( int i=0; i < buffer->current()->data().size(); ++i ) {
@@ -156,7 +159,7 @@ void DedispersionModuleTest::test_method()
 //          std::cout << std::endl;
 
           float expectedDMIntentsity = spectrumData[0]->nSubbands() * spectrumData[0]->nChannels();
-          CPPUNIT_ASSERT_EQUAL( expectedDMIntentsity , buffer->current()->dm( 0, dm ) );
+          CPPUNIT_ASSERT_EQUAL( expectedDMIntentsity , _connectData->dm( 0, dm ) );
           destroyBuffer( buffer );
           stokesData.deleteData(spectrumData);
         }
@@ -186,16 +189,16 @@ ConfigNode DedispersionModuleTest::testConfig(QString xml) const
     return node;
 }
 
-LockingCircularBuffer<DedispersionSpectra* >* DedispersionModuleTest::outputBuffer(int size) {
+LockingPtrContainer<DedispersionSpectra* >* DedispersionModuleTest::outputBuffer(int size) {
      QList<DedispersionSpectra* >* buffer = new QList< DedispersionSpectra* >;
      for(int i=0; i < size; ++i ) {
         buffer->append( new DedispersionSpectra );
      }
-     return new LockingCircularBuffer<DedispersionSpectra* >( buffer );
+     return new LockingPtrContainer<DedispersionSpectra* >( buffer );
 }
 
 void DedispersionModuleTest::destroyBuffer(
-        LockingCircularBuffer<DedispersionSpectra* >* b) 
+        LockingPtrContainer<DedispersionSpectra* >* b) 
 {
     foreach( DedispersionSpectra* d, *(b->rawBuffer()) ) {
         delete d;

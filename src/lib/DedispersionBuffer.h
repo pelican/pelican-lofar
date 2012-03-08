@@ -57,7 +57,7 @@ class DedispersionBuffer
         /// copy data from this object to the supplied DataBuffer object
         //  data is taken from the last offset samples in the 
         //  buffer
-        void copy( DedispersionBuffer* buf, unsigned int samples = 0 );
+        const QList<WeightedSpectrumDataSet*>& copy( DedispersionBuffer* buf, unsigned int samples = 0 );
 
         /// return the list of input data Blobs used to construct
         //  the data buffer
