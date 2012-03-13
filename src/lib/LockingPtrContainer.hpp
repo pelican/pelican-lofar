@@ -28,11 +28,11 @@ class LockingPtrContainer
 {
     public:
         LockingPtrContainer() {};
-        LockingPtrContainer( QList<T>* dataBuffer ) { reset(dataBuffer); };
+        LockingPtrContainer( QList<T*>* dataBuffer ) { reset(dataBuffer); };
         ~LockingPtrContainer() {};
 
         /// set the dataBuffer to manage
-        void reset(QList<T>* dataBuffer ) {
+        void reset(QList<T*>* dataBuffer ) {
              _dataBuffer = dataBuffer;
              _available.clear();
              for(int i=0; i < dataBuffer->size(); ++i ) {
@@ -42,22 +42,22 @@ class LockingPtrContainer
 
         /// return a reference to the next free resource
         //  This will block until a resource becomes available
-        T next() {
+        T* next() {
            QMutexLocker lock(&_mutex);
            while( ! _available.size() ) {
                _waitCondition.wait(&_mutex);
            }
-           return _available.takeFirst();
+           return const_cast<T*>(_available.takeFirst());
         }
 
         // unlock the specified data
-        void unlock(const T data) {
+        void unlock( const T* data ) {
            QMutexLocker lock(&_mutex);
            _available.append(data);
            _waitCondition.wakeOne();
         }
 
-        QList<T>* rawBuffer() const {
+        QList<T*>* rawBuffer() const {
            return _dataBuffer;
         }
 
@@ -66,10 +66,10 @@ class LockingPtrContainer
         }
 
     private:
-        QList<T>* _dataBuffer;
+        QList<T*>* _dataBuffer;
         QWaitCondition _waitCondition;
         QMutex _mutex;
-        QList<T> _available; // array of available pointers
+        QList<const T*> _available; // array of available pointers
 };
 
 } // namespace lofar

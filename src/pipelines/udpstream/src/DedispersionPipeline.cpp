@@ -2,6 +2,7 @@
 #include "WeightedSpectrumDataSet.h"
 #include "DedispersedTimeSeries.h"
 #include <boost/bind.hpp>
+#include "SpectrumDataSet.h"
 
 
 namespace pelican {
@@ -49,11 +50,12 @@ void DedispersionPipeline::init()
     // Create local datablobs
     spectra = (SpectrumDataSetC32*) createBlob("SpectrumDataSetC32");
     _stokesData = createBlobs<SpectrumDataSetStokes>("SpectrumDataSetStokes", history);
-    _stokesBuffer = new LockingCircularBuffer<SpectrumDataSetStokes*>(&_stokesData);
+    _stokesBuffer = new LockingPtrContainer<SpectrumDataSetStokes>(&_stokesData);
     _dedispersedData = createBlobs<DedispersionSpectra >("DedispersionSpectra", history);
-    _dedispersedDataBuffer = new LockingPtrContainer<DedispersionSpectra* >(&_dedispersedData);
+    _dedispersedDataBuffer = new LockingPtrContainer<DedispersionSpectra>(&_dedispersedData);
 
-    weightedIntStokes = (WeightedSpectrumDataSet*) createBlob("WeightedSpectrumDataSet");
+    _weightedData = createBlobs<WeightedSpectrumDataSet>("WeightedSpectrumDataSet", history );
+    _weightedDataBuffer = new LockingPtrContainer<WeightedSpectrumDataSet>(&_weightedData);
 
 
     // Request remote data
@@ -78,9 +80,11 @@ void DedispersionPipeline::run(QHash<QString, DataBlob*>& remoteData)
     SpectrumDataSetStokes* stokes=_stokesBuffer->next();
     _stokesGenerator->run(spectra, stokes);
 
-    // Clips RFI and modifies blob in place
+    // get the next suitable datablob
+    WeightedSpectrumDataSet* weightedIntStokes = _weightedDataBuffer->next();
     weightedIntStokes->reset(stokes);
 
+    // Clips RFI and modifies blob in place
     _rfiClipper->run(weightedIntStokes);
     dataOutput(&(weightedIntStokes->stats()), "RFI_Stats");
 
@@ -89,10 +93,13 @@ void DedispersionPipeline::run(QHash<QString, DataBlob*>& remoteData)
 
 }
 
-void DedispersionPipeline::updateBufferLock( const QList<const DataBlob*>& freeData ) {
+void DedispersionPipeline::updateBufferLock( const QList<DataBlob*>& freeData ) {
      // find WeightedDataBlobs that can be unlocked
-     foreach( const DataBlob* d, freeData ) {
-        //_stokesBuffer->unlock( d );
+     foreach( DataBlob* blob, freeData ) {
+        Q_ASSERT( blob->type() == "WeightedSpectrumDataSet" );
+        const WeightedSpectrumDataSet* d = static_cast<const WeightedSpectrumDataSet*>(blob);
+        _stokesBuffer->unlock( static_cast<SpectrumDataSetStokes*>(d->dataSet()) );
+        _weightedDataBuffer->unlock( d );
      }
 }
 

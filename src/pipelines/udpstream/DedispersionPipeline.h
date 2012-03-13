@@ -48,7 +48,7 @@ class DedispersionPipeline : public AbstractPipeline
         void run(QHash<QString, DataBlob*>& remoteData);
 
         /// called internally to free up DataBlobs after they are finished with
-        void updateBufferLock( const QList<const DataBlob*>& );
+        void updateBufferLock( const QList<DataBlob*>& );
 
     private:
         QString _streamIdentifier;
@@ -65,11 +65,12 @@ class DedispersionPipeline : public AbstractPipeline
         SpectrumDataSetC32* spectra;
         QList<SpectrumDataSetC32*> _spectraBuffer;
         QList<DedispersionSpectra*> _dedispersedData;
-        LockingPtrContainer<DedispersionSpectra* >* _dedispersedDataBuffer;
+        LockingPtrContainer<DedispersionSpectra>* _dedispersedDataBuffer;
         TimeSeriesDataSetC32* timeSeries;
         QList<SpectrumDataSetStokes*> _stokesData;
-        LockingCircularBuffer<SpectrumDataSetStokes*>* _stokesBuffer;
-        WeightedSpectrumDataSet* weightedIntStokes;
+        LockingPtrContainer<SpectrumDataSetStokes>* _stokesBuffer;
+        QList<WeightedSpectrumDataSet*> _weightedData;
+        LockingPtrContainer<WeightedSpectrumDataSet>* _weightedDataBuffer;
 
 };
 

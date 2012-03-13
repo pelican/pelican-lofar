@@ -64,9 +64,9 @@ class DedispersionModule : public AsyncronousModule
         //DedispersionSpectra* dedisperse( DataBlob* incoming );
         /// processing the incoming data, filling the provided DedispersedSpectra
         void dedisperse( DataBlob* incoming, 
-                                 LockingPtrContainer<DedispersionSpectra* >* dataOut );
+                                 LockingPtrContainer<DedispersionSpectra>* dataOut );
         void dedisperse( WeightedSpectrumDataSet* incoming,
-                                 LockingPtrContainer<DedispersionSpectra* >* dataOut );
+                                 LockingPtrContainer<DedispersionSpectra>* dataOut );
 
         /// clean up after gpu task is finished
         void gpuJobFinished( GPU_Job* job,  
@@ -100,7 +100,7 @@ class DedispersionModule : public AsyncronousModule
         double _fch1;
         double _foff;
         QList<DedispersionBuffer*> _buffersList;
-        LockingPtrContainer<DedispersionBuffer*> _buffers;
+        LockingPtrContainer<DedispersionBuffer> _buffers;
         QList<GPU_Job> _jobs;
         LockingContainer<GPU_Job> _jobBuffer; // collection of job objects
         int _maxshift; // number of samples to overlap between processes
@@ -111,8 +111,8 @@ class DedispersionModule : public AsyncronousModule
         QVector<float> _dmshifts;
 
         QList<DedispersionKernel*> _kernelList; // collection of pre-configured kernels
-        LockingPtrContainer<DedispersionKernel*> _kernels;
-        QHash< DataBlob*, LockingPtrContainer<DedispersionSpectra*>* > _dedispersionBuffer;
+        LockingPtrContainer<DedispersionKernel> _kernels;
+        QHash< DataBlob*, LockingPtrContainer<DedispersionSpectra>* > _dedispersionBuffer;
 };
 
 PELICAN_DECLARE_MODULE(DedispersionModule)

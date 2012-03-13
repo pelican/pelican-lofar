@@ -132,12 +132,12 @@ void DedispersionModule::resize( const SpectrumDataSet<float>* streamData ) {
 }
 
 void DedispersionModule::dedisperse( DataBlob* incoming,
-                                 LockingPtrContainer<DedispersionSpectra* >* dataOut ) {
+                                 LockingPtrContainer<DedispersionSpectra>* dataOut ) {
     dedisperse( dynamic_cast<WeightedSpectrumDataSet*>(incoming), dataOut );
 }
 
 void DedispersionModule::dedisperse( WeightedSpectrumDataSet* weightedData, 
-                        LockingPtrContainer<DedispersionSpectra* >* dataOut )
+                        LockingPtrContainer<DedispersionSpectra>* dataOut )
 {
     // transfer weighted data to host memory buffer
     //

@@ -2,6 +2,7 @@
 #include "GPU_MemoryMap.h"
 #include <cuda.h>
 #include <cuda_runtime_api.h>
+#include <iostream>
 
 
 namespace pelican {
@@ -12,7 +13,7 @@ namespace lofar {
 /**
  *@details GPU_Param 
  */
-GPU_Param::GPU_Param( const GPU_MemoryMap& map ) : _map(map)
+GPU_Param::GPU_Param( const GPU_MemoryMap& map ) : _map(map), _devicePtr(0)
 {
     cudaMalloc( &_devicePtr , map.size() );
 }
@@ -27,6 +28,7 @@ GPU_Param::~GPU_Param()
 
 void GPU_Param::syncHostToDevice() {
     if( _map.hostPtr() ) {
+        //std::cout << "GPU_Param::syncHostToDevice: device=" << _devicePtr << " host=" << _map.hostPtr() << " size=" << _map.size() << std::endl;
         cudaMemcpy( _devicePtr , _map.hostPtr(),
                 _map.size(), cudaMemcpyHostToDevice );
     }

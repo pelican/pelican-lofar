@@ -76,12 +76,14 @@ void DedispersionModuleTest::test_multipleBlobsPerBuffer ()
 
      DedispersionModule ddm(config);
      try {
-        LockingPtrContainer<DedispersionSpectra* >* buffer = outputBuffer(2);
+        LockingPtrContainer<DedispersionSpectra>* buffer = outputBuffer(2);
         ddm.connect( boost::bind( &DedispersionModuleTest::connected, this, _1 ) );
         ddm.onChainCompletion( boost::bind( &DedispersionModuleTest::connectFinished, this ) );
+        ddm.unlockCallback( boost::bind( &DedispersionModuleTest::unlockCallback, this, _1 ) );
         _connectData = 0;
         _connectCount = 0;
         _chainFinished = 0;
+        _unlocked.clear();
         // first dedisperse call should just buffer
         ddm.dedisperse( &weightedData, buffer ); // asynchronous task
         CPPUNIT_ASSERT_EQUAL( 1, ddm.lockNumber( &weightedData ) );
@@ -99,6 +101,11 @@ void DedispersionModuleTest::test_multipleBlobsPerBuffer ()
         while( _chainFinished == 0 ) { sleep(1); }
         CPPUNIT_ASSERT_EQUAL( 1, ddm.lockNumber( &weightedData2 ) );
         CPPUNIT_ASSERT_EQUAL( 0, ddm.lockNumber( &weightedData ) );
+
+        // expect unlock trigger
+        CPPUNIT_ASSERT_EQUAL( 1, _unlocked.size() );
+        CPPUNIT_ASSERT_EQUAL( (void *)&weightedData, (void *)_unlocked[0] );
+
         destroyBuffer( buffer );
         stokesData.deleteData(spectrumData);
      }
@@ -106,6 +113,10 @@ void DedispersionModuleTest::test_multipleBlobsPerBuffer ()
      {
          CPPUNIT_FAIL(s.toStdString());
      }
+}
+
+void DedispersionModuleTest::unlockCallback( const QList<DataBlob*>& data ) {
+     _unlocked=data;
 }
 
 void DedispersionModuleTest::test_multipleBlobs ()
@@ -156,7 +167,7 @@ void DedispersionModuleTest::test_multipleBlobs ()
           config.setFromString(configString);
 
           DedispersionModule ddm(config);
-          LockingPtrContainer<DedispersionSpectra* >* buffer = outputBuffer(2);
+          LockingPtrContainer<DedispersionSpectra>* buffer = outputBuffer(2);
           ddm.connect( boost::bind( &DedispersionModuleTest::connected, this, _1 ) );
           _connectData = 0;
           _connectCount = 0;
@@ -212,7 +223,7 @@ void DedispersionModuleTest::test_method()
                                         .arg( ddSamples );
           config.setFromString(configString);
           DedispersionModule ddm(config);
-          LockingPtrContainer<DedispersionSpectra* >* buffer = outputBuffer(2);
+          LockingPtrContainer<DedispersionSpectra>* buffer = outputBuffer(2);
           ddm.connect( boost::bind( &DedispersionModuleTest::connected, this, _1 ) );
           _connectData = 0;
           _connectCount = 0;
@@ -262,16 +273,16 @@ ConfigNode DedispersionModuleTest::testConfig(QString xml) const
     return node;
 }
 
-LockingPtrContainer<DedispersionSpectra* >* DedispersionModuleTest::outputBuffer(int size) {
+LockingPtrContainer<DedispersionSpectra>* DedispersionModuleTest::outputBuffer(int size) {
      QList<DedispersionSpectra* >* buffer = new QList< DedispersionSpectra* >;
      for(int i=0; i < size; ++i ) {
         buffer->append( new DedispersionSpectra );
      }
-     return new LockingPtrContainer<DedispersionSpectra* >( buffer );
+     return new LockingPtrContainer<DedispersionSpectra>( buffer );
 }
 
 void DedispersionModuleTest::destroyBuffer(
-        LockingPtrContainer<DedispersionSpectra* >* b) 
+        LockingPtrContainer<DedispersionSpectra>* b) 
 {
     foreach( DedispersionSpectra* d, *(b->rawBuffer()) ) {
         delete d;

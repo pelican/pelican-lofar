@@ -4,7 +4,7 @@
 #include <QMutex>
 #include "pelican/core/AbstractModule.h"
 #include <boost/function.hpp>
-#include "ProcessingChain.h"
+#include "ProcessingChain1.h"
 #include <iostream>
 
 /**
@@ -30,7 +30,7 @@ class AsyncronousModule : public AbstractModule
 {
     public:
         typedef boost::function1<void, DataBlob*> CallBackT;
-        typedef boost::function1<void, const QList<const DataBlob*>& > UnlockCallBackT;
+        typedef boost::function1<void, const QList<DataBlob*>& > UnlockCallBackT;
 
     public:
         AsyncronousModule( const ConfigNode& config );
@@ -56,6 +56,7 @@ class AsyncronousModule : public AbstractModule
 
         // will be called immediatley before any chain completion
         // callbacks. Override to clean up any data locks etc.
+        // This is where to call the unlock() method.
         virtual void exportComplete( DataBlob* ) = 0;
 
         // mark DataBlob as being in use
@@ -71,22 +72,20 @@ class AsyncronousModule : public AbstractModule
         }
         // mark DataBlob as no longer being in use
         // returns the number of locks remaining ( 0 = unlocked )
-        int unlock( const DataBlob* );
+        int unlock( DataBlob* );
 
     protected:
-        ProcessingChain _chain;
+        ProcessingChain1<DataBlob*> _chain;
 
     private:
         void _exportComplete( DataBlob* );
-        void _runTask( const CallBackT& functor, DataBlob* inputData );
-        void _finished(); // call the chain completion callbacks
-        QHash<const DataBlob*, int> _dataLocker; // keep a track of subprocessing using a specifc DataBlob
+        QHash<const DataBlob*, int> _dataLocker; // keep a track of DataBlobs in use
         mutable QMutex _lockerMutex;
         static GPU_Manager* gpuManager();
         QList<CallBackT> _linkedFunctors;
         QList<UnlockCallBackT> _unlockTriggers;
         QList<boost::function0<void> > _callbacks; // end of chain callbacks
-        QList<const DataBlob*> _recentUnlocked;
+        QList<DataBlob*> _recentUnlocked;
 };
 
 } // namespace lofar

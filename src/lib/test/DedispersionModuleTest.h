@@ -48,6 +48,7 @@ class DedispersionModuleTest : public CppUnit::TestFixture
         // utility methods
         void connected( DataBlob* dataOut );
         void connectFinished();
+        void unlockCallback( const QList<DataBlob*>&  );
 
     public:
         DedispersionModuleTest(  );
@@ -55,15 +56,15 @@ class DedispersionModuleTest : public CppUnit::TestFixture
 
     protected:
         ConfigNode testConfig(QString file = QString() ) const;
-        LockingPtrContainer<DedispersionSpectra* >* outputBuffer(int size);
-        void destroyBuffer(LockingPtrContainer<DedispersionSpectra* >* b);
+        LockingPtrContainer<DedispersionSpectra>* outputBuffer(int size);
+        void destroyBuffer(LockingPtrContainer<DedispersionSpectra>* b);
         QList<DedispersionSpectra* > _outputData;
 
     private:
         int _connectCount;
         DedispersionSpectra* _connectData;
         int _chainFinished;
-        
+        QList<DataBlob*> _unlocked;
 };
 
 } // namespace lofar
