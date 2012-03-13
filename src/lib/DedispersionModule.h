@@ -73,8 +73,9 @@ class DedispersionModule : public AsyncronousModule
                              DedispersionBuffer* buffer, 
                              DedispersionKernel* kernel,
                              DedispersionSpectra* dataOut );
+
         /// clean up after asyncronous task is finished
-        void unlockData( DedispersionSpectra* data );
+        void exportComplete( DataBlob* data );
 
         /// resize the buffers if necessary to accomodate the provided streamData
         //  If a resize is required any existing data in the buffers

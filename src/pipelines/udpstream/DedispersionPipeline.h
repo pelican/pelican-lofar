@@ -48,7 +48,7 @@ class DedispersionPipeline : public AbstractPipeline
         void run(QHash<QString, DataBlob*>& remoteData);
 
         /// called internally to free up DataBlobs after they are finished with
-        void updateBufferLock();
+        void updateBufferLock( const QList<const DataBlob*>& );
 
     private:
         QString _streamIdentifier;

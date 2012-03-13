@@ -44,7 +44,7 @@ void DedispersionPipeline::init()
      _dedispersionModule = (DedispersionModule*) createModule("DedispersionModule");
      _dedispersionAnalyser = (DedispersionAnalyser*) createModule("DedispersionAnalyser");
      _dedispersionModule->connect( boost::bind( &DedispersionAnalyser::run, _dedispersionAnalyser, _1 ) );
-     _dedispersionModule->onChainCompletion( boost::bind( &DedispersionPipeline::updateBufferLock, this ) );
+     _dedispersionModule->unlockCallback( boost::bind( &DedispersionPipeline::updateBufferLock, this, _1 ) );
 
     // Create local datablobs
     spectra = (SpectrumDataSetC32*) createBlob("SpectrumDataSetC32");
@@ -89,11 +89,11 @@ void DedispersionPipeline::run(QHash<QString, DataBlob*>& remoteData)
 
 }
 
-void DedispersionPipeline::updateBufferLock( ) {
+void DedispersionPipeline::updateBufferLock( const QList<const DataBlob*>& freeData ) {
      // find WeightedDataBlobs that can be unlocked
-     _stokesBuffer->shiftLock();
-     //_stokesBuffer->setLock( _dedispersionModule->currentlyLockedDataBlobs() );
- 
+     foreach( const DataBlob* d, freeData ) {
+        //_stokesBuffer->unlock( d );
+     }
 }
 
 } // namespace lofar

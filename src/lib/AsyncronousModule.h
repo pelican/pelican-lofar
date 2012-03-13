@@ -5,6 +5,7 @@
 #include "pelican/core/AbstractModule.h"
 #include <boost/function.hpp>
 #include "ProcessingChain.h"
+#include <iostream>
 
 /**
  * @file AsyncronousModule.h
@@ -27,22 +28,39 @@ class GPU_Manager;
 
 class AsyncronousModule : public AbstractModule
 {
-    private:
+    public:
         typedef boost::function1<void, DataBlob*> CallBackT;
+        typedef boost::function1<void, const QList<const DataBlob*>& > UnlockCallBackT;
 
     public:
         AsyncronousModule( const ConfigNode& config );
         virtual ~AsyncronousModule();
+        /// attach a task to be processed when the data is available
+        //  Each task will be run in a separate thread
         void connect( const boost::function1<void, DataBlob*>& functor );
+
+        /// attach a task to be completed when a DataBlob is unlocked by the module
+        void unlockCallback( const UnlockCallBackT& callback );
+
+        /// attach a task to be processed when all connect tasks have been completed
+        //  and all locks removed
         void onChainCompletion( const boost::function0<void>& fn ) { _callbacks.append(fn); };
+
+        /// return the number of locks for the specified object
+        int lockNumber( const DataBlob* ) const;
 
     protected:
         /// queue a GPU_Job for submission
         GPU_Job* submit(GPU_Job*);
         void exportData( DataBlob* data );
-        void exportDataTrial( DataBlob* data );
+
+        // will be called immediatley before any chain completion
+        // callbacks. Override to clean up any data locks etc.
+        virtual void exportComplete( DataBlob* ) = 0;
+
         // mark DataBlob as being in use
         void lock( const DataBlob* );
+
 
         template<class DataBlobPtr>
         void lock( const QList<DataBlobPtr>& data ) {
@@ -54,20 +72,21 @@ class AsyncronousModule : public AbstractModule
         // mark DataBlob as no longer being in use
         // returns the number of locks remaining ( 0 = unlocked )
         int unlock( const DataBlob* );
-        void unlock( const QList<DataBlob*>& data );
 
     protected:
         ProcessingChain _chain;
 
     private:
+        void _exportComplete( DataBlob* );
         void _runTask( const CallBackT& functor, DataBlob* inputData );
         void _finished(); // call the chain completion callbacks
         QHash<const DataBlob*, int> _dataLocker; // keep a track of subprocessing using a specifc DataBlob
-        QMutex _lockerMutex;
+        mutable QMutex _lockerMutex;
         static GPU_Manager* gpuManager();
         QList<CallBackT> _linkedFunctors;
+        QList<UnlockCallBackT> _unlockTriggers;
         QList<boost::function0<void> > _callbacks; // end of chain callbacks
-
+        QList<const DataBlob*> _recentUnlocked;
 };
 
 } // namespace lofar

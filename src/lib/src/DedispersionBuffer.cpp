@@ -31,7 +31,7 @@ DedispersionBuffer::~DedispersionBuffer()
 void DedispersionBuffer::setSampleCapacity(unsigned int maxSamples)
 {
     _nsamp = maxSamples;
-    _data.resize( _nsamp * _sampleSize );
+    _data.resize( maxSamples * _sampleSize );
 }
 
 void DedispersionBuffer::dump( const QString& fileName ) const {
@@ -68,7 +68,7 @@ const QList<WeightedSpectrumDataSet*>& DedispersionBuffer::copy( DedispersionBuf
         count += s;
     } 
     buf->_sampleCount = samples;
-    return _inputBlobs;
+    return buf->_inputBlobs;
 }
 
 unsigned DedispersionBuffer::spaceRemaining() const {

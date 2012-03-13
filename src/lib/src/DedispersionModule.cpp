@@ -205,8 +205,9 @@ void DedispersionModule::gpuJobFinished( GPU_Job* job, DedispersionBuffer* buffe
      exportData( dataOut );  // send out the finished data product to our customers
 }
 
-void DedispersionModule::unlockData( DedispersionSpectra* data ) {
+void DedispersionModule::exportComplete( DataBlob* datablob ) {
     // unlock Spectrum Data blobs
+    DedispersionSpectra* data = static_cast<DedispersionSpectra*>(datablob);
     foreach( WeightedSpectrumDataSet* d, data->inputDataBlobs() ) {
         unlock( d );
     }

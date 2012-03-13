@@ -31,6 +31,7 @@ class DedispersionModuleTest : public CppUnit::TestFixture
 {
     public:
         CPPUNIT_TEST_SUITE( DedispersionModuleTest );
+        CPPUNIT_TEST( test_multipleBlobsPerBuffer );
         CPPUNIT_TEST( test_method );
         CPPUNIT_TEST( test_multipleBlobs );
         CPPUNIT_TEST_SUITE_END();
@@ -42,9 +43,11 @@ class DedispersionModuleTest : public CppUnit::TestFixture
         // Test Methods
         void test_method();
         void test_multipleBlobs();
+        void test_multipleBlobsPerBuffer();
 
         // utility methods
         void connected( DataBlob* dataOut );
+        void connectFinished();
 
     public:
         DedispersionModuleTest(  );
@@ -59,6 +62,7 @@ class DedispersionModuleTest : public CppUnit::TestFixture
     private:
         int _connectCount;
         DedispersionSpectra* _connectData;
+        int _chainFinished;
         
 };
 

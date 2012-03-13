@@ -38,6 +38,76 @@ void DedispersionModuleTest::tearDown()
 {
 }
 
+void DedispersionModuleTest::test_multipleBlobsPerBuffer ()
+{
+     // Use Case:
+     // Buffer size is bigger than a single WeightedData sample set
+     // Expect:
+     // Asyncronous task to only happen when data buffer is full
+     // Data is unlocked
+    float dm = 10.0;
+    unsigned ddSamples = 200;
+    unsigned nBlocks = 2;
+    unsigned nSamples = 6400;
+    DedispersionDataGenerator stokesData;
+    stokesData.setTimeSamplesPerBlock( nSamples );
+    QList<SpectrumDataSetStokes*> spectrumData = stokesData.generate( nBlocks, dm );
+
+    WeightedSpectrumDataSet weightedData(spectrumData[0]);
+    WeightedSpectrumDataSet weightedData2(spectrumData[1]);
+    ConfigNode config;
+
+    // setup configuration
+    QString configString = QString("<DedispersionModule>"
+            " <sampleNumber value=\"%1\" />"
+            " <frequencyChannel1 value=\"%2\"/>"
+            " <sampleTime value=\"%3\"/>"
+            " <channelBandwidth value=\"%4\"/>"
+            " <dedispersionSamples value=\"%5\" />"
+            " <dedispersionStepSize value=\"0.1\" />"
+            " <numberOfBuffers value=\"3\" />"
+            "</DedispersionModule>")
+        .arg( nSamples * 2 ) // block size should match the buffer size to ensure we get two calls to the GPU
+        .arg( stokesData.startFrequency())
+        .arg( stokesData.timeOfSample())
+        .arg( stokesData.bandwidthOfSample())
+        .arg( ddSamples );
+     config.setFromString(configString);
+
+     DedispersionModule ddm(config);
+     try {
+        LockingPtrContainer<DedispersionSpectra* >* buffer = outputBuffer(2);
+        ddm.connect( boost::bind( &DedispersionModuleTest::connected, this, _1 ) );
+        ddm.onChainCompletion( boost::bind( &DedispersionModuleTest::connectFinished, this ) );
+        _connectData = 0;
+        _connectCount = 0;
+        _chainFinished = 0;
+        // first dedisperse call should just buffer
+        ddm.dedisperse( &weightedData, buffer ); // asynchronous task
+        CPPUNIT_ASSERT_EQUAL( 1, ddm.lockNumber( &weightedData ) );
+        CPPUNIT_ASSERT_EQUAL( 0, ddm.lockNumber( &weightedData2 ) );
+        CPPUNIT_ASSERT_EQUAL( 0, _connectCount ); // no data should be processed first time
+        CPPUNIT_ASSERT( (int)nSamples > ddm.maxshift() ); // ensures first sample should be released
+        // second dedisperse call should trigger a process chain
+        ddm.dedisperse( &weightedData2, buffer ); // asynchronous task
+        CPPUNIT_ASSERT( ddm.lockNumber( &weightedData2 ) > 1 ); // needs to be reserved for maxshift
+        while( _connectCount == 0 ) { sleep(1); };
+        CPPUNIT_ASSERT_EQUAL( 1, _connectCount );
+
+        float expectedDMIntentsity = spectrumData[0]->nSubbands() * spectrumData[0]->nChannels();
+        CPPUNIT_ASSERT_EQUAL( expectedDMIntentsity , _connectData->dm( 0, dm ) );
+        while( _chainFinished == 0 ) { sleep(1); }
+        CPPUNIT_ASSERT_EQUAL( 1, ddm.lockNumber( &weightedData2 ) );
+        CPPUNIT_ASSERT_EQUAL( 0, ddm.lockNumber( &weightedData ) );
+        destroyBuffer( buffer );
+        stokesData.deleteData(spectrumData);
+     }
+     catch( const QString& s )
+     {
+         CPPUNIT_FAIL(s.toStdString());
+     }
+}
+
 void DedispersionModuleTest::test_multipleBlobs ()
 {
      // Use Case:
@@ -58,7 +128,7 @@ void DedispersionModuleTest::test_multipleBlobs ()
         float dm = 10.0;
         unsigned ddSamples = 200;
         unsigned nBlocks = 2;
-        unsigned nSamples = 6400;
+        unsigned nSamples = 3400;
         DedispersionDataGenerator stokesData;
         stokesData.setTimeSamplesPerBlock( nSamples );
         QList<SpectrumDataSetStokes*> spectrumData = stokesData.generate( nBlocks, dm );
@@ -99,7 +169,7 @@ void DedispersionModuleTest::test_multipleBlobs ()
           while( _connectCount != 2 ) { sleep(1); };
           destroyBuffer( buffer );
           stokesData.deleteData(spectrumData);
-     }
+    }
     catch( const QString& s )
     {
         CPPUNIT_FAIL(s.toStdString());
@@ -174,7 +244,10 @@ void DedispersionModuleTest::connected( DataBlob* dataOut ) {
     ++_connectCount;
     _connectData = 0;
     CPPUNIT_ASSERT( ( _connectData = dynamic_cast<DedispersionSpectra* >(dataOut) ) );
-    // check the dedispersion values
+}
+
+void DedispersionModuleTest::connectFinished() {
+    ++_chainFinished;
 }
 
 ConfigNode DedispersionModuleTest::testConfig(QString xml) const

@@ -64,18 +64,27 @@ void GPU_NVidia::setupConfiguration ( const GPU_NVidiaConfiguration* c )
          _currentParams.clear();
          foreach( const GPU_MemoryMap& map, c->allMaps() ) {
              GPU_Param* p = new GPU_Param( map ) ;
+             if(  cudaPeekAtLastError() ) {
+                throw( cudaGetErrorString( cudaPeekAtLastError() ) );
+             }
              _params.insert( map, p );
              _currentParams.append( p );
          }
          // sync constants only on creation
          foreach( const GPU_MemoryMap& map, c->constants() ) {
              _params.value(map)->syncHostToDevice();
+             if(  cudaPeekAtLastError() ) {
+                 throw( cudaGetErrorString( cudaPeekAtLastError() ) );
+             }
          }
          _currentConfig = c;
      }
      // upload non-constant input data from host
      foreach( const GPU_MemoryMap& map, c->inputMaps() ) {
          _params.value(map)->syncHostToDevice();
+         if(  cudaPeekAtLastError() ) {
+             throw( cudaGetErrorString( cudaPeekAtLastError() ) );
+         }
      }
      cudaDeviceSynchronize();
 }
