@@ -44,10 +44,11 @@ class DedispersionSpectra : public DataBlob
         inline QVector<float>& data() { return _data; }
 
         /// the inegrated power for the specified dm and timeslice
-        float dm( unsigned timeSlice, float dm ) const;
+        float dmAmplitude( unsigned timeSlice, float dm ) const;
 
         /// return the index of the bin for a given dm value
         unsigned int dmIndex( float dm ) const;
+        float dm( unsigned dm ) const;
 
         /// return a list of pointers to the objects representing input data
         const QList< WeightedSpectrumDataSet* >& inputDataBlobs() const {

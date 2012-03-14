@@ -30,13 +30,17 @@ void DedispersionSpectra::resize( unsigned timebins, unsigned dedispersionBins,
     _data.resize( timebins*dedispersionBins ); 
 }
 
-float DedispersionSpectra::dm( unsigned timeSlice, float dm ) const {
+float DedispersionSpectra::dmAmplitude( unsigned timeSlice, float dm ) const {
     unsigned dm_index = dmIndex(dm);
     return _data[timeSlice + _timeBins * dm_index];
 }
 
 unsigned DedispersionSpectra::dmIndex( float dm ) const {
     return _dmBin.binIndex(dm);
+}
+
+float DedispersionSpectra::dm( unsigned dm ) const {
+    return _dmBin.binAssignmentNumber( dm );
 }
 
 void DedispersionSpectra::setInputDataBlobs( const QList< WeightedSpectrumDataSet* >& blobs ) {

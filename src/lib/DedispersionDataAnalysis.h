@@ -5,6 +5,7 @@
 #include "pelican/data/DataBlob.h"
 #include <QVector>
 #include <QPair>
+#include "DedispersionEvent.h"
 
 /**
  * @file DedispersionDataAnalysis.h
@@ -27,7 +28,8 @@ class DedispersionSpectra;
 
 class DedispersionDataAnalysis : public DataBlob
 {
-        typedef QVector< QPair<unsigned, unsigned> > EventIndexT;
+        typedef QList< DedispersionEvent > EventIndexT;
+
     public:
         DedispersionDataAnalysis(  );
         ~DedispersionDataAnalysis();
@@ -35,16 +37,21 @@ class DedispersionDataAnalysis : public DataBlob
         /// add an event
         void addEvent( unsigned dm, unsigned timeBin );
 
-        /// return the number of events founds
+        /// return the number of events found
         int eventsFound() const; 
 
         /// reset the Analysis data and set a different base data layer
         void reset( const DedispersionSpectra* );
 
+        /// return a list of events found
+        const QList<DedispersionEvent>& events() const;
+
     private:
         const DedispersionSpectra* _data;
         EventIndexT _eventIndex;
 };
+
+PELICAN_DECLARE_DATABLOB(DedispersionDataAnalysis)
 
 } // namespace lofar
 } // namespace pelican

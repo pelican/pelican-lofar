@@ -97,7 +97,7 @@ void DedispersionModuleTest::test_multipleBlobsPerBuffer ()
         CPPUNIT_ASSERT_EQUAL( 1, _connectCount );
 
         float expectedDMIntentsity = spectrumData[0]->nSubbands() * spectrumData[0]->nChannels();
-        CPPUNIT_ASSERT_EQUAL( expectedDMIntentsity , _connectData->dm( 0, dm ) );
+        CPPUNIT_ASSERT_EQUAL( expectedDMIntentsity , _connectData->dmAmplitude( 0, dm ) );
         while( _chainFinished == 0 ) { sleep(1); }
         CPPUNIT_ASSERT_EQUAL( 1, ddm.lockNumber( &weightedData2 ) );
         CPPUNIT_ASSERT_EQUAL( 0, ddm.lockNumber( &weightedData ) );
@@ -175,7 +175,7 @@ void DedispersionModuleTest::test_multipleBlobs ()
           CPPUNIT_ASSERT_EQUAL( 1, buffer->numberAvailable() );
           while( _connectCount != 1 ) { sleep(1); };
           float expectedDMIntentsity = spectrumData[0]->nSubbands() * spectrumData[0]->nChannels();
-          CPPUNIT_ASSERT_EQUAL( expectedDMIntentsity , _connectData->dm( 0, dm ) );
+          CPPUNIT_ASSERT_EQUAL( expectedDMIntentsity , _connectData->dmAmplitude( 0, dm ) );
           ddm.dedisperse( &weightedData2, buffer ); // asynchronous task
           while( _connectCount != 2 ) { sleep(1); };
           destroyBuffer( buffer );
@@ -240,7 +240,7 @@ void DedispersionModuleTest::test_method()
 //          std::cout << std::endl;
 
           float expectedDMIntentsity = spectrumData[0]->nSubbands() * spectrumData[0]->nChannels();
-          CPPUNIT_ASSERT_EQUAL( expectedDMIntentsity , _connectData->dm( 0, dm ) );
+          CPPUNIT_ASSERT_EQUAL( expectedDMIntentsity , _connectData->dmAmplitude( 0, dm ) );
           destroyBuffer( buffer );
           stokesData.deleteData(spectrumData);
         }

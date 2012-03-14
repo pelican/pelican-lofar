@@ -11,6 +11,8 @@ set(lib_src
     src/BlobStatistics.cpp
     src/DedispersionAnalyser.cpp
     src/DedispersionDataAnalysis.cpp
+    src/DedispersionDataAnalysisOutput.cpp
+    src/DedispersionEvent.cpp
     src/DedispersionBuffer.cpp
     src/DedispersionSpectra.cpp
     src/EmbraceChunker.cpp

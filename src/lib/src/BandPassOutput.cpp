@@ -42,10 +42,10 @@ void BandPassOutput::addFile(const QString& filename)
 
 void BandPassOutput::sendStream(const QString& /*streamName*/, const DataBlob* dataBlob)
 {
-    if( dataBlob->type() == "PandPass" )
+    if( dataBlob->type() == "BandPass" )
     {
         const BandPass* bp = static_cast<const BandPass*>(dataBlob);
-	    foreach( QIODevice* device, _devices ) {
+        foreach( QIODevice* device, _devices ) {
            float start = bp->primaryMap().startValue();
            float end= bp->primaryMap().endValue();
            int nBins = bp->primaryMap().numberBins();

@@ -16,6 +16,7 @@
 #include "DedispersionModule.h"
 #include "DedispersionSpectra.h"
 #include "DedispersionAnalyser.h"
+#include "DedispersionDataAnalysisOutput.h"
 
 
 /**

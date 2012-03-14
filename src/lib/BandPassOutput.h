@@ -35,10 +35,10 @@ namespace lofar {
 class BandPassOutput : public AbstractOutputStream
 {
     public:
-	/// Constructor
+    /// Constructor
         BandPassOutput( const ConfigNode& configNode  );
 
-	/// Destructor
+    /// Destructor
         ~BandPassOutput();
 
         /// Write out to a file with the specified name
