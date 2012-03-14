@@ -142,7 +142,10 @@ target_link_libraries(timingPipeline
     ${QT_QTXML_LIBRARY}
     ${QT_QTCORE_LIBRARY}
 )
-install(TARGETS emptyPipeline udpBFPipeline udpBFPipelineStream1 udpBFPipelineStream2 DESTINATION ${BINARY_INSTALL_DIR})
+install(TARGETS emptyPipeline udpBFPipeline 
+                udpBFPipelineStream1 udpBFPipelineStream2 
+                dedispersionStream1 dedispersionStream2
+                DESTINATION ${BINARY_INSTALL_DIR})
 
 #install(TARGETS udpBFPipeline DESTINATION ${BINARY_INSTALL_DIR})
 
