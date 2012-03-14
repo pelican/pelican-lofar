@@ -55,6 +55,12 @@ class DedispersionSpectra : public DataBlob
         }
         void setInputDataBlobs( const QList< WeightedSpectrumDataSet* >& );
 
+        /// return the maximum DM that can be represented in the data
+        double dmMax() const { return _dmBin.endValue(); }
+        /// return the number of dm bins
+        int dmBins() const { return _dmBin.numberBins(); }
+        inline int timeSamples() const { return _timeBins; }
+
     private:
         BinMap _dmBin;
         unsigned _timeBins;

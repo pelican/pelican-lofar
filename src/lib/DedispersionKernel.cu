@@ -92,22 +92,19 @@ extern "C" void cacheDedisperseLoop( float *outbuff, long outbufSize, float *buf
     int num_blocks_t = (numSamples - maxshift)/(divisions_in_t * num_reg);
     int num_blocks_dm = tdms/divisions_in_dm;
 
-
+/*
     std::cout << "\nnumSamples\t" << numSamples;
     std::cout << "\ndivisions_in_t\t" << divisions_in_t;
     std::cout << "\ndivisions_in_dm\t" << divisions_in_dm;
     std::cout << "\nnum_reg\t" << num_reg;
     std::cout << "\nnum_blocks_t\t" << num_blocks_t;
     std::cout << "\nnum_blocks_dm\t" << num_blocks_dm;
-    //printf("\ndm_step\t%f", dm_step);
     std::cout << "\ntdms\t" << tdms << std::endl;
-    //std::cout << "\nmaxshift\t" << *i_maxshift << std::endl;
-    //std::cout << "\nnchans\t" << *i_nchans << std::endl;
-    //std::cout << "\ndmshift\t" << *dmShift << std::endl;
     std::cout << "mdmstep\t" << mdmstep << std::endl;
     std::cout << "mstartdm\t" << mstartdm << std::endl;
     std::cout << "buff\t" << buff << std::endl;
     std::cout << "outbuff\t" << outbuff << std::endl;
+*/
 
     dim3 threads_per_block(divisions_in_t, divisions_in_dm);
     dim3 num_blocks(num_blocks_t,num_blocks_dm);

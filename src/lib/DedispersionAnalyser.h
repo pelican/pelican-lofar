@@ -3,6 +3,7 @@
 
 
 #include "pelican/modules/AbstractModule.h"
+#include "DedispersionSpectra.h"
 
 /**
  * @file DedispersionAnalyser.h
@@ -11,13 +12,13 @@
 namespace pelican {
 class DataBlob;
 namespace lofar {
-class AsyncronousJob;
+class DedispersionDataAnalysis;
 
 /**
  * @class DedispersionAnalyser
  *
  * @brief
- *
+ *    Extract astronomical events form dedispersion data
  * @details
  *
  */
@@ -27,7 +28,7 @@ class DedispersionAnalyser : public AbstractModule
     public:
         DedispersionAnalyser( const ConfigNode& config );
         ~DedispersionAnalyser();
-        void run( DataBlob* ) {};
+        int analyse( DedispersionSpectra*, DedispersionDataAnalysis* );
 
     private:
 };

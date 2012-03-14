@@ -1,6 +1,7 @@
 #include "DedispersionPipeline.h"
 #include "WeightedSpectrumDataSet.h"
 #include "DedispersedTimeSeries.h"
+#include "DedispersionDataAnalysis.h"
 #include <boost/bind.hpp>
 #include "SpectrumDataSet.h"
 
@@ -44,7 +45,7 @@ void DedispersionPipeline::init()
     _stokesIntegrator = (StokesIntegrator *) createModule("StokesIntegrator");
      _dedispersionModule = (DedispersionModule*) createModule("DedispersionModule");
      _dedispersionAnalyser = (DedispersionAnalyser*) createModule("DedispersionAnalyser");
-     _dedispersionModule->connect( boost::bind( &DedispersionAnalyser::run, _dedispersionAnalyser, _1 ) );
+     _dedispersionModule->connect( boost::bind( &DedispersionPipeline::dedispersionAnalysis, this, _1 ) );
      _dedispersionModule->unlockCallback( boost::bind( &DedispersionPipeline::updateBufferLock, this, _1 ) );
 
     // Create local datablobs
@@ -91,6 +92,15 @@ void DedispersionPipeline::run(QHash<QString, DataBlob*>& remoteData)
     // start the asyncronous chain of events
     _dedispersionModule->dedisperse(weightedIntStokes, _dedispersedDataBuffer );
 
+}
+
+void DedispersionPipeline::dedispersionAnalysis( DataBlob* blob ) {
+    DedispersionDataAnalysis result;
+    DedispersionSpectra* data = static_cast<DedispersionSpectra*>(blob);
+    if ( _dedispersionAnalyser->analyse(data, &result) )
+    {
+        dataOutput( &result );
+    }
 }
 
 void DedispersionPipeline::updateBufferLock( const QList<DataBlob*>& freeData ) {

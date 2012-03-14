@@ -9,7 +9,10 @@ set(lib_src
     src/BandPassOutput.cpp
     src/BandPassRecorder.cpp
     src/BlobStatistics.cpp
+    src/DedispersionAnalyser.cpp
+    src/DedispersionDataAnalysis.cpp
     src/DedispersionBuffer.cpp
+    src/DedispersionSpectra.cpp
     src/EmbraceChunker.cpp
     src/FilterBankHeader.cpp
     src/FilterBankAdapter.cpp
@@ -38,7 +41,6 @@ set(lib_src
     src/SigprocStokesWriter.cpp
     src/LofarDataSplittingChunker.cpp
     src/WeightedSpectrumDataSet.cpp
-    src/DedispersionSpectra.cpp
     src/AsyncronousTask.cpp
     src/GPU_Task.cpp
     src/GPU_MemoryMap.cpp

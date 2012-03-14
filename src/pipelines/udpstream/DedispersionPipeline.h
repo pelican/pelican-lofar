@@ -50,6 +50,9 @@ class DedispersionPipeline : public AbstractPipeline
         /// called internally to free up DataBlobs after they are finished with
         void updateBufferLock( const QList<DataBlob*>& );
 
+    protected:
+        void dedispersionAnalysis( DataBlob* data );
+
     private:
         QString _streamIdentifier;
 
