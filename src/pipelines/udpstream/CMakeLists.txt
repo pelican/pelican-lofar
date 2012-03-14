@@ -10,6 +10,7 @@ set(pipeline_lib_src
     src/SigProcPipeline.cpp
     src/BandPassPipeline.cpp
     src/DedispersionPipeline.cpp
+    src/DedispersionApplication.cpp
 )
 add_library(pelicanMdsm ${pipeline_lib_src})
 
@@ -19,6 +20,38 @@ target_link_libraries(emptyPipeline
     pelicanMdsm
     pelican-lofar_static
     ${PELICAN_LIBRARY}
+    ${QT_QTNETWORK_LIBRARY}
+    ${QT_QTXML_LIBRARY}
+    ${QT_QTCORE_LIBRARY}
+)
+
+# === Build the dedispersion pipeline binary
+add_executable(dedispersionStream1 src/dedispersionStream1.cpp)
+set_target_properties(dedispersionStream1 PROPERTIES
+    COMPILE_FLAGS "${OpenMP_CXX_FLAGS}"
+    LINK_FLAGS "${OpenMP_CXX_FLAGS}"
+)
+target_link_libraries(dedispersionStream1
+    pelicanMdsm
+    pelican-lofar_static
+    ${PELICAN_LIBRARY}
+    ${FFTW3_FFTW_LIBRARY}
+    ${FFTW3_FFTWF_LIBRARY}
+    ${QT_QTNETWORK_LIBRARY}
+    ${QT_QTXML_LIBRARY}
+    ${QT_QTCORE_LIBRARY}
+)
+add_executable(dedispersionStream2 src/dedispersionStream2.cpp)
+set_target_properties(dedispersionStream2 PROPERTIES
+    COMPILE_FLAGS "${OpenMP_CXX_FLAGS}"
+    LINK_FLAGS "${OpenMP_CXX_FLAGS}"
+)
+target_link_libraries(dedispersionStream2
+    pelicanMdsm
+    pelican-lofar_static
+    ${PELICAN_LIBRARY}
+    ${FFTW3_FFTW_LIBRARY}
+    ${FFTW3_FFTWF_LIBRARY}
     ${QT_QTNETWORK_LIBRARY}
     ${QT_QTXML_LIBRARY}
     ${QT_QTCORE_LIBRARY}
