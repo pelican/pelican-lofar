@@ -2,6 +2,8 @@
 #define DEDISPERSIONDATAGENERATOR_H
 
 #include <QList>
+class QMutex;
+class QWaitCondition;
 
 /**
  * @file DedispersionDataGenerator.h
@@ -11,6 +13,7 @@ namespace pelican {
 
 namespace lofar {
 class SpectrumDataSetStokes;
+class DedispersionSpectra;
 
 /**
  * @class DedispersionDataGenerator
@@ -46,8 +49,17 @@ class DedispersionDataGenerator
         /// convenience method to clean up the memory of a generated dataset
         static void deleteData( QList<SpectrumDataSetStokes*>& data );
 
+        /// convenience method to clean up generated DedispersionSpectra objects
+        static void deleteData( DedispersionSpectra* data );
+
         /// fill each block with the specified number of samples
         void setTimeSamplesPerBlock( unsigned num ) { nSamples = num; }
+
+        /// create a dedispersion object (processdd by the dedispersion module)
+        DedispersionSpectra* dedispersionData( float dedispersionMeasure );
+
+    protected:
+        void wakeUp( QWaitCondition* waiter, QMutex* mutex );
 
     protected:
         unsigned nSamples; // number of samples per DataBlob

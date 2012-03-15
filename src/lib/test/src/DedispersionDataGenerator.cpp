@@ -2,7 +2,16 @@
 #include "pelican/utility/ConfigNode.h"
 #include "pelican/output/DataBlobFile.h"
 #include "SpectrumDataSet.h"
+#include "WeightedSpectrumDataSet.h"
+#include "DedispersionSpectra.h"
+#include "DedispersionModule.h"
+#include "LockingPtrContainer.hpp"
+#include <QMutex>
+#include <QMutexLocker>
+#include <QWaitCondition>
+#include <QList>
 #include <fstream>
+#include <boost/bind.hpp>
 
 
 namespace pelican {
@@ -16,7 +25,7 @@ namespace lofar {
 DedispersionDataGenerator::DedispersionDataGenerator()
 {
     // set default values (typical LOFAR station values)
-    nSamples = 16; // samples per blob
+    nSamples = 6400; // samples per blob
     nSubbands = 32;
     nChannels = 64; // 2048 total channels (32x64)
     startBin = 0; // offset bin (time) to start the dedispersion
@@ -55,7 +64,8 @@ QList<SpectrumDataSetStokes*> DedispersionDataGenerator::generate( int numberOfB
 
                     float* I = stokes->spectrumData(t, s, 0);
                     // add a signal of bandwidth signalWidth
-                    if( (int)t >= sampleNumber && (int)t < sampleNumber + signalWidth ) {
+                    if( (int)t >= sampleNumber && 
+                                  t < (unsigned)sampleNumber + signalWidth ) {
                         I[c] = 1.0;
                     } else {
                         I[c] = 0.0;
@@ -67,6 +77,48 @@ QList<SpectrumDataSetStokes*> DedispersionDataGenerator::generate( int numberOfB
     return data;
 }
 
+DedispersionSpectra* DedispersionDataGenerator::dedispersionData( float dedispersionMeasure ) {
+    /// generate stokes data and process it using the dedispersion module
+    unsigned ddSamples = 2 * dedispersionMeasure;
+    QList<SpectrumDataSetStokes*> stokes = generate( 1, dedispersionMeasure );
+    ConfigNode config;
+    QString configString = QString("<DedispersionModule>"
+            " <sampleNumber value=\"%1\" />"
+            " <frequencyChannel1 value=\"%2\"/>"
+            " <sampleTime value=\"%3\"/>"
+            " <channelBandwidth value=\"%4\"/>"
+            " <dedispersionSamples value=\"%5\" />"
+            " <dedispersionStepSize value=\"0.1\" />"
+            " <numberOfBuffers value=\"3\" />"
+            "</DedispersionModule>")
+        .arg( nSamples ) // block size should match the buffer size to ensure we get two calls to the GPU
+        .arg( startFrequency())
+        .arg( timeOfSample())
+        .arg( bandwidthOfSample())
+        .arg( ddSamples );
+    config.setFromString(configString);
+    QList<DedispersionSpectra*> outputData;
+    outputData << new DedispersionSpectra;
+    LockingPtrContainer<DedispersionSpectra> outputBuffer(&outputData);
+    DedispersionModule ddm(config);
+    WeightedSpectrumDataSet* inputData = new WeightedSpectrumDataSet( stokes[0] );
+
+    // launch the dedispersion module and wait for it to return
+    QMutex mutex;
+    QMutexLocker locker( &mutex );
+    QWaitCondition waiter;
+    ddm.onChainCompletion( boost::bind( &DedispersionDataGenerator::wakeUp, this,  &waiter, &mutex) );
+    ddm.dedisperse( inputData, &outputBuffer );
+    waiter.wait(&mutex);
+
+    return outputData[0];
+}
+
+void DedispersionDataGenerator::wakeUp( QWaitCondition* waiter, QMutex* mutex ) {
+     QMutexLocker locker(mutex);
+     waiter->wakeAll();
+}
+
 void DedispersionDataGenerator::writeToFile( const QString& filename, const QList<SpectrumDataSetStokes*>& data ) {
     ConfigNode dummy;
     DataBlobFile writer(dummy);
@@ -75,6 +127,13 @@ void DedispersionDataGenerator::writeToFile( const QString& filename, const QLis
         writer.send( QString("input"), d );
     }
 
+}
+
+void DedispersionDataGenerator::deleteData( DedispersionSpectra* data ) {
+    foreach( WeightedSpectrumDataSet* d, data->inputDataBlobs() ) {
+        delete d;
+    }
+    delete data;
 }
 
 void DedispersionDataGenerator::deleteData( QList<SpectrumDataSetStokes*>& data )
