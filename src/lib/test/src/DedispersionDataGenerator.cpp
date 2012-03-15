@@ -79,7 +79,8 @@ QList<SpectrumDataSetStokes*> DedispersionDataGenerator::generate( int numberOfB
 
 DedispersionSpectra* DedispersionDataGenerator::dedispersionData( float dedispersionMeasure ) {
     /// generate stokes data and process it using the dedispersion module
-    unsigned ddSamples = 2 * dedispersionMeasure;
+    double dedispersionStep = 0.1;
+    unsigned ddSamples = 2*dedispersionMeasure/dedispersionStep;
     QList<SpectrumDataSetStokes*> stokes = generate( 1, dedispersionMeasure );
     ConfigNode config;
     QString configString = QString("<DedispersionModule>"
@@ -88,14 +89,15 @@ DedispersionSpectra* DedispersionDataGenerator::dedispersionData( float dedisper
             " <sampleTime value=\"%3\"/>"
             " <channelBandwidth value=\"%4\"/>"
             " <dedispersionSamples value=\"%5\" />"
-            " <dedispersionStepSize value=\"0.1\" />"
-            " <numberOfBuffers value=\"3\" />"
+            " <dedispersionStepSize value=\"%6\" />"
+            " <numberOfBuffers value=\"2\" />"
             "</DedispersionModule>")
         .arg( nSamples ) // block size should match the buffer size to ensure we get two calls to the GPU
         .arg( startFrequency())
         .arg( timeOfSample())
         .arg( bandwidthOfSample())
-        .arg( ddSamples );
+        .arg( ddSamples )
+        .arg( dedispersionStep );
     config.setFromString(configString);
     QList<DedispersionSpectra*> outputData;
     outputData << new DedispersionSpectra;
