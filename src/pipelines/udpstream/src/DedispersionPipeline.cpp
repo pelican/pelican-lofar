@@ -36,7 +36,8 @@ DedispersionPipeline::~DedispersionPipeline()
 
 void DedispersionPipeline::init()
 {
-    unsigned int history=10;
+    ConfigNode c = config( QString("DedispersionPipeline") );
+    unsigned int history= c.getOption("history", "value", "10").toUInt();
 
     // Create modules
     _ppfChanneliser = (PPFChanneliser *) createModule("PPFChanneliser");
