@@ -63,7 +63,7 @@ void DedispersionAnalyserTest::test_singleEvent()
 
          ConfigNode config;
          DedispersionAnalyser analyser(config);
-         CPPUNIT_ASSERT_EQUAL( 1, analyser.analyse( inputData, &outputData ) );
+         CPPUNIT_ASSERT( analyser.analyse( inputData, &outputData ) > inputData->dmBins() );
          DedispersionEvent e = outputData.events()[0];
 
          // clean up
