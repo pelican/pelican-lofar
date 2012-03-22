@@ -10,7 +10,10 @@ set(lofarTestLib_src
     src/LofarEmulatorDataSim.cpp
     src/GPU_TestCard.cpp
     src/DedispersionDataGenerator.cpp
+    src/LofarPipelineTester.cpp
+    src/PipelineWrapper.cpp
 )
+
 # CUDA routines
 set(cuda_src
    CudaVectorAdd.cu

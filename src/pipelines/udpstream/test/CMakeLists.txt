@@ -15,6 +15,7 @@ set(pipelineTest_src
     src/UdpBFPipelineIntegrationTest.cpp
     src/LofarTestClient.cpp
     src/EmulatorPipeline.cpp
+    src/DedispersionPipelineTest.cpp
 )
 
 set( pipelineTest_moc_headers
@@ -29,7 +30,9 @@ set_target_properties(pipelineTest PROPERTIES
     LINK_FLAGS "${OpenMP_CXX_FLAGS}"
 )
 target_link_libraries(pipelineTest
-    pelican-lofar_static
+#    pelican-lofar_static
+    pelican-lofar
+    pelicanMdsm
 #    pipelineTestLib
     lofarTestLib
     ${PELICAN_TESTUTILS_LIBRARY}

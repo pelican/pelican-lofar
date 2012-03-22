@@ -7,7 +7,6 @@
  * @file UdpBFPipelineIntegrationTest.h
  */
 class QProcess;
-class QCoreApplication;
 
 namespace pelican {
 
@@ -45,8 +44,6 @@ class UdpBFPipelineIntegrationTest : public CppUnit::TestFixture
         UdpBFPipelineIntegrationTest(  );
         ~UdpBFPipelineIntegrationTest();
 
-    private:
-        QCoreApplication* _app;
 };
 
 } // namespace lofar
