@@ -29,7 +29,7 @@ class LockingPtrContainer
     public:
         LockingPtrContainer() {};
         LockingPtrContainer( QList<T*>* dataBuffer ) { reset(dataBuffer); };
-        ~LockingPtrContainer() {};
+        ~LockingPtrContainer() { _waitCondition.wakeAll(); };
 
         /// set the dataBuffer to manage
         void reset(QList<T*>* dataBuffer ) {

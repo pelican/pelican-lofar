@@ -17,6 +17,8 @@ namespace lofar {
 DedispersionPipeline::DedispersionPipeline( const QString& streamIdentifier )
     : AbstractPipeline(), _streamIdentifier(streamIdentifier)
 {
+     _stokesBuffer = 0;
+     _dedispersedDataBuffer = 0;
 }
 
 /**
