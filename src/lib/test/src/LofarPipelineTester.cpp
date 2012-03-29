@@ -1,8 +1,7 @@
 #include "LofarPipelineTester.h"
 #include "pelican/core/AbstractPipeline.h"
 #include "pelican/core/PipelineApplication.h"
-#include "pelican/utility/Config.h"
-#include "PipelineWrapper.h"
+#include "LofarDataBlobGenerator.h"
 
 
 namespace pelican {
@@ -13,18 +12,16 @@ namespace lofar {
 /**
  *@details LofarPipelineTester 
  */
-LofarPipelineTester::LofarPipelineTester( AbstractPipeline* pipeline, const QString& configXML )
-    : _pipeline(0)
+void LofarPipelineTester::_init( const QString& configXML )
 {
     // ensure initialised form the passed configuration
-    Config config;
-    config.setXML( configXML );
-    _app = new PipelineApplication(config);
-
-    _pipeline = new PipelineWrapper( pipeline, _app );
-    _app->registerPipeline(_pipeline);
-    //_app->setDataClient("FileDataClient");
-
+    _config.setXML( configXML );
+    _app = new PipelineApplication(_config);
+     QString generator = "LofarDataBlobGenerator";
+     // add sutable stanza to config
+     QString genXML =  "<" + generator + ">"
+                       "</" + generator + ">";
+    _app->setDataClient( generator );
 }
 
 /**
@@ -32,7 +29,7 @@ LofarPipelineTester::LofarPipelineTester( AbstractPipeline* pipeline, const QStr
  */
 LofarPipelineTester::~LofarPipelineTester()
 {
-     delete _pipeline;
+     //delete _dataGenerator;
      delete _app;
 }
 

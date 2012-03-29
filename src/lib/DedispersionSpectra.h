@@ -69,6 +69,7 @@ class DedispersionSpectra : public DataBlob
         QVector<float> _data;
         QList< WeightedSpectrumDataSet* > _inputBlobs;
 };
+PELICAN_DECLARE_DATABLOB( DedispersionSpectra )
 
 } // namespace lofar
 } // namespace pelican

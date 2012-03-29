@@ -63,7 +63,7 @@ void DedispersionPipeline::init()
 
 
     // Request remote data
-    requestRemoteData(_streamIdentifier, history );
+    requestRemoteData( _streamIdentifier, history );
 
 }
 

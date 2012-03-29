@@ -1,6 +1,7 @@
 #include "PipelineWrapper.h"
 #include "pelican/core/PipelineApplication.h"
 #include "pelican/core/AbstractPipeline.h"
+#include <QDebug>
 
 
 namespace pelican {
@@ -14,6 +15,7 @@ namespace lofar {
 PipelineWrapper::PipelineWrapper( AbstractPipeline* pipeline, PipelineApplication* app)
     :  _pipeline(pipeline), _app(app)
 {
+    //
     timerInit(&_runTime);
 }
 
@@ -31,6 +33,7 @@ void PipelineWrapper::init() {
 
 void PipelineWrapper::run( QHash<QString, DataBlob*>& data ) {
      timerStart(&_runTime);
+     qDebug() << "PipelineWrapper::run:" << data.keys();
      _pipeline->run(data);
      timerUpdate(&_runTime);
      _app->stop();

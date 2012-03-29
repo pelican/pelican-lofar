@@ -1,7 +1,12 @@
+#include "test/LofarPipelineTester.h"
 #include "DedispersionPipelineTest.h"
 #include "DedispersionPipeline.h"
-#include "test/LofarPipelineTester.h"
-
+#include "TimeSeriesDataSet.h"
+#include <QDir>
+#include <QDebug>
+#define QUOTE(str) #str
+#define EXPAND_AND_QUOTE(str) QUOTE(str)
+#define TEST_DATA_DIR EXPAND_AND_QUOTE(TEST_DATA)
 
 namespace pelican {
 
@@ -37,8 +42,30 @@ void DedispersionPipelineTest::test_method()
      // Single run through 
      // Expect:
      // no segfaults
-     QString streamId = "LofarDataStream1";
-     QString xml="<pipelineConfig />";
+     QString streamId = "LofarTimeStream1";
+     QString xml = QString("<pipelineConfig />"
+                 "<modules>"
+                     "<RFI_Clipper active=\"true\" rejectionFactor=\"10.0\" >"
+                     "<BandPassData file=\"%1\" />"
+                     "<Band matching=\"true\" />"
+                     "<History maximum=\"10000\" />"
+                     "</RFI_Clipper>"
+                     "<DedispersionModule>"
+                     " <sampleNumber value=\"%2\" />"
+                     " <frequencyChannel1 value=\"%3\"/>"
+                     " <sampleTime value=\"%4\"/>"
+                     " <channelBandwidth value=\"%5\"/>"
+                     " <dedispersionSamples value=\"%6\" />"
+                     " <dedispersionStepSize value=\"0.1\" />"
+                     " <numberOfBuffers value=\"3\" />"
+                     "</DedispersionModule>"
+                 "</modules>")
+                  .arg( QString(TEST_DATA_DIR) + QDir::separator() + "band31.bp")
+                  .arg( 100 )
+                  .arg( 150 )
+                  .arg( 0.1 )
+                  .arg( -0.2 )
+                  .arg ( 200 );
      try {
          DedispersionPipeline p(streamId);
          LofarPipelineTester tester(&p, config(xml));

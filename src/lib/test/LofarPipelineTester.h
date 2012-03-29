@@ -1,5 +1,10 @@
 #ifndef LOFARPIPELINETESTER_H
 #define LOFARPIPELINETESTER_H
+#include "pelican/utility/Config.h"
+#include "PipelineWrapper.h"
+// Lofar Specific Data Types
+#include "SpectrumDataSet.h"
+#include "TimeSeriesDataSet.h"
 
 #include <QString>
 
@@ -13,7 +18,7 @@ class PipelineApplication;
 class AbstractPipeline;
 
 namespace lofar {
-class PipelineWrapper;
+class LofarDataBlobGenerator;
 
 /**
  * @class LofarPipelineTester
@@ -28,13 +33,26 @@ class PipelineWrapper;
 class LofarPipelineTester
 {
     public:
-        LofarPipelineTester( AbstractPipeline* pipeline, const QString& configXML );
+        template <class AbstractPipelineType>
+        LofarPipelineTester( AbstractPipelineType* pipeline, const QString& configXML ) : _pipeline(0)
+        {
+            _init( configXML );
+            _pipeline = new 
+                PipelineWrapper<AbstractPipelineType>( pipeline, _app );
+            _app->registerPipeline(_pipeline);
+        }
+
         ~LofarPipelineTester();
         void run();
 
+    private: 
+        void _init( const QString& );
+
     private:
+        Config _config;
         PipelineApplication* _app;
-        PipelineWrapper* _pipeline;
+        AbstractPipeline* _pipeline;
+        LofarDataBlobGenerator* _dataGenerator;
 };
 
 } // namespace lofar
