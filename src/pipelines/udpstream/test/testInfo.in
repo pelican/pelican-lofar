@@ -1,3 +1,5 @@
+#ifndef PELICANLOFARTESTINFO_H
+#define PELICANLOFARTESTINFO_H
 /*
  * template file to convey info about the
  * local test enviromanet
@@ -16,3 +18,4 @@ QString TEST_DATA_DIR( "${CMAKE_CURRENT_SOURCE_DIR}/data" );
 } 
 }
 }
+#endif // PELICANLOFARTESTINFO_H

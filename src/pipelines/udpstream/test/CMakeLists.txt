@@ -2,18 +2,25 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR} ..)
 
 # Create test utility library.
 # ------------------------------------------------------------------------------
-#set(pipelineTestLib_src
+set(pipelineTestLib_src
 #    src/LofarEmulatorDataSim.cpp
-#)
+)
 #add_library(pipelineTestLib STATIC ${lofarTestLib_src})
+
+set( TEST_DATA_DIR
+     ${CMAKE_CURRENT_SOURCE_DIR}/data
+   )
+set(TEST_FLAGS
+    -DTEST_DATA=\"${TEST_DATA_DIR}\"
+   )
 
 
 # Create test binary and add it to the cmake test framework.
 # ------------------------------------------------------------------------------
 set(pipelineTest_src
     src/pipelineTest.cpp
-    src/UdpBFPipelineIntegrationTest.cpp
     src/LofarTestClient.cpp
+    src/UdpBFPipelineIntegrationTest.cpp
     src/EmulatorPipeline.cpp
     src/DedispersionPipelineTest.cpp
 )
@@ -26,7 +33,7 @@ QT4_WRAP_CPP(pipelineTest_src ${pipelineTest_moc_headers})
 
 add_executable(pipelineTest ${pipelineTest_src})
 set_target_properties(pipelineTest PROPERTIES
-    COMPILE_FLAGS "${OpenMP_CXX_FLAGS}"
+    COMPILE_FLAGS "${OpenMP_CXX_FLAGS} ${TEST_FLAGS}"
     LINK_FLAGS "${OpenMP_CXX_FLAGS}"
 )
 target_link_libraries(pipelineTest
