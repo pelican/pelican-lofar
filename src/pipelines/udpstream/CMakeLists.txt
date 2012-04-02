@@ -9,9 +9,13 @@ set(pipeline_lib_src
     src/StokesOnlyPipeline.cpp
     src/SigProcPipeline.cpp
     src/BandPassPipeline.cpp
-    src/DedispersionPipeline.cpp
-    src/DedispersionApplication.cpp
 )
+if(CUDA_FOUND)
+    list(APPEND pipeline_lib_src
+	    src/DedispersionPipeline.cpp
+	    src/DedispersionApplication.cpp
+	)
+endif(CUDA_FOUND)
 add_library(pelicanMdsm ${pipeline_lib_src})
 
 # === Build the Empty Pipeline for max performance testing
@@ -26,6 +30,7 @@ target_link_libraries(emptyPipeline
 )
 
 # === Build the dedispersion pipeline binary
+if(CUDA_FOUND)
 add_executable(dedispersionStream1 src/dedispersionStream1.cpp)
 set_target_properties(dedispersionStream1 PROPERTIES
     COMPILE_FLAGS "${OpenMP_CXX_FLAGS}"
@@ -56,6 +61,9 @@ target_link_libraries(dedispersionStream2
     ${QT_QTXML_LIBRARY}
     ${QT_QTCORE_LIBRARY}
 )
+install(TARGETS dedispersionStream1 dedispersionStream2
+		DESTINATION ${BINARY_INSTALL_DIR})
+endif(CUDA_FOUND)
 
 # === Build the UDP Beamforming pipeline binary.
 add_executable(udpBFPipeline src/udpBFmain.cpp)
@@ -144,7 +152,6 @@ target_link_libraries(timingPipeline
 )
 install(TARGETS emptyPipeline udpBFPipeline 
                 udpBFPipelineStream1 udpBFPipelineStream2 
-                dedispersionStream1 dedispersionStream2
                 DESTINATION ${BINARY_INSTALL_DIR})
 
 #install(TARGETS udpBFPipeline DESTINATION ${BINARY_INSTALL_DIR})

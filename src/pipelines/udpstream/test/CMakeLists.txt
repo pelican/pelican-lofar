@@ -22,8 +22,12 @@ set(pipelineTest_src
     src/LofarTestClient.cpp
     src/UdpBFPipelineIntegrationTest.cpp
     src/EmulatorPipeline.cpp
-    src/DedispersionPipelineTest.cpp
 )
+if(CUDA_FOUND)
+    list(APPEND pipelineTest_src
+         src/DedispersionPipelineTest.cpp
+	)
+endif(CUDA_FOUND)
 
 set( pipelineTest_moc_headers
      LofarTestClient.h
