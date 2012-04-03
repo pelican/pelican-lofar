@@ -21,7 +21,7 @@ if( CUDA_FOUND )
     CUDA_COMPILE( cuda_obj ${cuda_src} )
     list(APPEND lofarTestLib_src 
          src/TestCudaVectorAdd.cpp
-	 src/DedispersionDataGenerator.cpp
+         src/DedispersionDataGenerator.cpp
         )
 endif( CUDA_FOUND )
 
@@ -59,7 +59,7 @@ if(CUDA_FOUND)
             src/GPU_ParamTest.cpp
             src/DedispersionBufferTest.cpp
             src/DedispersionModuleTest.cpp
-	    src/DedispersionAnalyserTest.cpp
+            src/DedispersionAnalyserTest.cpp
         )
 endif(CUDA_FOUND)
 
