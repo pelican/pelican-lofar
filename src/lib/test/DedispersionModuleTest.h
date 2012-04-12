@@ -34,6 +34,7 @@ class DedispersionModuleTest : public CppUnit::TestFixture
         CPPUNIT_TEST( test_multipleBlobsPerBuffer );
         CPPUNIT_TEST( test_method );
         CPPUNIT_TEST( test_multipleBlobs );
+        CPPUNIT_TEST( test_multipleBuffersPerBlob );
         CPPUNIT_TEST_SUITE_END();
 
     public:
@@ -44,6 +45,7 @@ class DedispersionModuleTest : public CppUnit::TestFixture
         void test_method();
         void test_multipleBlobs();
         void test_multipleBlobsPerBuffer();
+        void test_multipleBuffersPerBlob();
 
         // utility methods
         void connected( DataBlob* dataOut );

@@ -64,10 +64,13 @@ DedispersionModule::DedispersionModule( const ConfigNode& config )
  */
 DedispersionModule::~DedispersionModule()
 {
-    _cleanBuffers();
+    while( ! ( _kernels.allAvailable() && _jobBuffer.allAvailable() ) ) {
+        usleep(10);
+    }
     foreach( DedispersionKernel* k, _kernelList ) {
         delete k;
     }
+    _cleanBuffers();
 }
 
 void DedispersionModule::_cleanBuffers() {
@@ -103,7 +106,6 @@ void DedispersionModule::resize( const SpectrumDataSet<float>* streamData ) {
                                (_fch1 + (_foff * c))) - (1.0 / _fch1 / _fch1)) );
         }
         _maxshift = ((_dmLow + _dmStep * (_tdms - 1)) * _dmshifts[_nChannels - 1])/_tsamp;
-        Q_ASSERT( (int)maxSamples > _maxshift );
         std::cout << "resize: maxSamples = " << maxSamples << std::endl;
         std::cout << "resize: dmLow = " << _dmLow << std::endl;
         std::cout << "resize: mshift = " << _dmLow + _dmStep * (_tdms - 1) * _dmshifts[nChannels - 1] << std::endl;
@@ -114,6 +116,7 @@ void DedispersionModule::resize( const SpectrumDataSet<float>* streamData ) {
         std::cout << "resize: maxShift = " << _maxshift << std::endl;
         std::cout << "resize: tsamp = " << _tsamp << std::endl;
         std::cout << "resize: nchans= " << nChannels << std::endl;
+        Q_ASSERT( (int)maxSamples > _maxshift );
         // reset kernels
         foreach( DedispersionKernel* k, _kernelList ) {
             delete k;
@@ -163,6 +166,7 @@ void DedispersionModule::dedisperse( WeightedSpectrumDataSet* weightedData,
         if( _currentBuffer->addSamples( weightedData, &sampleNumber ) == 0 ) {
             //(*_currentBuffer)->dump("input.data");
             DedispersionBuffer* next = _buffers.next();
+            next->clear();
             lock( _currentBuffer->copy( next, _maxshift ) );
             DedispersionSpectra* dedispersionObj = dataOut->next();
             _dedispersionBuffer.insert(dedispersionObj, dataOut); // record lock manager for dd data
@@ -186,23 +190,26 @@ void DedispersionModule::dedisperse( DedispersionBuffer* buffer, DedispersionSpe
     GPU_MemoryMap out( dataOut->data() );
     kernelPtr->addOutputMap( out );
     kernelPtr->addInputMap( GPU_MemoryMap( buffer->getData() ) );
-    //qDebug() << "input buffer:" << buffer->getData();
     job->addKernel( kernelPtr );
     job->addCallBack( boost::bind( &DedispersionModule::gpuJobFinished, this, job, buffer, kernelPtr, dataOut ) );
     submit( job );
 }
 
 void DedispersionModule::gpuJobFinished( GPU_Job* job, DedispersionBuffer* buffer, DedispersionKernel* kernel, DedispersionSpectra* dataOut ) {
-     Q_ASSERT( job->status() != GPU_Job::Failed ||
-        std::cerr << "DedispersionModule: " << job->error() << std::endl
-     );
      dataOut->setInputDataBlobs( buffer->inputDataBlobs() );
      kernel->reset();
      _kernels.unlock( kernel ); // give up the kernel
-     job->reset();
-     _jobBuffer.unlock(job); // return the job to the pool, ready for the next
      _buffers.unlock( buffer ); // give up the buffer
-     exportData( dataOut );  // send out the finished data product to our customers
+     if( job->status() != GPU_Job::Failed ) {
+         job->reset();
+         _jobBuffer.unlock(job); // return the job to the pool, ready for the next
+         exportData( dataOut );  // send out the finished data product to our customers
+     } else {
+         std::cerr << "DedispersionModule: " << job->error() << std::endl;
+         job->reset();
+         _jobBuffer.unlock(job); // return the job to the pool, ready for the next
+         exportComplete( dataOut );
+     }
 }
 
 void DedispersionModule::exportComplete( DataBlob* datablob ) {
@@ -229,6 +236,7 @@ void DedispersionModule::DedispersionKernel::run(const QList<GPU_Param*>& param 
 //std::cout << " nchans =" << _nChans << std::endl;
 //std::cout << " tsamp =" << _tsamp << std::endl;
 //std::cout << " input buffer size =" << param[0]->size() << std::endl;
+//std::cout << " output buffer (" << param[3]->device() << ") size =" << param[3]->size() << std::endl;
 //std::cout << " dmShift size =" << param[1]->size() << std::endl;
 //std::cout << " nSamples =" << nsamples << std::endl;
      cacheDedisperseLoop( (float*)param[3]->device() , param[3]->size(),

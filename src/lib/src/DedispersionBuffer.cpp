@@ -76,7 +76,8 @@ unsigned DedispersionBuffer::spaceRemaining() const {
 }
 
 unsigned DedispersionBuffer::addSamples( WeightedSpectrumDataSet* weightedData, unsigned *sampleNumber ) {
-    _inputBlobs.append(weightedData);
+    if( ! _inputBlobs.contains(weightedData) )
+        _inputBlobs.append(weightedData);
     unsigned int numSamples = weightedData->dataSet()->nTimeBlocks();
     return _addSamples( weightedData, sampleNumber, numSamples );
 }
