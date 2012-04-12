@@ -38,6 +38,66 @@ void DedispersionModuleTest::tearDown()
 {
 }
 
+void DedispersionModuleTest::test_multipleBuffersPerBlob()
+{
+    // Use Case:
+    // Blob size is bigger than a single buffer
+    // Expect:
+    // Launch multipleaasync tasks
+    float dm = 10.0;
+    int multiple=4; // factor of blob samples size to buffer size
+    unsigned ddSamples = 200;
+    unsigned nBlocks = 2;
+    unsigned nSamples = 6400;
+    CPPUNIT_ASSERT( nSamples%multiple == 0 );
+    DedispersionDataGenerator stokesData;
+    stokesData.setTimeSamplesPerBlock( nSamples );
+    QList<SpectrumDataSetStokes*> spectrumData = stokesData.generate( nBlocks, dm );
+
+    WeightedSpectrumDataSet weightedData(spectrumData[0]);
+    WeightedSpectrumDataSet weightedData2(spectrumData[1]);
+    ConfigNode config;
+
+    // setup configuration
+    QString configString = QString("<DedispersionModule>"
+            " <sampleNumber value=\"%1\" />"
+            " <frequencyChannel1 value=\"%2\"/>"
+            " <sampleTime value=\"%3\"/>"
+            " <channelBandwidth value=\"%4\"/>"
+            " <dedispersionSamples value=\"%5\" />"
+            " <dedispersionStepSize value=\"0.1\" />"
+            " <numberOfBuffers value=\"3\" />"
+            "</DedispersionModule>")
+        .arg( nSamples / multiple  ) // block size should match the buffer size to ensure we get two calls to the GPU
+        .arg( stokesData.startFrequency())
+        .arg( stokesData.timeOfSample())
+        .arg( stokesData.bandwidthOfSample())
+        .arg( ddSamples );
+     config.setFromString(configString);
+
+     LockingPtrContainer<DedispersionSpectra>* buffer = outputBuffer(3);
+     try {
+        DedispersionModule ddm(config);
+        ddm.connect( boost::bind( &DedispersionModuleTest::connected, this, _1 ) );
+        ddm.onChainCompletion( boost::bind( &DedispersionModuleTest::connectFinished, this ) );
+        ddm.unlockCallback( boost::bind( &DedispersionModuleTest::unlockCallback, this, _1 ) );
+        _connectData = 0;
+        _connectCount = 0;
+        _chainFinished = 0;
+        _unlocked.clear();
+        ddm.dedisperse( &weightedData, buffer ); // asynchronous tasks launch
+        while( _connectCount < multiple ) { sleep(1); }; // expect more times
+                                                         // due to maxshift
+        while( _chainFinished != _connectCount ) { sleep(1); };
+     }
+     catch( const QString& s )
+     {
+         CPPUNIT_FAIL(s.toStdString());
+     }
+     destroyBuffer( buffer );
+     stokesData.deleteData(spectrumData);
+}
+
 void DedispersionModuleTest::test_multipleBlobsPerBuffer ()
 {
      // Use Case:
@@ -74,9 +134,9 @@ void DedispersionModuleTest::test_multipleBlobsPerBuffer ()
         .arg( ddSamples );
      config.setFromString(configString);
 
-     DedispersionModule ddm(config);
+     LockingPtrContainer<DedispersionSpectra>* buffer = outputBuffer(2);
      try {
-        LockingPtrContainer<DedispersionSpectra>* buffer = outputBuffer(2);
+        DedispersionModule ddm(config);
         ddm.connect( boost::bind( &DedispersionModuleTest::connected, this, _1 ) );
         ddm.onChainCompletion( boost::bind( &DedispersionModuleTest::connectFinished, this ) );
         ddm.unlockCallback( boost::bind( &DedispersionModuleTest::unlockCallback, this, _1 ) );
@@ -105,14 +165,13 @@ void DedispersionModuleTest::test_multipleBlobsPerBuffer ()
         // expect unlock trigger
         CPPUNIT_ASSERT_EQUAL( 1, _unlocked.size() );
         CPPUNIT_ASSERT_EQUAL( (void *)&weightedData, (void *)_unlocked[0] );
-
-        destroyBuffer( buffer );
-        stokesData.deleteData(spectrumData);
      }
      catch( const QString& s )
      {
          CPPUNIT_FAIL(s.toStdString());
      }
+     destroyBuffer( buffer );
+     stokesData.deleteData(spectrumData);
 }
 
 void DedispersionModuleTest::unlockCallback( const QList<DataBlob*>& data ) {
