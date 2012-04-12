@@ -28,7 +28,7 @@ GPU_Param::~GPU_Param()
 
 void GPU_Param::syncHostToDevice() {
     if( _map.hostPtr() ) {
-        //std::cout << "GPU_Param::syncHostToDevice: device=" << _devicePtr << " host=" << _map.hostPtr() << " size=" << _map.size() << std::endl;
+//        std::cout << "GPU_Param::syncHostToDevice: device=" << _devicePtr << " host=" << _map.hostPtr() << " size=" << _map.size() << std::endl;
         cudaMemcpy( _devicePtr , _map.hostPtr(),
                 _map.size(), cudaMemcpyHostToDevice );
     }
@@ -36,6 +36,7 @@ void GPU_Param::syncHostToDevice() {
 
 void GPU_Param::syncDeviceToHost() {
     if( _map.hostPtr() ) {
+//        std::cout << "GPU_Param::syncDeviceToHost: device=" << _devicePtr << " host=" << _map.hostPtr() << " size=" << _map.size() << std::endl;
         cudaMemcpy( _map.hostPtr(), _devicePtr,
                 _map.size(), cudaMemcpyDeviceToHost );
     }

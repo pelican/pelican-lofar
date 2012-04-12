@@ -81,6 +81,7 @@ void GPU_NVidia::setupConfiguration ( const GPU_NVidiaConfiguration* c )
      }
      // upload non-constant input data from host
      foreach( const GPU_MemoryMap& map, c->inputMaps() ) {
+         Q_ASSERT( _params.contains(map) );
          _params.value(map)->syncHostToDevice();
          if(  cudaPeekAtLastError() ) {
              throw( cudaGetErrorString( cudaPeekAtLastError() ) );
