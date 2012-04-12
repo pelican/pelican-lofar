@@ -65,6 +65,10 @@ class LockingPtrContainer
            return _available.size();
         }
 
+        bool allAvailable() const {
+           return _available.size() == _dataBuffer->size();
+        }
+
     private:
         QList<T*>* _dataBuffer;
         QWaitCondition _waitCondition;

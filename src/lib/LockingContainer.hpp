@@ -34,6 +34,7 @@ class LockingContainer
         /// set the dataBuffer to manage
         void reset(QList<T>* dataBuffer ) {
              _available.clear();
+             _size = dataBuffer->size();
              for(int i=0; i < dataBuffer->size(); ++i ) {
                 _available.append( &((*dataBuffer)[i]) );
              }
@@ -56,9 +57,15 @@ class LockingContainer
            _waitCondition.wakeOne();
         }
 
+        // return true only if there are no locked objects
+        bool allAvailable() const {
+           return _available.size() == _size;
+        }
+
     private:
         QWaitCondition _waitCondition;
         QMutex _mutex;
+        int _size;
         QList<T*> _available; // array of available objects
 };
 
