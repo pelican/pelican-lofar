@@ -43,8 +43,6 @@ set(lib_src
     src/SigprocStokesWriter.cpp
     src/LofarDataSplittingChunker.cpp
     src/WeightedSpectrumDataSet.cpp
-    src/AsyncronousTask.cpp
-    src/GPU_Task.cpp
     src/GPU_MemoryMap.cpp
 )
 if(CUDA_FOUND)
@@ -60,10 +58,8 @@ if(CUDA_FOUND)
 endif(CUDA_FOUND)
 
 set(lib_moc_headers
-    AsyncronousTask.h
-    GPU_Task.h
 )
-QT4_WRAP_CPP(moc_src ${lib_moc_headers})
+#QT4_WRAP_CPP(moc_src ${lib_moc_headers})
 
 set(lib_cuda_src
     DedispersionKernel.cu
