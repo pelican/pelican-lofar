@@ -33,7 +33,11 @@ class ProcessingChain1
 
     public:
         ProcessingChain1() : _taskId(0) {};
-        ~ProcessingChain1() {};
+        ~ProcessingChain1() {
+            while( _processCount.size() ) {
+                sleep(1);
+            }
+        };
 
         /// execute the chain, starting with the parallel tasks
         //  and then the post completion task (sequential)
@@ -64,8 +68,8 @@ class ProcessingChain1
              functor( arg );
              QMutexLocker lock(&_mutex);
              if( --_processCount[taskId] == 0) {
-                _processCount.remove(taskId);
                 _finished( postTasks );
+                _processCount.remove(taskId);
              }
         }
 
