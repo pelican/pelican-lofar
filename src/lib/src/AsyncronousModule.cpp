@@ -17,6 +17,7 @@ namespace lofar {
 AsyncronousModule::AsyncronousModule( const ConfigNode& config )
     : AbstractModule( config )
 {
+   _chain = new ProcessingChain1<DataBlob*>;
    // initialise the GPU manager if required
    // for now we share the mamanger between all instances
    // and hog all the cards. We could refine this by removing
@@ -38,6 +39,10 @@ GPU_Manager* AsyncronousModule::gpuManager() {
  */
 AsyncronousModule::~AsyncronousModule()
 {
+    // delete _chain first as this will ensure that all 
+    // outstanding jobs
+    // are finished before removing the rest of the object
+    delete _chain;
 }
 
 void AsyncronousModule::connect( const boost::function1<void, DataBlob*>& functor ) {
@@ -55,7 +60,7 @@ GPU_Job* AsyncronousModule::submit(GPU_Job* job) {
 void AsyncronousModule::exportData( DataBlob* data ) {
      QList<boost::function0<void> > callbacks;
      callbacks << boost::bind( &AsyncronousModule::_exportComplete, this, data) << _callbacks;
-     _chain.exec(_linkedFunctors, callbacks, data );
+     _chain->exec(_linkedFunctors, callbacks, data );
 }
 
 void AsyncronousModule::_exportComplete( DataBlob* blob ) {

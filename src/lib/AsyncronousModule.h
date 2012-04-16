@@ -74,8 +74,8 @@ class AsyncronousModule : public AbstractModule
         // returns the number of locks remaining ( 0 = unlocked )
         int unlock( DataBlob* );
 
-    protected:
-        ProcessingChain1<DataBlob*> _chain;
+    private:
+        ProcessingChain1<DataBlob*>* _chain;
 
     private:
         void _exportComplete( DataBlob* );

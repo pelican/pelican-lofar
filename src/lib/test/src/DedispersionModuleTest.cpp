@@ -194,39 +194,39 @@ void DedispersionModuleTest::test_multipleBlobs ()
      // the second buffer.
      // As the buffer is of fixed size, all the data in the second blob will
      // not be included, but should be placed in the next awaiting buffer
-     try {
-        float dm = 10.0;
-        unsigned ddSamples = 200;
-        unsigned nBlocks = 2;
-        unsigned nSamples = 3400;
-        DedispersionDataGenerator stokesData;
-        stokesData.setTimeSamplesPerBlock( nSamples );
-        QList<SpectrumDataSetStokes*> spectrumData = stokesData.generate( nBlocks, dm );
-        stokesData.writeToFile( "inputStokes.data", spectrumData );
+    LockingPtrContainer<DedispersionSpectra>* buffer = outputBuffer(2);
+    float dm = 10.0;
+    unsigned ddSamples = 200;
+    unsigned nBlocks = 2;
+    unsigned nSamples = 3400;
+    DedispersionDataGenerator stokesData;
+    stokesData.setTimeSamplesPerBlock( nSamples );
+    QList<SpectrumDataSetStokes*> spectrumData = stokesData.generate( nBlocks, dm );
+    stokesData.writeToFile( "inputStokes.data", spectrumData );
 
-        WeightedSpectrumDataSet weightedData(spectrumData[0]);
-        WeightedSpectrumDataSet weightedData2(spectrumData[1]);
-        ConfigNode config;
-        CPPUNIT_ASSERT_EQUAL( nSamples, spectrumData[0]->nTimeBlocks() );
-        // setup configuration
-        QString configString = QString("<DedispersionModule>"
-                " <sampleNumber value=\"%1\" />"
-                " <frequencyChannel1 value=\"%2\"/>"
-                " <sampleTime value=\"%3\"/>"
-                " <channelBandwidth value=\"%4\"/>"
-                " <dedispersionSamples value=\"%5\" />"
-                " <dedispersionStepSize value=\"0.1\" />"
-                " <numberOfBuffers value=\"3\" />"
-                "</DedispersionModule>")
-                .arg( nSamples ) // block size should match the buffer size to ensure we get two calls to the GPU
-                .arg( stokesData.startFrequency())
-                .arg( stokesData.timeOfSample())
-                .arg( stokesData.bandwidthOfSample())
-                .arg( ddSamples );
-          config.setFromString(configString);
+    WeightedSpectrumDataSet weightedData(spectrumData[0]);
+    WeightedSpectrumDataSet weightedData2(spectrumData[1]);
+    ConfigNode config;
+    CPPUNIT_ASSERT_EQUAL( nSamples, spectrumData[0]->nTimeBlocks() );
+    // setup configuration
+    QString configString = QString("<DedispersionModule>"
+            " <sampleNumber value=\"%1\" />"
+            " <frequencyChannel1 value=\"%2\"/>"
+            " <sampleTime value=\"%3\"/>"
+            " <channelBandwidth value=\"%4\"/>"
+            " <dedispersionSamples value=\"%5\" />"
+            " <dedispersionStepSize value=\"0.1\" />"
+            " <numberOfBuffers value=\"3\" />"
+            "</DedispersionModule>")
+        .arg( nSamples ) // block size should match the buffer size to ensure we get two calls to the GPU
+        .arg( stokesData.startFrequency())
+        .arg( stokesData.timeOfSample())
+        .arg( stokesData.bandwidthOfSample())
+        .arg( ddSamples );
+    config.setFromString(configString);
 
+    try {
           DedispersionModule ddm(config);
-          LockingPtrContainer<DedispersionSpectra>* buffer = outputBuffer(2);
           ddm.connect( boost::bind( &DedispersionModuleTest::connected, this, _1 ) );
           _connectData = 0;
           _connectCount = 0;
@@ -237,17 +237,18 @@ void DedispersionModuleTest::test_multipleBlobs ()
           CPPUNIT_ASSERT_EQUAL( expectedDMIntentsity , _connectData->dmAmplitude( 0, dm ) );
           ddm.dedisperse( &weightedData2, buffer ); // asynchronous task
           while( _connectCount != 2 ) { sleep(1); };
-          destroyBuffer( buffer );
-          stokesData.deleteData(spectrumData);
     }
     catch( const QString& s )
     {
         CPPUNIT_FAIL(s.toStdString());
     }
+    destroyBuffer( buffer );
+    stokesData.deleteData(spectrumData);
 }
 
 void DedispersionModuleTest::test_method()
 {
+    LockingPtrContainer<DedispersionSpectra>* buffer = outputBuffer(2);
     try {
         float dm = 10.0;
         unsigned ddSamples = 200;
@@ -282,7 +283,6 @@ void DedispersionModuleTest::test_method()
                                         .arg( ddSamples );
           config.setFromString(configString);
           DedispersionModule ddm(config);
-          LockingPtrContainer<DedispersionSpectra>* buffer = outputBuffer(2);
           ddm.connect( boost::bind( &DedispersionModuleTest::connected, this, _1 ) );
           _connectData = 0;
           _connectCount = 0;
@@ -300,7 +300,6 @@ void DedispersionModuleTest::test_method()
 
           float expectedDMIntentsity = spectrumData[0]->nSubbands() * spectrumData[0]->nChannels();
           CPPUNIT_ASSERT_EQUAL( expectedDMIntentsity , _connectData->dmAmplitude( 0, dm ) );
-          destroyBuffer( buffer );
           stokesData.deleteData(spectrumData);
         }
     }
@@ -308,6 +307,7 @@ void DedispersionModuleTest::test_method()
     {
         CPPUNIT_FAIL(s.toStdString());
     }
+    destroyBuffer( buffer );
 }
 
 void DedispersionModuleTest::connected( DataBlob* dataOut ) {
@@ -346,7 +346,8 @@ void DedispersionModuleTest::destroyBuffer(
     foreach( DedispersionSpectra* d, *(b->rawBuffer()) ) {
         delete d;
     }
-    delete b->rawBuffer();
+    delete (b->rawBuffer());
+    delete b;
 }
 
 } // namespace lofar
