@@ -27,7 +27,7 @@ template<typename T>
 class LockingPtrContainer
 {
     public:
-        LockingPtrContainer() {};
+        LockingPtrContainer() : _dataBuffer(0) {};
         LockingPtrContainer( QList<T*>* dataBuffer ) { reset(dataBuffer); };
         ~LockingPtrContainer() { _waitCondition.wakeAll(); };
 
@@ -66,7 +66,9 @@ class LockingPtrContainer
         }
 
         bool allAvailable() const {
-           return _available.size() == _dataBuffer->size();
+           if( _dataBuffer )
+               return _available.size() == _dataBuffer->size();
+           return true;
         }
 
     private:

@@ -27,7 +27,7 @@ template<typename T>
 class LockingContainer
 {
     public:
-        LockingContainer() {};
+        LockingContainer() : _size(0) {};
         LockingContainer( QList<T>* dataBuffer ) { reset(dataBuffer); };
         ~LockingContainer() {};
 
@@ -59,7 +59,7 @@ class LockingContainer
 
         // return true only if there are no locked objects
         bool allAvailable() const {
-           return _available.size() == _size;
+               return _available.size() == _size;
         }
 
     private:
