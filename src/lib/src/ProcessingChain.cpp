@@ -20,6 +20,10 @@ ProcessingChain::ProcessingChain()
  */
 ProcessingChain::~ProcessingChain()
 {
+    // wait for all processing tasks to finish
+    while( _processCount.size() ) {
+        sleep(1);
+    }
 }
 
 void ProcessingChain::exec( const QList<CallBackT>& parallelTasks,
@@ -43,8 +47,8 @@ void ProcessingChain::_runTask( const CallBackT& functor, unsigned taskId, const
      functor();
      QMutexLocker lock(&_mutex);
      if( --_processCount[taskId] == 0) {
-        _processCount.remove(taskId);
         _finished( postProcessingTasks );
+        _processCount.remove(taskId); // mark processing chain complete
      }
 }
 
