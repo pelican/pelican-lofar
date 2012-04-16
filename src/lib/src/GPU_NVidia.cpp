@@ -34,28 +34,28 @@ GPU_NVidia::~GPU_NVidia()
 
 void GPU_NVidia::run( GPU_Job* job )
 {
-     // set to this device
-     cudaSetDevice( _deviceId );
-     // execute the kernels
-     foreach( GPU_Kernel* kernel, job->kernels() ) {
-        setupConfiguration( &(kernel->configuration()) );
-        kernel->run( _currentParams );
-        cudaDeviceSynchronize();
-        if( ! cudaPeekAtLastError() ) {
-            // copy device memory to host
-            foreach( const GPU_MemoryMap& map, _currentConfig->outputMaps() ) {
+    // set to this device
+    cudaSetDevice( _deviceId );
+    // execute the kernels
+    foreach( GPU_Kernel* kernel, job->kernels() ) {
+       setupConfiguration( &(kernel->configuration()) );
+       kernel->run( _currentParams );
+       cudaDeviceSynchronize();
+       if( ! cudaPeekAtLastError() ) {
+           // copy device memory to host
+           foreach( const GPU_MemoryMap& map, _currentConfig->outputMaps() ) {
                 _params.value(map)->syncDeviceToHost();
-            }
+           }
+       }
+       else {
+           throw( cudaGetErrorString( cudaPeekAtLastError() ) );
         }
-        else {
-             throw( cudaGetErrorString( cudaPeekAtLastError() ) );
-        }
-     }
+    }
 }
 
 void GPU_NVidia::setupConfiguration ( const GPU_NVidiaConfiguration* c )
 {
-     if( _currentConfig != c ) { // ! assumes config does not change between invoca.
+     //if( _currentConfig != c ) { // ! assumes config does not change between invoca.
          // free memory from existing job
          // TODO write code to test for overlapping mem
          // requirements for different configurations
@@ -78,7 +78,7 @@ void GPU_NVidia::setupConfiguration ( const GPU_NVidiaConfiguration* c )
              }
          }
          _currentConfig = c;
-     }
+     //}
      // upload non-constant input data from host
      foreach( const GPU_MemoryMap& map, c->inputMaps() ) {
          Q_ASSERT( _params.contains(map) );
