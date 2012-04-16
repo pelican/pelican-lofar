@@ -23,6 +23,7 @@ LofarDataBlobGenerator::LofarDataBlobGenerator( const ConfigNode& configNode,
     _nPols= 2;
     _nSubbands = 62;
     _nChannels = 16;
+    _timesPerChunk = 2048;
 }
 
 /**
@@ -56,11 +57,9 @@ AbstractDataClient::DataBlobHash LofarDataBlobGenerator::getData(
 
 
 TimeSeriesDataSetC32* LofarDataBlobGenerator::generateTimeSeriesData( TimeSeriesDataSetC32* timeSeries ) const {
-    //unsigned timesPerChunk =  262144; // 2^18
-    unsigned timesPerChunk = 64; 
-    if (timesPerChunk % _nChannels)
-        throw QString("Setup error");
-    unsigned nBlocks = timesPerChunk / _nChannels;
+    if (_timesPerChunk % _nChannels)
+        throw QString("Setup error: timesPerChunk must be multiple of nChannles");
+    unsigned nBlocks = _timesPerChunk / _nChannels;
     timeSeries->resize( nBlocks, _nSubbands, _nPols, _nChannels );
 
     // Generate channel profile by scanning though frequencies.
