@@ -66,11 +66,11 @@ void DedispersionPipelineTest::test_method()
                      "</DedispersionModule>"
                  "</modules>")
                   .arg( QString(TEST_DATA_DIR) + QDir::separator() + "band31.bp")
-                  .arg( 100 )
+                  .arg( 500 )
                   .arg( 150 )
                   .arg( 0.1 )
                   .arg( -0.2 )
-                  .arg ( 200 );
+                  .arg ( 100 );
      try {
          DedispersionPipeline p(streamId);
          LofarPipelineTester tester(&p, config(xml));

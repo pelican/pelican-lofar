@@ -4,6 +4,7 @@
 #include "DedispersionDataAnalysis.h"
 #include <boost/bind.hpp>
 #include "SpectrumDataSet.h"
+#include <QDebug>
 
 
 namespace pelican {
@@ -17,6 +18,8 @@ namespace lofar {
 DedispersionPipeline::DedispersionPipeline( const QString& streamIdentifier )
     : AbstractPipeline(), _streamIdentifier(streamIdentifier)
 {
+     _spectra = 0;
+     _weightedDataBuffer = 0;
      _stokesBuffer = 0;
      _dedispersedDataBuffer = 0;
 }
@@ -28,12 +31,17 @@ DedispersionPipeline::~DedispersionPipeline()
 {
     delete _stokesBuffer;
     delete _dedispersedDataBuffer;
+    delete _weightedDataBuffer;
     foreach(SpectrumDataSetStokes* d, _stokesData ) {
         delete d;
     }
     foreach(DedispersionSpectra* d, _dedispersedData ) {
         delete d;
     }
+    foreach(WeightedSpectrumDataSet* d, _weightedData) {
+        delete d;
+    }
+    delete _spectra;
 }
 
 void DedispersionPipeline::init()
@@ -52,7 +60,7 @@ void DedispersionPipeline::init()
      _dedispersionModule->unlockCallback( boost::bind( &DedispersionPipeline::updateBufferLock, this, _1 ) );
 
     // Create local datablobs
-    spectra = (SpectrumDataSetC32*) createBlob("SpectrumDataSetC32");
+    _spectra = (SpectrumDataSetC32*) createBlob("SpectrumDataSetC32");
     _stokesData = createBlobs<SpectrumDataSetStokes>("SpectrumDataSetStokes", history);
     _stokesBuffer = new LockingPtrContainer<SpectrumDataSetStokes>(&_stokesData);
     _dedispersedData = createBlobs<DedispersionSpectra >("DedispersionSpectra", history);
@@ -78,11 +86,11 @@ void DedispersionPipeline::run(QHash<QString, DataBlob*>& remoteData)
     // Run the polyphase channeliser.
     // Generates spectra from a blocks of time series indexed by sub-band
     // and polarisation.
-    _ppfChanneliser->run(timeSeries, spectra);
+    _ppfChanneliser->run(timeSeries, _spectra);
 
     // Convert spectra in X, Y polarisation into spectra with stokes parameters.
     SpectrumDataSetStokes* stokes=_stokesBuffer->next();
-    _stokesGenerator->run(spectra, stokes);
+    _stokesGenerator->run(_spectra, stokes);
 
     // get the next suitable datablob
     WeightedSpectrumDataSet* weightedIntStokes = _weightedDataBuffer->next();
@@ -93,7 +101,9 @@ void DedispersionPipeline::run(QHash<QString, DataBlob*>& remoteData)
     dataOutput(&(weightedIntStokes->stats()), "RFI_Stats");
 
     // start the asyncronous chain of events
-    _dedispersionModule->dedisperse(weightedIntStokes, _dedispersedDataBuffer );
+qDebug() << "Dedisperse start";
+    _dedispersionModule->dedisperse( weightedIntStokes, _dedispersedDataBuffer );
+qDebug() << "Dedispersion done";
 
 }
 

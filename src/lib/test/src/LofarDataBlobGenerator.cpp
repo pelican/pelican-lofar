@@ -56,7 +56,8 @@ AbstractDataClient::DataBlobHash LofarDataBlobGenerator::getData(
 
 
 TimeSeriesDataSetC32* LofarDataBlobGenerator::generateTimeSeriesData( TimeSeriesDataSetC32* timeSeries ) const {
-    unsigned timesPerChunk =  262144; // 2^18
+    //unsigned timesPerChunk =  262144; // 2^18
+    unsigned timesPerChunk = 64; 
     if (timesPerChunk % _nChannels)
         throw QString("Setup error");
     unsigned nBlocks = timesPerChunk / _nChannels;

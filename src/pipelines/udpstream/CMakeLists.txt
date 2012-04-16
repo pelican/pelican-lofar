@@ -12,9 +12,9 @@ set(pipeline_lib_src
 )
 if(CUDA_FOUND)
     list(APPEND pipeline_lib_src
-	    src/DedispersionPipeline.cpp
-	    src/DedispersionApplication.cpp
-	)
+         src/DedispersionPipeline.cpp
+         src/DedispersionApplication.cpp
+    )
 endif(CUDA_FOUND)
 add_library(pelicanMdsm ${pipeline_lib_src})
 
