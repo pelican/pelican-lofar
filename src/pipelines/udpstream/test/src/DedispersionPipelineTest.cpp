@@ -39,11 +39,17 @@ void DedispersionPipelineTest::tearDown()
 void DedispersionPipelineTest::test_method()
 {
      // Use Case:
-     // Single run through 
+     // Simple run through 
      // Expect:
      // no segfaults
+     int history = 10;
+     int sampleSize=2048;
      QString streamId = "LofarTimeStream1";
-     QString xml = QString("<pipelineConfig />"
+     QString xml = QString("<pipelineConfig>"
+                 "   <DedispersionPipeline>"
+                 "       <history value=\"%7\" />"
+                 "   </DedispersionPipeline>"
+                 "</pipelineConfig>"
                  "<modules>"
                      "<PPFChanneliser>"
                         "<outputChannelsPerSubband value=\"16\" />"
@@ -66,15 +72,22 @@ void DedispersionPipelineTest::test_method()
                      "</DedispersionModule>"
                  "</modules>")
                   .arg( QString(TEST_DATA_DIR) + QDir::separator() + "band31.bp")
-                  .arg( 500 )
+                  .arg( sampleSize / 4 )
                   .arg( 150 )
                   .arg( 0.1 )
                   .arg( -0.2 )
-                  .arg ( 100 );
+                  .arg ( 100 ).arg( history );
      try {
          DedispersionPipeline p(streamId);
          LofarPipelineTester tester(&p, config(xml));
          tester.run();
+         // multiple runs to ensure the history
+         // is full
+         // Expect: not to freeze waiting for history
+         // buffer to be freed
+         for(int i=0; i<history+1; ++i) {
+             tester.run();
+         }
       }
       catch( const QString& e ) {
         CPPUNIT_FAIL( e.toStdString() );
