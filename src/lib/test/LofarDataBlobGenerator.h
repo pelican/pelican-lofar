@@ -42,7 +42,7 @@ class LofarDataBlobGenerator : public AbstractDataClient
         void setPolarisations( unsigned num ) { _nPols = num; }
 
         /// set the number of ipolarisations
-        void setTimeSamplesPerBlock( unsigned num ) { _timesPerChunk = num; }
+        void setTimeSamplesPerBlock( unsigned num ) { _nSamples = num; }
 
     private:
         TimeSeriesDataSetC32* generateTimeSeriesData( 
@@ -52,7 +52,7 @@ class LofarDataBlobGenerator : public AbstractDataClient
         unsigned _nChannels;
         unsigned _nSubbands;
         unsigned _nPols;
-        unsigned _timesPerChunk;
+        unsigned _nSamples;
 };
 PELICAN_DECLARE_CLIENT(LofarDataBlobGenerator)
 

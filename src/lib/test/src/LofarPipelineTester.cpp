@@ -29,7 +29,6 @@ void LofarPipelineTester::_init( const QString& configXML )
  */
 LofarPipelineTester::~LofarPipelineTester()
 {
-     //delete _dataGenerator;
      delete _app;
 }
 

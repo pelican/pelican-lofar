@@ -21,9 +21,9 @@ LofarDataBlobGenerator::LofarDataBlobGenerator( const ConfigNode& configNode,
     : AbstractDataClient( configNode, types, config )
 {
     _nPols= 2;
-    _nSubbands = 62;
-    _nChannels = 16;
-    _timesPerChunk = 2048;
+    _nSubbands = 32;
+    _nChannels = 64;
+    _nSamples = 6400;
 }
 
 /**
@@ -57,9 +57,9 @@ AbstractDataClient::DataBlobHash LofarDataBlobGenerator::getData(
 
 
 TimeSeriesDataSetC32* LofarDataBlobGenerator::generateTimeSeriesData( TimeSeriesDataSetC32* timeSeries ) const {
-    if (_timesPerChunk % _nChannels)
-        throw QString("Setup error: timesPerChunk must be multiple of nChannles");
-    unsigned nBlocks = _timesPerChunk / _nChannels;
+    if (_nSamples % _nChannels)
+        throw QString("Setup error: nSamples must be multiple of nChannles");
+    unsigned nBlocks = _nSamples / _nChannels;
     timeSeries->resize( nBlocks, _nSubbands, _nPols, _nChannels );
 
     // Generate channel profile by scanning though frequencies.
@@ -82,7 +82,7 @@ TimeSeriesDataSetC32* LofarDataBlobGenerator::generateTimeSeriesData( TimeSeries
             {
                 time = double(i++) / sampleRate;
                 arg = 2.0 * math::pi * freqs[k] * time;
-                timeData[c] = Complex(cos(arg), sin(arg));
+//                timeData[c] = Complex(cos(arg), sin(arg));
             }
         }
     }
