@@ -30,6 +30,10 @@ class ProcessingChain
     public:
         ProcessingChain();
         ~ProcessingChain();
+
+        /// block thread until all tasks are complete
+        void waitTaskCompletion() const;
+
         /// execute the chain, starting with the parallel tasks
         //  and then the post completion task (sequential)
         //  This function is thread safe and re-entrant

@@ -85,7 +85,7 @@ void DedispersionPipelineTest::test_method()
          // is full
          // Expect: not to freeze waiting for history
          // buffer to be freed
-         for(int i=0; i<history+1; ++i) {
+         for(int i=0; i<history+2; ++i) {
              tester.run();
          }
       }

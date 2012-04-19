@@ -49,6 +49,9 @@ class AsyncronousModule : public AbstractModule
         /// return the number of locks for the specified object
         int lockNumber( const DataBlob* ) const;
 
+        /// block the thread until all asyncronous jobs have completed
+        void waitForJobCompletion() const;
+
     protected:
         /// queue a GPU_Job for submission
         GPU_Job* submit(GPU_Job*);

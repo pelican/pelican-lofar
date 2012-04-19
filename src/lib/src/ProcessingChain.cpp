@@ -21,8 +21,12 @@ ProcessingChain::ProcessingChain()
 ProcessingChain::~ProcessingChain()
 {
     // wait for all processing tasks to finish
+    waitTaskCompletion();
+}
+
+void ProcessingChain::waitTaskCompletion() const {
     while( _processCount.size() ) {
-        sleep(1);
+        usleep(10);
     }
 }
 

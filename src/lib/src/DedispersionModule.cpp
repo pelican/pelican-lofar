@@ -64,13 +64,18 @@ DedispersionModule::DedispersionModule( const ConfigNode& config )
  */
 DedispersionModule::~DedispersionModule()
 {
-    while( ! ( _kernels.allAvailable() && _jobBuffer.allAvailable() ) ) {
-        usleep(10);
-    }
+    waitForJobCompletion();
     foreach( DedispersionKernel* k, _kernelList ) {
         delete k;
     }
     _cleanBuffers();
+}
+
+void DedispersionModule::waitForJobCompletion() {
+    while( ! ( _kernels.allAvailable() && _jobBuffer.allAvailable() ) ) {
+        usleep(10);
+    }
+    AsyncronousModule::waitForJobCompletion();
 }
 
 void DedispersionModule::_cleanBuffers() {

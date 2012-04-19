@@ -34,10 +34,14 @@ class ProcessingChain1
     public:
         ProcessingChain1() : _taskId(0) {};
         ~ProcessingChain1() {
-            while( _processCount.size() ) {
-                sleep(1);
-            }
+            waitTaskCompletion();
         };
+
+        void waitTaskCompletion() const {
+            while( _processCount.size() ) {
+                usleep(10);
+            }
+        }
 
         /// execute the chain, starting with the parallel tasks
         //  and then the post completion task (sequential)

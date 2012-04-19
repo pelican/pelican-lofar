@@ -59,6 +59,10 @@ class DedispersionModule : public AsyncronousModule
     public:
         DedispersionModule( const ConfigNode& config );
         ~DedispersionModule();
+
+        /// wait for all asyncronous tasks that have been launched to complete
+        void waitForJobCompletion();
+
         /// processing the incoming data, generating a new DedispersedSpectra in
         /// the process
         //DedispersionSpectra* dedisperse( DataBlob* incoming );

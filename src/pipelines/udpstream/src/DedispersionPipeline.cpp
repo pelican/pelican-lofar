@@ -22,6 +22,13 @@ DedispersionPipeline::DedispersionPipeline( const QString& streamIdentifier )
      _weightedDataBuffer = 0;
      _stokesBuffer = 0;
      _dedispersedDataBuffer = 0;
+     _dedispersionModule = 0;
+     _dedispersionAnalyser = 0;
+     _ppfChanneliser = 0;
+     _rfiClipper = 0;
+     _stokesIntegrator = 0;
+     _stokesGenerator = 0;
+
 }
 
 /**
@@ -29,9 +36,16 @@ DedispersionPipeline::DedispersionPipeline( const QString& streamIdentifier )
  */
 DedispersionPipeline::~DedispersionPipeline()
 {
+    delete _dedispersionModule;
+    delete _dedispersionAnalyser;
     delete _stokesBuffer;
     delete _dedispersedDataBuffer;
     delete _weightedDataBuffer;
+    delete _ppfChanneliser;
+    delete _rfiClipper;
+    delete _stokesIntegrator;
+    delete _stokesGenerator;
+
     foreach(SpectrumDataSetStokes* d, _stokesData ) {
         delete d;
     }
@@ -54,10 +68,10 @@ void DedispersionPipeline::init()
     _stokesGenerator = (StokesGenerator *) createModule("StokesGenerator");
     _rfiClipper = (RFI_Clipper *) createModule("RFI_Clipper");
     _stokesIntegrator = (StokesIntegrator *) createModule("StokesIntegrator");
-     _dedispersionModule = (DedispersionModule*) createModule("DedispersionModule");
-     _dedispersionAnalyser = (DedispersionAnalyser*) createModule("DedispersionAnalyser");
-     _dedispersionModule->connect( boost::bind( &DedispersionPipeline::dedispersionAnalysis, this, _1 ) );
-     _dedispersionModule->unlockCallback( boost::bind( &DedispersionPipeline::updateBufferLock, this, _1 ) );
+    _dedispersionModule = (DedispersionModule*) createModule("DedispersionModule");
+    _dedispersionAnalyser = (DedispersionAnalyser*) createModule("DedispersionAnalyser");
+    _dedispersionModule->connect( boost::bind( &DedispersionPipeline::dedispersionAnalysis, this, _1 ) );
+    _dedispersionModule->unlockCallback( boost::bind( &DedispersionPipeline::updateBufferLock, this, _1 ) );
 
     // Create local datablobs
     _spectra = (SpectrumDataSetC32*) createBlob("SpectrumDataSetC32");
@@ -101,13 +115,12 @@ void DedispersionPipeline::run(QHash<QString, DataBlob*>& remoteData)
     dataOutput(&(weightedIntStokes->stats()), "RFI_Stats");
 
     // start the asyncronous chain of events
-qDebug() << "Dedisperse start";
     _dedispersionModule->dedisperse( weightedIntStokes, _dedispersedDataBuffer );
-qDebug() << "Dedispersion done";
 
 }
 
 void DedispersionPipeline::dedispersionAnalysis( DataBlob* blob ) {
+//qDebug() << "analysis()";
     DedispersionDataAnalysis result;
     DedispersionSpectra* data = static_cast<DedispersionSpectra*>(blob);
     if ( _dedispersionAnalyser->analyse(data, &result) )
@@ -118,6 +131,7 @@ void DedispersionPipeline::dedispersionAnalysis( DataBlob* blob ) {
 
 void DedispersionPipeline::updateBufferLock( const QList<DataBlob*>& freeData ) {
      // find WeightedDataBlobs that can be unlocked
+//qDebug() << "unlocking()";
      foreach( DataBlob* blob, freeData ) {
         Q_ASSERT( blob->type() == "WeightedSpectrumDataSet" );
         const WeightedSpectrumDataSet* d = static_cast<const WeightedSpectrumDataSet*>(blob);

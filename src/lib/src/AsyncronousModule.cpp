@@ -45,6 +45,10 @@ AsyncronousModule::~AsyncronousModule()
     delete _chain;
 }
 
+void AsyncronousModule::waitForJobCompletion() const {
+    _chain->waitTaskCompletion();
+}
+
 void AsyncronousModule::connect( const boost::function1<void, DataBlob*>& functor ) {
     _linkedFunctors.append(functor);
 }
