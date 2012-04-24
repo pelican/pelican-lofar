@@ -18,7 +18,7 @@ namespace lofar {
  *@details GPU_NVidia 
  */
 GPU_NVidia::GPU_NVidia( unsigned int id )
-     : _currentConfig(0), _deviceId(id)
+     :  _deviceId(id)
 {
     cudaGetDeviceProperties(&_deviceProp, id);
 }
@@ -38,13 +38,15 @@ void GPU_NVidia::run( GPU_Job* job )
     cudaSetDevice( _deviceId );
     // execute the kernels
     foreach( GPU_Kernel* kernel, job->kernels() ) {
-       setupConfiguration( &(kernel->configuration()) );
-       kernel->run( _currentParams );
+       freeMem(_currentParams ); // quickfix: delete everything for now
+       _currentParams.clear();
+       _outputs.clear();
+       kernel->run( *this );
        cudaDeviceSynchronize();
        if( ! cudaPeekAtLastError() ) {
            // copy device memory to host
-           foreach( const GPU_MemoryMap& map, _currentConfig->outputMaps() ) {
-                _params.value(map)->syncDeviceToHost();
+           foreach( GPU_Param* param, _outputs ) {
+                param->syncDeviceToHost();
            }
        }
        else {
@@ -53,47 +55,11 @@ void GPU_NVidia::run( GPU_Job* job )
     }
 }
 
-void GPU_NVidia::setupConfiguration ( const GPU_NVidiaConfiguration* c )
-{
-     //if( _currentConfig != c ) { // ! assumes config does not change between invoca.
-         // free memory from existing job
-         // TODO write code to test for overlapping mem
-         // requirements for different configurations
-         // to avoid unnessasary deallocations/allocations
-         freeMem(_currentParams ); // quickfix: delete everything for now
-         _currentParams.clear();
-         foreach( const GPU_MemoryMap& map, c->allMaps() ) {
-             GPU_Param* p = new GPU_Param( map ) ;
-             if(  cudaPeekAtLastError() ) {
-                throw( cudaGetErrorString( cudaPeekAtLastError() ) );
-             }
-             _params.insert( map, p );
-             _currentParams.append( p );
-         }
-         // sync constants only on creation
-         foreach( const GPU_MemoryMap& map, c->constants() ) {
-             _params.value(map)->syncHostToDevice();
-             if(  cudaPeekAtLastError() ) {
-                 throw( cudaGetErrorString( cudaPeekAtLastError() ) );
-             }
-         }
-         _currentConfig = c;
-     //}
-     // upload non-constant input data from host
-     foreach( const GPU_MemoryMap& map, c->inputMaps() ) {
-         Q_ASSERT( _params.contains(map) );
-         _params.value(map)->syncHostToDevice();
-         if(  cudaPeekAtLastError() ) {
-             throw( cudaGetErrorString( cudaPeekAtLastError() ) );
-         }
-     }
-     cudaDeviceSynchronize();
-}
-
 void GPU_NVidia::freeMem( const QList<GPU_Param*>& list ) {
      foreach( GPU_Param* p, list ) {
         delete p;
         _params.remove(_params.key(p));
+        _outputs.remove( p );
      }
 }
 
@@ -103,6 +69,50 @@ void GPU_NVidia::initialiseResources(GPU_Manager* manager) {
      for(int i = 0; i < num_devices; i++) {
         manager->addResource( new GPU_NVidia( i ) );
      }
+}
+
+GPU_Param* GPU_NVidia::_getParam( const GPU_MemoryMap& map ) {
+     if( ! _params.contains(map) ) {
+         GPU_Param* p = new GPU_Param( map ) ;
+         if(  cudaPeekAtLastError() ) {
+             throw( cudaGetErrorString( cudaPeekAtLastError() ) );
+         }
+         _params.insert( map, p );
+         _currentParams.append( p );
+     }
+     return _params.value(map);
+}
+
+void* GPU_NVidia::devicePtr( const GPU_MemoryMapOutput& map ) {
+     GPU_Param* p = _getParam(map);
+     _outputs.insert(p);
+     return p->device();
+}
+
+void* GPU_NVidia::devicePtr( const GPU_MemoryMapInputOutput& map ) {
+     GPU_Param* p = _getParam(map);
+     _outputs.insert(p);
+     p->syncHostToDevice();
+     return p->device();
+}
+
+void* GPU_NVidia::devicePtr( const GPU_MemoryMap& map ) {
+     GPU_Param* p = _getParam(map);
+     p->syncHostToDevice();
+     return p->device();
+}
+
+void* GPU_NVidia::devicePtr( const GPU_MemoryMapConst& map ) {
+     if( ! _params.contains(map) ) {
+         GPU_Param* p = new GPU_Param( map ) ;
+         if(  cudaPeekAtLastError() ) {
+             throw( cudaGetErrorString( cudaPeekAtLastError() ) );
+         }
+         _params.insert( map, p );
+         _params.value(map)->syncHostToDevice(); // consts sync only on creation
+         _currentParams.append( p );
+     }
+     return _params.value(map)->device();
 }
 
 } // namespace lofar

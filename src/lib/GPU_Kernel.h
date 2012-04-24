@@ -11,6 +11,7 @@
 namespace pelican {
 
 namespace lofar {
+class GPU_NVidia;
 
 /**
  * @class GPU_Kernel
@@ -26,13 +27,10 @@ class GPU_Kernel
     public:
         GPU_Kernel(  );
         virtual ~GPU_Kernel();
-        const GPU_NVidiaConfiguration& configuration() const { return _config; };
-        virtual void run( const QList<GPU_Param*>& devicePointers ) = 0;
-        void setConfiguration( const GPU_NVidiaConfiguration& config );
-        inline void addConstant( const GPU_MemoryMap& map ) { _config.addConstant(map); };
-        inline void addInputMap( const GPU_MemoryMap& map ) { _config.addInputMap(map); };
-        inline void addOutputMap( const GPU_MemoryMap& map ) { _config.addOutputMap(map); };
-        void clearInputOutputMaps();
+        const GPU_NVidiaConfiguration* configuration() const { return &_config; };
+        // implement this method to run the nvidia kernel
+        // using GPU_MemoryMap type to transfer data
+        virtual void run( GPU_NVidia& ) = 0;
 
     private:
         GPU_NVidiaConfiguration _config;

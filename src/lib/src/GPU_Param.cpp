@@ -26,6 +26,14 @@ GPU_Param::~GPU_Param()
     cudaFree( _devicePtr );
 }
 
+void GPU_Param::resetMap( const GPU_MemoryMap& map ) {
+    if( _map.size() != map.size() ) {
+        cudaFree( _devicePtr );
+        cudaMalloc( &_devicePtr , map.size() );
+    }
+    _map = map;
+}
+
 void GPU_Param::syncHostToDevice() {
     if( _map.hostPtr() ) {
 //        std::cout << "GPU_Param::syncHostToDevice: device=" << _devicePtr << " host=" << _map.hostPtr() << " size=" << _map.size() << std::endl;

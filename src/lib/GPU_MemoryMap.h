@@ -22,6 +22,10 @@ namespace lofar {
  * 
  */
 
+//
+// Use this class to represent data that has to be uploaded
+// to the GPU and the data is liable to change.
+//
 class GPU_MemoryMap
 {
     public:
@@ -48,6 +52,48 @@ class GPU_MemoryMap
         void* _host;
         unsigned long _size;
         unsigned int _hash;
+};
+
+//
+// Use this class to represent data that has to be uploaded
+// once only. i.e. the data does not change once uploaded
+//
+class GPU_MemoryMapConst : public GPU_MemoryMap
+{
+    public:
+        GPU_MemoryMapConst( void* host_address = 0 , unsigned long bytes = 0 ) 
+                : GPU_MemoryMap(host_address, bytes) {}
+        template<typename T>
+        GPU_MemoryMapConst( T vec ) : GPU_MemoryMap( vec ) {}
+        ~GPU_MemoryMapConst() {}
+};
+
+//
+// Use this class to represent data that has to be downloaded
+// No upload to the device is associated with this class
+// 
+class GPU_MemoryMapOutput : public GPU_MemoryMap
+{
+    public:
+        GPU_MemoryMapOutput( void* host_address = 0 , unsigned long bytes = 0 ) 
+                : GPU_MemoryMap(host_address, bytes) {}
+        template<typename T>
+        GPU_MemoryMapOutput( T vec ) : GPU_MemoryMap( vec ) {}
+        ~GPU_MemoryMapOutput() {}
+};
+
+//
+// Use this class to represent data that has to be uploaded
+// ito and dowloaded from the device
+// 
+class GPU_MemoryMapInputOutput : public GPU_MemoryMapOutput
+{
+    public:
+        GPU_MemoryMapInputOutput( void* host_address = 0 , unsigned long bytes = 0 ) 
+                : GPU_MemoryMapOutput(host_address, bytes) {}
+        template<typename T>
+        GPU_MemoryMapInputOutput( T vec ) : GPU_MemoryMapOutput( vec ) {}
+        ~GPU_MemoryMapInputOutput() {}
 };
 
 unsigned int qHash(const GPU_MemoryMap& key);

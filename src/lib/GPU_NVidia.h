@@ -10,6 +10,7 @@
 #include <cuda_runtime_api.h>
 #include <QHash>
 #include <QList>
+#include <QSet>
 
 /**
  * @file GPU_NVidia.h
@@ -19,7 +20,6 @@ namespace pelican {
 
 namespace lofar {
 class GPU_Manager;
-class GPU_NVidiaConfiguration;
 
 /**
  * @class GPU_NVidia
@@ -40,15 +40,20 @@ class GPU_NVidia : public GPU_Resource
 
         static void initialiseResources(GPU_Manager* manager);
 
+        void* devicePtr( const GPU_MemoryMap& map );
+        void* devicePtr( const GPU_MemoryMapOutput& map );
+        void* devicePtr( const GPU_MemoryMapInputOutput& map );
+        void* devicePtr( const GPU_MemoryMapConst& map );
+
     protected:
-        void setupConfiguration ( const GPU_NVidiaConfiguration* c );
         void freeMem( const QList<GPU_Param*>& );
 
     private:
+        GPU_Param* _getParam( const GPU_MemoryMap& map );
         cudaDeviceProp _deviceProp;
         QHash<GPU_MemoryMap, GPU_Param* > _params;
         QList<GPU_Param*> _currentParams;
-        const GPU_NVidiaConfiguration* _currentConfig;
+        QSet<GPU_Param*> _outputs;
         unsigned int _deviceId;
 };
 

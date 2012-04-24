@@ -27,6 +27,7 @@ class WeightedSpectrumDataSet;
 class GPU_DataMapping;
 class GPU_Job;
 class GPU_Param;
+class GPU_NVidia;
 class DedispersionBuffer;
 class LockingBuffer;
 
@@ -50,9 +51,18 @@ class DedispersionModule : public AsyncronousModule
               unsigned _tdms;
               unsigned _nChans;
               unsigned _maxshift;
+              unsigned _nsamples;
+              GPU_MemoryMapOutput _outputBuffer;
+              GPU_MemoryMap _inputBuffer;
+              GPU_MemoryMapConst _dmShift;
+
            public:
-              DedispersionKernel( float, float, float, float, unsigned, unsigned );
+              DedispersionKernel( float, float, float, float, unsigned, unsigned, unsigned );
+              void setDMShift( QVector<float>& );
+              void setOutputBuffer( QVector<float>& );
+              void setInputBuffer( QVector<float>& );
               void run(const QList<GPU_Param*>& param );
+              void run( GPU_NVidia& );
         };
 
     public:
@@ -109,8 +119,6 @@ class DedispersionModule : public AsyncronousModule
         int _maxshift; // number of samples to overlap between processes
         int _nChannels; // number of Channels per sample
         DedispersionBuffer* _currentBuffer;
-        GPU_MemoryMap _i_nSamples;
-        GPU_MemoryMap _f_dmshifts;
         QVector<float> _dmshifts;
 
         QList<DedispersionKernel*> _kernelList; // collection of pre-configured kernels

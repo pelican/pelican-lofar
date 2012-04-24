@@ -29,6 +29,7 @@ class GPU_Param
         GPU_Param( const GPU_MemoryMap& map );
         virtual ~GPU_Param();
         unsigned long size() const;
+        void resetMap( const GPU_MemoryMap& map );
         void syncHostToDevice();
         void syncDeviceToHost();
         inline void* operator*() const { return _devicePtr; };
@@ -42,7 +43,7 @@ class GPU_Param
         GPU_Param( const GPU_Param& ) {};
 
     protected:
-        const GPU_MemoryMap _map;
+        GPU_MemoryMap _map;
         void* _devicePtr;
 };
 

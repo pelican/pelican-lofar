@@ -10,6 +10,7 @@
 #include "GPU_Job.h"
 #include "GPU_Kernel.h"
 #include "GPU_Param.h"
+#include "GPU_NVidia.h"
 #include <fstream>
 
 extern "C" void cacheDedisperseLoop( float *outbuff, long outbufSize, float *buff, float mstartdm,
@@ -44,9 +45,6 @@ DedispersionModule::DedispersionModule( const ConfigNode& config )
 
     unsigned int maxBuffers = config.getOption("numberOfBuffers", "value", "3").toUInt();
     if( maxBuffers < 1 ) throw(QString("DedispersionModule: Must have at least one buffer"));
-
-    // calculate required parameters
-    _i_nSamples = GPU_MemoryMap( &_numSamplesBuffer, sizeof(int) );
 
     // setup the data buffers and objects required for each job
     for( unsigned int i=0; i < maxBuffers; ++i ) {
@@ -127,13 +125,11 @@ void DedispersionModule::resize( const SpectrumDataSet<float>* streamData ) {
             delete k;
         }
         _kernelList.clear();
-        _f_dmshifts = GPU_MemoryMap( _dmshifts );
         for( unsigned int i=0; i < maxBuffers; ++i ) {
             DedispersionKernel* kernel = new DedispersionKernel( _dmLow, _dmStep, _tsamp, _tdms,
-                                                                 _nChannels, _maxshift );
+                                                             _nChannels, _maxshift, _numSamplesBuffer );
             _kernelList.append( kernel ); 
-            kernel->addConstant( _f_dmshifts );
-            kernel->addConstant( _i_nSamples );
+            kernel->setDMShift( _dmshifts );
         }
         _kernels.reset( &_kernelList );
     }
@@ -190,11 +186,8 @@ void DedispersionModule::dedisperse( DedispersionBuffer* buffer, DedispersionSpe
     // Set up a job for the GPU processing kernel
     GPU_Job* job = _jobBuffer.next();
     DedispersionKernel* kernelPtr = _kernels.next();
-    //unsigned int outputSize;
-    //size_t outputSize = nsamp * _tdms * sizeof(float);
-    GPU_MemoryMap out( dataOut->data() );
-    kernelPtr->addOutputMap( out );
-    kernelPtr->addInputMap( GPU_MemoryMap( buffer->getData() ) );
+    kernelPtr->setOutputBuffer( dataOut->data() );
+    kernelPtr->setInputBuffer( buffer->getData() );
     job->addKernel( kernelPtr );
     job->addCallBack( boost::bind( &DedispersionModule::gpuJobFinished, this, job, buffer, kernelPtr, dataOut ) );
     submit( job );
@@ -202,7 +195,6 @@ void DedispersionModule::dedisperse( DedispersionBuffer* buffer, DedispersionSpe
 
 void DedispersionModule::gpuJobFinished( GPU_Job* job, DedispersionBuffer* buffer, DedispersionKernel* kernel, DedispersionSpectra* dataOut ) {
      dataOut->setInputDataBlobs( buffer->inputDataBlobs() );
-     kernel->clearInputOutputMaps();
      _kernels.unlock( kernel ); // give up the kernel
      _buffers.unlock( buffer ); // give up the buffer
      if( job->status() != GPU_Job::Failed ) {
@@ -227,27 +219,38 @@ void DedispersionModule::exportComplete( DataBlob* datablob ) {
     _dedispersionBuffer[data]->unlock(data);
 }
 
-DedispersionModule::DedispersionKernel::DedispersionKernel( float start, float step, float tsamp, float tdms , unsigned nChans, unsigned maxshift )
+DedispersionModule::DedispersionKernel::DedispersionKernel( float start, float step, float tsamp, float tdms , unsigned nChans, unsigned maxshift, unsigned nsamples )
    : _startdm( start ), _dmstep( step ), _tsamp(tsamp), _tdms(tdms), _nChans(nChans),
-     _maxshift(maxshift)
+     _maxshift(maxshift), _nsamples(nsamples)
 {
 }
 
-void DedispersionModule::DedispersionKernel::run(const QList<GPU_Param*>& param ) {
-     Q_ASSERT( param.size() == 4 );
+void DedispersionModule::DedispersionKernel::setDMShift( QVector<float>& buffer ) {
+    _dmShift = GPU_MemoryMap(buffer);
+}
+
+void DedispersionModule::DedispersionKernel::setOutputBuffer( QVector<float>& buffer )
+{
+    _outputBuffer = GPU_MemoryMap(buffer);
+}
+
+void DedispersionModule::DedispersionKernel::setInputBuffer( QVector<float>& buffer ) {
+    _inputBuffer = GPU_MemoryMap(buffer);
+}
+
+void DedispersionModule::DedispersionKernel::run( GPU_NVidia& gpu ) {
      //cache_dedisperse_loop( float *outbuff, float *buff, float mstartdm, float mdmstep )
-    unsigned nsamples = param[2]->value<int>();
 //std::cout << " maxShift =" << _maxshift << std::endl;
 //std::cout << " nchans =" << _nChans << std::endl;
 //std::cout << " tsamp =" << _tsamp << std::endl;
-//std::cout << " input buffer size =" << param[0]->size() << std::endl;
-//std::cout << " output buffer (" << param[3]->device() << ") size =" << param[3]->size() << std::endl;
-//std::cout << " dmShift size =" << param[1]->size() << std::endl;
-//std::cout << " nSamples =" << nsamples << std::endl;
-     cacheDedisperseLoop( (float*)param[3]->device() , param[3]->size(),
-                          (float*)param[0]->device(), (_startdm/_tsamp),
-                          (_dmstep/_tsamp), _tdms, nsamples,
-                          (const float*)param[1]->device(),
+//std::cout << " input buffer (" << gpu.devicePtr(_inputBuffer) << " ) size=" << _inputBuffer.size() << std::endl;
+//std::cout << " output buffer (" << gpu.devicePtr(_outputBuffer) << ") size=" << _outputBuffer.size() << std::endl;
+//std::cout << " dmShift size =" << _dmShift.size() << std::endl;
+//std::cout << " nSamples =" << _nsamples << std::endl;
+     cacheDedisperseLoop( (float*)gpu.devicePtr(_outputBuffer) , _outputBuffer.size(),
+                          (float*)gpu.devicePtr(_inputBuffer), (_startdm/_tsamp),
+                          (_dmstep/_tsamp), _tdms, _nsamples,
+                          (const float*)gpu.devicePtr(_dmShift),
                           _maxshift,
                           _nChans
                         );

@@ -4,7 +4,6 @@
 #include "GPU_Job.h"
 #include "GPU_MemoryMap.h"
 #include "TestCudaVectorAdd.h"
-#include "GPU_NVidiaConfiguration.h"
 #include <QVector>
 #include <string>
 
@@ -64,11 +63,9 @@ void GPU_NVidiaTest::test_managedCard()
         GPU_MemoryMap vec2map( vec2 );
         GPU_MemoryMap resultmap( result );
         TestCudaVectorAdd testKernel;
-        GPU_NVidiaConfiguration config;
-        config.addInputMap( vec1map );
-        config.addConstant( vec2map ); // add as a constant
-        config.addOutputMap( resultmap );
-        testKernel.setConfiguration( config );
+        testKernel.addInputMap( vec1map );
+        testKernel.addConstant( vec2map ); // add as a constant
+        testKernel.addOutputMap( resultmap );
         job.addKernel( &testKernel );
         m.submit(&job);
         job.wait();
@@ -91,11 +88,9 @@ void GPU_NVidiaTest::test_managedCard()
         GPU_MemoryMap vec2map( vec2 );
         GPU_MemoryMap resultmap( result );
         TestCudaVectorAdd testKernel;
-        GPU_NVidiaConfiguration config;
-        config.addInputMap( vec1map );
-        config.addConstant( vec2map ); // add as a constant
-        config.addOutputMap( resultmap );
-        testKernel.setConfiguration( config );
+        testKernel.addInputMap( vec1map );
+        testKernel.addConstant( vec2map ); // add as a constant
+        testKernel.addOutputMap( resultmap );
         job.addKernel( &testKernel );
         m.submit(&job);
         job.wait();
@@ -133,12 +128,10 @@ void GPU_NVidiaTest::test_multipleJobs()
     GPU_MemoryMap resultmap1( result1 );
     GPU_MemoryMap resultmap2( result2 );
 
-    GPU_NVidiaConfiguration config;
-    config.addConstant( vec2map ); // add as a constant
-    config.addInputMap( vec1map );
-    config.addOutputMap( resultmap1 );
     TestCudaVectorAdd testKernel;
-    testKernel.setConfiguration( config );
+    testKernel.addConstant( vec2map ); // add as a constant
+    testKernel.addInputMap( vec1map );
+    testKernel.addOutputMap( resultmap1 );
 
     GPU_Job job1;
     GPU_Job job2;
@@ -148,7 +141,6 @@ void GPU_NVidiaTest::test_multipleJobs()
     CPPUNIT_ASSERT( result1[0] != result2[0] );
     m.submit(&job1);
     job1.wait();
-    testKernel.clearInputOutputMaps();
     testKernel.addInputMap( vec1map );
     testKernel.addOutputMap( resultmap2 );
 
