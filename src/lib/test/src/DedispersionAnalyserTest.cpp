@@ -49,28 +49,27 @@ void DedispersionAnalyserTest::test_noSignificantEvents()
 
 void DedispersionAnalyserTest::test_singleEvent()
 {
-     // Use Case:
-     // Single significant dedispersion event
-     // Integration test with Dedispersion Module
-     // Expect:
-     // Event to be reported
-     try {
-         DedispersionDataGenerator dataGenerator;
-         DedispersionSpectra* inputData = dataGenerator.dedispersionData(10);
+    // Use Case:
+    // Single significant dedispersion event
+    // Integration test with Dedispersion Module
+    // Expect:
+    // Event to be reported
+    DedispersionDataGenerator dataGenerator;
+    DedispersionSpectra* inputData = dataGenerator.dedispersionData(10);
+    try {
+        DedispersionDataAnalysis outputData;
 
-         // -- Setup Data
-         DedispersionDataAnalysis outputData;
+        ConfigNode config;
+        DedispersionAnalyser analyser(config);
+        CPPUNIT_ASSERT( analyser.analyse( inputData, &outputData ) > inputData->dmBins() );
+        DedispersionEvent e = outputData.events()[0];
 
-         ConfigNode config;
-         DedispersionAnalyser analyser(config);
-         CPPUNIT_ASSERT( analyser.analyse( inputData, &outputData ) > inputData->dmBins() );
-         DedispersionEvent e = outputData.events()[0];
-
-         // clean up
-         dataGenerator.deleteData(inputData);
-     } catch ( const QString& e ) {
+        // clean up
+    } catch ( const QString& e ) {
+        dataGenerator.deleteData(inputData);
         CPPUNIT_FAIL( "THROW: " + e.toStdString() );
-     }
+    }
+    dataGenerator.deleteData(inputData);
 }
 
 } // namespace lofar
