@@ -32,8 +32,9 @@ class GPU_Kernel
         inline void addConstant( const GPU_MemoryMap& map ) { _config.addConstant(map); };
         inline void addInputMap( const GPU_MemoryMap& map ) { _config.addInputMap(map); };
         inline void addOutputMap( const GPU_MemoryMap& map ) { _config.addOutputMap(map); };
+        void clearInputOutputMaps();
 
-    protected:
+    private:
         GPU_NVidiaConfiguration _config;
 };
 

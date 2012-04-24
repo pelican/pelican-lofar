@@ -53,7 +53,6 @@ class DedispersionModule : public AsyncronousModule
            public:
               DedispersionKernel( float, float, float, float, unsigned, unsigned );
               void run(const QList<GPU_Param*>& param );
-              void reset();
         };
 
     public:

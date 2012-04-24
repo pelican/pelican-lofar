@@ -25,6 +25,7 @@ class GPU_NVidiaTest : public CppUnit::TestFixture
     public:
         CPPUNIT_TEST_SUITE( GPU_NVidiaTest );
         CPPUNIT_TEST( test_managedCard );
+        CPPUNIT_TEST( test_multipleJobs );
         CPPUNIT_TEST_SUITE_END();
 
     public:
@@ -33,6 +34,7 @@ class GPU_NVidiaTest : public CppUnit::TestFixture
 
         // Test Methods
         void test_managedCard();
+        void test_multipleJobs();
 
     public:
         GPU_NVidiaTest(  );

@@ -202,7 +202,7 @@ void DedispersionModule::dedisperse( DedispersionBuffer* buffer, DedispersionSpe
 
 void DedispersionModule::gpuJobFinished( GPU_Job* job, DedispersionBuffer* buffer, DedispersionKernel* kernel, DedispersionSpectra* dataOut ) {
      dataOut->setInputDataBlobs( buffer->inputDataBlobs() );
-     kernel->reset();
+     kernel->clearInputOutputMaps();
      _kernels.unlock( kernel ); // give up the kernel
      _buffers.unlock( buffer ); // give up the buffer
      if( job->status() != GPU_Job::Failed ) {
@@ -251,11 +251,6 @@ void DedispersionModule::DedispersionKernel::run(const QList<GPU_Param*>& param 
                           _maxshift,
                           _nChans
                         );
-}
-
-void DedispersionModule::DedispersionKernel::reset() {
-    _config.clearInputMaps();
-    _config.clearOutputMaps();
 }
 
 } // namespace lofar
