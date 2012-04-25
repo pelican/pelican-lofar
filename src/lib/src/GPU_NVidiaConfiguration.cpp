@@ -1,5 +1,6 @@
 #include "GPU_NVidiaConfiguration.h"
 #include "GPU_Param.h"
+#include <cuda_runtime_api.h>
 
 
 namespace pelican {
@@ -68,9 +69,9 @@ void* GPU_NVidiaConfiguration::devicePtr( const GPU_MemoryMap& map ) {
 void* GPU_NVidiaConfiguration::devicePtr( const GPU_MemoryMapConst& map ) {
      if( ! _constantParams.contains(map) ) {
          GPU_Param* p = new GPU_Param( map ) ;
-         //if(  cudaPeekAtLastError() ) {
-         //    throw( cudaGetErrorString( cudaPeekAtLastError() ) );
-        // }
+         if(  cudaPeekAtLastError() ) {
+             throw( cudaGetErrorString( cudaPeekAtLastError() ) );
+         }
          _constantParams.insert( map, p );
          p->syncHostToDevice(); // consts sync only on creation
      }
@@ -87,9 +88,9 @@ GPU_Param* GPU_NVidiaConfiguration::_getParam( const GPU_MemoryMap& map ) {
      if( ++_paramIndex >= _params.size() ) {
          // run out of existing params so create a new one
          GPU_Param* p = new GPU_Param( map ) ;
-         //if(  cudaPeekAtLastError() ) {
-         //    throw( cudaGetErrorString( cudaPeekAtLastError() ) );
-         //}
+         if(  cudaPeekAtLastError() ) {
+             throw( cudaGetErrorString( cudaPeekAtLastError() ) );
+         }
          _params.append( p );
         return p;
      }
