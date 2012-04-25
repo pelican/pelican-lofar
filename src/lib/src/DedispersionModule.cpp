@@ -6,7 +6,6 @@
 #include "GPU_MemoryMap.h"
 #include "DedispersionBuffer.h"
 #include "WeightedSpectrumDataSet.h"
-#include "GPU_NVidiaConfiguration.h"
 #include "GPU_Job.h"
 #include "GPU_Kernel.h"
 #include "GPU_Param.h"

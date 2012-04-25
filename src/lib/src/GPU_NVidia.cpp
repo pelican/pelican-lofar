@@ -20,6 +20,7 @@ namespace lofar {
 GPU_NVidia::GPU_NVidia( unsigned int id )
      :  _deviceId(id)
 {
+    _currentConfig = new GPU_NVidiaConfiguration;
     cudaGetDeviceProperties(&_deviceProp, id);
 }
 
@@ -28,9 +29,38 @@ GPU_NVidia::GPU_NVidia( unsigned int id )
  */
 GPU_NVidia::~GPU_NVidia()
 {
+    delete _currentConfig;
     freeMem( _params.values() );
     //cutilDeviceReset();
 }
+
+/*
+void GPU_NVidia::run( GPU_Job* job )
+{
+    // set to this device
+    cudaSetDevice( _deviceId );
+    // execute the kernels
+    foreach( GPU_Kernel* kernel, job->kernels() ) {
+       try { // try and reuse the existing configuration
+           _currentConfig->reset();
+           kernel->run( *this );
+       }
+       catch( const GPUConfigError& ) {
+           // existing configuration is not compatible so
+           // make a new one
+           _currentConfig->freeResources();
+           kernel->run( *this );
+       }
+       cudaDeviceSynchronize();
+       if( ! cudaPeekAtLastError() ) {
+           _currentConfig->syncOutputs();
+       }
+       else {
+           throw( cudaGetErrorString( cudaPeekAtLastError() ) );
+       }
+    }
+}
+*/
 
 void GPU_NVidia::run( GPU_Job* job )
 {

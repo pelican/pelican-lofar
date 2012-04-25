@@ -20,6 +20,7 @@ namespace pelican {
 
 namespace lofar {
 class GPU_Manager;
+class GPU_NVidiaConfiguration;
 
 /**
  * @class GPU_NVidia
@@ -55,6 +56,7 @@ class GPU_NVidia : public GPU_Resource
         QList<GPU_Param*> _currentParams;
         QSet<GPU_Param*> _outputs;
         unsigned int _deviceId;
+        GPU_NVidiaConfiguration* _currentConfig;
 };
 
 } // namespace lofar
