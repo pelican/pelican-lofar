@@ -58,6 +58,7 @@ RFI_Clipper::RFI_Clipper( const ConfigNode& config )
     _zeroDMing = 0;
     _num = 0; // _num is the number of points in the history
     _runningMedian = 0; // initialise the running median
+    _runningRMS = 0; // initialise the running median
     _integratedNewSum = 0;
     _integratedNewSumSq = 0;
     if( config.getOption("zeroDMing", "active" ) == "true" ) {
@@ -235,7 +236,7 @@ void RFI_Clipper::run( WeightedSpectrumDataSet* weightedStokes )
 
       // This is the RMS of the model subtracted data, in the
       // reference frame of the input
-      float spectrumRMS = sqrt(spectrumSumSq/goodChannels - std::pow(spectrumSum,2));
+      double spectrumRMS = sqrt(spectrumSumSq/goodChannels - std::pow(spectrumSum,2));
 
       // If goodChannels is substantially lower than the total number,
       // the rms of the spectrum will also be lower, so it needs to be
@@ -360,6 +361,8 @@ void RFI_Clipper::run( WeightedSpectrumDataSet* weightedStokes )
         // medianDelta is in the reference frame of the incoming data so ok!
         // Store the median value
         _history[_current] = medianDelta;
+        // Store the RMS value
+        _historyRMS[_current] = spectrumRMS;
         _historyNewSum[_current] = newSum;
         // update the history index (ring buffer) 
         _current = ++_current%_maxHistory;
@@ -368,6 +371,7 @@ void RFI_Clipper::run( WeightedSpectrumDataSet* weightedStokes )
         if (_num != _maxHistory ) {
           //          _runningMedian = (_runningMedian * (float) _num + median)/(float) (_num+1);
           _runningMedian = (_runningMedian * (float) _num + medianDelta)/(float) (_num+1);
+          _runningRMS = (_runningRMS * (float) _num + spectrumRMS)/(float) (_num+1);
           // store the integral of _historyNewSum and _historyNewSum^2 from the buffer
           _integratedNewSum += newSum;
           _integratedNewSumSq += pow(newSum,2);
@@ -377,12 +381,14 @@ void RFI_Clipper::run( WeightedSpectrumDataSet* weightedStokes )
         // value and remove the first value from the running median
         else {
           _runningMedian = (_runningMedian * (float) _num - _history[_current] + medianDelta) / (float) _num;
+          _runningRMS = (_runningRMS * (float) _num - _historyRMS[_current] + spectrumRMS) / (float) _num;
         // store the integral of _historyNewSum and _historyNewSum^2 from the buffer
           _integratedNewSum += newSum - _historyNewSum[_current];
           _integratedNewSumSq += pow(newSum,2) - pow(_historyNewSum[_current],2);
         }
-        //        Update the model to the current running median
+        //        Update the model to the current running median and RMS
         _bandPass.setMedian(_runningMedian);
+        _bandPass.setRMS(_runningRMS);
       }
     }
     
@@ -390,7 +396,7 @@ void RFI_Clipper::run( WeightedSpectrumDataSet* weightedStokes )
     // 1. update the model RMS first
     if (goodSamples !=0){
       blobRMS /= goodSamples;
-      _bandPass.setRMS(blobRMS);
+      // _bandPass.setRMS(blobRMS);
     }
     // 2. Use the history of NewSum to compute a running blobSum and
     // blobRMS; blobSum is the value of the running mean of newSum, in

@@ -35,17 +35,33 @@ SigprocStokesWriter::SigprocStokesWriter(const ConfigNode& configNode )
     _filepath = configNode.getOption("file", "filepath");
     _topsubband     = configNode.getOption("topSubbandIndex", "value", "150").toFloat();
     _lbahba     = configNode.getOption("LBA_0_or_HBA_1", "value", "1").toFloat();
-    if (_lbahba == 0) {
-      _fch1     = _clock / (_nRawPols * _nTotalSubbands) * _topsubband;
+    if( configNode.getOption("fch1", "value" ) == "" ){ 
+      if (_lbahba == 0) {
+        _fch1     = _clock / (_nRawPols * _nTotalSubbands) * _topsubband;
+      }
+      else{
+        if (_clock == 200)
+          _fch1     = 100 + _clock / (_nRawPols * _nTotalSubbands) * _topsubband;
+        if (_clock == 160)
+          _fch1     = 160 + _clock / (_nRawPols * _nTotalSubbands) * _topsubband;
+      }
     }
     else{
-      if (_clock == 200)
-        _fch1     = 100 + _clock / (_nRawPols * _nTotalSubbands) * _topsubband;
-      if (_clock == 160)
-        _fch1     = 160 + _clock / (_nRawPols * _nTotalSubbands) * _topsubband;
+      _fch1     = configNode.getOption("fch1", "value", "1400.0").toFloat();
     }
-    _foff     = -_clock / (_nRawPols * _nTotalSubbands) / float(_nChannels);
-    _tsamp    = (_nRawPols * _nTotalSubbands) * _nChannels * _integration / _clock/ 1e6;
+    if( configNode.getOption("foff", "value" ) == "" ){ 
+      _foff     = -_clock / (_nRawPols * _nTotalSubbands) / float(_nChannels);
+    }
+    else{
+      _foff     = configNode.getOption("foff", "value", "1.0").toFloat();
+    }
+    if( configNode.getOption("tsamp", "value" ) == "" ){ 
+      _tsamp    = (_nRawPols * _nTotalSubbands) * _nChannels * _integration / _clock/ 1e6;
+    }
+    else{
+      _tsamp     = configNode.getOption("tsamp", "value", "1.0").toFloat();
+    }
+
     _nPols    = configNode.getOption("params", "nPolsToWrite", "1").toUInt();
     _nchans   = _nChannels * _nSubbands;
     _buffSize = configNode.getOption("params", "bufferSize", "5120").toUInt();

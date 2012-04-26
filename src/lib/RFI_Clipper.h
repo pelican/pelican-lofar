@@ -50,6 +50,7 @@ class RFI_Clipper : public AbstractModule
 // flag for removing median from each spectrum, equivalent to the zero-DMing technique
         int _zeroDMing; 
         float _runningMedian; // the running average of the median
+        float _runningRMS; // the running average of the median
         float _integratedNewSum; // the integrated value of the sum of the spectrum
         float _integratedNewSumSq; // the integrated value of the sum of the spectrum
 };
