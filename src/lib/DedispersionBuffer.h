@@ -30,7 +30,7 @@ class DedispersionBuffer
         /// return the number of samples currently stored in the buffer
         unsigned int numSamples() const { return _sampleCount; };
 
-        size_t size() const { return _data.size() * sizeof(float); };
+        size_t size() const { return _timedata.size() * sizeof(float); };
         void setSampleCapacity(unsigned int maxSamples);
 
         /// return the max number of samples that can be fitted in the buffer
@@ -64,7 +64,7 @@ class DedispersionBuffer
         inline const QList< WeightedSpectrumDataSet* >& inputDataBlobs() const { 
                 return _inputBlobs; };
 
-        QVector<float>& getData() { return _data; };
+        QVector<float>& getData() { return _timedata; };
         inline float rms() const { return _rms; };
         inline float mean() const { return _mean; };
 
@@ -74,7 +74,7 @@ class DedispersionBuffer
         unsigned int _addSamples( WeightedSpectrumDataSet* data, unsigned *sampleOffset,
                                   unsigned numSamples /* max number fo samples to insert */ );
         QList<WeightedSpectrumDataSet* > _inputBlobs;
-        QVector<float> _data;
+        QVector<float> _timedata;
         unsigned int _nsamp;
         unsigned int _sampleCount;
         unsigned int _sampleSize;
