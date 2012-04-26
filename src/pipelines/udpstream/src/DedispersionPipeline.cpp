@@ -61,6 +61,8 @@ DedispersionPipeline::~DedispersionPipeline()
 void DedispersionPipeline::init()
 {
     ConfigNode c = config( QString("DedispersionPipeline") );
+    // history indicates the number of datablobs to keep (iterations of run())
+    // it should be Dedidpersion Buffer size (in Blobs)*number of Dedispersion Buffers
     unsigned int history= c.getOption("history", "value", "10").toUInt();
 
     // Create modules
@@ -76,6 +78,7 @@ void DedispersionPipeline::init()
     // Create local datablobs
     _spectra = (SpectrumDataSetC32*) createBlob("SpectrumDataSetC32");
     _stokesData = createBlobs<SpectrumDataSetStokes>("SpectrumDataSetStokes", history);
+    _intStokes = (SpectrumDataSetStokes*) createBlob("SpectrumDataSetStokes");
     _stokesBuffer = new LockingPtrContainer<SpectrumDataSetStokes>(&_stokesData);
     _dedispersedData = createBlobs<DedispersionSpectra >("DedispersionSpectra", history);
     _dedispersedDataBuffer = new LockingPtrContainer<DedispersionSpectra>(&_dedispersedData);
@@ -85,8 +88,8 @@ void DedispersionPipeline::init()
 
 
     // Request remote data
-    requestRemoteData( _streamIdentifier, history );
-
+    requestRemoteData( _streamIdentifier, history + 1 ); // +1 to ensure no data overwrite
+							 // before the first data lock
 }
 
 void DedispersionPipeline::run(QHash<QString, DataBlob*>& remoteData)
@@ -114,6 +117,9 @@ void DedispersionPipeline::run(QHash<QString, DataBlob*>& remoteData)
     _rfiClipper->run(weightedIntStokes);
     dataOutput(&(weightedIntStokes->stats()), "RFI_Stats");
 
+    _stokesIntegrator->run(stokes, _intStokes);
+    dataOutput(_intStokes, "SpectrumDataSetStokes");
+
     // start the asyncronous chain of events
     _dedispersionModule->dedisperse( weightedIntStokes, _dedispersedDataBuffer );
 
@@ -121,11 +127,16 @@ void DedispersionPipeline::run(QHash<QString, DataBlob*>& remoteData)
 
 void DedispersionPipeline::dedispersionAnalysis( DataBlob* blob ) {
 //qDebug() << "analysis()";
+    std::cout << "analysis" << std::endl;
     DedispersionDataAnalysis result;
     DedispersionSpectra* data = static_cast<DedispersionSpectra*>(blob);
     if ( _dedispersionAnalyser->analyse(data, &result) )
     {
+    std::cout << "analysis - found something!" << std::endl;
         dataOutput( &result );
+        //foreach( WeightedDataBlob* d, result.data()->inputDataBlobs()) {
+	//    dataOutput( *d, "SignalFoundSpectrum" )
+	//}
     }
 }
 
