@@ -43,6 +43,9 @@ class DedispersionDataAnalysis : public DataBlob
         /// reset the Analysis data and set a different base data layer
         void reset( const DedispersionSpectra* );
 
+	/// return the underlying data object
+	inline const DedispersionSpectra* data() const { return _data; };
+
         /// return a list of events found
         const QList<DedispersionEvent>& events() const;
 
