@@ -27,7 +27,10 @@ namespace lofar {
 class RFI_Clipper : public AbstractModule
 {
     public:
+	/// Constructor
         RFI_Clipper( const ConfigNode& config );
+
+	/// Destructor
         ~RFI_Clipper();
         void run( WeightedSpectrumDataSet* weightedStokes );
         const BandPass& bandPass() const { return _bandPass; }; // return the BandPass Filter in use

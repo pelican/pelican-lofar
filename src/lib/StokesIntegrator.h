@@ -24,9 +24,13 @@ class SpectrumDataSetStokes;
 /**
  * @class StokesIntegrator
  *
- * @brief
+ * @details Retrieves desired integration step size from the config file and applies it to the stokes data.
+ * 
+ * Relevant config option from xml file 
+ @verbatim
+ code
+ @endverbatim
  *
- * @details
  */
 
 class StokesIntegrator : public AbstractModule

@@ -2,6 +2,7 @@
 #include "GPU_Manager.h"
 #include "GPU_Job.h"
 #include "GPU_TestCard.h"
+#include <boost/bind.hpp>
 
 
 namespace pelican {
@@ -32,6 +33,27 @@ void GPU_ManagerTest::tearDown()
 {
 }
 
+void GPU_ManagerTest::test_throw()
+{
+     // Use Case:
+     // Single gpu card
+     // Sumbit a single job that throws
+     // Expect:
+     // throw to be trapped and passed in the Job info
+     GPU_Manager m; // a single Test card
+     GPU_TestCard* card = new GPU_TestCard;
+     m.addResource( card );
+     CPPUNIT_ASSERT_EQUAL( 1, m.freeResources() );
+     GPU_Job testJob1;
+     m.submit(&testJob1);
+     do{ sleep(1); } while( testJob1.status() == GPU_Job::Queued );
+     CPPUNIT_ASSERT_EQUAL( 0, m.freeResources() );
+     QString errorMsg("Job Throwing");
+     card->throwJob( errorMsg );
+     do{ sleep(1); } while( testJob1.status() != GPU_Job::Failed );
+     CPPUNIT_ASSERT_EQUAL( errorMsg.toStdString() , testJob1.error() );
+}
+
 void GPU_ManagerTest::test_submit()
 {
      // Use Case:
@@ -48,6 +70,8 @@ void GPU_ManagerTest::test_submit()
      CPPUNIT_ASSERT_EQUAL( 1, m.freeResources() );
      GPU_Job testJob1;
      GPU_Job testJob2;
+     testJob2.addCallBack( boost::bind( &GPU_ManagerTest::callBackTest,this ) );
+     _callbackCount = 0;
      m.submit(&testJob1);
      do{ sleep(1); } while( testJob1.status() == GPU_Job::Queued );
      CPPUNIT_ASSERT_EQUAL( 0, m.jobsQueued() );
@@ -63,9 +87,14 @@ void GPU_ManagerTest::test_submit()
      CPPUNIT_ASSERT_EQUAL( &testJob2, card->currentJob() );
      card->completeJob();
      do{ sleep(1); } while( testJob2.status() != GPU_Job::Finished );
+     CPPUNIT_ASSERT_EQUAL( 1, _callbackCount );
      CPPUNIT_ASSERT_EQUAL( 1, m.freeResources() );
      CPPUNIT_ASSERT_EQUAL( 0, m.jobsQueued() );
 
+}
+
+void GPU_ManagerTest::callBackTest() {
+     ++_callbackCount;
 }
 
 void GPU_ManagerTest::test_submitMultiCards()

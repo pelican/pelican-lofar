@@ -22,6 +22,7 @@ namespace pelican {
 class ConfigNode;
 
 namespace lofar {
+class SpectrumDataSetStokes;
 
 /**
  * @class SubbandSpectrumWidget
@@ -41,9 +42,13 @@ class SpectrumDataSetWidget : public DataBlobWidget, public Ui::SpectrumDataSetV
 
         void updateData(DataBlob* data);
 
+    protected slots:
+        void doPlot();
+
     private:
         void _plot(const vector<double>& vec);
 
+        SpectrumDataSetStokes* _spectra; // the current data set
         vector<double> _spectrumAmp;
         unsigned _integrationCount;
 };

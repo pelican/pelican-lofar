@@ -73,17 +73,17 @@ class DedispersedTimeSeries : public DataBlob
         /// Returns a the value for the specified dm and sample
         DedispersedSeries<T>* samples(unsigned dm)
         {
-        	if (_values.size() >= dm)
-        		return &_values[dm];
-        	else return NULL;
+            if (_values.size() >= dm)
+                return &_values[dm];
+            else return NULL;
         }
 
         /// Returns a the value for the specified dm and sample (const overload)
         const DedispersedSeries<T>* samples (unsigned dm) const
         {
-        	if (_values.size() >= dm)
-        		return &_values[dm];
-        	else return NULL;
+            if (_values.size() >= dm)
+                return &_values[dm];
+            else return NULL;
         }
 
     protected:

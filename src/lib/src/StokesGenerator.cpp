@@ -26,9 +26,9 @@ StokesGenerator::~StokesGenerator()
 
 /**
  * @details
- * Converts a collection of spectra from x,y polarisation to stokes
- * parameters.
+ *
  */
+
 void StokesGenerator::run(const SpectrumDataSetC32* channeliserOutput,
         SpectrumDataSetStokes* stokes)
 {
@@ -36,6 +36,7 @@ void StokesGenerator::run(const SpectrumDataSetC32* channeliserOutput,
     unsigned nSamples = channeliserOutput->nTimeBlocks();
     unsigned nSubbands = channeliserOutput->nSubbands();
     unsigned nChannels = channeliserOutput->nChannels();
+    Q_ASSERT( channeliserOutput->nPolarisations() >= 2 );
 
     stokes->setLofarTimestamp(channeliserOutput->getLofarTimestamp());
     stokes->setBlockRate(channeliserOutput->getBlockRate());
@@ -55,9 +56,9 @@ void StokesGenerator::run(const SpectrumDataSetC32* channeliserOutput,
             unsigned dataPolIndexY = channeliserOutput->index( s, nSubbands, 
                                                                1,2,
                                                                t, nChannels);
-            unsigned indexStokes = stokes->index( s, nSubbands,
-                                                  0,2,
-                                                  t, nChannels );
+            //unsigned indexStokes = stokes->index( s, nSubbands,
+            //                                      0,2,
+            //                                      t, nChannels );
             //dataPolX = channeliserOutput->spectrumData(t, s, 0);
             //dataPolY = channeliserOutput->spectrumData(t, s, 1);
             dataPolX = &dataPolDataBlock[dataPolIndexX];
@@ -67,8 +68,9 @@ void StokesGenerator::run(const SpectrumDataSetC32* channeliserOutput,
             Q = stokes->spectrumData(t, s, 1);
             U = stokes->spectrumData(t, s, 2);
             V = stokes->spectrumData(t, s, 3);
-            // std::cout << nSamples << " " << t << " " << s  <<std::endl;
-            // std::cout << dataPolX << " " << dataPolY << std::endl;
+            //std::cout << "nSamples=" << nSamples << " t=" << t << " s=" << s;
+            //std::cout << "  dataPolIndexX=" << dataPolIndexX;
+            //std::cout << "  dataPolIndexY=" << dataPolIndexY << std::endl;
             // std::cout << I << " "<< Q <<" "<< U << " "<< V <<std::endl;
             for (unsigned c = 0; c < nChannels; ++c) {
                 // XxYstar=dataPolX[c]*conj(dataPolY[c]);

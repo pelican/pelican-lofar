@@ -23,10 +23,8 @@ class SpectrumDataSetStokes;
 /**
  * @class StokesGenerator
  *
- * @brief
- * Module for converting polarisations from X,Y to stokes parameters.
- *
- * @details
+ * @details Module used for converting a collection of spectra from X,Y polarisations to stokes parameters.
+
  *
  */
 

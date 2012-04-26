@@ -9,7 +9,12 @@ set(lib_src
     src/BandPassOutput.cpp
     src/BandPassRecorder.cpp
     src/BlobStatistics.cpp
-#    src/DedispersionModule.cpp
+    src/DedispersionAnalyser.cpp
+    src/DedispersionDataAnalysis.cpp
+    src/DedispersionDataAnalysisOutput.cpp
+    src/DedispersionEvent.cpp
+    src/DedispersionBuffer.cpp
+    src/DedispersionSpectra.cpp
     src/EmbraceChunker.cpp
     src/FilterBankHeader.cpp
     src/FilterBankAdapter.cpp
@@ -25,6 +30,7 @@ set(lib_src
     src/LofarStationConfiguration.cpp
     src/LofarStationConfigurationAdapter.cpp
     src/PelicanBlobClient.cpp
+    src/ProcessingChain.cpp
     src/PumaOutput.cpp
     src/PolyphaseCoefficients.cpp
     src/RFI_Clipper.cpp
@@ -37,32 +43,32 @@ set(lib_src
     src/SigprocStokesWriter.cpp
     src/LofarDataSplittingChunker.cpp
     src/WeightedSpectrumDataSet.cpp
-    src/AsyncronousTask.cpp
-    src/GPU_Task.cpp
-    src/GPU_Kernel.cpp
     src/GPU_MemoryMap.cpp
-#    src/AbstractGPU_Module.cpp
 )
 if(CUDA_FOUND)
     list(APPEND lib_src
+            src/AsyncronousModule.cpp
+            src/DedispersionModule.cpp
+            src/DedispersionModule.cpp
+            src/GPU_Param.cpp
             src/GPU_NVidia.cpp
             src/GPU_NVidiaConfiguration.cpp
+            src/GPU_Kernel.cpp
         )
 endif(CUDA_FOUND)
 
 set(lib_moc_headers
-    AsyncronousTask.h
-    GPU_Task.h
 )
-QT4_WRAP_CPP(moc_src ${lib_moc_headers})
+#QT4_WRAP_CPP(moc_src ${lib_moc_headers})
 
 set(lib_cuda_src
+    DedispersionKernel.cu
    )
 if(CUDA_FOUND)
     include_directories(${CUDA_INCLUDE_DIRS})
-#    CUDA_ADD_LIBRARY(ampp-cuda STATIC ${lib_cuda_src})
-#   set(cuda_libs ampp-cuda ${CUDA_LIBRARIES} )
-    set(cuda_libs ${CUDA_LIBRARIES} )
+    CUDA_ADD_LIBRARY(ampp-cuda STATIC ${lib_cuda_src})
+   set(cuda_libs ampp-cuda ${CUDA_LIBRARIES} )
+#    set(cuda_libs ${CUDA_LIBRARIES} )
 else(CUDA_FOUND)
     set(cuda_libs)
 endif(CUDA_FOUND)

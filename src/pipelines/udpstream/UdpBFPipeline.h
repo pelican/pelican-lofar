@@ -27,7 +27,7 @@ namespace lofar {
 /**
  * @class UdpBFPipeline
  *
- * @brief
+ * @brief The UdpBF Pipeline.
  *
  * @details
  *
@@ -35,7 +35,9 @@ namespace lofar {
 class UdpBFPipeline : public AbstractPipeline
 {
     public:
+	/// Constructor
         UdpBFPipeline( const QString& streamIdentifier );
+	/// Destructor
         ~UdpBFPipeline();
 
         /// Initialises the pipeline.

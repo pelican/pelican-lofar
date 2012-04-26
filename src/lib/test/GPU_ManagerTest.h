@@ -26,6 +26,7 @@ class GPU_ManagerTest : public CppUnit::TestFixture
         CPPUNIT_TEST_SUITE( GPU_ManagerTest );
         CPPUNIT_TEST( test_submit );
         CPPUNIT_TEST( test_submitMultiCards );
+        CPPUNIT_TEST( test_throw );
         CPPUNIT_TEST_SUITE_END();
 
     public:
@@ -35,12 +36,17 @@ class GPU_ManagerTest : public CppUnit::TestFixture
         // Test Methods
         void test_submit();
         void test_submitMultiCards();
+        void test_throw();
+
+        // test aids
+        void callBackTest();
 
     public:
         GPU_ManagerTest(  );
         ~GPU_ManagerTest();
 
     private:
+        int _callbackCount;
 };
 
 } // namespace lofar

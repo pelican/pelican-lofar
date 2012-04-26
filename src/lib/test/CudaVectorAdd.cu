@@ -9,7 +9,7 @@ __global__ void VecAdd(const float* A, const float* B, float* C, int N)
         C[i] = A[i] + B[i];
 }
 
-// C interface wrapper - A B C are dudaMalloc'ed references
+// C interface wrapper - A B C are cudaMalloc'ed references
 extern "C" void vecAdd( const float* A, const float* B, float* C, int size ) {
     int threadsPerBlock = 256;
     int blocksPerGrid = (size + threadsPerBlock - 1) / threadsPerBlock;

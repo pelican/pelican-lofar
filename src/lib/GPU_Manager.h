@@ -43,7 +43,7 @@ class GPU_Manager
         ~GPU_Manager();
 
         /// submit a job to the queue
-        void submit( GPU_Job* job ); 
+        GPU_Job* submit( GPU_Job* job ); 
 
         /// add a GPU resource (e.g. an NVidia card) to manage
         //  ownership is transferred to the manager
@@ -55,6 +55,9 @@ class GPU_Manager
 
         /// return the number of jobs that are in the queue
         int jobsQueued() const;
+
+        /// return number of resources managed
+        int resources() const;
 
     private:
         void _matchResources();

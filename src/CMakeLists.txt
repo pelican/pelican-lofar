@@ -34,6 +34,7 @@ include(compilerDefaults)
 include(cmake/tags.cmake)
 
 set(CUDA_PROPAGATE_HOST_FLAGS OFF)
+set(CUDA_NVCC_FLAGS --ptxas-options=-v --compiler-options -fPIC)
 
 # === Find Dependencies.
 find_package(Pelican REQUIRED)

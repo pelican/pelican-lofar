@@ -9,7 +9,10 @@ set(lofarTestLib_src
     src/LofarUdpEmulator.cpp
     src/LofarEmulatorDataSim.cpp
     src/GPU_TestCard.cpp
+    src/LofarPipelineTester.cpp
+    src/LofarDataBlobGenerator.cpp
 )
+
 # CUDA routines
 set(cuda_src
    CudaVectorAdd.cu
@@ -18,6 +21,7 @@ if( CUDA_FOUND )
     CUDA_COMPILE( cuda_obj ${cuda_src} )
     list(APPEND lofarTestLib_src 
          src/TestCudaVectorAdd.cpp
+         src/DedispersionDataGenerator.cpp
         )
 endif( CUDA_FOUND )
 
@@ -33,23 +37,29 @@ target_link_libraries(lofarTestLib
 set(lofarTest_src
     src/CppUnitMain.cpp
     src/GPU_ManagerTest.cpp
+    src/GPU_MemoryMapTest.cpp
     src/AdapterTimeSeriesDataSetTest.cpp
     src/BandPassTest.cpp
     src/BinMapTest.cpp
     src/DataStreamingTest.cpp
     #src/FilterBankAdapterTest.cpp
     #src/LofarChunkerTest.cpp
+    src/LockingContainerTest.cpp;
     src/LofarDataSplittingChunkerTest.cpp
     #src/PelicanBlobClientTest.cpp
     src/PPF_ChanneliserTest.cpp
     src/PPF_CoefficientsTest.cpp
     src/PumaOutputTest.cpp
-    src/RFI_ClipperTest.cpp
+    #src/RFI_ClipperTest.cpp
     src/SpectrumDataSetTest.cpp
 )
 if(CUDA_FOUND)
     list(APPEND lofarTest_src
             src/GPU_NVidiaTest.cpp
+            src/GPU_ParamTest.cpp
+            src/DedispersionBufferTest.cpp
+            src/DedispersionModuleTest.cpp
+            src/DedispersionAnalyserTest.cpp
         )
 endif(CUDA_FOUND)
 

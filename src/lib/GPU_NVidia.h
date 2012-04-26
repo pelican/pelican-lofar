@@ -4,11 +4,9 @@
 #ifdef CUDA_FOUND
 
 #include "GPU_Resource.h"
-#include "GPU_MemoryMap.h"
 #include <cuda.h>
 #include <cuda_runtime_api.h>
-#include <QHash>
-#include <QList>
+#include "GPU_NVidiaConfiguration.h"
 
 /**
  * @file GPU_NVidia.h
@@ -18,7 +16,6 @@ namespace pelican {
 
 namespace lofar {
 class GPU_Manager;
-class GPU_NVidiaConfiguration;
 
 /**
  * @class GPU_NVidia
@@ -39,17 +36,15 @@ class GPU_NVidia : public GPU_Resource
 
         static void initialiseResources(GPU_Manager* manager);
 
-    protected:
-        void setupConfiguration ( const GPU_NVidiaConfiguration* c );
-        void freeMem( const QList<void*>& pointers );
-
+        // call these functions from the kernel run() method to get GPU
+        // memory resources.
+        template<class MemMap> 
+            void* devicePtr( const MemMap& map ) { return _currentConfig->devicePtr( map ); }
 
     private:
         cudaDeviceProp _deviceProp;
-        QHash<GPU_MemoryMap, void*> _memPointers;
-        QList<void*> _currentDevicePointers;
-        const GPU_NVidiaConfiguration* _currentConfig;
         unsigned int _deviceId;
+        GPU_NVidiaConfiguration* _currentConfig;
 };
 
 } // namespace lofar

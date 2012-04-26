@@ -7,10 +7,10 @@
 #include "TimeSeriesDataSet.h"
 #include "AdapterTimeSeriesDataSet.h"
 #include <QProcess>
-#include <QCoreApplication>
 #include <QFile>
 #include <QList>
 #include <QString>
+#include <QCoreApplication>
 
 
 namespace pelican {
@@ -33,16 +33,12 @@ UdpBFPipelineIntegrationTest::~UdpBFPipelineIntegrationTest() {
 }
 
 void UdpBFPipelineIntegrationTest::setUp() {
-    int argc = 0;
-    char* argv[1];
-    _app = new QCoreApplication(argc,argv);
     _server = new QProcess();
     _server->setProcessChannelMode(QProcess::ForwardedChannels);
 }
 
 void UdpBFPipelineIntegrationTest::tearDown() {
     delete _server;
-    delete _app;
 }
 
 void UdpBFPipelineIntegrationTest::startServer() {
@@ -103,7 +99,7 @@ void UdpBFPipelineIntegrationTest::test_topdownInit()
         startServer();
         client1.startup();
         client2.startup();
-        while( ! client1.count() ) { _app->processEvents(); usleep(5); }
+        while( ! client1.count() ) { QCoreApplication::processEvents(); usleep(5); }
         clientCalledCount1 = client1.count();
         CPPUNIT_ASSERT( clientCalledCount1 >= 1 );
 
@@ -117,7 +113,7 @@ void UdpBFPipelineIntegrationTest::test_topdownInit()
         data.wait();
         clientCalledCount1 = client1.count();
         data.start();
-        do { _app->processEvents(); usleep(5); }
+        do { QCoreApplication::processEvents(); usleep(5); }
         while( !( clientCalledCount1 < client1.count()) );
         clientCalledCount1 = client1.count();
 
@@ -131,7 +127,7 @@ void UdpBFPipelineIntegrationTest::test_topdownInit()
         startServer();
         sleep(1);
         CPPUNIT_ASSERT( _server->pid() != 0 );
-        do { _app->processEvents(); usleep(5); }
+        do { QCoreApplication::processEvents(); usleep(5); }
         while( !( clientCalledCount1 < client1.count()) );
         clientCalledCount1 = client1.count();
 
@@ -146,7 +142,7 @@ void UdpBFPipelineIntegrationTest::test_topdownInit()
         do{ sleep(1); }
         while( ( data.dataCount() - start ) < bufferSize );
         client1.start();
-        do { _app->processEvents(); usleep(5); }
+        do { QCoreApplication::processEvents(); usleep(5); }
         while( !( clientCalledCount1 < client1.count()) );
         clientCalledCount1 = client1.count();
         data.terminate();

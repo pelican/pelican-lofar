@@ -32,7 +32,7 @@ set(OpenMP_C_FLAG_CANDIDATES
   #Microsoft Visual Studio
   "/openmp"
   #Intel windows
-  "-Qopenmp"
+  #"-Qopenmp"
   #Intel
   "-openmp"
   #Gnu

@@ -27,41 +27,27 @@ class SpectrumDataSetC32;
 /**
  * @class PPFChanneliser
  *
- * @brief
- * Module to channelise a time stream data blob.
+ * @brief Module to channelise a time stream data blob.
  *
- * @details
- * Channelises time stream data using a polyphase channelising filter.
- * For configuration info see @ref page0
+ * @details Channelises time stream data using a polyphase channelising filter.
  *
- */
-
-/*
- * @page page0 PPFChanneliser
+ * Example configuration node :
  *
- * @section config Configuration
- */
-
-/** @details Example configuration node.
+ @verbatim
+ 		<PPFChanneliser name="">
+ 			<channels number="512"/>
+ 			<processingThreads number="2"/>
+ 			<filter nTaps="8" filterWindow="kaiser"/>
+ 		</PPFChanneliser>
+ @endverbatim
  *
- * @verbatim
- * 		<PPFChanneliser name="">
- * 			<channels number="512"/>
- * 			<processingThreads number="2"/>
- * 			<filter nTaps="8" filterWindow="kaiser"/>
- * 		</PPFChanneliser>
- * @endverbatim
+ * - @b channels: The number of channels generated in the spectra.
  *
- * - channels: The number of channels generated in the spectra.
+ * - @b processingThreads: The number of threads to parallelise over.
  *
- * - processingThreads: The number of threads to parallelise over.
- *
- * - filter: Options for FIR filer coefficients.
- *     - nTaps: Number of filter taps in the PPF coefficient data
- *     - filterWindow: The filter window type used in generating FIR filer
- *       coefficients. Possible options are: "kaiser" (default), "gaussian",
- *       "blackman" and "hamming".
- *
+ * - @b filter: Options for FIR filer coefficients.
+ *     - @i nTaps: Number of filter taps in the PPF coefficient data
+ *     - @i filterWindow: The filter window type used in generating FIR filter coefficients. Possible options are: "kaiser" (default), "gaussian", "blackman" and "hamming".
  *
  */
 

@@ -27,36 +27,28 @@ class TimeSeriesDataSetC32;
  *
  * @ingroup pelican_lofar
  *
- * @brief
- * Adapter to deserialise chunks of UDP packets from a LOFAR station RSP board.
+ * @brief Adapter to deserialise chunks of UDP packets from a LOFAR station RSP board.
  *
- * @details
- * Adapter to deserialise chunks of UDP packets from a LOFAR station RSP board.
+ * @details Example configuration node:
+ @verbatim
+		<AdapterTimeStream name="">
+			<fixedSizePackets value="true|false"/>
+			<sampleSize bits=""/>
+			<samplesPerPacket number=""/>
+			<packetsPerChunk number=""/>
+			<samplesPerTimeBlock number=""/>
+			<subbands number=""/>
+			<polarisations number=""/>
+		<\AdapterTimeStream>
+@endverbatim
  *
- * \section Configuration:
- *
- * Example configuration node:
- *
- * \verbatim
- *		<AdapterTimeStream name="">
- *			<fixedSizePackets value="true|false"/>
- *			<sampleSize bits=""/>
- *			<samplesPerPacket number=""/>
- *			<packetsPerChunk number=""/>
- *			<samplesPerTimeBlock number=""/>
- *			<subbands number=""/>
- *			<polarisations number=""/>
- *		<\AdapterTimeStream>
- * \verbatim
- *
- * - samplesPerPacket: Number of (time) samples per packet.
- * - fixedSizePackets: Specify if UDP packets are fixed size or not.
- * - sampleSize: Number of bits per sample. (Samples are assumed to be complex
- *               pairs of the number of bits specified).
- * - packetsPerChunk: Number of UDP packets in each input data chunk.
- * - samplesPerTimeBlock: Number of time samples to put in a block.
- * - subbands: Number of sub-bands per packet.
- * - polarisations: Number of polarisations per packet.
+ * - @b samplesPerPacket: Number of (time) samples per packet.
+ * - @b fixedSizePackets: Specify if UDP packets are fixed size or not.
+ * - @b sampleSize: Number of bits per sample. (Samples are assumed to be complex pairs of the number of bits specified).
+ * - @b packetsPerChunk: Number of UDP packets in each input data chunk.
+ * - @b samplesPerTimeBlock: Number of time samples to put in a block.
+ * - @b subbands: Number of sub-bands per packet.
+ * - @b polarisations: Number of polarisations per packet.
  */
 
 class AdapterTimeSeriesDataSet : public AbstractStreamAdapter
@@ -68,10 +60,10 @@ class AdapterTimeSeriesDataSet : public AbstractStreamAdapter
         typedef std::complex<Real> Complex;
 
     public:
-        /// Constructs a new AdapterTimeStream.
+        /// Constructor
         AdapterTimeSeriesDataSet(const ConfigNode& config);
 
-        /// Destroys the AdapterTimeStream.
+        /// Destructor
         ~AdapterTimeSeriesDataSet() {}
 
         /// Method to deserialise a LOFAR time stream data.

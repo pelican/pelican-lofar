@@ -61,7 +61,7 @@ LofarPelicanClientApp::LofarPelicanClientApp( int argc, char** argv,
             std::cout << "warning: unnamed server specified" << std::endl;
         }
         _clients.insert(element.attribute("name"), 
-                        new ThreadedDataBlobClient(ConfigNode(element)));
+                        new ThreadedDataBlobClient(ConfigNode(element,0)));
     }
 
     // subscribe servers to the specified streams

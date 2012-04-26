@@ -27,8 +27,12 @@ RFI_Clipper::RFI_Clipper( const ConfigNode& config )
     // read in any fixed file data
     QString file = config.getOption("BandPassData", "file", "");
     if( file != "" && _active ) {
-        if(! QFile::exists(file))
-            throw(QString("RFI_Clipper: File \"" + file + "\" does not exist"));
+        try {
+            file=config.searchFile(file);
+        }
+        catch( QString e ) {
+            throw(QString("RFI_Clipper: " + e ));
+        }
 
         QFile dataFile(file);
         if( ! dataFile.open(QIODevice::ReadOnly | QIODevice::Text) )
@@ -93,9 +97,6 @@ RFI_Clipper::~RFI_Clipper()
   /**                                                                                                                                       
    * @details The following if statement from RFI_Clipper.cpp tests the channels for abnormal intensity spikes.                             
    * @verbatim
-   /**                                                                                                                                       
-   * @details The following if statement from RFI_Clipper.cpp tests the channels for abnormal intensity spikes.                             
-   * @verbatim                                                                                                                              
    if (I[index + c] - medianDelta > margin ) {                                                                                             
             I[index + c] = 0.0;                                                                                                           
             W[index +c] = 0.0;                                                                                                            
@@ -147,7 +148,7 @@ void RFI_Clipper::run( WeightedSpectrumDataSet* weightedStokes )
     unsigned nPolarisations = stokesAll->nPolarisations();
     unsigned nBins = nChannels * nSubbands;
     unsigned goodSamples = 0;
-    float modelRMS = _bandPass.rms();
+    //float modelRMS = _bandPass.rms();
     // This has all been tested..
     _map.reset( nBins );
     _map.setStart( _startFrequency );

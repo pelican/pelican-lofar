@@ -41,6 +41,10 @@ void GPU_Manager::addResource(GPU_Resource* r) {
     _matchResources();
 }
 
+int GPU_Manager::resources() const {
+    return _resources.size();
+}
+
 void GPU_Manager::_matchResources() {
      // ensure _resourceMutex is locked before calling this 
      // function
@@ -53,10 +57,28 @@ void GPU_Manager::_matchResources() {
 
 void GPU_Manager::_runJob( GPU_Resource* r, GPU_Job* job ) {
     job->setStatus( GPU_Job::Running );
-    r->exec(job);
-    job->setStatus( GPU_Job::Finished );
+    try {
+        r->exec(job);
+        job->setStatus( GPU_Job::Finished );
+    } 
+    catch( const QString& e ) {
+        job->setError( e.toStdString() );
+        job->setStatus( GPU_Job::Failed );
+    }
+    catch( const std::string& e ) {
+        job->setError( e );
+        job->setStatus( GPU_Job::Failed );
+    }
+    catch( const char* e ) {
+        job->setError( std::string(e) );
+        job->setStatus( GPU_Job::Failed );
+    }
     job->emitFinished();
     _resourceFree( r );
+    // execute any job callbacks
+    foreach( const boost::function0<void>& fn, job->callBacks() ) {
+        fn();
+    }
 }
 
 int GPU_Manager::freeResources() const {
@@ -69,12 +91,13 @@ int GPU_Manager::jobsQueued() const {
     return _queue.size();
 }
 
-void GPU_Manager::submit( GPU_Job* job) {
+GPU_Job* GPU_Manager::submit( GPU_Job* job) {
     job->setStatus( GPU_Job::Queued );
     job->setAsRunning(); // mark job as being dealt with
     QMutexLocker lock(&_resourceMutex);
     _queue.append(job);
     _matchResources();
+    return job;
 } 
 
 void GPU_Manager::_resourceFree( GPU_Resource* res) {

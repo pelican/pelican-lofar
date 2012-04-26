@@ -4,6 +4,7 @@
 #include <QtCore/QList>
 #include "pelican/core/AbstractPipeline.h"
 #include "pelican/utility/LockingCircularBuffer.hpp"
+#include "LockingPtrContainer.hpp"
 #include "PPFChanneliser.h"
 #include "StokesGenerator.h"
 #include "RFI_Clipper.h"
@@ -12,6 +13,10 @@
 #include "TimeSeriesDataSet.h"
 #include "SpectrumDataSet.h"
 #include "SigprocStokesWriter.h"
+#include "DedispersionModule.h"
+#include "DedispersionSpectra.h"
+#include "DedispersionAnalyser.h"
+#include "DedispersionDataAnalysisOutput.h"
 
 
 /**
@@ -26,7 +31,7 @@ namespace lofar {
  * @class DedispersionPipeline
  *  
  * @brief
- *     A deeispersion pipeline for streaming TimeSeries bemaformed Data
+ *     A dedispersion pipeline for streaming TimeSeries bemaformed Data
  * @details
  * 
  */
@@ -43,6 +48,12 @@ class DedispersionPipeline : public AbstractPipeline
         /// Runs the pipeline.
         void run(QHash<QString, DataBlob*>& remoteData);
 
+        /// called internally to free up DataBlobs after they are finished with
+        void updateBufferLock( const QList<DataBlob*>& );
+
+    protected:
+        void dedispersionAnalysis( DataBlob* data );
+
     private:
         QString _streamIdentifier;
 
@@ -51,16 +62,20 @@ class DedispersionPipeline : public AbstractPipeline
         StokesGenerator* _stokesGenerator;
         StokesIntegrator* _stokesIntegrator;
         RFI_Clipper* _rfiClipper;
+        DedispersionModule* _dedispersionModule;
+        DedispersionAnalyser* _dedispersionAnalyser;
 
         /// Local data blobs
-        SpectrumDataSetC32* spectra;
+        SpectrumDataSetC32* _spectra;
         QList<SpectrumDataSetC32*> _spectraBuffer;
+        QList<DedispersionSpectra*> _dedispersedData;
+        LockingPtrContainer<DedispersionSpectra>* _dedispersedDataBuffer;
         TimeSeriesDataSetC32* timeSeries;
-        SpectrumDataSetStokes* stokes;
         QList<SpectrumDataSetStokes*> _stokesData;
-        LockingCircularBuffer<SpectrumDataSetStokes*>* _stokesBuffer;
-        SpectrumDataSetStokes* intStokes;
-        WeightedSpectrumDataSet* weightedIntStokes;
+        LockingPtrContainer<SpectrumDataSetStokes>* _stokesBuffer;
+        QList<WeightedSpectrumDataSet*> _weightedData;
+        LockingPtrContainer<WeightedSpectrumDataSet>* _weightedDataBuffer;
+
 };
 
 } // namespace lofar

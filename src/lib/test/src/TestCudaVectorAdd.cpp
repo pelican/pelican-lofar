@@ -1,4 +1,5 @@
 #include "TestCudaVectorAdd.h"
+#include "GPU_NVidia.h"
 
 extern "C" void vecAdd( const float*, const float*, float*, int );
 
@@ -22,8 +23,9 @@ TestCudaVectorAdd::~TestCudaVectorAdd()
 {
 }
 
-void TestCudaVectorAdd::run( const QList<void*>& args  ) {
-     vecAdd( (const float*)args[0], (const float*)args[1], (float*)args[2], 2 );
+void TestCudaVectorAdd::run( GPU_NVidia& gpu ) {
+     vecAdd( (const float*)gpu.devicePtr(_vec1), (const float*)gpu.devicePtr(_vec2)
+              , (float*)gpu.devicePtr(_vecOut), 2 );
 }
 
 } // namespace lofar
