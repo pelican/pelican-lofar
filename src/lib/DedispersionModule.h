@@ -98,6 +98,10 @@ class DedispersionModule : public AsyncronousModule
         /// deprecated
         int maxshift() const { return _maxshift; }
 
+	/// return the minimum number of DedispersionDataBlobs required to avoid locking
+	//  note this is only valid after the first call of run.
+	unsigned minDedisperionDataBlobs() const { return _minDedispersionSpectraBlobs; };
+
      protected:
         void dedisperse( DedispersionBuffer* buffer, DedispersionSpectra* dataOut );
         void _cleanBuffers();
@@ -124,6 +128,7 @@ class DedispersionModule : public AsyncronousModule
         QList<DedispersionKernel*> _kernelList; // collection of pre-configured kernels
         LockingPtrContainer<DedispersionKernel> _kernels;
         QHash< DataBlob*, LockingPtrContainer<DedispersionSpectra>* > _dedispersionBuffer;
+	unsigned _minDedispersionSpectraBlobs;
 };
 
 PELICAN_DECLARE_MODULE(DedispersionModule)
