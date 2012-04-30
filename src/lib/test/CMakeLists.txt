@@ -42,6 +42,7 @@ set(lofarTest_src
     src/BandPassTest.cpp
     src/BinMapTest.cpp
     src/DataStreamingTest.cpp
+    src/DedispersionDataAnalysisOutputTest.cpp
     #src/FilterBankAdapterTest.cpp
     #src/LofarChunkerTest.cpp
     src/LockingContainerTest.cpp;

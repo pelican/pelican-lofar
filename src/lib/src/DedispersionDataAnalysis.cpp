@@ -11,7 +11,7 @@ namespace lofar {
  *@details DedispersionDataAnalysis 
  */
 DedispersionDataAnalysis::DedispersionDataAnalysis()
-    : DataBlob("DedispersedDataAnalysis")
+    : DataBlob("DedispersionDataAnalysis"), _data(0)
 {
 }
 
