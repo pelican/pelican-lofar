@@ -120,7 +120,7 @@ void DedispersionModule::resize( const SpectrumDataSet<float>* streamData ) {
         std::cout << "resize: nchans= " << nChannels << std::endl;
         Q_ASSERT( (int)maxSamples > _maxshift );
         // ensure the history of DataBlobs available is sufficient
-	_minDedispersionSpectraBlobs = maxSamples/ streamData->nTimeBlocks() * maxBuffers;
+        _minDedispersionSpectraBlobs = maxSamples/ streamData->nTimeBlocks() * maxBuffers;
         std::cout << "Warning: DedispersionSpectra datablobs buffer must be at least: " << _minDedispersionSpectraBlobs << std::endl;
         // reset kernels
         foreach( DedispersionKernel* k, _kernelList ) {

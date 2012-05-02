@@ -98,9 +98,9 @@ class DedispersionModule : public AsyncronousModule
         /// deprecated
         int maxshift() const { return _maxshift; }
 
-	/// return the minimum number of DedispersionDataBlobs required to avoid locking
-	//  note this is only valid after the first call of run.
-	unsigned minDedisperionDataBlobs() const { return _minDedispersionSpectraBlobs; };
+        /// return the minimum number of DedispersionDataBlobs required to avoid locking
+        //  note this is only valid after the first call of run.
+        unsigned minDedisperionDataBlobs() const { return _minDedispersionSpectraBlobs; };
 
      protected:
         void dedisperse( DedispersionBuffer* buffer, DedispersionSpectra* dataOut );
