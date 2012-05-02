@@ -92,6 +92,7 @@ int AsyncronousModule::lockNumber( const DataBlob* data ) const
 }
 
 int AsyncronousModule::unlock( DataBlob* data ) {
+    Q_ASSERT( ! _lockerMutex.tryLock() ); // must be locked before entry
     Q_ASSERT( _dataLocker[data] > 0 );
     if( --_dataLocker[data] == 0 ) {
         _recentUnlocked.append(data);
