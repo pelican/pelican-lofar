@@ -94,41 +94,41 @@ RFI_Clipper::~RFI_Clipper()
 {
 }
   
-  /**                                                                                                                                       
-   * @details The following if statement from RFI_Clipper.cpp tests the channels for abnormal intensity spikes.                             
+  /**
+   * @details The following if statement from RFI_Clipper.cpp tests the channels for abnormal intensity spikes.
    * @verbatim
-   if (I[index + c] - medianDelta > margin ) {                                                                                             
-            I[index + c] = 0.0;                                                                                                           
-            W[index +c] = 0.0;                                                                                                            
-            for(unsigned int pol = 1; pol < nPolarisations; ++pol ) {                                                                     
-              long index = stokesAll->index(s, nSubbands,                                                                                 
-                                          pol, nPolarisations, t, nChannels );                                                            
-              I[index + c] = 0.0;                                                                                                         
-              W[index +c] = 0.0;                                                                                                          
-            }                                                                                                                             
-          }                                                                                                                               
-          else{                                                                                                                           
-            // Subtract the current model from the data                                                                                   
-            I[index+c] -= bandPass[bin] + _zeroDMing * medianDelta ;                                                                      
-            // if the condition doesn't hold build up the statistical                                                                     
-            // description.                                                                                                               
-            spectrumSum += I[index+c];                                                                                                    
-                                                                                                                                          
-            // Use this for RMS calculation - This is the RMS in the reference frame of the input                                         
-            spectrumSumSq += pow(I[index+c],2);                                                                                           
-            // Scale the data by the RMS                                                                                                  
-            I[index+c] /= modelRMS;                                                                                                       
-            ++goodChannels;                                                                                                               
-          }                                                                                                                               
-                                                                                                                              
-   * @endverbatim                                                                                                                           
-   *                                                                                                                                        
-   * The next statements check the entire spectra against the current model. Discarding 
+   if (I[index + c] - medianDelta > margin ) {
+            I[index + c] = 0.0;
+            W[index +c] = 0.0;
+            for(unsigned int pol = 1; pol < nPolarisations; ++pol ) {
+              long index = stokesAll->index(s, nSubbands,
+                                          pol, nPolarisations, t, nChannels );
+              I[index + c] = 0.0;
+              W[index +c] = 0.0;
+            }
+          }
+          else{
+            // Subtract the current model from the data
+            I[index+c] -= bandPass[bin] + _zeroDMing * medianDelta ;
+            // if the condition doesn't hold build up the statistical
+            // description.
+            spectrumSum += I[index+c];
+
+            // Use this for RMS calculation - This is the RMS in the reference frame of the input
+            spectrumSumSq += pow(I[index+c],2);
+            // Scale the data by the RMS
+            I[index+c] /= modelRMS;
+            ++goodChannels;
+          }
+
+   * @endverbatim
+   *
+   * The next statements check the entire spectra against the current model. Discarding
    * bad data and keeping good data, using it to update  \
-   * the bandpass model used by the clipper.                                                                                                   
-   *                                                                                                                                        
-   * Lastly the RFI Clipper computes the RFI stats for each blob so that they are available for use.                                        
-   *                                                                                                                                        
+   * the bandpass model used by the clipper.
+   *
+   * Lastly the RFI Clipper computes the RFI stats for each blob so that they are available for use.
+   *
    */
 
 // RFI clipper to be used with Stokes-I out of Stokes Generator
@@ -370,22 +370,22 @@ void RFI_Clipper::run( WeightedSpectrumDataSet* weightedStokes )
         
         // if the buffer isn't full, update the average properly
         if (_num != _maxHistory ) {
-          //          _runningMedian = (_runningMedian * (float) _num + median)/(float) (_num+1);
-          _runningMedian = (_runningMedian * (float) _num + medianDelta)/(float) (_num+1);
-          _runningRMS = (_runningRMS * (float) _num + spectrumRMS)/(float) (_num+1);
-          // store the integral of _historyNewSum and _historyNewSum^2 from the buffer
-          _integratedNewSum += newSum;
-          _integratedNewSumSq += pow(newSum,2);
-          ++_num;
+            //          _runningMedian = (_runningMedian * (float) _num + median)/(float) (_num+1);
+            _runningMedian = (_runningMedian * (float) _num + medianDelta)/(float) (_num+1);
+            _runningRMS = (_runningRMS * (float) _num + spectrumRMS)/(float) (_num+1);
+            // store the integral of _historyNewSum and _historyNewSum^2 from the buffer
+            _integratedNewSum += newSum;
+            _integratedNewSumSq += pow(newSum,2);
+            ++_num;
         }
         // Now the whole buffer is full. So I want to add the new
         // value and remove the first value from the running median
         else {
-          _runningMedian = (_runningMedian * (float) _num - _history[_current] + medianDelta) / (float) _num;
-          _runningRMS = (_runningRMS * (float) _num - _historyRMS[_current] + spectrumRMS) / (float) _num;
-        // store the integral of _historyNewSum and _historyNewSum^2 from the buffer
-          _integratedNewSum += newSum - _historyNewSum[_current];
-          _integratedNewSumSq += pow(newSum,2) - pow(_historyNewSum[_current],2);
+            _runningMedian = (_runningMedian * (float) _num - _history[_current] + medianDelta) / (float) _num;
+            _runningRMS = (_runningRMS * (float) _num - _historyRMS[_current] + spectrumRMS) / (float) _num;
+            // store the integral of _historyNewSum and _historyNewSum^2 from the buffer
+            _integratedNewSum += newSum - _historyNewSum[_current];
+            _integratedNewSumSq += pow(newSum,2) - pow(_historyNewSum[_current],2);
         }
         //        Update the model to the current running median and RMS
         _bandPass.setMedian(_runningMedian);
@@ -396,8 +396,8 @@ void RFI_Clipper::run( WeightedSpectrumDataSet* weightedStokes )
     // Now the chunk has finished. All that remains is to pass on the stats of the chunk
     // 1. update the model RMS first
     if (goodSamples !=0){
-      blobRMS /= goodSamples;
-      // _bandPass.setRMS(blobRMS);
+        blobRMS /= goodSamples;
+        // _bandPass.setRMS(blobRMS);
     }
     // 2. Use the history of NewSum to compute a running blobSum and
     // blobRMS; blobSum is the value of the running mean of newSum, in
@@ -411,15 +411,15 @@ void RFI_Clipper::run( WeightedSpectrumDataSet* weightedStokes )
     // spectrum is 1. The following only works if the data have been
     // scaled to RMS=1
     if (_zeroDMing == 1){
-      blobRMS = sqrt(nChannels * nSubbands);
+        blobRMS = sqrt(nChannels * nSubbands);
     }
     if (goodSamples !=0){
-    weightedStokes->setRMS( blobRMS ); 
-    weightedStokes->setMean( blobSum);
+        weightedStokes->setRMS( blobRMS ); 
+        weightedStokes->setMean( blobSum);
     }
     else {
-      weightedStokes->setRMS( 1e+6 ); 
-      weightedStokes->setMean( 0.0);
+        weightedStokes->setRMS( 1e+6 ); 
+        weightedStokes->setMean( 0.0);
     }      
   }
 }
