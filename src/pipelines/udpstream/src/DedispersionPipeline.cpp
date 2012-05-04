@@ -89,7 +89,7 @@ void DedispersionPipeline::init()
 
     // Request remote data
     requestRemoteData( _streamIdentifier, history + 1 ); // +1 to ensure no data overwrite
-							 // before the first data lock
+                                                         // before the first data lock
 }
 
 void DedispersionPipeline::run(QHash<QString, DataBlob*>& remoteData)
@@ -108,14 +108,20 @@ void DedispersionPipeline::run(QHash<QString, DataBlob*>& remoteData)
     // Convert spectra in X, Y polarisation into spectra with stokes parameters.
     SpectrumDataSetStokes* stokes=_stokesBuffer->next();
     _stokesGenerator->run(_spectra, stokes);
+//std::cout << "stokes1(" << stokes->data()[0] <<",";
+//std::cout << stokes->data()[1] << ")" << std::endl;
 
     // get the next suitable datablob
     WeightedSpectrumDataSet* weightedIntStokes = _weightedDataBuffer->next();
     weightedIntStokes->reset(stokes);
+//std::cout << "stokes2(" << stokes->data()[0] <<",";
+//std::cout << stokes->data()[1] << ")" << std::endl;
 
     // Clips RFI and modifies blob in place
     _rfiClipper->run(weightedIntStokes);
     dataOutput(&(weightedIntStokes->stats()), "RFI_Stats");
+//std::cout << "stokes3(" << stokes->data()[0] <<",";
+//std::cout << stokes->data()[1] << ")" << std::endl;
 
     _stokesIntegrator->run(stokes, _intStokes);
     dataOutput(_intStokes, "SpectrumDataSetStokes");
@@ -127,16 +133,14 @@ void DedispersionPipeline::run(QHash<QString, DataBlob*>& remoteData)
 
 void DedispersionPipeline::dedispersionAnalysis( DataBlob* blob ) {
 //qDebug() << "analysis()";
-    std::cout << "analysis" << std::endl;
     DedispersionDataAnalysis result;
     DedispersionSpectra* data = static_cast<DedispersionSpectra*>(blob);
     if ( _dedispersionAnalyser->analyse(data, &result) )
     {
-    std::cout << "analysis - found something!" << std::endl;
         dataOutput( &result );
-        //foreach( WeightedDataBlob* d, result.data()->inputDataBlobs()) {
-	//    dataOutput( *d, "SignalFoundSpectrum" )
-	//}
+        foreach( const WeightedSpectrumDataSet* d, result.data()->inputDataBlobs()) {
+            dataOutput( d, "SignalFoundSpectrum" );
+        }
     }
 }
 
