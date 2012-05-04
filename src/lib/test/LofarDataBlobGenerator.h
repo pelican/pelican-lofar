@@ -53,6 +53,7 @@ class LofarDataBlobGenerator : public AbstractDataClient
         unsigned _nSubbands;
         unsigned _nPols;
         unsigned _nSamples;
+        unsigned _counter;
 };
 PELICAN_DECLARE_CLIENT(LofarDataBlobGenerator)
 

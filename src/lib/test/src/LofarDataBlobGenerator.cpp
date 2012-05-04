@@ -24,6 +24,7 @@ LofarDataBlobGenerator::LofarDataBlobGenerator( const ConfigNode& configNode,
     _nSubbands = 32;
     _nChannels = 64;
     _nSamples = 6400;
+    _counter = 0;
 }
 
 /**
@@ -48,6 +49,7 @@ AbstractDataClient::DataBlobHash LofarDataBlobGenerator::getData(
         {
             if( ! dataHash.contains(type) )
                 throw( QString("FileDataClient: getData() called without DataBlob %1").arg(type) );
+            ++_counter;
             validHash.insert( type, generateTimeSeriesData( 
                 dynamic_cast<TimeSeriesDataSetC32*>(dataHash.value(type)) ) );
         }
@@ -82,7 +84,7 @@ TimeSeriesDataSetC32* LofarDataBlobGenerator::generateTimeSeriesData( TimeSeries
             {
                 time = double(i++) / sampleRate;
                 arg = 2.0 * math::pi * freqs[k] * time;
-//                timeData[c] = Complex(cos(arg), sin(arg));
+                timeData[c] = Complex(cos(arg) + _counter, sin(arg) + _counter);
             }
         }
     }
