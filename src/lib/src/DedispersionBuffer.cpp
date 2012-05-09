@@ -39,7 +39,7 @@ void DedispersionBuffer::dump( const QString& fileName ) const {
     if (QFile::exists(fileName)) QFile::remove(fileName);
     if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) return;
     QTextStream out(&file);
-     
+
     for (int c = 0; c < _timedata.size(); ++c) {
         out << QString::number(_timedata[c], 'g' ) << QString(((c+1)%_nsamp == 0)?"\n":" ");
     }
@@ -58,15 +58,15 @@ const QList<WeightedSpectrumDataSet*>& DedispersionBuffer::copy( DedispersionBuf
         unsigned s = blob->dataSet()->nTimeBlocks();
         sampleNum = samples - count; // remaining samples
         if( sampleNum <= s ) {
-            buf->_sampleCount = 0;// ofset position to write to
+            buf->_sampleCount = 0; // offset position to write to
             blobSample = s - sampleNum;
         } else {
-            buf->_sampleCount = sampleNum - s;// ofset position to write to
+            buf->_sampleCount = sampleNum - s;// offset position to write to
         }
         buf->_addSamples( blob, &blobSample, s - blobSample );
         buf->_inputBlobs.push_front( blob );
         count += s;
-    } 
+    }
     buf->_sampleCount = samples;
     return buf->_inputBlobs;
 }
@@ -94,11 +94,11 @@ unsigned DedispersionBuffer::_addSamples( WeightedSpectrumDataSet* weightedData,
                    << ") does not match buffer sample size (" << _sampleSize << ")" << std::endl;
         return spaceRemaining();
     }
- 
+
     unsigned maxSamples = std::min( numSamples, spaceRemaining() + *sampleNumber );
     for(unsigned t = *sampleNumber; t < maxSamples; ++t) {
         for (unsigned s = 0; s < nSubbands; ++s) {
-	    const float* data = streamData->spectrumData(t, s, 0);
+            const float* data = streamData->spectrumData(t, s, 0);
             for (unsigned c = 0; c < nChannels; ++c) {
                 // rearrange to have time samples in inner loop
                 _timedata[ ((s * nChannels) + c ) * _nsamp + _sampleCount ] = data[c];
