@@ -62,6 +62,7 @@ class LockingPtrContainer
         }
 
         int numberAvailable() const {
+           QMutexLocker lock(&_mutex);
            return _available.size();
         }
 
@@ -74,7 +75,7 @@ class LockingPtrContainer
     private:
         QList<T*>* _dataBuffer;
         QWaitCondition _waitCondition;
-        QMutex _mutex;
+        mutable QMutex _mutex;
         QList<const T*> _available; // array of available pointers
 };
 
