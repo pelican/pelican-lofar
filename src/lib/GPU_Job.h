@@ -49,7 +49,7 @@ class GPU_Job
         void emitFinished();
         void wait() const;
         void addCallBack( const boost::function0<void>& fn ) { _callbacks.append(fn); };
-        const QList<boost::function0<void> > callBacks() { return _callbacks; };
+        const QList<boost::function0<void> >& callBacks() const { return _callbacks; };
         void reset();
 
     private:

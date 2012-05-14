@@ -128,8 +128,9 @@ void DedispersionModule::resize( const SpectrumDataSet<float>* streamData ) {
         }
         _kernelList.clear();
         for( unsigned int i=0; i < maxBuffers; ++i ) {
-            DedispersionKernel* kernel = new DedispersionKernel( _dmLow, _dmStep, _tsamp, _tdms,
-                                                             _nChannels, _maxshift, _numSamplesBuffer );
+            DedispersionKernel* kernel = new DedispersionKernel( _dmLow, _dmStep,
+                                _tsamp, _tdms,
+                                _nChannels, _maxshift, _numSamplesBuffer );
             _kernelList.append( kernel ); 
             kernel->setDMShift( _dmshifts );
         }
@@ -190,16 +191,16 @@ void DedispersionModule::dedisperse( DedispersionBuffer* buffer, DedispersionSpe
     GPU_Job* job = _jobBuffer.next();
     DedispersionKernel* kernelPtr = _kernels.next();
     kernelPtr->setOutputBuffer( dataOut->data() );
-    kernelPtr->setInputBuffer( buffer->getData() );
+    kernelPtr->setInputBuffer( buffer->getData(),
+                   boost::bind( &DedispersionModule::gpuDataUploaded, this, buffer ) );
     job->addKernel( kernelPtr );
-    job->addCallBack( boost::bind( &DedispersionModule::gpuJobFinished, this, job, buffer, kernelPtr, dataOut ) );
+    job->addCallBack( boost::bind( &DedispersionModule::gpuJobFinished, this, job, kernelPtr, dataOut ) );
+    dataOut->setInputDataBlobs( buffer->inputDataBlobs() );
     submit( job );
 }
 
-void DedispersionModule::gpuJobFinished( GPU_Job* job, DedispersionBuffer* buffer, DedispersionKernel* kernel, DedispersionSpectra* dataOut ) {
-     dataOut->setInputDataBlobs( buffer->inputDataBlobs() );
+void DedispersionModule::gpuJobFinished( GPU_Job* job, DedispersionKernel* kernel, DedispersionSpectra* dataOut ) {
      _kernels.unlock( kernel ); // give up the kernel
-     _buffers.unlock( buffer ); // give up the buffer
      if( job->status() != GPU_Job::Failed ) {
          job->reset();
          _jobBuffer.unlock(job); // return the job to the pool, ready for the next
@@ -210,6 +211,10 @@ void DedispersionModule::gpuJobFinished( GPU_Job* job, DedispersionBuffer* buffe
          _jobBuffer.unlock(job); // return the job to the pool, ready for the next
          exportComplete( dataOut );
      }
+}
+
+void DedispersionModule::gpuDataUploaded( DedispersionBuffer* buffer ) {
+    _buffers.unlock(buffer);
 }
 
 void DedispersionModule::exportComplete( DataBlob* datablob ) {
@@ -237,8 +242,9 @@ void DedispersionModule::DedispersionKernel::setOutputBuffer( QVector<float>& bu
     _outputBuffer = GPU_MemoryMap(buffer);
 }
 
-void DedispersionModule::DedispersionKernel::setInputBuffer( QVector<float>& buffer ) {
+void DedispersionModule::DedispersionKernel::setInputBuffer( QVector<float>& buffer, GPU_MemoryMap::CallBackT callback ) {
     _inputBuffer = GPU_MemoryMap(buffer);
+    _inputBuffer.addCallBack( callback );
 }
 
 void DedispersionModule::DedispersionKernel::run( GPU_NVidia& gpu ) {

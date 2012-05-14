@@ -60,7 +60,7 @@ class DedispersionModule : public AsyncronousModule
               DedispersionKernel( float, float, float, float, unsigned, unsigned, unsigned );
               void setDMShift( QVector<float>& );
               void setOutputBuffer( QVector<float>& );
-              void setInputBuffer( QVector<float>& );
+              void setInputBuffer( QVector<float>&, GPU_MemoryMap::CallBackT );
               void run(const QList<GPU_Param*>& param );
               void run( GPU_NVidia& );
         };
@@ -83,9 +83,10 @@ class DedispersionModule : public AsyncronousModule
 
         /// clean up after gpu task is finished
         void gpuJobFinished( GPU_Job* job,  
-                             DedispersionBuffer* buffer, 
                              DedispersionKernel* kernel,
                              DedispersionSpectra* dataOut );
+        /// return input buffers for reuse as soon as data uploaded to the GPU
+        void gpuDataUploaded( DedispersionBuffer* );
 
         /// clean up after asyncronous task is finished
         void exportComplete( DataBlob* data );

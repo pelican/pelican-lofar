@@ -2,6 +2,7 @@
 #define GPU_MEMORYMAP_H
 #include <vector>
 #include <QVector>
+#include <boost/function.hpp>
 
 
 /**
@@ -29,6 +30,9 @@ namespace lofar {
 class GPU_MemoryMap
 {
     public:
+        typedef boost::function0<void> CallBackT;
+
+    public:
         GPU_MemoryMap( void* host_address = 0 , unsigned long bytes = 0 );
         template<typename T>
         GPU_MemoryMap( std::vector<T>& vec ) {
@@ -44,11 +48,17 @@ class GPU_MemoryMap
         bool operator==(const GPU_MemoryMap&) const;
         inline unsigned int qHash() const { return _hash; }
         template<typename T> T value() const { return *(static_cast<T*>(_host)); }
+        /// add a function to be called immediately after a sync to the device 
+        //  has completed.
+        void addCallBack( const CallBackT& fn ) { 
+                         _callbacks.append(fn); };
+        const QList<CallBackT>& callBacks() const { return _callbacks; };
 
     protected:
         void _set(void* host_address, unsigned long bytes);
 
     private:
+        QList<CallBackT> _callbacks;
         void* _host;
         unsigned long _size;
         unsigned int _hash;
@@ -84,8 +94,8 @@ class GPU_MemoryMapOutput : public GPU_MemoryMap
 
 //
 // Use this class to represent data that has to be uploaded
-// ito and dowloaded from the device
-// 
+// to and dowloaded from the device
+//
 class GPU_MemoryMapInputOutput : public GPU_MemoryMapOutput
 {
     public:

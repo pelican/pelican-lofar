@@ -58,6 +58,10 @@ void* GPU_NVidiaConfiguration::devicePtr( const GPU_MemoryMapInputOutput& map ) 
 void* GPU_NVidiaConfiguration::devicePtr( const GPU_MemoryMap& map ) {
      GPU_Param* p = _getParam(map);
      p->syncHostToDevice();
+     // call any post sink hooks
+     foreach( const GPU_MemoryMap::CallBackT& fn, map.callBacks() ) {
+         fn();
+     }
      return p->device();
 }
 
