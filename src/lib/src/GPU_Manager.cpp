@@ -73,6 +73,10 @@ void GPU_Manager::_runJob( GPU_Resource* r, GPU_Job* job ) {
         job->setError( std::string(e) );
         job->setStatus( GPU_Job::Failed );
     }
+    catch( ... ) {
+        job->setError( "GPU_Manager: caught unknown error whilst running a job" );
+        job->setStatus( GPU_Job::Failed );
+    }
     job->emitFinished();
     _resourceFree( r );
     // execute any job callbacks
