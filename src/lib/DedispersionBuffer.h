@@ -10,7 +10,7 @@
 namespace pelican {
 
 namespace lofar {
-class WeightedSpectrumDataSet;
+class SpectrumDataSetStokes;
 
 /**
  * @class DedispersionBuffer
@@ -48,7 +48,7 @@ class DedispersionBuffer
         // The space remaining in the boffer is provided in return value 
         // sampleNumber is updated to the last sample number from
         // the dataset that was included
-        unsigned int addSamples( WeightedSpectrumDataSet* weightedData, unsigned *sampleNumber );
+        unsigned int addSamples( SpectrumDataSetStokes* weightedData, unsigned *sampleNumber );
 
         /// return the amount of empty space in the buffer (in samples)
         unsigned int spaceRemaining() const;
@@ -57,11 +57,11 @@ class DedispersionBuffer
         /// copy data from this object to the supplied DataBuffer object
         //  data is taken from the last offset samples in the 
         //  buffer
-        const QList<WeightedSpectrumDataSet*>& copy( DedispersionBuffer* buf, unsigned int samples = 0 );
+        const QList<SpectrumDataSetStokes*>& copy( DedispersionBuffer* buf, unsigned int samples = 0 );
 
         /// return the list of input data Blobs used to construct
         //  the data buffer
-        inline const QList< WeightedSpectrumDataSet* >& inputDataBlobs() const { 
+        inline const QList< SpectrumDataSetStokes* >& inputDataBlobs() const { 
                 return _inputBlobs; };
 
         QVector<float>& getData() { return _timedata; };
@@ -71,9 +71,9 @@ class DedispersionBuffer
         void dump( const QString& fileName ) const;
 
     private:
-        unsigned int _addSamples( WeightedSpectrumDataSet* data, unsigned *sampleOffset,
+        unsigned int _addSamples( SpectrumDataSetStokes* data, unsigned *sampleOffset,
                                   unsigned numSamples /* max number fo samples to insert */ );
-        QList<WeightedSpectrumDataSet* > _inputBlobs;
+        QList<SpectrumDataSetStokes* > _inputBlobs;
         QVector<float> _timedata;
         unsigned int _nsamp;
         unsigned int _sampleCount;

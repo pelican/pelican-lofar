@@ -146,25 +146,27 @@ void DedispersionModuleTest::test_multipleBlobsPerBuffer ()
         _unlocked.clear();
         // first dedisperse call should just buffer
         ddm.dedisperse( &weightedData, buffer ); // asynchronous task
-        CPPUNIT_ASSERT_EQUAL( 1, ddm.lockNumber( &weightedData ) );
+        CPPUNIT_ASSERT_EQUAL( 0, ddm.lockNumber( &weightedData ) );
         CPPUNIT_ASSERT_EQUAL( 0, ddm.lockNumber( &weightedData2 ) );
+        CPPUNIT_ASSERT_EQUAL( 1, ddm.lockNumber( spectrumData[0] ) );
+        CPPUNIT_ASSERT_EQUAL( 0, ddm.lockNumber( spectrumData[1] ) );
         CPPUNIT_ASSERT_EQUAL( 0, _connectCount ); // no data should be processed first time
         CPPUNIT_ASSERT( (int)nSamples > ddm.maxshift() ); // ensures first sample should be released
         // second dedisperse call should trigger a process chain
         ddm.dedisperse( &weightedData2, buffer ); // asynchronous task
-        CPPUNIT_ASSERT( ddm.lockNumber( &weightedData2 ) > 1 ); // needs to be reserved for maxshift
+        CPPUNIT_ASSERT( ddm.lockNumber( spectrumData[1] ) > 1 ); // needs to be reserved for maxshift
         while( _connectCount == 0 ) { sleep(1); };
         CPPUNIT_ASSERT_EQUAL( 1, _connectCount );
 
         float expectedDMIntentsity = spectrumData[0]->nSubbands() * spectrumData[0]->nChannels();
         CPPUNIT_ASSERT_EQUAL( expectedDMIntentsity , _connectData->dmAmplitude( 0, dm ) );
         while( _chainFinished == 0 ) { sleep(1); }
-        CPPUNIT_ASSERT_EQUAL( 1, ddm.lockNumber( &weightedData2 ) );
-        CPPUNIT_ASSERT_EQUAL( 0, ddm.lockNumber( &weightedData ) );
+        CPPUNIT_ASSERT_EQUAL( 1, ddm.lockNumber( spectrumData[1] ) );
+        CPPUNIT_ASSERT_EQUAL( 0, ddm.lockNumber( spectrumData[0] ) );
 
         // expect unlock trigger
         CPPUNIT_ASSERT_EQUAL( 1, _unlocked.size() );
-        CPPUNIT_ASSERT_EQUAL( (void *)&weightedData, (void *)_unlocked[0] );
+        CPPUNIT_ASSERT_EQUAL( (void *)spectrumData[0], (void *)_unlocked[0] );
      }
      catch( const QString& s )
      {

@@ -157,16 +157,17 @@ void DedispersionModule::dedisperse( WeightedSpectrumDataSet* weightedData,
     //_means[_counter % _stages][index] = blobMean * nChannels;
     //_rmss[_counter % _stages][index] = blobRMS * nChannels;
 
-    lock( weightedData );
     // --------- copy spectrum data to buffer -----------------
-    SpectrumDataSet<float>* streamData = weightedData->dataSet();
+    SpectrumDataSetStokes* streamData = 
+                static_cast<SpectrumDataSetStokes*>(weightedData->dataSet());
+    lock( streamData );
     resize( streamData ); // ensure we have buffers scaled appropriately
 
     unsigned int sampleNumber = 0; // marker to indicate the number of samples succesfully 
                                    // transferred to the buffer from the Datablob
     unsigned int maxSamples = streamData->nTimeBlocks();
     do {
-        if( _currentBuffer->addSamples( weightedData, &sampleNumber ) == 0 ) {
+        if( _currentBuffer->addSamples( streamData, &sampleNumber ) == 0 ) {
             //(*_currentBuffer)->dump("input.data");
             DedispersionBuffer* next = _buffers.next();
             next->clear();
@@ -214,7 +215,7 @@ void DedispersionModule::gpuJobFinished( GPU_Job* job, DedispersionBuffer* buffe
 void DedispersionModule::exportComplete( DataBlob* datablob ) {
     // unlock Spectrum Data blobs
     DedispersionSpectra* data = static_cast<DedispersionSpectra*>(datablob);
-    foreach( WeightedSpectrumDataSet* d, data->inputDataBlobs() ) {
+    foreach( SpectrumDataSetStokes* d, data->inputDataBlobs() ) {
         unlock( d );
     }
     // unlock the dedispersion datablob

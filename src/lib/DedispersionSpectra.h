@@ -14,7 +14,7 @@
 namespace pelican {
 
 namespace lofar {
-class WeightedSpectrumDataSet;
+class SpectrumDataSetStokes;
 
 /**
  * @class DedispersionSpectra
@@ -51,10 +51,10 @@ class DedispersionSpectra : public DataBlob
         float dm( unsigned dm ) const;
 
         /// return a list of pointers to the objects representing input data
-        const QList< WeightedSpectrumDataSet* >& inputDataBlobs() const {
+        const QList< SpectrumDataSetStokes* >& inputDataBlobs() const {
                 return _inputBlobs;
         }
-        void setInputDataBlobs( const QList< WeightedSpectrumDataSet* >& );
+        void setInputDataBlobs( const QList< SpectrumDataSetStokes* >& );
 
         /// return the maximum DM that can be represented in the data
         double dmMax() const { return _dmBin.endValue(); }
@@ -67,7 +67,7 @@ class DedispersionSpectra : public DataBlob
         unsigned _timeBins;
         unsigned _dedispersionBins;
         QVector<float> _data;
-        QList< WeightedSpectrumDataSet* > _inputBlobs;
+        QList<SpectrumDataSetStokes* > _inputBlobs;
 };
 PELICAN_DECLARE_DATABLOB( DedispersionSpectra )
 

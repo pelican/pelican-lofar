@@ -132,8 +132,7 @@ void DedispersionDataGenerator::writeToFile( const QString& filename, const QLis
 }
 
 void DedispersionDataGenerator::deleteData( DedispersionSpectra* data ) {
-    foreach( WeightedSpectrumDataSet* d, data->inputDataBlobs() ) {
-        delete d->dataSet();
+    foreach( SpectrumDataSetStokes* d, data->inputDataBlobs() ) {
         delete d;
     }
     delete data;

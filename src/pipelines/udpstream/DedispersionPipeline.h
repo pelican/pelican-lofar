@@ -74,8 +74,7 @@ class DedispersionPipeline : public AbstractPipeline
         QList<SpectrumDataSetStokes*> _stokesData;
         SpectrumDataSetStokes* _intStokes;
         LockingPtrContainer<SpectrumDataSetStokes>* _stokesBuffer;
-        QList<WeightedSpectrumDataSet*> _weightedData;
-        LockingPtrContainer<WeightedSpectrumDataSet>* _weightedDataBuffer;
+        WeightedSpectrumDataSet* _weightedIntStokes;
 
 };
 

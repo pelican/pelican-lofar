@@ -3,7 +3,6 @@
 #include "DedispersionBuffer.h"
 #include <algorithm>
 #include "SpectrumDataSet.h"
-#include "WeightedSpectrumDataSet.h"
 
 
 namespace pelican {
@@ -46,7 +45,7 @@ void DedispersionBuffer::dump( const QString& fileName ) const {
     file.close();
 }
 
-const QList<WeightedSpectrumDataSet*>& DedispersionBuffer::copy( DedispersionBuffer* buf, unsigned int samples )
+const QList<SpectrumDataSetStokes*>& DedispersionBuffer::copy( DedispersionBuffer* buf, unsigned int samples )
 {
     unsigned int count = 0;
     unsigned int blobIndex = _inputBlobs.size();
@@ -54,8 +53,8 @@ const QList<WeightedSpectrumDataSet*>& DedispersionBuffer::copy( DedispersionBuf
     unsigned int blobSample = 0;
     while( count < samples ) {
         Q_ASSERT( blobIndex > 0 );
-        WeightedSpectrumDataSet* blob = _inputBlobs[--blobIndex];
-        unsigned s = blob->dataSet()->nTimeBlocks();
+        SpectrumDataSetStokes* blob = _inputBlobs[--blobIndex];
+        unsigned s = blob->nTimeBlocks();
         sampleNum = samples - count; // remaining samples
         if( sampleNum <= s ) {
             buf->_sampleCount = 0; // offset position to write to
@@ -75,16 +74,15 @@ unsigned DedispersionBuffer::spaceRemaining() const {
     return _nsamp - _sampleCount;
 }
 
-unsigned DedispersionBuffer::addSamples( WeightedSpectrumDataSet* weightedData, unsigned *sampleNumber ) {
-    if( ! _inputBlobs.contains(weightedData) )
-        _inputBlobs.append(weightedData);
-    unsigned int numSamples = weightedData->dataSet()->nTimeBlocks();
-    return _addSamples( weightedData, sampleNumber, numSamples );
+unsigned DedispersionBuffer::addSamples( SpectrumDataSetStokes* streamData, unsigned *sampleNumber ) {
+    if( ! _inputBlobs.contains(streamData) )
+        _inputBlobs.append(streamData);
+    unsigned int numSamples = streamData->nTimeBlocks();
+    return _addSamples( streamData, sampleNumber, numSamples );
 }
 
-unsigned DedispersionBuffer::_addSamples( WeightedSpectrumDataSet* weightedData, 
+unsigned DedispersionBuffer::_addSamples( SpectrumDataSetStokes* streamData, 
                                           unsigned *sampleNumber, unsigned numSamples ) {
-    SpectrumDataSet<float>* streamData = weightedData->dataSet();
     Q_ASSERT( streamData != 0 );
     unsigned int nChannels = streamData->nChannels();
     unsigned int nSubbands = streamData->nSubbands();

@@ -43,7 +43,7 @@ float DedispersionSpectra::dm( unsigned dm ) const {
     return _dmBin.binAssignmentNumber( dm );
 }
 
-void DedispersionSpectra::setInputDataBlobs( const QList< WeightedSpectrumDataSet* >& blobs ) {
+void DedispersionSpectra::setInputDataBlobs( const QList<SpectrumDataSetStokes*>& blobs ) {
     _inputBlobs = blobs;
 }
 

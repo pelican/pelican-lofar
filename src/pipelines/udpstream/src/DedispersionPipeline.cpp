@@ -19,7 +19,6 @@ DedispersionPipeline::DedispersionPipeline( const QString& streamIdentifier )
     : AbstractPipeline(), _streamIdentifier(streamIdentifier)
 {
      _spectra = 0;
-     _weightedDataBuffer = 0;
      _stokesBuffer = 0;
      _dedispersedDataBuffer = 0;
      _dedispersionModule = 0;
@@ -40,7 +39,6 @@ DedispersionPipeline::~DedispersionPipeline()
     delete _dedispersionAnalyser;
     delete _stokesBuffer;
     delete _dedispersedDataBuffer;
-    delete _weightedDataBuffer;
     delete _ppfChanneliser;
     delete _rfiClipper;
     delete _stokesIntegrator;
@@ -50,9 +48,6 @@ DedispersionPipeline::~DedispersionPipeline()
         delete d;
     }
     foreach(DedispersionSpectra* d, _dedispersedData ) {
-        delete d;
-    }
-    foreach(WeightedSpectrumDataSet* d, _weightedData) {
         delete d;
     }
     delete _spectra;
@@ -83,13 +78,10 @@ void DedispersionPipeline::init()
     _dedispersedData = createBlobs<DedispersionSpectra >("DedispersionSpectra", history);
     _dedispersedDataBuffer = new LockingPtrContainer<DedispersionSpectra>(&_dedispersedData);
 
-    _weightedData = createBlobs<WeightedSpectrumDataSet>("WeightedSpectrumDataSet", history );
-    _weightedDataBuffer = new LockingPtrContainer<WeightedSpectrumDataSet>(&_weightedData);
-
+    _weightedIntStokes = (WeightedSpectrumDataSet*) createBlob("WeightedSpectrumDataSet");
 
     // Request remote data
-    requestRemoteData( _streamIdentifier, history + 1 ); // +1 to ensure no data overwrite
-                                                         // before the first data lock
+    requestRemoteData( _streamIdentifier, 1 );
 }
 
 void DedispersionPipeline::run(QHash<QString, DataBlob*>& remoteData)
@@ -108,26 +100,19 @@ void DedispersionPipeline::run(QHash<QString, DataBlob*>& remoteData)
     // Convert spectra in X, Y polarisation into spectra with stokes parameters.
     SpectrumDataSetStokes* stokes=_stokesBuffer->next();
     _stokesGenerator->run(_spectra, stokes);
-//std::cout << "stokes1(" << stokes->data()[0] <<",";
-//std::cout << stokes->data()[1] << ")" << std::endl;
 
-    // get the next suitable datablob
-    WeightedSpectrumDataSet* weightedIntStokes = _weightedDataBuffer->next();
-    weightedIntStokes->reset(stokes);
-//std::cout << "stokes2(" << stokes->data()[0] <<",";
-//std::cout << stokes->data()[1] << ")" << std::endl;
+    // set up a suitable datablob fro the rfi clipper
+    _weightedIntStokes->reset(stokes);
 
     // Clips RFI and modifies blob in place
-    _rfiClipper->run(weightedIntStokes);
-    dataOutput(&(weightedIntStokes->stats()), "RFI_Stats");
-//std::cout << "stokes3(" << stokes->data()[0] <<",";
-//std::cout << stokes->data()[1] << ")" << std::endl;
+    _rfiClipper->run(_weightedIntStokes);
+    dataOutput(&(_weightedIntStokes->stats()), "RFI_Stats");
 
     _stokesIntegrator->run(stokes, _intStokes);
     dataOutput(_intStokes, "SpectrumDataSetStokes");
 
     // start the asyncronous chain of events
-    _dedispersionModule->dedisperse( weightedIntStokes, _dedispersedDataBuffer );
+    _dedispersionModule->dedisperse( _weightedIntStokes, _dedispersedDataBuffer );
 
 }
 
@@ -138,7 +123,7 @@ void DedispersionPipeline::dedispersionAnalysis( DataBlob* blob ) {
     if ( _dedispersionAnalyser->analyse(data, &result) )
     {
         dataOutput( &result );
-        foreach( const WeightedSpectrumDataSet* d, result.data()->inputDataBlobs()) {
+        foreach( const SpectrumDataSetStokes* d, result.data()->inputDataBlobs()) {
             dataOutput( d, "SignalFoundSpectrum" );
         }
     }
@@ -148,10 +133,8 @@ void DedispersionPipeline::updateBufferLock( const QList<DataBlob*>& freeData ) 
      // find WeightedDataBlobs that can be unlocked
 //qDebug() << "unlocking()";
      foreach( DataBlob* blob, freeData ) {
-        Q_ASSERT( blob->type() == "WeightedSpectrumDataSet" );
-        const WeightedSpectrumDataSet* d = static_cast<const WeightedSpectrumDataSet*>(blob);
-        _stokesBuffer->unlock( static_cast<SpectrumDataSetStokes*>(d->dataSet()) );
-        _weightedDataBuffer->unlock( d );
+        Q_ASSERT( blob->type() == "SpectrumDataSetStokes" );
+        _stokesBuffer->unlock( static_cast<SpectrumDataSetStokes*>(blob) );
      }
 }
 

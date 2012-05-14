@@ -1,6 +1,5 @@
 #include "DedispersionBufferTest.h"
 #include "DedispersionBuffer.h"
-#include "WeightedSpectrumDataSet.h"
 #include "SpectrumDataSet.h"
 
 
@@ -40,9 +39,8 @@ void DedispersionBufferTest::test_sizing()
      unsigned nPolarisations=2;
      unsigned nSubbands=2;
      unsigned sampleSize = nSubbands * nPolarisations * nChannels;
-     SpectrumDataSet<float> spectrumData;
-     spectrumData.resize( nSamples, nSubbands, nPolarisations, nChannels );
-     WeightedSpectrumDataSet data( &spectrumData );
+     SpectrumDataSetStokes data;
+     data.resize( nSamples, nSubbands, nPolarisations, nChannels );
      { // Use Case:
        // Default constructor
        // Expect:
@@ -114,12 +112,10 @@ void DedispersionBufferTest::test_copy() {
      unsigned nPolarisations=2;
      unsigned nSubbands=2;
      unsigned sampleSize = nSubbands * nPolarisations * nChannels;
-     SpectrumDataSet<float> spectrumData;
-     SpectrumDataSet<float> spectrumData2;
-     spectrumData.resize( nSamples, nSubbands, nPolarisations, nChannels );
-     spectrumData2.resize( nSamples, nSubbands, nPolarisations, nChannels );
-     WeightedSpectrumDataSet data( &spectrumData );
-     WeightedSpectrumDataSet data2( &spectrumData2 );
+     SpectrumDataSetStokes data;
+     SpectrumDataSetStokes data2;
+     data.resize( nSamples, nSubbands, nPolarisations, nChannels );
+     data2.resize( nSamples, nSubbands, nPolarisations, nChannels );
      { // Use Case:
        // copy from on identical buffer to the next, zero offset
        // single datablobi, complete
