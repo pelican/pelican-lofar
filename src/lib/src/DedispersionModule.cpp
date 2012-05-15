@@ -42,7 +42,7 @@ DedispersionModule::DedispersionModule( const ConfigNode& config )
     if( _foff >= 0 ) { throw QString("DedispersionModule: channelBandwidth must be a negative number"); }
     if( _fch1 == 0 ) { throw QString("DedispersionModule: frequencyChannel1 must be a positve number"); }
 
-    unsigned int maxBuffers = config.getOption("numberOfBuffers", "value", "3").toUInt();
+    unsigned int maxBuffers = config.getOption("numberOfBuffers", "value", "2").toUInt();
     if( maxBuffers < 1 ) throw(QString("DedispersionModule: Must have at least one buffer"));
 
     // setup the data buffers and objects required for each job
