@@ -50,17 +50,21 @@ const QList<SpectrumDataSetStokes*>& DedispersionBuffer::copy( DedispersionBuffe
     unsigned int count = 0;
     unsigned int blobIndex = _inputBlobs.size();
     unsigned int sampleNum;
-    unsigned int blobSample = 0;
+    unsigned int blobSample;
+    // copy the memory
     while( count < samples ) {
         Q_ASSERT( blobIndex > 0 );
         SpectrumDataSetStokes* blob = _inputBlobs[--blobIndex];
         unsigned s = blob->nTimeBlocks();
         sampleNum = samples - count; // remaining samples
         if( sampleNum <= s ) {
+            // We have all the samples we need in the current blob
             buf->_sampleCount = 0; // offset position to write to
             blobSample = s - sampleNum;
         } else {
+            // Take all the samples from this blob
             buf->_sampleCount = sampleNum - s;// offset position to write to
+            blobSample = 0;
         }
         buf->_addSamples( blob, &blobSample, s - blobSample );
         buf->_inputBlobs.push_front( blob );
