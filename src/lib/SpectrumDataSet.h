@@ -97,6 +97,26 @@ class SpectrumDataSet : public DataBlob
         /// Returns a pointer to the data (const overload).
         T const * data() const { return &_data[0]; }
 
+        /// return true if the data is equivalent
+        bool operator!=( const SpectrumDataSet<T>& data ) const {
+            return !( data == *this );
+        }
+        bool operator==( const SpectrumDataSet<T>& data ) const {
+            if( data._nTimeBlocks == _nTimeBlocks &&
+                    data._nPolarisations == _nPolarisations &&
+                    data._nSubbands == _nSubbands &&
+                    data._nChannels == _nChannels ) {
+                // check data contents
+                for( unsigned i=0; i < _data.size(); ++i ) {
+                    if( _data[i] != data._data[i] ) {
+                        return false;
+                    }
+                }
+                return true;
+            }
+            return false;
+        }
+
         /// Return an iterator over the data starting at the beginning
         typename std::vector<T>::const_iterator begin() const { return _data.begin(); }
 

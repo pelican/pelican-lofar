@@ -131,11 +131,6 @@ void SpectrumDataSetC32::deserialise(QIODevice& in, QSysInfo::Endian endian)
     in.read((char*)&_data[0], sizeof(std::complex<float>) * _data.size());
 }
 
-
-
-
-
-
 //------------------------------------------------------------------------------
 
 

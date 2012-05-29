@@ -113,14 +113,18 @@ void DedispersionBufferTest::test_copy() {
      unsigned nSubbands=2;
      unsigned sampleSize = nSubbands * nPolarisations * nChannels;
      SpectrumDataSetStokes data;
+     _fillData( &data, 1.0 );
      SpectrumDataSetStokes data2;
+     _fillData( &data2, 1000.0 );
      data.resize( nSamples, nSubbands, nPolarisations, nChannels );
      data2.resize( nSamples, nSubbands, nPolarisations, nChannels );
+     SpectrumDataSetStokes dataRef(data); // data should not change
+     SpectrumDataSetStokes data2Ref(data2); // data should not change
      { // Use Case:
        // copy from on identical buffer to the next, zero offset
-       // single datablobi, complete
+       // single datablob, complete
        // Expect:
-       // Same datablobs in each, same number of samples in each
+       // Same datablob in each buffer, same number of samples in each
        DedispersionBuffer b1( nSamples,sampleSize );
        unsigned nSamp = 0;
        b1.addSamples( &data, &nSamp );
@@ -130,7 +134,8 @@ void DedispersionBufferTest::test_copy() {
        CPPUNIT_ASSERT_EQUAL( 1, b2.inputDataBlobs().size() );
        CPPUNIT_ASSERT_EQUAL( b1.numberOfSamples(), b2.numberOfSamples() );
        CPPUNIT_ASSERT_EQUAL( &data, b2.inputDataBlobs()[0] );
-       //TODO verify data pattern
+       // verify data has not been changed
+       CPPUNIT_ASSERT( data == dataRef );
      }
      { // Use Case:
        // copy a complete single blob sampleset when mutliple blobs are in the buffer
@@ -148,7 +153,9 @@ void DedispersionBufferTest::test_copy() {
        CPPUNIT_ASSERT_EQUAL( 1, b2.inputDataBlobs().size() );
        CPPUNIT_ASSERT_EQUAL( 2 * nSamples , b1.numberOfSamples() );
        CPPUNIT_ASSERT_EQUAL( &data2, b2.inputDataBlobs()[0] );
-       //TODO verify data pattern
+       // verify data has not been changed
+       CPPUNIT_ASSERT( data == dataRef );
+       CPPUNIT_ASSERT( data2 == data2Ref );
      }
      { // Use Case:
        // Copy a number of samples that do not correspond to 
@@ -168,8 +175,26 @@ void DedispersionBufferTest::test_copy() {
        CPPUNIT_ASSERT_EQUAL( nSamples + 1, b2.numberOfSamples() );
        CPPUNIT_ASSERT_EQUAL( &data, b2.inputDataBlobs()[0] );
        CPPUNIT_ASSERT_EQUAL( &data2, b2.inputDataBlobs()[1] );
-       //TODO verify data pattern
+       CPPUNIT_ASSERT( data == dataRef );
+       CPPUNIT_ASSERT( data2 == data2Ref );
      }
+
+}
+
+void DedispersionBufferTest::_fillData( SpectrumDataSetStokes* spectrumData, float start ) {
+    // each sample is filled with the sample number, with an offset of start
+    unsigned samples = spectrumData->nTimeBlocks();
+    unsigned nSubbands = spectrumData->nSubbands();
+    unsigned nChannels= spectrumData->nChannels();
+    for(unsigned t = 0; t < samples; ++t) {
+        for (unsigned s = 0; s < nSubbands; ++s) {
+            float* data = spectrumData->spectrumData(t, s, 0);
+            for (unsigned c = 0; c < nChannels; ++c) {
+                data[c]=start;
+            }
+        }
+        ++start;
+    }
 }
 
 } // namespace lofar

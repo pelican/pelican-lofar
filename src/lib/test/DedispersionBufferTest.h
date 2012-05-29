@@ -10,6 +10,7 @@
 namespace pelican {
 
 namespace lofar {
+class SpectrumDataSetStokes;
 
 /**
  * @class DedispersionBufferTest
@@ -41,6 +42,7 @@ class DedispersionBufferTest : public CppUnit::TestFixture
         ~DedispersionBufferTest();
 
     private:
+        void _fillData( SpectrumDataSetStokes* data, float start );
 };
 
 } // namespace lofar
