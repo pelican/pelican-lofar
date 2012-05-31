@@ -10,6 +10,7 @@
 #include "GPU_Kernel.h"
 #include "GPU_Param.h"
 #include "GPU_NVidia.h"
+#include "GPU_Manager.h"
 #include <fstream>
 
 extern "C" void cacheDedisperseLoop( float *outbuff, long outbufSize, float *buff, float mstartdm,
@@ -110,17 +111,18 @@ void DedispersionModule::resize( const SpectrumDataSet<float>* streamData ) {
         _maxshift = ((_dmLow + _dmStep * (_tdms - 1)) * _dmshifts[_nChannels - 1])/_tsamp;
         std::cout << "resize: maxSamples = " << maxSamples << std::endl;
         std::cout << "resize: dmLow = " << _dmLow << std::endl;
-        std::cout << "resize: mshift = " << _dmLow + _dmStep * (_tdms - 1) * _dmshifts[nChannels - 1] << std::endl;
+        std::cout << "resize: mshift = " << _dmLow + _dmStep * (_tdms - 1) * _dmshifts[_nChannels - 1] << std::endl;
         std::cout << "resize: dmStep = " << _dmStep << std::endl;
         std::cout << "resize: tdms = " << _tdms << std::endl;
         std::cout << "resize: foff = " << _foff << std::endl;
         std::cout << "resize: fch1 = " << _fch1 << std::endl;
         std::cout << "resize: maxShift = " << _maxshift << std::endl;
         std::cout << "resize: tsamp = " << _tsamp << std::endl;
-        std::cout << "resize: nchans= " << nChannels << std::endl;
+        std::cout << "resize: blob nChannels= " << nChannels << std::endl;
+        std::cout << "resize: nTimeBlocks= " << streamData->nTimeBlocks() << std::endl;
         Q_ASSERT( (int)maxSamples > _maxshift );
         // ensure the history of DataBlobs available is sufficient
-        _minDedispersionSpectraBlobs = maxSamples/ streamData->nTimeBlocks() * maxBuffers;
+        _minDedispersionSpectraBlobs = maxBuffers * maxSamples/streamData->nTimeBlocks();
         std::cout << "Warning: DedispersionSpectra datablobs buffer must be at least: " << _minDedispersionSpectraBlobs << std::endl;
         // reset kernels
         foreach( DedispersionKernel* k, _kernelList ) {
@@ -169,6 +171,7 @@ void DedispersionModule::dedisperse( WeightedSpectrumDataSet* weightedData,
     unsigned int maxSamples = streamData->nTimeBlocks();
     do {
         if( _currentBuffer->addSamples( streamData, &sampleNumber ) == 0 ) {
+//std::cout << "dedispersionModule: launching job" << std::endl;
             //(*_currentBuffer)->dump("input.data");
             DedispersionBuffer* next = _buffers.next();
             next->clear();
@@ -197,9 +200,11 @@ void DedispersionModule::dedisperse( DedispersionBuffer* buffer, DedispersionSpe
     job->addCallBack( boost::bind( &DedispersionModule::gpuJobFinished, this, job, kernelPtr, dataOut ) );
     dataOut->setInputDataBlobs( buffer->inputDataBlobs() );
     submit( job );
+    //std::cout << "dedispersionModule: current jobs = " << gpuManager()->jobsQueued() << std::endl;
 }
 
 void DedispersionModule::gpuJobFinished( GPU_Job* job, DedispersionKernel* kernel, DedispersionSpectra* dataOut ) {
+    //std::cout << "dedispersionModule: job finished" << std::endl;
      _kernels.unlock( kernel ); // give up the kernel
      if( job->status() != GPU_Job::Failed ) {
          job->reset();
