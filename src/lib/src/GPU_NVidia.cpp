@@ -39,23 +39,32 @@ void GPU_NVidia::run( GPU_Job* job )
     cudaSetDevice( _deviceId );
     // execute the kernels
     foreach( GPU_Kernel* kernel, job->kernels() ) {
-       try { // try and reuse the existing configuration
-           _currentConfig->reset();
-           kernel->run( *this );
-       }
-       catch( const GPUConfigError& ) {
-           // existing configuration is not compatible so
-           // make a new one
-           _currentConfig->freeResources();
-           kernel->run( *this );
-       }
-       cudaDeviceSynchronize();
-       if( ! cudaPeekAtLastError() ) {
-           _currentConfig->syncOutputs();
-       }
-       else {
-           throw( cudaGetErrorString( cudaPeekAtLastError() ) );
-       }
+       try {
+           try { // try and reuse the existing configuration
+               _currentConfig->reset();
+               kernel->run( *this );
+           }
+           catch( const GPUConfigError& ) {
+               // if we get this exception then the
+               // existing configuration is not compatible so
+               // make a new one
+               _currentConfig->freeResources();
+               kernel->run( *this );
+           }
+           cudaDeviceSynchronize();
+           if( ! cudaPeekAtLastError() ) {
+               _currentConfig->syncOutputs();
+           }
+           else {
+               throw( cudaGetErrorString( cudaPeekAtLastError() ) );
+           }
+        }
+        catch( ... ) {
+           // if we have an exception we cant deal with 
+           // then we must clean up first
+           kernel->cleanUp();
+           throw;
+        }
     }
 }
 

@@ -61,8 +61,8 @@ class DedispersionModule : public AsyncronousModule
               void setDMShift( QVector<float>& );
               void setOutputBuffer( QVector<float>& );
               void setInputBuffer( QVector<float>&, GPU_MemoryMap::CallBackT );
-              void run(const QList<GPU_Param*>& param );
               void run( GPU_NVidia& );
+              void cleanUp();
         };
 
     public:

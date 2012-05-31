@@ -53,12 +53,14 @@ class GPU_MemoryMap
         void addCallBack( const CallBackT& fn ) { 
                          _callbacks.append(fn); };
         const QList<CallBackT>& callBacks() const { return _callbacks; };
+        // run all callBacks (and destroy callback list)
+        void runCallBacks() const;
 
     protected:
         void _set(void* host_address, unsigned long bytes);
 
     private:
-        QList<CallBackT> _callbacks;
+        mutable QList<CallBackT> _callbacks;
         void* _host;
         unsigned long _size;
         unsigned int _hash;

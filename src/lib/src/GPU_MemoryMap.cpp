@@ -21,6 +21,7 @@ GPU_MemoryMap::GPU_MemoryMap( void* host_address, unsigned long s )
  */
 GPU_MemoryMap::~GPU_MemoryMap()
 {
+    runCallBacks();
 }
 
 void GPU_MemoryMap::_set(void* host_address, unsigned long s) {
@@ -34,6 +35,14 @@ bool GPU_MemoryMap::operator==(const GPU_MemoryMap& m) const
      return (m._host == _host) && ( m._size == _size );
 }
 
+void GPU_MemoryMap::runCallBacks() const {
+    foreach( const GPU_MemoryMap::CallBackT& fn, _callbacks ) {
+       fn();
+    }
+    _callbacks.clear(); // must clear after making the calls
+                        // to avoid multiple calls to the
+                        // same function
+}
 
 /// Compute a hash value for use with QHash (uses the hash member function).
 uint qHash(const GPU_MemoryMap& map) {

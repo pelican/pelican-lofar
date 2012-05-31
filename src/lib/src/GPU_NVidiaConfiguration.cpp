@@ -1,6 +1,7 @@
 #include "GPU_NVidiaConfiguration.h"
 #include "GPU_Param.h"
 #include <cuda_runtime_api.h>
+#include <iostream>
 
 
 namespace pelican {
@@ -43,12 +44,14 @@ void GPU_NVidiaConfiguration::syncOutputs() {
 }
 
 void* GPU_NVidiaConfiguration::devicePtr( const GPU_MemoryMapOutput& map ) {
+    //std::cout << "GPU_NVidiaConfiguration::devicePtr( const GPU_MemoryMapOutput& map )" << std::endl;
      GPU_Param* p = _getParam(map);
      _outputs.insert(p);
      return p->device();
 }
 
 void* GPU_NVidiaConfiguration::devicePtr( const GPU_MemoryMapInputOutput& map ) {
+    //std::cout << "GPU_NVidiaConfiguration::devicePtr( const GPU_MemoryMapInputOutput& map )" << std::endl;
      GPU_Param* p = _getParam(map);
      _outputs.insert(p);
      p->syncHostToDevice();
@@ -56,13 +59,12 @@ void* GPU_NVidiaConfiguration::devicePtr( const GPU_MemoryMapInputOutput& map ) 
 }
 
 void* GPU_NVidiaConfiguration::devicePtr( const GPU_MemoryMap& map ) {
-     GPU_Param* p = _getParam(map);
-     p->syncHostToDevice();
-     // call any post sink hooks
-     foreach( const GPU_MemoryMap::CallBackT& fn, map.callBacks() ) {
-         fn();
-     }
-     return p->device();
+    //std::cout << "GPU_NVidiaConfiguration::devicePtr( const GPU_MemoryMap& map )" << std::endl;
+    GPU_Param* p = _getParam(map);
+    p->syncHostToDevice();
+    // call any post sync hooks
+    map.runCallBacks();
+    return p->device();
 }
 
 //
@@ -71,6 +73,7 @@ void* GPU_NVidiaConfiguration::devicePtr( const GPU_MemoryMap& map ) {
 // block of a sufficient size.
 //
 void* GPU_NVidiaConfiguration::devicePtr( const GPU_MemoryMapConst& map ) {
+    //std::cout << "GPU_NVidiaConfiguration::devicePtr( const GPU_MemoryMapConst& map )" << std::endl;
      if( ! _constantParams.contains(map) ) {
          GPU_Param* p = new GPU_Param( map ) ;
          if(  cudaPeekAtLastError() ) {

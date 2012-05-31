@@ -29,6 +29,10 @@ class GPU_Kernel
         // implement this method to run the nvidia kernel
         // using GPU_MemoryMap type to transfer data
         virtual void run( GPU_NVidia& ) = 0;
+        // this method will be called when something
+        // goes wrong and the run is abandoned.
+        // call any callbacks for the MemoryMap from here
+        virtual void cleanUp() {};
 
     private:
 };
