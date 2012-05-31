@@ -67,6 +67,10 @@ void AsyncronousModule::exportData( DataBlob* data ) {
      _chain->exec(_linkedFunctors, callbacks, data );
 }
 
+void AsyncronousModule::exportCancel( DataBlob* data ) {
+     _exportComplete( data );
+}
+
 void AsyncronousModule::_exportComplete( DataBlob* blob ) {
      // allow derived class space to unlock
      QMutexLocker lock( &_lockerMutex );

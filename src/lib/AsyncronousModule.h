@@ -55,11 +55,21 @@ class AsyncronousModule : public AbstractModule
     protected:
         /// queue a GPU_Job for submission
         GPU_Job* submit(GPU_Job*);
+
+        /// export specified data to asynchronous tasks in the chain
+        //  including the exportComplete() method to clean up
         void exportData( DataBlob* data );
+        /// call cleanup associated with the specified data without
+        //  propagating to the asyncronous tasks. Typically called 
+        //  after error conditions
+        void exportCancel( DataBlob* data );
 
         // will be called immediatley before any chain completion
         // callbacks. Override to clean up any data locks etc.
         // This is where to call the unlock() method.
+        // N.B. this should not be called directly. Use exportData()
+        // or the exportCancel() methods to ensure mutexs etc are in 
+        // place
         virtual void exportComplete( DataBlob* ) = 0;
 
         // mark DataBlob as being in use
