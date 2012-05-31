@@ -77,6 +77,9 @@ class AsyncronousModule : public AbstractModule
         // returns the number of locks remaining ( 0 = unlocked )
         int unlock( DataBlob* );
 
+    protected:
+        static GPU_Manager* gpuManager();
+
     private:
         ProcessingChain1<DataBlob*>* _chain;
 
@@ -84,7 +87,6 @@ class AsyncronousModule : public AbstractModule
         void _exportComplete( DataBlob* );
         QHash<const DataBlob*, int> _dataLocker; // keep a track of DataBlobs in use
         mutable QMutex _lockerMutex;
-        static GPU_Manager* gpuManager();
         QList<CallBackT> _linkedFunctors;
         QList<UnlockCallBackT> _unlockTriggers;
         QList<boost::function0<void> > _callbacks; // end of chain callbacks
