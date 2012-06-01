@@ -176,7 +176,10 @@ void DedispersionModule::dedisperse( WeightedSpectrumDataSet* weightedData,
             next->clear();
             lock( _currentBuffer->copy( next, _maxshift ) );
             DedispersionSpectra* dedispersionObj = dataOut->next();
-            _dedispersionBuffer.insert(dedispersionObj, dataOut); // record lock manager for dd data
+            { 
+                QMutexLocker l(&_dedispersionBufferMutex);
+                _dedispersionBuffer.insert(dedispersionObj, dataOut); // record lock manager for dd data
+            }
             dedisperse( _currentBuffer, dedispersionObj );
             _currentBuffer = next;
         }
@@ -227,6 +230,7 @@ void DedispersionModule::exportComplete( DataBlob* datablob ) {
         unlock( d );
     }
     // unlock the dedispersion datablob
+    QMutexLocker l(&_dedispersionBufferMutex);
     _dedispersionBuffer[data]->unlock(data);
 }
 

@@ -5,6 +5,7 @@
 #include "boost/function.hpp"
 #include <QVector>
 #include <QList>
+#include <QMutex>
 #include "pelican/core/AbstractModule.h"
 #include "pelican/utility/LockingCircularBuffer.hpp"
 #include "LockingContainer.hpp"
@@ -129,7 +130,8 @@ class DedispersionModule : public AsyncronousModule
         QList<DedispersionKernel*> _kernelList; // collection of pre-configured kernels
         LockingPtrContainer<DedispersionKernel> _kernels;
         QHash< DataBlob*, LockingPtrContainer<DedispersionSpectra>* > _dedispersionBuffer;
-	unsigned _minDedispersionSpectraBlobs;
+        unsigned _minDedispersionSpectraBlobs;
+        QMutex _dedispersionBufferMutex;
 };
 
 PELICAN_DECLARE_MODULE(DedispersionModule)
