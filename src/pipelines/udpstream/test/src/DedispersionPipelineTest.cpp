@@ -44,6 +44,7 @@ void DedispersionPipelineTest::test_method()
      // no segfaults
      int history = 10;
      int sampleSize=2048;
+     int numberOfBuffers=2;
      QString streamId = "LofarTimeStream1";
      QString xml = QString("<pipelineConfig>"
                  "   <DedispersionPipeline>"
@@ -68,7 +69,7 @@ void DedispersionPipelineTest::test_method()
                          "<channelBandwidth value=\"%5\"/>"
                          "<dedispersionSamples value=\"%6\" />"
                          "<dedispersionStepSize value=\"0.1\" />"
-                         "<numberOfBuffers value=\"3\" />"
+                         "<numberOfBuffers value=\"%8\" />"
                      "</DedispersionModule>"
                  "</modules>")
                   .arg( QString(TEST_DATA_DIR) + QDir::separator() + "band31.bp")
@@ -76,7 +77,8 @@ void DedispersionPipelineTest::test_method()
                   .arg( 150 )
                   .arg( 0.1 )
                   .arg( -0.2 )
-                  .arg ( 100 ).arg( history );
+                  .arg ( 100 ).arg( history )
+                  .arg( numberOfBuffers );
      try {
          DedispersionPipeline p(streamId);
          LofarPipelineTester tester(&p, config(xml));
@@ -85,7 +87,7 @@ void DedispersionPipelineTest::test_method()
          // is full
          // Expect: not to freeze waiting for history
          // buffer to be freed
-         for(int i=0; i<history+2; ++i) {
+         for(int i=0; i<(history*numberOfBuffers)+2; ++i) {
              tester.run();
          }
       }
@@ -98,19 +100,21 @@ void DedispersionPipelineTest::test_lofar()
 {
     // Use Case:
     // test with a typical lofar configuration file
-    int history = 1280;
+    int history = 406;
+    int nSubbands = 64;
+    int samplesPerPacket = 16;
     QString streamId = "LofarTimeStream1";
     QString commonXML = QString(
-         "<samplesPerPacket value=\"16\" />"
+         "<samplesPerPacket value=\"%2\" />"
          "<nRawPolarisations value=\"2\" />"
          "<dataBitSize value=\"16\" />"
          "<totalComplexSubbands value=\"512\" />"
 
          "<clock value=\"200\" /> <!-- Could also be 160 -->"
-         "<outputChannelsPerSubband value=\"64\" />"
+         "<outputChannelsPerSubband value=\"%1\" />"
          "<udpPacketsPerIteration value=\"128\" />"
          "<integrateTimeBins value=\"16\" />"
-    );
+    ).arg( nSubbands ).arg( samplesPerPacket );
     QString xml = QString(
                  "<pipelineConfig>"
                  "   <DedispersionPipeline>"
@@ -152,7 +156,7 @@ void DedispersionPipelineTest::test_lofar()
     try {
         DedispersionPipeline p(streamId);
         LofarPipelineTester tester(&p, config(xml));
-        for(int i=0; 1000; ++i) {
+        for(int i=0; i < 1000; ++i) {
             tester.run();
         }
     }
