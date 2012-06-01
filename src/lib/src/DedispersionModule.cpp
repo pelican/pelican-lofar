@@ -171,7 +171,6 @@ void DedispersionModule::dedisperse( WeightedSpectrumDataSet* weightedData,
     unsigned int maxSamples = streamData->nTimeBlocks();
     do {
         if( _currentBuffer->addSamples( streamData, &sampleNumber ) == 0 ) {
-//std::cout << "dedispersionModule: launching job" << std::endl;
             //(*_currentBuffer)->dump("input.data");
             DedispersionBuffer* next = _buffers.next();
             next->clear();
@@ -204,7 +203,6 @@ void DedispersionModule::dedisperse( DedispersionBuffer* buffer, DedispersionSpe
 }
 
 void DedispersionModule::gpuJobFinished( GPU_Job* job, DedispersionKernel* kernel, DedispersionSpectra* dataOut ) {
-    //std::cout << "dedispersionModule: job finished" << std::endl;
      _kernels.unlock( kernel ); // give up the kernel
      if( job->status() != GPU_Job::Failed ) {
          job->reset();
@@ -214,7 +212,7 @@ void DedispersionModule::gpuJobFinished( GPU_Job* job, DedispersionKernel* kerne
          std::cerr << "DedispersionModule: " << job->error() << std::endl;
          job->reset();
          _jobBuffer.unlock(job); // return the job to the pool, ready for the next
-         exportComplete( dataOut );
+         exportCancel( dataOut );
      }
 }
 
@@ -240,6 +238,10 @@ DedispersionModule::DedispersionKernel::DedispersionKernel( float start, float s
 
 void DedispersionModule::DedispersionKernel::setDMShift( QVector<float>& buffer ) {
     _dmShift = GPU_MemoryMap(buffer);
+}
+
+void DedispersionModule::DedispersionKernel::cleanUp() {
+    _inputBuffer.runCallBacks();
 }
 
 void DedispersionModule::DedispersionKernel::setOutputBuffer( QVector<float>& buffer )
