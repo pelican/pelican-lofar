@@ -21,7 +21,6 @@ GPU_MemoryMap::GPU_MemoryMap( void* host_address, unsigned long s )
  */
 GPU_MemoryMap::~GPU_MemoryMap()
 {
-    runCallBacks();
 }
 
 void GPU_MemoryMap::_set(void* host_address, unsigned long s) {
