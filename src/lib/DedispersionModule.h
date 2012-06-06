@@ -5,7 +5,6 @@
 #include "boost/function.hpp"
 #include <QVector>
 #include <QList>
-#include <QMutex>
 #include "pelican/core/AbstractModule.h"
 #include "pelican/utility/LockingCircularBuffer.hpp"
 #include "LockingContainer.hpp"
@@ -77,10 +76,8 @@ class DedispersionModule : public AsyncronousModule
         /// the process
         //DedispersionSpectra* dedisperse( DataBlob* incoming );
         /// processing the incoming data, filling the provided DedispersedSpectra
-        void dedisperse( DataBlob* incoming, 
-                                 LockingPtrContainer<DedispersionSpectra>* dataOut );
-        void dedisperse( WeightedSpectrumDataSet* incoming,
-                                 LockingPtrContainer<DedispersionSpectra>* dataOut );
+        void dedisperse( DataBlob* incoming );
+        void dedisperse( WeightedSpectrumDataSet* incoming );
 
         /// clean up after gpu task is finished
         void gpuJobFinished( GPU_Job* job,  
@@ -99,10 +96,6 @@ class DedispersionModule : public AsyncronousModule
 
         /// deprecated
         int maxshift() const { return _maxshift; }
-
-        /// return the minimum number of DedispersionDataBlobs required to avoid locking
-        //  note this is only valid after the first call of run.
-        unsigned minDedisperionDataBlobs() const { return _minDedispersionSpectraBlobs; };
 
      protected:
         void dedisperse( DedispersionBuffer* buffer, DedispersionSpectra* dataOut );
@@ -127,11 +120,11 @@ class DedispersionModule : public AsyncronousModule
         DedispersionBuffer* _currentBuffer;
         QVector<float> _dmshifts;
 
+        QList<DedispersionSpectra> _dedispersionData; // data products for async tasks
+        LockingContainer<DedispersionSpectra> _dedispersionDataBuffer;
+
         QList<DedispersionKernel*> _kernelList; // collection of pre-configured kernels
         LockingPtrContainer<DedispersionKernel> _kernels;
-        QHash< DataBlob*, LockingPtrContainer<DedispersionSpectra>* > _dedispersionBuffer;
-        unsigned _minDedispersionSpectraBlobs;
-        QMutex _dedispersionBufferMutex;
 };
 
 PELICAN_DECLARE_MODULE(DedispersionModule)

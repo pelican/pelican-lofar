@@ -10,6 +10,7 @@ class QWaitCondition;
  */
 
 namespace pelican {
+class DataBlob;
 
 namespace lofar {
 class SpectrumDataSetStokes;
@@ -59,6 +60,7 @@ class DedispersionDataGenerator
         DedispersionSpectra* dedispersionData( float dedispersionMeasure );
 
     protected:
+        void copyData( DataBlob* in, DedispersionSpectra* out ) const;
         void wakeUp( QWaitCondition* waiter, QMutex* mutex );
 
     protected:

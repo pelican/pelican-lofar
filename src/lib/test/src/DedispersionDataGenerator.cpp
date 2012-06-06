@@ -99,9 +99,7 @@ DedispersionSpectra* DedispersionDataGenerator::dedispersionData( float dedisper
         .arg( ddSamples )
         .arg( dedispersionStep );
     config.setFromString(configString);
-    QList<DedispersionSpectra*> outputData;
-    outputData << new DedispersionSpectra;
-    LockingPtrContainer<DedispersionSpectra> outputBuffer(&outputData);
+    DedispersionSpectra* outputData = new DedispersionSpectra;
     DedispersionModule ddm(config);
     WeightedSpectrumDataSet* inputData = new WeightedSpectrumDataSet( stokes[0] );
 
@@ -109,11 +107,16 @@ DedispersionSpectra* DedispersionDataGenerator::dedispersionData( float dedisper
     QMutex mutex;
     QMutexLocker locker( &mutex );
     QWaitCondition waiter;
+    ddm.connect( boost::bind( &DedispersionDataGenerator::copyData, this, _1, outputData ) );
     ddm.onChainCompletion( boost::bind( &DedispersionDataGenerator::wakeUp, this,  &waiter, &mutex) );
-    ddm.dedisperse( inputData, &outputBuffer );
+    ddm.dedisperse( inputData );
     waiter.wait(&mutex);
 
-    return outputData[0];
+    return outputData;
+}
+
+void DedispersionDataGenerator::copyData( DataBlob* in, DedispersionSpectra* out ) const {
+     *out = *(static_cast<DedispersionSpectra*>(in));
 }
 
 void DedispersionDataGenerator::wakeUp( QWaitCondition* waiter, QMutex* mutex ) {

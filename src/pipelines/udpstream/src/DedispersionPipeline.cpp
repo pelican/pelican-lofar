@@ -20,7 +20,6 @@ DedispersionPipeline::DedispersionPipeline( const QString& streamIdentifier )
 {
      _spectra = 0;
      _stokesBuffer = 0;
-     _dedispersedDataBuffer = 0;
      _dedispersionModule = 0;
      _dedispersionAnalyser = 0;
      _ppfChanneliser = 0;
@@ -38,16 +37,12 @@ DedispersionPipeline::~DedispersionPipeline()
     delete _dedispersionModule;
     delete _dedispersionAnalyser;
     delete _stokesBuffer;
-    delete _dedispersedDataBuffer;
     delete _ppfChanneliser;
     delete _rfiClipper;
     delete _stokesIntegrator;
     delete _stokesGenerator;
 
     foreach(SpectrumDataSetStokes* d, _stokesData ) {
-        delete d;
-    }
-    foreach(DedispersionSpectra* d, _dedispersedData ) {
         delete d;
     }
     delete _spectra;
@@ -75,9 +70,6 @@ void DedispersionPipeline::init()
     _stokesData = createBlobs<SpectrumDataSetStokes>("SpectrumDataSetStokes", history);
     _intStokes = (SpectrumDataSetStokes*) createBlob("SpectrumDataSetStokes");
     _stokesBuffer = new LockingPtrContainer<SpectrumDataSetStokes>(&_stokesData);
-    _dedispersedData = createBlobs<DedispersionSpectra >("DedispersionSpectra", history);
-    _dedispersedDataBuffer = new LockingPtrContainer<DedispersionSpectra>(&_dedispersedData);
-
     _weightedIntStokes = (WeightedSpectrumDataSet*) createBlob("WeightedSpectrumDataSet");
 
     // Request remote data
@@ -112,7 +104,7 @@ void DedispersionPipeline::run(QHash<QString, DataBlob*>& remoteData)
     dataOutput(_intStokes, "SpectrumDataSetStokes");
 
     // start the asyncronous chain of events
-    _dedispersionModule->dedisperse( _weightedIntStokes, _dedispersedDataBuffer );
+    _dedispersionModule->dedisperse( _weightedIntStokes );
 
 }
 

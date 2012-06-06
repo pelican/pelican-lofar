@@ -35,6 +35,7 @@ class DedispersionModuleTest : public CppUnit::TestFixture
         CPPUNIT_TEST( test_method );
         CPPUNIT_TEST( test_multipleBlobs );
         CPPUNIT_TEST( test_multipleBuffersPerBlob );
+        CPPUNIT_TEST( test_multipleBlobsPerBufferUnaligned );
         CPPUNIT_TEST_SUITE_END();
 
     public:
@@ -45,6 +46,7 @@ class DedispersionModuleTest : public CppUnit::TestFixture
         void test_method();
         void test_multipleBlobs();
         void test_multipleBlobsPerBuffer();
+        void test_multipleBlobsPerBufferUnaligned();
         void test_multipleBuffersPerBlob();
 
         // utility methods
@@ -58,9 +60,6 @@ class DedispersionModuleTest : public CppUnit::TestFixture
 
     protected:
         ConfigNode testConfig(QString file = QString() ) const;
-        LockingPtrContainer<DedispersionSpectra>* outputBuffer(int size);
-        void destroyBuffer(LockingPtrContainer<DedispersionSpectra>* b);
-        QList<DedispersionSpectra* > _outputData;
 
     private:
         int _connectCount;

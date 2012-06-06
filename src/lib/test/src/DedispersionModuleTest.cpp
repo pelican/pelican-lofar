@@ -43,7 +43,7 @@ void DedispersionModuleTest::test_multipleBuffersPerBlob()
     // Use Case:
     // Blob size is bigger than a single buffer
     // Expect:
-    // Launch multipleaasync tasks
+    // Launch multiple async tasks
     float dm = 10.0;
     int multiple=4; // factor of blob samples size to buffer size
     unsigned ddSamples = 200;
@@ -75,7 +75,6 @@ void DedispersionModuleTest::test_multipleBuffersPerBlob()
         .arg( ddSamples );
      config.setFromString(configString);
 
-     LockingPtrContainer<DedispersionSpectra>* buffer = outputBuffer(3);
      try {
         DedispersionModule ddm(config);
         ddm.connect( boost::bind( &DedispersionModuleTest::connected, this, _1 ) );
@@ -85,7 +84,7 @@ void DedispersionModuleTest::test_multipleBuffersPerBlob()
         _connectCount = 0;
         _chainFinished = 0;
         _unlocked.clear();
-        ddm.dedisperse( &weightedData, buffer ); // asynchronous tasks launch
+        ddm.dedisperse( &weightedData ); // asynchronous tasks launch
         while( _connectCount < multiple ) { sleep(1); }; // expect more times
                                                          // due to maxshift
         while( _chainFinished != _connectCount ) { sleep(1); };
@@ -94,7 +93,104 @@ void DedispersionModuleTest::test_multipleBuffersPerBlob()
      {
          CPPUNIT_FAIL(s.toStdString());
      }
-     destroyBuffer( buffer );
+     stokesData.deleteData(spectrumData);
+}
+
+void DedispersionModuleTest::test_multipleBlobsPerBufferUnaligned ()
+{
+     // Uses Case:
+     // buffer size is bigger than a single DataSample
+     // and it is not an integer number of the DataSample
+     // size so that the Data sample is split over two buffers
+     // Maxshift should be small enough to leave plenty of room
+     // to allow for unlocked DataBlobs
+     // Expect:
+     // Datablobs to be locked until they are finished with
+     // even across the buffer boundry
+     float dm = 10.0;
+     float multiple=5.5; // factor of blob samples size to buffer size
+     unsigned ddSamples = 200;
+     unsigned nBlocks = 6;
+     unsigned nSamples = 3200;
+     DedispersionDataGenerator stokesData;
+     stokesData.setTimeSamplesPerBlock( nSamples );
+     QList<SpectrumDataSetStokes*> spectrumData = stokesData.generate( nBlocks, dm );
+
+     WeightedSpectrumDataSet weightedData(spectrumData[0]);
+     WeightedSpectrumDataSet weightedData2(spectrumData[1]);
+     ConfigNode config;
+
+     // setup configuration
+     QString configString = QString("<DedispersionModule>"
+             " <sampleNumber value=\"%1\" />"
+             " <frequencyChannel1 value=\"%2\"/>"
+             " <sampleTime value=\"%3\"/>"
+             " <channelBandwidth value=\"%4\"/>"
+            " <dedispersionSamples value=\"%5\" />"
+            " <dedispersionStepSize value=\"0.1\" />"
+            " <numberOfBuffers value=\"2\" />"
+            "</DedispersionModule>")
+        .arg( nSamples * multiple  ) // block size should match the buffer size to ensure we get two calls to the GPU
+        .arg( stokesData.startFrequency())
+        .arg( stokesData.timeOfSample())
+        .arg( stokesData.bandwidthOfSample())
+        .arg( ddSamples );
+     config.setFromString(configString);
+
+     try {
+         DedispersionModule ddm(config);
+         ddm.connect( boost::bind( &DedispersionModuleTest::connected, this, _1 ) );
+         ddm.onChainCompletion( boost::bind( &DedispersionModuleTest::connectFinished, this ) );
+         ddm.unlockCallback( boost::bind( &DedispersionModuleTest::unlockCallback, this, _1 ) );
+         _connectData = 0;
+         _connectCount = 0;
+         _chainFinished = 0;
+         _unlocked.clear();
+         // first dedisperse calls should just buffer
+         int i;
+         for(i=0; i < (int)multiple; ++i ) {
+             WeightedSpectrumDataSet weightedData(spectrumData[i]);
+             ddm.dedisperse( &weightedData ); // asynchronous task
+             CPPUNIT_ASSERT_EQUAL( 1, ddm.lockNumber( spectrumData[i] ) );
+             CPPUNIT_ASSERT_EQUAL( 0, _connectCount ); // no data should be processed first time
+             CPPUNIT_ASSERT( (int)nSamples > ddm.maxshift() ); // ensures first sample should be released
+         }
+         // next dedisperse call should trigger a process chain
+         WeightedSpectrumDataSet weightedData(spectrumData[i]);
+         ddm.dedisperse( &weightedData ); // asynchronous task
+         CPPUNIT_ASSERT( ddm.lockNumber( spectrumData[i] ) > 1 ); // needs to be reserved for maxshift
+         while( _connectCount == 0 ) { sleep(1); };
+         CPPUNIT_ASSERT_EQUAL( 1, _connectCount );
+
+         float expectedDMIntentsity = spectrumData[0]->nSubbands() * spectrumData[0]->nChannels();
+         CPPUNIT_ASSERT_EQUAL( expectedDMIntentsity , _connectData->dmAmplitude( 0, dm ) );
+         while( _chainFinished == 0 ) { sleep(1); }
+
+         for( i=0; i < (int)multiple; ++i ) {
+             CPPUNIT_ASSERT_EQUAL( 0, ddm.lockNumber( spectrumData[i] ) );
+         }
+         // the split blob should still be locked after processing the 
+         // first buffer as it is partually used in the second
+         // it may also be associated with the xshift
+         CPPUNIT_ASSERT_EQUAL( 1, ddm.lockNumber( spectrumData[i] ));
+
+         // expect unlock trigger
+         CPPUNIT_ASSERT_EQUAL( (int)multiple, _unlocked.size() );
+         CPPUNIT_ASSERT_EQUAL( (void *)spectrumData[0], (void *)_unlocked[0] );
+
+         // ensure lock clears for the latest spectrumData after next iteration
+         for(i=0; i < (int)multiple; ++i ) {
+             WeightedSpectrumDataSet weightedData(spectrumData[i]);
+             ddm.dedisperse( &weightedData ); // asynchronous task
+         }
+         while( _connectCount == 1 ) { sleep(1); };
+         CPPUNIT_ASSERT_EQUAL( 2, _connectCount );
+         CPPUNIT_ASSERT_EQUAL( 0, ddm.lockNumber( spectrumData[i] ));
+     }
+     catch( const QString& s )
+     {
+         CPPUNIT_FAIL(s.toStdString());
+     }
      stokesData.deleteData(spectrumData);
 }
 
@@ -134,7 +230,6 @@ void DedispersionModuleTest::test_multipleBlobsPerBuffer ()
         .arg( ddSamples );
      config.setFromString(configString);
 
-     LockingPtrContainer<DedispersionSpectra>* buffer = outputBuffer(2);
      try {
         DedispersionModule ddm(config);
         ddm.connect( boost::bind( &DedispersionModuleTest::connected, this, _1 ) );
@@ -145,7 +240,7 @@ void DedispersionModuleTest::test_multipleBlobsPerBuffer ()
         _chainFinished = 0;
         _unlocked.clear();
         // first dedisperse call should just buffer
-        ddm.dedisperse( &weightedData, buffer ); // asynchronous task
+        ddm.dedisperse( &weightedData ); // asynchronous task
         CPPUNIT_ASSERT_EQUAL( 0, ddm.lockNumber( &weightedData ) );
         CPPUNIT_ASSERT_EQUAL( 0, ddm.lockNumber( &weightedData2 ) );
         CPPUNIT_ASSERT_EQUAL( 1, ddm.lockNumber( spectrumData[0] ) );
@@ -153,7 +248,7 @@ void DedispersionModuleTest::test_multipleBlobsPerBuffer ()
         CPPUNIT_ASSERT_EQUAL( 0, _connectCount ); // no data should be processed first time
         CPPUNIT_ASSERT( (int)nSamples > ddm.maxshift() ); // ensures first sample should be released
         // second dedisperse call should trigger a process chain
-        ddm.dedisperse( &weightedData2, buffer ); // asynchronous task
+        ddm.dedisperse( &weightedData2 ); // asynchronous task
         CPPUNIT_ASSERT( ddm.lockNumber( spectrumData[1] ) > 1 ); // needs to be reserved for maxshift
         while( _connectCount == 0 ) { sleep(1); };
         CPPUNIT_ASSERT_EQUAL( 1, _connectCount );
@@ -172,7 +267,6 @@ void DedispersionModuleTest::test_multipleBlobsPerBuffer ()
      {
          CPPUNIT_FAIL(s.toStdString());
      }
-     destroyBuffer( buffer );
      stokesData.deleteData(spectrumData);
 }
 
@@ -196,7 +290,6 @@ void DedispersionModuleTest::test_multipleBlobs ()
      // the second buffer.
      // As the buffer is of fixed size, all the data in the second blob will
      // not be included, but should be placed in the next awaiting buffer
-    LockingPtrContainer<DedispersionSpectra>* buffer = outputBuffer(2);
     float dm = 10.0;
     unsigned ddSamples = 200;
     unsigned nBlocks = 2;
@@ -232,25 +325,22 @@ void DedispersionModuleTest::test_multipleBlobs ()
           ddm.connect( boost::bind( &DedispersionModuleTest::connected, this, _1 ) );
           _connectData = 0;
           _connectCount = 0;
-          ddm.dedisperse( &weightedData, buffer ); // asynchronous task
-          CPPUNIT_ASSERT_EQUAL( 1, buffer->numberAvailable() );
+          ddm.dedisperse( &weightedData ); // asynchronous task
           while( _connectCount != 1 ) { sleep(1); };
           float expectedDMIntentsity = spectrumData[0]->nSubbands() * spectrumData[0]->nChannels();
           CPPUNIT_ASSERT_EQUAL( expectedDMIntentsity , _connectData->dmAmplitude( 0, dm ) );
-          ddm.dedisperse( &weightedData2, buffer ); // asynchronous task
+          ddm.dedisperse( &weightedData2 ); // asynchronous task
           while( _connectCount != 2 ) { sleep(1); };
     }
     catch( const QString& s )
     {
         CPPUNIT_FAIL(s.toStdString());
     }
-    destroyBuffer( buffer );
     stokesData.deleteData(spectrumData);
 }
 
 void DedispersionModuleTest::test_method()
 {
-    LockingPtrContainer<DedispersionSpectra>* buffer = outputBuffer(2);
     try {
         float dm = 10.0;
         unsigned ddSamples = 200;
@@ -288,7 +378,7 @@ void DedispersionModuleTest::test_method()
           ddm.connect( boost::bind( &DedispersionModuleTest::connected, this, _1 ) );
           _connectData = 0;
           _connectCount = 0;
-          ddm.dedisperse( &weightedData, buffer ); // asynchronous task
+          ddm.dedisperse( &weightedData ); // asynchronous task
           while( ! _connectCount ) { sleep(1); };
           CPPUNIT_ASSERT_EQUAL( 1, _connectCount );
           int outputSampleSize = (int)(((nSamples - ddm.maxshift() )));
@@ -309,7 +399,6 @@ void DedispersionModuleTest::test_method()
     {
         CPPUNIT_FAIL(s.toStdString());
     }
-    destroyBuffer( buffer );
 }
 
 void DedispersionModuleTest::connected( DataBlob* dataOut ) {
@@ -332,24 +421,6 @@ ConfigNode DedispersionModuleTest::testConfig(QString xml) const
     }
     node.setFromString( xml );
     return node;
-}
-
-LockingPtrContainer<DedispersionSpectra>* DedispersionModuleTest::outputBuffer(int size) {
-     QList<DedispersionSpectra* >* buffer = new QList< DedispersionSpectra* >;
-     for(int i=0; i < size; ++i ) {
-        buffer->append( new DedispersionSpectra );
-     }
-     return new LockingPtrContainer<DedispersionSpectra>( buffer );
-}
-
-void DedispersionModuleTest::destroyBuffer(
-        LockingPtrContainer<DedispersionSpectra>* b) 
-{
-    foreach( DedispersionSpectra* d, *(b->rawBuffer()) ) {
-        delete d;
-    }
-    delete (b->rawBuffer());
-    delete b;
 }
 
 } // namespace lofar

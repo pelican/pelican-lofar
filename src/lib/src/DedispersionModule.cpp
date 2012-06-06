@@ -51,9 +51,12 @@ DedispersionModule::DedispersionModule( const ConfigNode& config )
         _buffersList.append( new DedispersionBuffer(_numSamplesBuffer, 1) );
         GPU_Job tmp;
         _jobs.append( tmp );
+        DedispersionSpectra tmp2;
+        _dedispersionData.append( tmp2 );
     }
     _jobBuffer.reset( &_jobs );
     _buffers.reset( &_buffersList );
+    _dedispersionDataBuffer.reset( &_dedispersionData );
     _currentBuffer = _buffers.next();
 }
 
@@ -63,9 +66,6 @@ DedispersionModule::DedispersionModule( const ConfigNode& config )
 DedispersionModule::~DedispersionModule()
 {
     waitForJobCompletion();
-    foreach( DedispersionKernel* k, _kernelList ) {
-        delete k;
-    }
     _cleanBuffers();
 }
 
@@ -77,6 +77,11 @@ void DedispersionModule::waitForJobCompletion() {
 }
 
 void DedispersionModule::_cleanBuffers() {
+    // clean up kernels
+    foreach( DedispersionKernel* k, _kernelList ) {
+        delete k;
+    }
+    _kernelList.clear();
     // clean up the data buffers memory
     foreach( DedispersionBuffer* b, _buffersList ) {
         delete b;
@@ -93,6 +98,7 @@ void DedispersionModule::resize( const SpectrumDataSet<float>* streamData ) {
     if( sampleSize != _currentBuffer->sampleSize() ) {
         unsigned maxBuffers = _buffersList.size();
         unsigned maxSamples = _currentBuffer->maxSamples();
+        waitForJobCompletion();
         _cleanBuffers();
         for( unsigned int i=0; i < maxBuffers; ++i ) {
             _buffersList.append( new DedispersionBuffer(maxSamples, sampleSize) );
@@ -121,14 +127,7 @@ void DedispersionModule::resize( const SpectrumDataSet<float>* streamData ) {
         std::cout << "resize: blob nChannels= " << nChannels << std::endl;
         std::cout << "resize: nTimeBlocks= " << streamData->nTimeBlocks() << std::endl;
         Q_ASSERT( (int)maxSamples > _maxshift );
-        // ensure the history of DataBlobs available is sufficient
-        _minDedispersionSpectraBlobs = maxBuffers * maxSamples/streamData->nTimeBlocks();
-        std::cout << "Warning: DedispersionSpectra datablobs buffer must be at least: " << _minDedispersionSpectraBlobs << std::endl;
         // reset kernels
-        foreach( DedispersionKernel* k, _kernelList ) {
-            delete k;
-        }
-        _kernelList.clear();
         for( unsigned int i=0; i < maxBuffers; ++i ) {
             DedispersionKernel* kernel = new DedispersionKernel( _dmLow, _dmStep,
                                 _tsamp, _tdms,
@@ -140,13 +139,12 @@ void DedispersionModule::resize( const SpectrumDataSet<float>* streamData ) {
     }
 }
 
-void DedispersionModule::dedisperse( DataBlob* incoming,
-                                 LockingPtrContainer<DedispersionSpectra>* dataOut ) {
-    dedisperse( dynamic_cast<WeightedSpectrumDataSet*>(incoming), dataOut );
+void DedispersionModule::dedisperse( DataBlob* incoming )
+{
+    dedisperse( dynamic_cast<WeightedSpectrumDataSet*>(incoming) );
 }
 
-void DedispersionModule::dedisperse( WeightedSpectrumDataSet* weightedData, 
-                        LockingPtrContainer<DedispersionSpectra>* dataOut )
+void DedispersionModule::dedisperse( WeightedSpectrumDataSet* weightedData )
 {
     // transfer weighted data to host memory buffer
     //
@@ -175,12 +173,11 @@ void DedispersionModule::dedisperse( WeightedSpectrumDataSet* weightedData,
             DedispersionBuffer* next = _buffers.next();
             next->clear();
             lock( _currentBuffer->copy( next, _maxshift ) );
-            DedispersionSpectra* dedispersionObj = dataOut->next();
-            { 
-                QMutexLocker l(&_dedispersionBufferMutex);
-                _dedispersionBuffer.insert(dedispersionObj, dataOut); // record lock manager for dd data
-            }
-            dedisperse( _currentBuffer, dedispersionObj );
+            // ensure lock is maintianed for the next buffer
+            // if not already marked by the maxshift copy
+            if( sampleNumber != maxSamples && lockNumber( streamData ) <=1 )
+                lock( streamData );
+            dedisperse( _currentBuffer, _dedispersionDataBuffer.next() );
             _currentBuffer = next;
         }
     }
@@ -230,8 +227,7 @@ void DedispersionModule::exportComplete( DataBlob* datablob ) {
         unlock( d );
     }
     // unlock the dedispersion datablob
-    QMutexLocker l(&_dedispersionBufferMutex);
-    _dedispersionBuffer[data]->unlock(data);
+    _dedispersionDataBuffer.unlock(data);
 }
 
 DedispersionModule::DedispersionKernel::DedispersionKernel( float start, float step, float tsamp, float tdms , unsigned nChans, unsigned maxshift, unsigned nsamples )
