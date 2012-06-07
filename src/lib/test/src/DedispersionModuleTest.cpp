@@ -115,6 +115,10 @@ void DedispersionModuleTest::test_multipleBlobsPerBufferUnaligned ()
      DedispersionDataGenerator stokesData;
      stokesData.setTimeSamplesPerBlock( nSamples );
      QList<SpectrumDataSetStokes*> spectrumData = stokesData.generate( nBlocks, dm );
+     QList<SpectrumDataSetStokes*> spectrumDataCopy
+                                        = stokesData.deepCopy( spectrumData );
+     CPPUNIT_ASSERT_EQUAL( spectrumData.size(), spectrumDataCopy.size() );
+     CPPUNIT_ASSERT( stokesData.equal( spectrumData, spectrumDataCopy ));
 
      WeightedSpectrumDataSet weightedData(spectrumData[0]);
      WeightedSpectrumDataSet weightedData2(spectrumData[1]);
@@ -155,6 +159,7 @@ void DedispersionModuleTest::test_multipleBlobsPerBufferUnaligned ()
              CPPUNIT_ASSERT_EQUAL( 0, _connectCount ); // no data should be processed first time
              CPPUNIT_ASSERT( (int)nSamples > ddm.maxshift() ); // ensures first sample should be released
          }
+         stokesData.equal( spectrumData, spectrumDataCopy );
          // next dedisperse call should trigger a process chain
          WeightedSpectrumDataSet weightedData(spectrumData[i]);
          ddm.dedisperse( &weightedData ); // asynchronous task
@@ -166,12 +171,16 @@ void DedispersionModuleTest::test_multipleBlobsPerBufferUnaligned ()
          CPPUNIT_ASSERT_EQUAL( expectedDMIntentsity , _connectData->dmAmplitude( 0, dm ) );
          while( _chainFinished == 0 ) { sleep(1); }
 
+         CPPUNIT_ASSERT( stokesData.equal( spectrumData, spectrumDataCopy ));
+         // check that the datablobs are freed
          for( i=0; i < (int)multiple; ++i ) {
              CPPUNIT_ASSERT_EQUAL( 0, ddm.lockNumber( spectrumData[i] ) );
          }
-         // the split blob should still be locked after processing the 
+
+         // the split blob should still be locked after processing the
          // first buffer as it is partually used in the second
-         // it may also be associated with the xshift
+         // it may also be associated with the xshift, in either
+         // case it should only be locked once
          CPPUNIT_ASSERT_EQUAL( 1, ddm.lockNumber( spectrumData[i] ));
 
          // expect unlock trigger
@@ -192,6 +201,7 @@ void DedispersionModuleTest::test_multipleBlobsPerBufferUnaligned ()
          CPPUNIT_FAIL(s.toStdString());
      }
      stokesData.deleteData(spectrumData);
+     stokesData.deleteData(spectrumDataCopy);
 }
 
 void DedispersionModuleTest::test_multipleBlobsPerBuffer ()
@@ -350,7 +360,7 @@ void DedispersionModuleTest::test_method()
         stokesData.setTimeSamplesPerBlock( nSamples );
         QList<SpectrumDataSetStokes*> spectrumData = stokesData.generate( nBlocks, dm );
         //stokesData.writeToFile( "inputStokes.data", spectrumData );
-        
+
         WeightedSpectrumDataSet weightedData(spectrumData[0]);
         { // Use Case:
           // Single Data Blob as input, of same size as the buffer

@@ -148,5 +148,32 @@ void DedispersionDataGenerator::deleteData( QList<SpectrumDataSetStokes*>& data 
     }
 }
 
+QList<SpectrumDataSetStokes*> DedispersionDataGenerator::deepCopy( 
+        const QList<SpectrumDataSetStokes*>& input ) 
+{
+    QList<SpectrumDataSetStokes*> out;
+    // make a deep copy of each SpectrumData Set
+    foreach( SpectrumDataSetStokes* d, input ) {
+        SpectrumDataSetStokes* s = new SpectrumDataSetStokes;
+        *s = *d;
+        out.push_back( s );
+    }
+    return out;
+}
+
+bool DedispersionDataGenerator::equal(
+                const QList<SpectrumDataSetStokes*>& input,
+                const QList<SpectrumDataSetStokes*>& ref )
+{
+    if( input.size() != ref.size() ) return false;
+    for( int i=0; i < input.size(); ++i ) {
+        if( *(input[i]) != *(ref[i]) ) {
+//            std::cerr << "data varies at index: " << i << std::endl;
+            return false;
+        }
+    }
+    return true;
+}
+
 } // namespace lofar
 } // namespace pelican

@@ -53,11 +53,21 @@ class DedispersionDataGenerator
         /// convenience method to clean up generated DedispersionSpectra objects
         static void deleteData( DedispersionSpectra* data );
 
+        /// convenience method to make a deep copy of a data set
+        static QList<SpectrumDataSetStokes*> deepCopy(
+                const QList<SpectrumDataSetStokes*>& input );
+
+        /// compare two datasets for euality
+        static bool equal(
+                const QList<SpectrumDataSetStokes*>& input,
+                const QList<SpectrumDataSetStokes*>& ref );
+
         /// fill each block with the specified number of samples
         void setTimeSamplesPerBlock( unsigned num ) { nSamples = num; }
 
         /// create a dedispersion object (processdd by the dedispersion module)
         DedispersionSpectra* dedispersionData( float dedispersionMeasure );
+
 
     protected:
         void copyData( DataBlob* in, DedispersionSpectra* out ) const;
