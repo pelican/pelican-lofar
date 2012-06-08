@@ -36,6 +36,7 @@ class DedispersionModuleTest : public CppUnit::TestFixture
         CPPUNIT_TEST( test_multipleBlobs );
         CPPUNIT_TEST( test_multipleBuffersPerBlob );
         CPPUNIT_TEST( test_multipleBlobsPerBufferUnaligned );
+        CPPUNIT_TEST( test_dataConsistency );
         CPPUNIT_TEST_SUITE_END();
 
     public:
@@ -48,6 +49,7 @@ class DedispersionModuleTest : public CppUnit::TestFixture
         void test_multipleBlobsPerBuffer();
         void test_multipleBlobsPerBufferUnaligned();
         void test_multipleBuffersPerBlob();
+        void test_dataConsistency();
 
         // utility methods
         void connected( DataBlob* dataOut );
@@ -59,7 +61,7 @@ class DedispersionModuleTest : public CppUnit::TestFixture
         ~DedispersionModuleTest();
 
     protected:
-        ConfigNode testConfig(QString file = QString() ) const;
+        ConfigNode testConfig( unsigned nBufferSamples ) const;
 
     private:
         int _connectCount;

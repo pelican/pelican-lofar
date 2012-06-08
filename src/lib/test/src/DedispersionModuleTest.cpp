@@ -411,6 +411,54 @@ void DedispersionModuleTest::test_method()
     }
 }
 
+void DedispersionModuleTest::test_dataConsistency() {
+    // Use case:
+    // Ensure Input DataBlobs do not get corrupted after 
+    // passing through the dedisperse algo
+    // Ensure each Blob is unique to ensure detection
+    unsigned multiple = 5.3;
+    unsigned nTimeBlocks = 6400;
+    unsigned nSubbands = 64;
+    unsigned nChan = 32;
+    unsigned nPol = 1;
+    QList<SpectrumDataSetStokes*> spectrumData;
+    for( int i=0; i < (int)(2.0*multiple); ++i ) { // 2 full buffers worth
+       SpectrumDataSetStokes* d = new SpectrumDataSetStokes;
+       d->resize( nTimeBlocks, nSubbands, nPol, nChan );
+       // set unique data for each data point
+       float* data = d->data();
+       for(int j=0; j < d->size(); ++j ) {
+           data[j]= j + i;
+       }
+       spectrumData.append(d);
+    }
+    QList<SpectrumDataSetStokes*> spectrumDataCopy =
+                        DedispersionDataGenerator::deepCopy( spectrumData );
+    try {
+         DedispersionModule ddm(testConfig( nTimeBlocks * multiple));
+         ddm.connect( boost::bind( &DedispersionModuleTest::connected, this, _1 ) );
+         ddm.onChainCompletion( boost::bind( &DedispersionModuleTest::connectFinished, this ) );
+         _connectData = 0;
+         _connectCount = 0;
+        _chainFinished = 0;
+         int i;
+         for(i=0; i < spectrumData.size(); ++i ) {
+             WeightedSpectrumDataSet weightedData(spectrumData[i]);
+             ddm.dedisperse( &weightedData ); // asynchronous task
+             CPPUNIT_ASSERT( ddm.lockNumber( spectrumData[i] ) >= 1 );
+         }
+         while( _connectCount != 2 ) { sleep(1); };
+         while( _chainFinished != _connectCount ) { sleep(1); };
+         CPPUNIT_ASSERT( DedispersionDataGenerator::equal(spectrumData, spectrumDataCopy ));
+    }
+    catch( const QString& s )
+    {
+        CPPUNIT_FAIL(s.toStdString());
+    }
+    DedispersionDataGenerator::deleteData(spectrumData);
+    DedispersionDataGenerator::deleteData(spectrumDataCopy);
+}
+
 void DedispersionModuleTest::connected( DataBlob* dataOut ) {
     ++_connectCount;
     _connectData = 0;
@@ -421,14 +469,17 @@ void DedispersionModuleTest::connectFinished() {
     ++_chainFinished;
 }
 
-ConfigNode DedispersionModuleTest::testConfig(QString xml) const
+ConfigNode DedispersionModuleTest::testConfig(unsigned nSamples) const
 {
     ConfigNode node;
-    if( xml == "" ) {
-        xml = QString("<DedispersionModule >\n"
-                  "<Band startFrequency=\"131.250763\" endFrequency=\"137.3\" />\n"
-              "</DedispersionModule>\n");
-    }
+    QString xml = QString("<DedispersionModule >\n"
+                " <sampleNumber value=\"%1\" />"
+                " <frequencyChannel1 value=\"150.0\"/>"
+                " <sampleTime value=\"0.00032768\"/>"
+                " <channelBandwidth value=\"-0.0292969\"/>" // -6.0/(nSubbands*nChannels);
+                " <dedispersionSamples value=\"200\" />"
+                " <dedispersionStepSize value=\"0.1\" />"
+              "</DedispersionModule>\n").arg(nSamples);
     node.setFromString( xml );
     return node;
 }
