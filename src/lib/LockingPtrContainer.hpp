@@ -53,6 +53,7 @@ class LockingPtrContainer
         // unlock the specified data
         void unlock( const T* data ) {
            QMutexLocker lock(&_mutex);
+           Q_ASSERT( ! _available.contains(data) );
            _available.append(data);
            _waitCondition.wakeOne();
         }
