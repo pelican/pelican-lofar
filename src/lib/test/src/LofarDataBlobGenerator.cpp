@@ -21,8 +21,8 @@ LofarDataBlobGenerator::LofarDataBlobGenerator( const ConfigNode& configNode,
     : AbstractDataClient( configNode, types, config )
 {
     _nPols= 2;
-    _nSubbands = 32;
-    _nChannels = 64;
+    _nSubbands = 64;
+    _nChannels = 32;
     _nSamples = 6400;
     _counter = 0;
 }
