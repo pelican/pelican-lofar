@@ -72,8 +72,9 @@ class ProcessingChain1
              functor( arg );
              QMutexLocker lock(&_mutex);
              if( --_processCount[taskId] == 0) {
-                _finished( postTasks );
                 _processCount.remove(taskId);
+                lock.unlock(); // allow other tasks to launch
+                _finished( postTasks );
              }
         }
 
