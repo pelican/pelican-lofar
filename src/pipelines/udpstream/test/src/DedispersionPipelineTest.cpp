@@ -64,9 +64,9 @@ void DedispersionPipelineTest::test_method()
                      "</RFI_Clipper>"
                      "<DedispersionModule>"
                          "<sampleNumber value=\"%2\" />"
-                         "<frequencyChannel1 value=\"%3\"/>"
-                         "<sampleTime value=\"%4\"/>"
-                         "<channelBandwidth value=\"%5\"/>"
+                         "<frequencyChannel1 MHz=\"%3\"/>"
+                         "<sampleTime seconds=\"%4\"/>"
+                         "<channelBandwidth MHz=\"%5\"/>"
                          "<dedispersionSamples value=\"%6\" />"
                          "<dedispersionStepSize value=\"0.1\" />"
                          "<numberOfBuffers value=\"%8\" />"
@@ -122,7 +122,7 @@ void DedispersionPipelineTest::test_lofar()
                  "   </DedispersionPipeline>"
                  "</pipelineConfig>"
                  "<modules>"
-                 "       <PPFChanneliser>"
+                 "      <PPFChanneliser>"
                  "           %1"
                  "           <processingThreads value=\"6\" />"
                  "           <filter nTaps=\"8\" filterWindow=\"kaiser\"/>"
@@ -139,12 +139,12 @@ void DedispersionPipelineTest::test_lofar()
                  "      </RFI_Clipper>"
                  "      <DedispersionModule>"
                  "         <sampleNumber value=\"8192\" />"
-                 "         <frequencyChannel1 value=\"148.828125\"/>"
-                 "         <sampleTime value=\"327.68\"/>"
-                 "         <channelBandwidth value=\"-0.003051757812\"/>"
+                 "         <frequencyChannel1 MHz=\"148.828125\"/>"
+                 "         <sampleTime seconds=\"0.32768\"/>"
+                 "         <channelBandwidth MHz=\"-0.003051757812\"/>"
                  "         <dedispersionSamples value=\"1000\" />"
                  "         <dedispersionStepSize value=\"0.1\" />"
-                 "         <numberOfBuffers value=\"5\" />"
+                 "         <numberOfBuffers value=\"2\" />"
                  "      </DedispersionModule>"
                  "      <StokesIntegrator>"
                  "        %1"
@@ -156,7 +156,7 @@ void DedispersionPipelineTest::test_lofar()
     try {
         DedispersionPipeline p(streamId);
         LofarPipelineTester tester(&p, config(xml));
-        for(int i=0; i < 1000; ++i) {
+        for(int i=0; i < history * 2 ; ++i) {
             tester.run();
         }
     }

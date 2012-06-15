@@ -25,6 +25,23 @@ namespace lofar {
 
 /**
  *@details DedispersionModule 
+ * Example configuration:
+ * <DedispersionModule>
+ *    <sampleNumber value="512">
+ *       The total number of time samples to dedisperse at once
+ *    </sampleNumber>
+ *    <sampleTime seconds="0.3">
+ *       The time represented by each time sample (in seconds)
+ *    </sampleNumber>
+ *    <frequencyChannel1 MHz="150.0">
+ *       The frequency of the first channel (highest freq)
+ *    </frequencyChannel1>
+ *    <channelBandwidth MHz="-0.03">
+ *       The width of each frequency channel. Must be -ve such
+ *       that frequencyChannel1 + nChannels*channelBandwidth =
+ *       lowest frequency.
+ *    </channelBandwidth>
+ * </DedispersionModule>
  */
 DedispersionModule::DedispersionModule( const ConfigNode& config )
     : AsyncronousModule(config)
@@ -34,11 +51,11 @@ DedispersionModule::DedispersionModule( const ConfigNode& config )
     _numSamplesBuffer = config.getOption("sampleNumber", "value", "512").toUInt();
     _tdms = config.getOption("dedispersionSamples", "value", "1984").toUInt();
     _dmStep = config.getOption("dedispersionStepSize", "value", "0.0").toFloat();
-    _dmLow = config.getOption("dedispersionMinimum", "value", "0").toFloat();
+    _dmLow = config.getOption("dedispersionMinimum", "value", "0.0").toFloat();
     if( _dmLow < 0.0 ) { _dmLow = 0.0; }
-    _fch1 = config.getOption("frequencyChannel1", "value", "0.0").toDouble();
-    _foff = config.getOption("channelBandwidth", "value", "1.0").toDouble();
-    _tsamp = config.getOption("sampleTime", "value", "0.0").toDouble();
+    _fch1 = config.getOption("frequencyChannel1", "MHz", "0.0").toDouble();
+    _foff = config.getOption("channelBandwidth", "MHz", "1.0").toDouble();
+    _tsamp = config.getOption("sampleTime", "seconds", "0.0").toDouble();
     if( _tsamp == 0.000 ) { throw QString("DedispersionModule: must specify a sampleTime"); }
     if( _foff >= 0 ) { throw QString("DedispersionModule: channelBandwidth must be a negative number"); }
     if( _fch1 == 0 ) { throw QString("DedispersionModule: frequencyChannel1 must be a positve number"); }

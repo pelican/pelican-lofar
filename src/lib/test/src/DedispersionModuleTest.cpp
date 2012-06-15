@@ -61,9 +61,9 @@ void DedispersionModuleTest::test_multipleBuffersPerBlob()
     // setup configuration
     QString configString = QString("<DedispersionModule>"
             " <sampleNumber value=\"%1\" />"
-            " <frequencyChannel1 value=\"%2\"/>"
-            " <sampleTime value=\"%3\"/>"
-            " <channelBandwidth value=\"%4\"/>"
+            " <frequencyChannel1 MHz=\"%2\"/>"
+            " <sampleTime seconds=\"%3\"/>"
+            " <channelBandwidth MHz=\"%4\"/>"
             " <dedispersionSamples value=\"%5\" />"
             " <dedispersionStepSize value=\"0.1\" />"
             " <numberOfBuffers value=\"3\" />"
@@ -127,9 +127,9 @@ void DedispersionModuleTest::test_multipleBlobsPerBufferUnaligned ()
      // setup configuration
      QString configString = QString("<DedispersionModule>"
              " <sampleNumber value=\"%1\" />"
-             " <frequencyChannel1 value=\"%2\"/>"
-             " <sampleTime value=\"%3\"/>"
-             " <channelBandwidth value=\"%4\"/>"
+             " <frequencyChannel1 MHz=\"%2\"/>"
+             " <sampleTime seconds=\"%3\"/>"
+             " <channelBandwidth MHz=\"%4\"/>"
             " <dedispersionSamples value=\"%5\" />"
             " <dedispersionStepSize value=\"0.1\" />"
             " <numberOfBuffers value=\"2\" />"
@@ -226,9 +226,9 @@ void DedispersionModuleTest::test_multipleBlobsPerBuffer ()
     // setup configuration
     QString configString = QString("<DedispersionModule>"
             " <sampleNumber value=\"%1\" />"
-            " <frequencyChannel1 value=\"%2\"/>"
-            " <sampleTime value=\"%3\"/>"
-            " <channelBandwidth value=\"%4\"/>"
+            " <frequencyChannel1 MHz=\"%2\"/>"
+            " <sampleTime seconds=\"%3\"/>"
+            " <channelBandwidth MHz=\"%4\"/>"
             " <dedispersionSamples value=\"%5\" />"
             " <dedispersionStepSize value=\"0.1\" />"
             " <numberOfBuffers value=\"3\" />"
@@ -316,9 +316,9 @@ void DedispersionModuleTest::test_multipleBlobs ()
     // setup configuration
     QString configString = QString("<DedispersionModule>"
             " <sampleNumber value=\"%1\" />"
-            " <frequencyChannel1 value=\"%2\"/>"
-            " <sampleTime value=\"%3\"/>"
-            " <channelBandwidth value=\"%4\"/>"
+            " <frequencyChannel1 MHz=\"%2\"/>"
+            " <sampleTime seconds=\"%3\"/>"
+            " <channelBandwidth MHz=\"%4\"/>"
             " <dedispersionSamples value=\"%5\" />"
             " <dedispersionStepSize value=\"0.1\" />"
             " <numberOfBuffers value=\"3\" />"
@@ -372,9 +372,9 @@ void DedispersionModuleTest::test_method()
           CPPUNIT_ASSERT_EQUAL( nSamples, spectrumData[0]->nTimeBlocks() );
           QString configString = QString("<DedispersionModule>"
                                          " <sampleNumber value=\"%1\" />"
-                                         " <frequencyChannel1 value=\"%2\"/>"
-                                         " <sampleTime value=\"%3\"/>"
-                                         " <channelBandwidth value=\"%4\"/>"
+                                         " <frequencyChannel1 MHz=\"%2\"/>"
+                                         " <sampleTime seconds=\"%3\"/>"
+                                         " <channelBandwidth MHz=\"%4\"/>"
                                          " <dedispersionSamples value=\"%5\" />"
                                          " <dedispersionStepSize value=\"0.1\" />"
                                          "</DedispersionModule>")
@@ -474,9 +474,9 @@ ConfigNode DedispersionModuleTest::testConfig(unsigned nSamples) const
     ConfigNode node;
     QString xml = QString("<DedispersionModule >\n"
                 " <sampleNumber value=\"%1\" />"
-                " <frequencyChannel1 value=\"150.0\"/>"
-                " <sampleTime value=\"0.00032768\"/>"
-                " <channelBandwidth value=\"-0.0292969\"/>" // -6.0/(nSubbands*nChannels);
+                " <frequencyChannel1 MHz=\"150.0\"/>"
+                " <sampleTime seconds=\"0.00032768\"/>"
+                " <channelBandwidth MHz=\"-0.0292969\"/>" // -6.0/(nSubbands*nChannels);
                 " <dedispersionSamples value=\"200\" />"
                 " <dedispersionStepSize value=\"0.1\" />"
               "</DedispersionModule>\n").arg(nSamples);
