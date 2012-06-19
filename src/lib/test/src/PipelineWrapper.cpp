@@ -11,33 +11,19 @@ namespace lofar {
 
 /**
  *@details PipelineWrapper 
+ *  base class for PipelineWrapperSpecialisation
+ *  which is the one you should use
  */
-PipelineWrapper::PipelineWrapper( AbstractPipeline* pipeline, PipelineApplication* app)
-    :  _pipeline(pipeline), _app(app)
+PipelineWrapper::PipelineWrapper( PipelineApplication* app)
+    :  _app_(app)
 {
     //
-    timerInit(&_runTime);
+    timerInit(&_runTime_);
+    _pipelineWrapperIterationCount = 1;
 }
 
-/**
- *@details
- */
-PipelineWrapper::~PipelineWrapper()
-{
-}
-
-void PipelineWrapper::init() {
-    copyConfig(_pipeline);
-    _pipeline->init();
-}
-
-void PipelineWrapper::run( QHash<QString, DataBlob*>& data ) {
-     timerStart(&_runTime);
-     qDebug() << "PipelineWrapper::run:" << data.keys();
-     _pipeline->run(data);
-     timerUpdate(&_runTime);
-     _app->stop();
-     timerReport(&_runTime, "Pipeline Time: run()");
+void PipelineWrapper::setIterations( unsigned i ) {
+    _pipelineWrapperIterationCount = i;
 }
 
 } // namespace lofar

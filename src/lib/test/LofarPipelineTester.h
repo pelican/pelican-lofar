@@ -38,12 +38,12 @@ class LofarPipelineTester
         {
             _init( configXML );
             _pipeline = new 
-                PipelineWrapper<AbstractPipelineType>( pipeline, _app );
-            _app->registerPipeline(_pipeline);
+                PipelineWrapperSpecialisation<AbstractPipelineType>( pipeline, _app );
+            _app->registerPipeline((PipelineWrapperSpecialisation<AbstractPipelineType>*)_pipeline);
         }
 
         ~LofarPipelineTester();
-        void run();
+        void run( unsigned iterations = 1 );
 
     private: 
         void _init( const QString& );
@@ -51,7 +51,7 @@ class LofarPipelineTester
     private:
         Config _config;
         PipelineApplication* _app;
-        AbstractPipeline* _pipeline;
+        PipelineWrapper* _pipeline;
         LofarDataBlobGenerator* _dataGenerator;
 };
 

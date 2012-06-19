@@ -32,9 +32,10 @@ LofarPipelineTester::~LofarPipelineTester()
      delete _app;
 }
 
-void LofarPipelineTester::run()
+void LofarPipelineTester::run( unsigned iterations )
 {
      Q_ASSERT( ! _app->isRunning() );
+     _pipeline->setIterations( iterations );
      _app->start(); // pipeline wrapper will stop()
 }
 

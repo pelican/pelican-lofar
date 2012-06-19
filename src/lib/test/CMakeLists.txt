@@ -11,6 +11,7 @@ set(lofarTestLib_src
     src/GPU_TestCard.cpp
     src/LofarPipelineTester.cpp
     src/LofarDataBlobGenerator.cpp
+    src/PipelineWrapper.cpp
 )
 
 # CUDA routines
