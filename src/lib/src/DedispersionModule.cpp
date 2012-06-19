@@ -143,7 +143,10 @@ void DedispersionModule::resize( const SpectrumDataSet<float>* streamData ) {
         std::cout << "resize: tsamp = " << _tsamp << std::endl;
         std::cout << "resize: blob nChannels= " << nChannels << std::endl;
         std::cout << "resize: nTimeBlocks= " << streamData->nTimeBlocks() << std::endl;
-        Q_ASSERT( (int)maxSamples > _maxshift );
+        if( (int)maxSamples <= _maxshift ) {
+            throw QString("DedispersionModule: maxshift requirements (%1) are bigger"
+                          " than the number of samples (%2)").arg(_maxshift).arg(maxSamples);
+        }
         // reset kernels
         for( unsigned int i=0; i < maxBuffers; ++i ) {
             DedispersionKernel* kernel = new DedispersionKernel( _dmLow, _dmStep,
