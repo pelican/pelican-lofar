@@ -87,9 +87,7 @@ void DedispersionPipelineTest::test_method()
          // is full
          // Expect: not to freeze waiting for history
          // buffer to be freed
-         for(int i=0; i<(history*numberOfBuffers)+2; ++i) {
-             tester.run();
-         }
+         tester.run( (history*numberOfBuffers)+2 );
       }
       catch( const QString& e ) {
         CPPUNIT_FAIL( e.toStdString() );
@@ -140,7 +138,7 @@ void DedispersionPipelineTest::test_lofar()
                  "      <DedispersionModule>"
                  "         <sampleNumber value=\"8192\" />"
                  "         <frequencyChannel1 MHz=\"148.828125\"/>"
-                 "         <sampleTime seconds=\"0.32768\"/>"
+                 "         <sampleTime seconds=\"0.0032768\"/>"
                  "         <channelBandwidth MHz=\"-0.003051757812\"/>"
                  "         <dedispersionSamples value=\"1000\" />"
                  "         <dedispersionStepSize value=\"0.1\" />"
@@ -156,9 +154,7 @@ void DedispersionPipelineTest::test_lofar()
     try {
         DedispersionPipeline p(streamId);
         LofarPipelineTester tester(&p, config(xml));
-        for(int i=0; i < history * 2 ; ++i) {
-            tester.run();
-        }
+        tester.run( history * 2);
     }
     catch( const QString& e ) {
        CPPUNIT_FAIL( e.toStdString() );

@@ -54,12 +54,11 @@ class PipelineWrapperSpecialisation : public AbstractPipelineType,
             {}
         virtual ~PipelineWrapperSpecialisation() {};
         void run( QHash<QString, DataBlob*>& data ) {
-            unsigned count = _pipelineWrapperIterationCount;
-            qDebug() << "PipelineWrapperSpec::run:" << data.keys();
+            qDebug() << "PipelineWrapperc::run" << data.keys() << " iteration:" << _pipelineWrapperIterationCount;
             timerStart(&_runTime_);
             this->AbstractPipelineType::run(data);
             timerUpdate(&_runTime_);
-            if( --count ) {
+            if( ! --_pipelineWrapperIterationCount  ) {
                 _app_->stop();
                 timerReport(&_runTime_, "Pipeline Time: run()");
             }
