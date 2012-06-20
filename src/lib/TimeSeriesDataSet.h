@@ -127,11 +127,17 @@ template <typename T>
 inline void TimeSeriesDataSet<T>::resize(unsigned nTimeBlocks,
         unsigned nSubbands, unsigned nPols, unsigned nTimes)
 {
-    _nSubbands = nSubbands;
-    _nPolarisations = nPols;
-    _nTimeBlocks = nTimeBlocks;
-    _nTimesPerBlock = nTimes;
-    _data.resize(nSubbands * nPols * nTimeBlocks * nTimes);
+    if( ( _nSubbands != nSubbands ) ||
+        _nPolarisations != nPols  ||
+        _nTimeBlocks != nTimeBlocks ||
+        _nTimesPerBlock != nTimes )
+    {
+        _nSubbands = nSubbands;
+        _nPolarisations = nPols;
+        _nTimeBlocks = nTimeBlocks;
+        _nTimesPerBlock = nTimes;
+        _data.resize(nSubbands * nPols * nTimeBlocks * nTimes);
+    }
 }
 
 template <typename T>
