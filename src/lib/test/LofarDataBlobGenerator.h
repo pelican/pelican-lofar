@@ -3,6 +3,7 @@
 
 
 #include "pelican/core/AbstractDataClient.h"
+#include <QList>
 
 /**
  * @file LofarDataBlobGenerator.h
@@ -54,6 +55,7 @@ class LofarDataBlobGenerator : public AbstractDataClient
         unsigned _nPols;
         unsigned _nSamples;
         unsigned _counter;
+        mutable QList<TimeSeriesDataSetC32*> _readyMade;
 };
 PELICAN_DECLARE_CLIENT(LofarDataBlobGenerator)
 

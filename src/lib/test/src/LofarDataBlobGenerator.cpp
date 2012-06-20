@@ -3,7 +3,6 @@
 #include "constants.h"
 #include <QDebug>
 #include <vector>
-#include <complex>
 #include <cmath>
 
 
@@ -38,9 +37,8 @@ AbstractDataClient::DataBlobHash LofarDataBlobGenerator::getData(
         AbstractDataClient::DataBlobHash& dataHash ) {
     DataBlobHash validHash;
 
-    qDebug() << "getData:" << dataHash.keys();
     foreach(const DataRequirements& req, dataRequirements()) {
-        foreach(const QString& type, req.serviceData())
+        foreach(const QString& type, req.serviceData() )
         {
             if( ! dataHash.contains(type) )
                 throw( QString("LofarDataBlobGenerator: getData() called without DataBlob %1").arg(type) );
@@ -48,7 +46,7 @@ AbstractDataClient::DataBlobHash LofarDataBlobGenerator::getData(
         foreach(const QString& type, req.streamData() )
         {
             if( ! dataHash.contains(type) )
-                throw( QString("FileDataClient: getData() called without DataBlob %1").arg(type) );
+                throw( QString("LofarDataBlobGenerator: getData() called without DataBlob %1").arg(type) );
             ++_counter;
             validHash.insert( type, generateTimeSeriesData( 
                 dynamic_cast<TimeSeriesDataSetC32*>(dataHash.value(type)) ) );
@@ -59,6 +57,10 @@ AbstractDataClient::DataBlobHash LofarDataBlobGenerator::getData(
 
 
 TimeSeriesDataSetC32* LofarDataBlobGenerator::generateTimeSeriesData( TimeSeriesDataSetC32* timeSeries ) const {
+    // if weve seen this object before don't regenrate it 
+    // as filling DataBlob is very expensive
+    if ( _readyMade.contains( timeSeries ) ) return timeSeries;
+    qDebug() << "Generating Data for TimeSeriesDataSet" << timeSeries ;
     if (_nSamples % _nChannels)
         throw QString("Setup error: nSamples must be multiple of nChannles");
     unsigned nBlocks = _nSamples / _nChannels;
@@ -71,23 +73,24 @@ TimeSeriesDataSetC32* LofarDataBlobGenerator::generateTimeSeriesData( TimeSeries
     double freqInc    = 0.01e6;    // Frequency increment of profile steps.
     std::vector<double> freqs(nSteps);
 
-    typedef std::complex<float> Complex;
     for (unsigned k = 0; k < nSteps; ++k)
     {
         // Generate signal.
         freqs[k] = startFreq + k * freqInc;
         for (unsigned i = 0, t = 0; t < nBlocks; ++t)
         {
-            Complex* timeData = timeSeries->timeSeriesData(t, 0, 0);
+            float* timeData = (float*)(timeSeries->timeSeriesData(t, 0, 0));
             double time, arg;
-            for (unsigned c = 0; c < _nChannels; ++c)
+            time = double(i++) / sampleRate;
+            arg = 2.0 * math::pi * freqs[k] * time;
+            for (unsigned c = 0; c < _nChannels * 2; ++c)
             {
-                time = double(i++) / sampleRate;
-                arg = 2.0 * math::pi * freqs[k] * time;
-                timeData[c] = Complex(cos(arg) + _counter, sin(arg) + _counter);
+                timeData[c] = cos(arg) + _counter;
+                timeData[++c] = sin(arg) + _counter;
             }
         }
     }
+    _readyMade.append( timeSeries );
     return timeSeries;
 }
 
