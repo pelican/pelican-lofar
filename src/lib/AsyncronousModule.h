@@ -81,7 +81,7 @@ class AsyncronousModule : public AbstractModule
             QMutexLocker lock(&_lockerMutex);
             foreach( const DataBlob* d, data ) {
                 ++_dataLocker[d];
-std::cout << "locking blob:" << d << " : " << _dataLocker[d] << std::endl;
+                //std::cout << "locking blob:" << d << " : " << _dataLocker[d] << std::endl;
             }
         }
         // mark DataBlob as no longer being in use

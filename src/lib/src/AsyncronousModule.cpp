@@ -85,7 +85,7 @@ void AsyncronousModule::_exportComplete( DataBlob* blob ) {
 void AsyncronousModule::lock( const DataBlob* data ) {
     QMutexLocker lock(&_lockerMutex);
     ++_dataLocker[data];
-std::cout << "locking blob:" << data << " : " << _dataLocker[data] << std::endl;
+//std::cout << "locking blob:" << data << " : " << _dataLocker[data] << std::endl;
 }
 
 int AsyncronousModule::lockNumber( const DataBlob* data ) const
@@ -102,7 +102,7 @@ int AsyncronousModule::unlock( DataBlob* data ) {
     if( --_dataLocker[data] == 0 ) {
         _recentUnlocked.append(data);
     }
-std::cout << "unlocking blob:" << data << " : " << _dataLocker[data] << std::endl;
+//std::cout << "unlocking blob:" << data << " : " << _dataLocker[data] << std::endl;
     return _dataLocker[data];
 }
 
