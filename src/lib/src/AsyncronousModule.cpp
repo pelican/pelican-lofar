@@ -73,7 +73,7 @@ void AsyncronousModule::exportCancel( DataBlob* data ) {
 
 void AsyncronousModule::_exportComplete( DataBlob* blob ) {
      // allow derived class space to unlock
-     QMutexLocker lock( &_lockerMutex );
+     QMutexLocker lock( &lockerMutex );
      exportComplete( blob );
      // call unlocked triggers
      foreach( const UnlockCallBackT& functor, _unlockTriggers ) { 
@@ -83,27 +83,27 @@ void AsyncronousModule::_exportComplete( DataBlob* blob ) {
 }
 
 void AsyncronousModule::lock( const DataBlob* data ) {
-    QMutexLocker lock(&_lockerMutex);
-    ++dataLocker[data];
-//std::cout << "locking blob:" << data << " : " << dataLocker[data] << std::endl;
+    QMutexLocker lock(&lockerMutex);
+    ++_dataLocker[data];
+//std::cout << "locking blob:" << data << " : " << _dataLocker[data] << std::endl;
 }
 
 int AsyncronousModule::lockNumber( const DataBlob* data ) const
 {
-    QMutexLocker lock(&_lockerMutex);
-    if( dataLocker.contains( data ) )
-        return dataLocker.value(data);
+    QMutexLocker lock(&lockerMutex);
+    if( _dataLocker.contains( data ) )
+        return _dataLocker.value(data);
     return 0;
 }
 
 int AsyncronousModule::unlock( DataBlob* data ) {
-    Q_ASSERT( ! _lockerMutex.tryLock() ); // must be locked before entry
-    Q_ASSERT( dataLocker[data] > 0 );
-    if( --dataLocker[data] == 0 ) {
+    Q_ASSERT( ! lockerMutex.tryLock() ); // must be locked before entry
+    Q_ASSERT( _dataLocker[data] > 0 );
+    if( --_dataLocker[data] == 0 ) {
         _recentUnlocked.append(data);
     }
-//std::cout << "unlocking blob:" << data << " : " << dataLocker[data] << std::endl;
-    return dataLocker[data];
+//std::cout << "unlocking blob:" << data << " : " << _dataLocker[data] << std::endl;
+    return _dataLocker[data];
 }
 
 } // namespace lofar

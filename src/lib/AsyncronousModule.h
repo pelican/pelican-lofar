@@ -79,16 +79,16 @@ class AsyncronousModule : public AbstractModule
         // without invoking the lock mutex
         // (Assumes you have done this already)
         inline void lockUnprotected( const DataBlob* d ) {
-            ++dataLocker[d];
+            ++_dataLocker[d];
         }
 
         /// mark a list of DataBlobs as being in use with a single
         // mutex lock
         template<class DataBlobPtr>
         void lock( const QList<DataBlobPtr>& data ) {
-            QMutexLocker lock(&_lockerMutex);
+            QMutexLocker lock(&lockerMutex);
             foreach( const DataBlob* d, data ) {
-                ++dataLocker[d];
+                ++_dataLocker[d];
             }
         }
 
@@ -112,11 +112,11 @@ class AsyncronousModule : public AbstractModule
         ProcessingChain1<DataBlob*>* _chain;
 
     protected:
-        mutable QMutex _lockerMutex;
+        mutable QMutex lockerMutex;
 
     private:
         void _exportComplete( DataBlob* );
-        QHash<const DataBlob*, int> dataLocker; // keep a track of DataBlobs in use
+        QHash<const DataBlob*, int> _dataLocker; // keep a track of DataBlobs in use
         QList<CallBackT> _linkedFunctors;
         QList<UnlockCallBackT> _unlockTriggers;
         QList<boost::function0<void> > _callbacks; // end of chain callbacks
