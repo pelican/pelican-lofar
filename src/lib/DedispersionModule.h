@@ -120,6 +120,8 @@ class DedispersionModule : public AsyncronousModule
         DedispersionBuffer* _currentBuffer;
         QVector<float> _dmshifts;
 
+        QVector<SpectrumDataSetStokes*> _blobs;
+
         QList<DedispersionSpectra> _dedispersionData; // data products for async tasks
         LockingContainer<DedispersionSpectra> _dedispersionDataBuffer;
 

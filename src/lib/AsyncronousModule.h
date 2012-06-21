@@ -75,15 +75,32 @@ class AsyncronousModule : public AbstractModule
         // mark DataBlob as being in use
         void lock( const DataBlob* );
 
+        // mark DataBlob as being in use
+        // without invoking the lock mutex
+        // (Assumes you have done this already)
+        inline void lockUnprotected( const DataBlob* d ) {
+            ++dataLocker[d];
+        }
 
+        /// mark a list of DataBlobs as being in use with a single
+        // mutex lock
         template<class DataBlobPtr>
         void lock( const QList<DataBlobPtr>& data ) {
             QMutexLocker lock(&_lockerMutex);
             foreach( const DataBlob* d, data ) {
-                ++_dataLocker[d];
-                //std::cout << "locking blob:" << d << " : " << _dataLocker[d] << std::endl;
+                ++dataLocker[d];
             }
         }
+
+        /// mark all the DataBlobs in the ContainerType
+        // as locked, without invoking the mutex.
+        template<class ContainerType>
+        void lockAllUnprotected( const ContainerType& data ) {
+             for(int i=0; i < data.size(); ++i ) {
+                lockUnprotected( data[i] );
+             }
+        }
+
         // mark DataBlob as no longer being in use
         // returns the number of locks remaining ( 0 = unlocked )
         int unlock( DataBlob* );
@@ -99,7 +116,7 @@ class AsyncronousModule : public AbstractModule
 
     private:
         void _exportComplete( DataBlob* );
-        QHash<const DataBlob*, int> _dataLocker; // keep a track of DataBlobs in use
+        QHash<const DataBlob*, int> dataLocker; // keep a track of DataBlobs in use
         QList<CallBackT> _linkedFunctors;
         QList<UnlockCallBackT> _unlockTriggers;
         QList<boost::function0<void> > _callbacks; // end of chain callbacks

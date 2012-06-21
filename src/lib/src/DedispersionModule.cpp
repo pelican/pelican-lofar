@@ -107,7 +107,7 @@ void DedispersionModule::_cleanBuffers() {
 }
 
 void DedispersionModule::resize( const SpectrumDataSet<float>* streamData ) {
-    
+
     unsigned int nChannels = streamData->nChannels();
     unsigned int nSubbands = streamData->nSubbands();
     unsigned int nPolarisations = streamData->nPolarisations();
@@ -117,6 +117,7 @@ void DedispersionModule::resize( const SpectrumDataSet<float>* streamData ) {
         unsigned maxSamples = _currentBuffer->maxSamples();
         waitForJobCompletion();
         _cleanBuffers();
+        // set up the time/freq buffers
         for( unsigned int i=0; i < maxBuffers; ++i ) {
             _buffersList.append( new DedispersionBuffer(maxSamples, sampleSize) );
         }
@@ -181,23 +182,30 @@ void DedispersionModule::dedisperse( WeightedSpectrumDataSet* weightedData )
     // --------- copy spectrum data to buffer -----------------
     SpectrumDataSetStokes* streamData = 
                 static_cast<SpectrumDataSetStokes*>(weightedData->dataSet());
-    lock( streamData );
     resize( streamData ); // ensure we have buffers scaled appropriately
 
     unsigned int sampleNumber = 0; // marker to indicate the number of samples succesfully 
                                    // transferred to the buffer from the Datablob
     unsigned int maxSamples = streamData->nTimeBlocks();
+    _blobs.push_back( streamData ); // keep a list of blobs to lock
     do {
         if( _currentBuffer->addSamples( streamData, &sampleNumber ) == 0 ) {
             //(*_currentBuffer)->dump("input.data");
             DedispersionBuffer* next = _buffers.next();
             next->clear();
-            lock( _currentBuffer->copy( next, _maxshift ) );
-            // ensure lock is maintianed for the next buffer
-            // if not already marked by the maxshift copy
-            if( sampleNumber != maxSamples && lockNumber( streamData ) <=1 )
-                lock( streamData );
+            {   // lock mutex scope
+                // lock here to ensure there is just a single hit on the 
+                // lock mutex for each buffer
+                QMutexLocker l( &_lockerMutex );
+                lockAllUnprotected( _blobs );
+                lockAllUnprotected( _currentBuffer->copy( next, _maxshift ) );
+                // ensure lock is maintianed for the next buffer
+                // if not already marked by the maxshift copy
+                if( sampleNumber != maxSamples && lockNumber( streamData ) <= 1 )
+                    lockUnprotected( streamData );
+            }
             dedisperse( _currentBuffer, _dedispersionDataBuffer.next() );
+            _blobs.clear();
             _currentBuffer = next;
         }
     }
