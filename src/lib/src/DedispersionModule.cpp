@@ -182,12 +182,12 @@ void DedispersionModule::dedisperse( WeightedSpectrumDataSet* weightedData )
     // --------- copy spectrum data to buffer -----------------
     SpectrumDataSetStokes* streamData = 
                 static_cast<SpectrumDataSetStokes*>(weightedData->dataSet());
+    _blobs.push_back( streamData ); // keep a list of blobs to lock
     resize( streamData ); // ensure we have buffers scaled appropriately
 
     unsigned int sampleNumber = 0; // marker to indicate the number of samples succesfully 
                                    // transferred to the buffer from the Datablob
     unsigned int maxSamples = streamData->nTimeBlocks();
-    _blobs.push_back( streamData ); // keep a list of blobs to lock
     do {
         if( _currentBuffer->addSamples( streamData, &sampleNumber ) == 0 ) {
             //(*_currentBuffer)->dump("input.data");
@@ -196,16 +196,16 @@ void DedispersionModule::dedisperse( WeightedSpectrumDataSet* weightedData )
             {   // lock mutex scope
                 // lock here to ensure there is just a single hit on the 
                 // lock mutex for each buffer
-                QMutexLocker l( &_lockerMutex );
+                QMutexLocker l( &lockerMutex );
                 lockAllUnprotected( _blobs );
                 lockAllUnprotected( _currentBuffer->copy( next, _maxshift ) );
                 // ensure lock is maintianed for the next buffer
                 // if not already marked by the maxshift copy
-                if( sampleNumber != maxSamples && lockNumber( streamData ) <= 1 )
+                if( sampleNumber != maxSamples && ! next->inputDataBlobs().contains(streamData) )
                     lockUnprotected( streamData );
             }
-            dedisperse( _currentBuffer, _dedispersionDataBuffer.next() );
             _blobs.clear();
+            dedisperse( _currentBuffer, _dedispersionDataBuffer.next() );
             _currentBuffer = next;
         }
     }

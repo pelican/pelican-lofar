@@ -444,7 +444,6 @@ void DedispersionModuleTest::test_dataConsistency() {
              WeightedSpectrumDataSet weightedData(spectrumData[i]);
              ddm.dedisperse( &weightedData ); // asynchronous task
          }
-         CPPUNIT_ASSERT( ddm.lockNumber( spectrumData[i] ) >= 1 );
          while( _connectCount != 2 ) { sleep(1); };
          while( _chainFinished != _connectCount ) { sleep(1); };
          CPPUNIT_ASSERT( DedispersionDataGenerator::equal(spectrumData, spectrumDataCopy ));
