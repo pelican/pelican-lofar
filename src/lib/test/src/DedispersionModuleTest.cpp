@@ -155,7 +155,6 @@ void DedispersionModuleTest::test_multipleBlobsPerBufferUnaligned ()
          for(i=0; i < (int)multiple; ++i ) {
              WeightedSpectrumDataSet weightedData(spectrumData[i]);
              ddm.dedisperse( &weightedData ); // asynchronous task
-             CPPUNIT_ASSERT_EQUAL( 1, ddm.lockNumber( spectrumData[i] ) );
              CPPUNIT_ASSERT_EQUAL( 0, _connectCount ); // no data should be processed first time
              CPPUNIT_ASSERT( (int)nSamples > ddm.maxshift() ); // ensures first sample should be released
          }
@@ -253,7 +252,6 @@ void DedispersionModuleTest::test_multipleBlobsPerBuffer ()
         ddm.dedisperse( &weightedData ); // asynchronous task
         CPPUNIT_ASSERT_EQUAL( 0, ddm.lockNumber( &weightedData ) );
         CPPUNIT_ASSERT_EQUAL( 0, ddm.lockNumber( &weightedData2 ) );
-        CPPUNIT_ASSERT_EQUAL( 1, ddm.lockNumber( spectrumData[0] ) );
         CPPUNIT_ASSERT_EQUAL( 0, ddm.lockNumber( spectrumData[1] ) );
         CPPUNIT_ASSERT_EQUAL( 0, _connectCount ); // no data should be processed first time
         CPPUNIT_ASSERT( (int)nSamples > ddm.maxshift() ); // ensures first sample should be released
@@ -445,8 +443,8 @@ void DedispersionModuleTest::test_dataConsistency() {
          for(i=0; i < spectrumData.size(); ++i ) {
              WeightedSpectrumDataSet weightedData(spectrumData[i]);
              ddm.dedisperse( &weightedData ); // asynchronous task
-             CPPUNIT_ASSERT( ddm.lockNumber( spectrumData[i] ) >= 1 );
          }
+         CPPUNIT_ASSERT( ddm.lockNumber( spectrumData[i] ) >= 1 );
          while( _connectCount != 2 ) { sleep(1); };
          while( _chainFinished != _connectCount ) { sleep(1); };
          CPPUNIT_ASSERT( DedispersionDataGenerator::equal(spectrumData, spectrumDataCopy ));

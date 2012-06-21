@@ -90,9 +90,7 @@ void DedispersionPipeline::run(QHash<QString, DataBlob*>& remoteData)
     _ppfChanneliser->run(timeSeries, _spectra);
 
     // Convert spectra in X, Y polarisation into spectra with stokes parameters.
-    std::cout << "Getting next Stokes" << std::endl;
     SpectrumDataSetStokes* stokes=_stokesBuffer->next();
-    std::cout << "Got next Stokes: " << stokes << std::endl;
     _stokesGenerator->run(_spectra, stokes);
 
     // set up a suitable datablob fro the rfi clipper
@@ -107,7 +105,6 @@ void DedispersionPipeline::run(QHash<QString, DataBlob*>& remoteData)
 
     // start the asyncronous chain of events
     _dedispersionModule->dedisperse( _weightedIntStokes );
-    std::cout << "run() finished" << std::endl;
 
 }
 
@@ -126,10 +123,8 @@ void DedispersionPipeline::dedispersionAnalysis( DataBlob* blob ) {
 
 void DedispersionPipeline::updateBufferLock( const QList<DataBlob*>& freeData ) {
      // find WeightedDataBlobs that can be unlocked
-//qDebug() << "unlocking()";
      foreach( DataBlob* blob, freeData ) {
         Q_ASSERT( blob->type() == "SpectrumDataSetStokes" );
-        std::cout << "Freeing Stokes :" << blob << std::endl;
         _stokesBuffer->unlock( static_cast<SpectrumDataSetStokes*>(blob) );
      }
 }
