@@ -312,6 +312,7 @@ void LofarDataSplittingChunker::next(QIODevice* device)
 
     else {
         // Must discard the datagram if there is no available space.
+        if (!isActive()) return;
         socket->readDatagram(0, 0);
         cout << "LofarDataSplittingChunker::next(): "
                 "Writable data not valid, discarding packets." << endl;
