@@ -182,7 +182,6 @@ void LofarDataSplittingChunkerTest::test_normal_packets()
         // Create and setup chunker.
         LofarDataSplittingChunker chunker(configNode);
         QIODevice* device = chunker.newDevice();
-        chunker.setDevice(device);
 
         // Create Data Manager.
         pelican::DataManager dataManager(&_config);
@@ -195,6 +194,7 @@ void LofarDataSplittingChunkerTest::test_normal_packets()
 
         // Acquire data through chunker.
         chunker.next(device);
+        delete device;
 
         // Read through the data in the chunks and check that it is correct.
         typedef TYPES::i8complex i8c;
