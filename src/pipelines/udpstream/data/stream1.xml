@@ -15,16 +15,21 @@
     <adapters>
       <AdapterTimeSeriesDataSet>
         <subbandsPerPacket value="31"/> <!-- 31 or 61 or 62 -->
-        <import file="/home/artemis/Pulsars/B0329+54/mycommon.xml"/>
+        <import file="/data/Commissioning/Brenda/mycommon.xml"/>
         <!--   -->
         <fixedSizePackets value="false" />
       </AdapterTimeSeriesDataSet>
     </adapters>
 
-    <modules>
+    <pipelineConfig>
+         <DedispersionPipeline>
+             <history value="1280" />
+         </DedispersionPipeline>
+    </pipelineConfig>
 
+    <modules>
       <PPFChanneliser>
-        <import file="/home/artemis/Pulsars/B0329+54/mycommon.xml"/>
+        <import file="/data/Commissioning/Brenda/mycommon.xml"/>
         <!--   -->
         <processingThreads value="6" />
         <filter nTaps="8" filterWindow="kaiser"/>
@@ -33,21 +38,30 @@
       <StokesGenerator>
       </StokesGenerator>
 
-      <RFI_Clipper active="true" rejectionFactor="10.0" >
-		<BandPassData file="/home/artemis/Pulsars/band31.bp" />
-		<Band matching="true" />
-		<History maximum="10000" />
+      <RFI_Clipper active="true" channelRejectionRMS="10.0"
+                   spectrumRejectionRMS="6.0">
+	<zeroDMing active="true" />
+	<BandPassData file="/data/Commissioning/Brenda/band31.bp" />
+	<Band matching="true" />
+	<History maximum="10000" />
       </RFI_Clipper>
 
-      <!--MdsmModule>
-        <observationfile filepath="/Data/XML/obs31.xml" />
-        <import file="/home/artemis/Pulsars/mycommon.xml"/>
-	<createOutputBlob value="0" />
-	<invertChannels value="1" />
-      </MdsmModule-->
-      
+      <DedispersionModule>
+	 <sampleNumber value="32768" />
+	 <frequencyChannel1 MHz="142.96875"/>
+	 <!--sampleTime seconds="0.00032768"/-->
+	 <channelBandwidth MHz="0.003051757812"/>
+	 <dedispersionSamples value="2000" />
+	 <dedispersionStepSize value="0.1" />
+	 <numberOfBuffers value="5" />
+      </DedispersionModule>
+
+      <DedispersionAnalyser>
+	<detectionThreshold in_sigma="6" />
+      </DedispersionAnalyser>
+
       <StokesIntegrator>
-        <import file="/home/artemis/Pulsars/B0329+54/mycommon.xml"/>
+        <import file="/data/Commissioning/Brenda/mycommon.xml"/>
       </StokesIntegrator>
 
     </modules>
@@ -56,7 +70,10 @@
 
       <dataStreams>
         <!-- <stream name="SpectrumDataSetStokes" listeners="PelicanTCPBlobServer" />  -->
-        <stream name="SpectrumDataSetStokes" listeners="SigprocStokesWriter"/>
+	<!--stream name="LofarTimeStream1" listeners="DataBlobFile" /> -->
+        <!--stream name="SpectrumDataSetStokes" listeners="SigprocStokesWriter"/-->
+	<stream name="DedispersionDataAnalysis" listeners="DedispersionDataAnalysisOutput" /> 
+	<!--stream name="SignalFoundSpectrum" listeners="SigprocStokesWriter" /-->
       </dataStreams>
 
       <streamers>
@@ -64,21 +81,27 @@
              <connection port="6969" />
         </PelicanTCPBlobServer>
         -->
-        <SigprocStokesWriter active="true" writeHeader="true">
-          <import file="/home/artemis/Pulsars/B0329+54/mycommon.xml"/>
-          <dataBits value="8"/>
-          <scale max="200" min="-200"/>
+	<DataBlobFile active="false">
+	  <file name="timeseriesStream1.data" type="homogeneous" />
+	</DataBlobFile>
+        <SigprocStokesWriter active="false" writeHeader="true">
+          <import file="/data/Commissioning/Brenda/mycommon.xml"/>
+          <dataBits value="32" />
+	      <scale max="100" min="0" />
           <topSubbandIndex value="250"/>
           <LBA_0_or_HBA_1 value="1" />
           <subbandsPerPacket value="31"/>
           <!-- -->
-          <file filepath="V1_HBA31_t250_B0329+54.dat" /><!--Change-->
+          <file filepath="/data/Commissioning/Brenda/test.dat" /><!--Change-->
           <params telescope="LOFAR" nPolsToWrite="1"/><!--Change-->
           <RAJ value="033259.3" />
           <DecJ value="+543443.5"/>
           <TelescopeID value="3"/>
-          <MachineID value="9"/>
+          <MachineID value="10"/>
         </SigprocStokesWriter>
+	<DedispersionDataAnalysisOutput active="true">
+          <file name="dm1.dat" />
+	</DedispersionDataAnalysisOutput>
       </streamers>
       
     </output>
