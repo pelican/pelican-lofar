@@ -13,8 +13,9 @@ namespace lofar {
 /**
  *@details DedispersionBuffer 
  */
-DedispersionBuffer::DedispersionBuffer( unsigned int size, unsigned int sampleSize )
-   : _sampleSize(sampleSize)
+DedispersionBuffer::DedispersionBuffer( unsigned int size, unsigned int sampleSize,
+                                        bool invertChannels )
+   : _sampleSize(sampleSize), _invertChannels(invertChannels)
 {
     setSampleCapacity(size);
     clear();
@@ -100,10 +101,9 @@ unsigned DedispersionBuffer::_addSamples( SpectrumDataSetStokes* streamData,
     unsigned maxSamples = std::min( numSamples, spaceRemaining() + *sampleNumber );
     for(unsigned t = *sampleNumber; t < maxSamples; ++t) {
         for (unsigned s = 0; s < nSubbands; ++s) {
-            const float* data = streamData->spectrumData(t, s, 0);
+            const float* data = streamData->spectrumData(t, (_invertChannels) ? nSubbands - 1 - s : s, 0);
             for (unsigned c = 0; c < nChannels; ++c) {
-                // rearrange to have time samples in inner loop
-                _timedata[ ((s * nChannels) + c ) * _nsamp + _sampleCount ] = data[c];
+                _timedata[ ((s * nChannels) + c ) * _nsamp + _sampleCount ] = data[(_invertChannels) ? nChannels - 1 - c : c];
             }
         }
         ++_sampleCount;

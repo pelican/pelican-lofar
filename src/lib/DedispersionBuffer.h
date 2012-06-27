@@ -24,7 +24,8 @@ class SpectrumDataSetStokes;
 class DedispersionBuffer
 {
     public:
-        DedispersionBuffer( unsigned int size = 0, unsigned int sampleSize = 0 );
+        DedispersionBuffer( unsigned int size = 0, unsigned int sampleSize = 0,
+                            bool invertChannels = true );
         ~DedispersionBuffer();
 
         /// return the number of samples currently stored in the buffer
@@ -80,6 +81,7 @@ class DedispersionBuffer
         unsigned int _sampleSize;
         float _mean;
         float _rms;
+        bool _invertChannels;
 };
 
 } // namespace lofar
