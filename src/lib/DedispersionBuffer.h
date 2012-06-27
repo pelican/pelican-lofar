@@ -25,7 +25,7 @@ class DedispersionBuffer
 {
     public:
         DedispersionBuffer( unsigned int size = 0, unsigned int sampleSize = 0,
-                            bool invertChannels = true );
+                            bool invertChannels = false );
         ~DedispersionBuffer();
 
         /// return the number of samples currently stored in the buffer
@@ -46,7 +46,7 @@ class DedispersionBuffer
 
         /// import as many samples as possible into the buffer from the 
         // provided data set staring at the sample given by sampleNumber. 
-        // The space remaining in the boffer is provided in return value 
+        // The space remaining in the buffer is provided in return value 
         // sampleNumber is updated to the last sample number from
         // the dataset that was included
         unsigned int addSamples( SpectrumDataSetStokes* weightedData, unsigned *sampleNumber );
@@ -54,6 +54,9 @@ class DedispersionBuffer
         /// return the amount of empty space in the buffer (in samples)
         unsigned int spaceRemaining() const;
         unsigned int numberOfSamples() const { return _sampleCount; };
+
+        /// return the first sample number (in the first datablob)
+        inline unsigned int firstSampleNumber() const { return _firstSample; }
 
         /// copy data from this object to the supplied DataBuffer object
         //  data is taken from the last offset samples in the 
@@ -82,6 +85,8 @@ class DedispersionBuffer
         float _mean;
         float _rms;
         bool _invertChannels;
+        unsigned int  _firstSample;
+        
 };
 
 } // namespace lofar

@@ -74,6 +74,11 @@ class SpectrumDataSet : public DataBlob
         unsigned nChannels() const
         { return _nChannels; }
 
+        /// Return the time (in seconds) of the corresponding timeSlice
+        double getTime( unsigned sampleNumber ) const { 
+            return _lofarTimestamp + sampleNumber * _blockRate;
+        }
+
         /// Return the block rate (time-span of the entire chunk)
         double getBlockRate() const { return _blockRate; }
 

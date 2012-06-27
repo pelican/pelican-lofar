@@ -98,6 +98,10 @@ unsigned DedispersionBuffer::_addSamples( SpectrumDataSetStokes* streamData,
         return spaceRemaining();
     }
 
+    if( _sampleCount == 0 ) {
+        // record first sample number
+        _firstSample = *sampleNumber;
+    }
     unsigned maxSamples = std::min( numSamples, spaceRemaining() + *sampleNumber );
     for(unsigned t = *sampleNumber; t < maxSamples; ++t) {
         for (unsigned s = 0; s < nSubbands; ++s) {

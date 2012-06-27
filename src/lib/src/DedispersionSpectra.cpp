@@ -1,4 +1,5 @@
 #include "DedispersionSpectra.h"
+#include "SpectrumDataSet.h"
 
 
 namespace pelican {
@@ -52,6 +53,17 @@ float DedispersionSpectra::dm( unsigned dm ) const {
 
 void DedispersionSpectra::setInputDataBlobs( const QList<SpectrumDataSetStokes*>& blobs ) {
     _inputBlobs = blobs;
+}
+
+void DedispersionSpectra::setFirstSample( unsigned int sampleNumber ) {
+    _firstSampleNumber = sampleNumber;
+}
+
+double DedispersionSpectra::getTime( unsigned int sampleNumber ) const {
+    // N.B not resilient to inhomogenous sample times across blobs
+    // to fix this we would need to find the blob corresponding to the
+    // sample first.
+    return _inputBlobs[0]->getTime( sampleNumber + _firstSampleNumber );
 }
 
 } // namespace lofar

@@ -58,6 +58,7 @@ class DedispersionSpectra : public DataBlob
                 return _inputBlobs;
         }
         void setInputDataBlobs( const QList< SpectrumDataSetStokes* >& );
+        void setFirstSample( unsigned int sampleNumber );
 
         /// return the start of the maximum DM that can be represented in the data
         float dmMax() const { return _dmBin.lastBinValue(); }
@@ -66,10 +67,13 @@ class DedispersionSpectra : public DataBlob
         int dmBins() const { return _dmBin.numberBins(); }
         inline int timeSamples() const { return _timeBins; }
 
+        double getTime( unsigned int sampleNumber ) const;
+
     private:
         BinMap _dmBin;
         unsigned _timeBins;
         unsigned _dedispersionBins;
+        unsigned _firstSampleNumber;
         QVector<float> _data;
         QList<SpectrumDataSetStokes* > _inputBlobs;
 };
