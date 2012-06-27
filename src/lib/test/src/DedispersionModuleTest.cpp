@@ -60,6 +60,7 @@ void DedispersionModuleTest::test_multipleBuffersPerBlob()
 
     // setup configuration
     QString configString = QString("<DedispersionModule>"
+            " <invertedData value=\"0\" />"
             " <sampleNumber value=\"%1\" />"
             " <frequencyChannel1 MHz=\"%2\"/>"
             " <sampleTime seconds=\"%3\"/>"
@@ -126,6 +127,7 @@ void DedispersionModuleTest::test_multipleBlobsPerBufferUnaligned ()
 
      // setup configuration
      QString configString = QString("<DedispersionModule>"
+            " <invertedData value=\"0\" />"
              " <sampleNumber value=\"%1\" />"
              " <frequencyChannel1 MHz=\"%2\"/>"
              " <sampleTime seconds=\"%3\"/>"
@@ -224,6 +226,7 @@ void DedispersionModuleTest::test_multipleBlobsPerBuffer ()
 
     // setup configuration
     QString configString = QString("<DedispersionModule>"
+            " <invertedData value=\"0\" />"
             " <sampleNumber value=\"%1\" />"
             " <frequencyChannel1 MHz=\"%2\"/>"
             " <sampleTime seconds=\"%3\"/>"
@@ -313,6 +316,7 @@ void DedispersionModuleTest::test_multipleBlobs ()
     CPPUNIT_ASSERT_EQUAL( nSamples, spectrumData[0]->nTimeBlocks() );
     // setup configuration
     QString configString = QString("<DedispersionModule>"
+            " <invertedData value=\"0\" />"
             " <sampleNumber value=\"%1\" />"
             " <frequencyChannel1 MHz=\"%2\"/>"
             " <sampleTime seconds=\"%3\"/>"
@@ -369,6 +373,7 @@ void DedispersionModuleTest::test_method()
           ConfigNode config;
           CPPUNIT_ASSERT_EQUAL( nSamples, spectrumData[0]->nTimeBlocks() );
           QString configString = QString("<DedispersionModule>"
+                                         " <invertedData value=\"0\" />"
                                          " <sampleNumber value=\"%1\" />"
                                          " <frequencyChannel1 MHz=\"%2\"/>"
                                          " <sampleTime seconds=\"%3\"/>"
@@ -470,6 +475,7 @@ ConfigNode DedispersionModuleTest::testConfig(unsigned nSamples) const
 {
     ConfigNode node;
     QString xml = QString("<DedispersionModule >\n"
+                " <invertedData value=\"0\" />"
                 " <sampleNumber value=\"%1\" />"
                 " <frequencyChannel1 MHz=\"150.0\"/>"
                 " <sampleTime seconds=\"0.00032768\"/>"

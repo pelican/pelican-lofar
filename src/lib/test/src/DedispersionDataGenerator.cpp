@@ -84,10 +84,11 @@ DedispersionSpectra* DedispersionDataGenerator::dedispersionData( float dedisper
     QList<SpectrumDataSetStokes*> stokes = generate( 1, dedispersionMeasure );
     ConfigNode config;
     QString configString = QString("<DedispersionModule>"
+            " <invertedData value=\"0\" />"
             " <sampleNumber value=\"%1\" />"
-            " <frequencyChannel1 value=\"%2\"/>"
-            " <sampleTime value=\"%3\"/>"
-            " <channelBandwidth value=\"%4\"/>"
+            " <frequencyChannel1 MHz=\"%2\"/>"
+            " <sampleTime seconds=\"%3\"/>"
+            " <channelBandwidth MHz=\"%4\"/>"
             " <dedispersionSamples value=\"%5\" />"
             " <dedispersionStepSize value=\"%6\" />"
             " <numberOfBuffers value=\"2\" />"
