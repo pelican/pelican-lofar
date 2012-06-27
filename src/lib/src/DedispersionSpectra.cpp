@@ -33,7 +33,7 @@ void DedispersionSpectra::resize( unsigned timebins, unsigned dedispersionBins,
 float DedispersionSpectra::dmAmplitude( unsigned timeSlice, float dm ) const {
     unsigned dm_index = dmIndex(dm);
     Q_ASSERT( (int)dm_index < dmBins() );
-    int index = (timeSlice - 1 ) + _timeBins * dm_index;
+    int index = timeSlice + _timeBins * dm_index;
     Q_ASSERT( index < _data.size() );
     return _data[index];
 }

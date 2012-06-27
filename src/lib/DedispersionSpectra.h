@@ -45,7 +45,7 @@ class DedispersionSpectra : public DataBlob
         inline QVector<float>& data() { return _data; }
 
         /// the inegrated power for the specified dm and timeslice
-        /// range of timeslice is 1-timeSamples()
+        /// range of timeslice is 0->(timeSamples()-1)
         float dmAmplitude( unsigned timeSlice, float dm ) const;
 
         /// return the index of the bin for a given dm value
