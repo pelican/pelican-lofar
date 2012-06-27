@@ -31,11 +31,18 @@ void DedispersionSpectra::resize( unsigned timebins, unsigned dedispersionBins,
 }
 
 float DedispersionSpectra::dmAmplitude( unsigned timeSlice, float dm ) const {
-    unsigned dm_index = dmIndex(dm);
-    return _data[timeSlice + _timeBins * dm_index];
+    int dm_index = dmIndex(dm);
+    return dmAmplitude( timeSlice, dm_index );
 }
 
-unsigned DedispersionSpectra::dmIndex( float dm ) const {
+float DedispersionSpectra::dmAmplitude( unsigned timeSlice, int dm ) const {
+    Q_ASSERT( (int)dm < dmBins() );
+    int index = timeSlice + _timeBins * dm;
+    Q_ASSERT( index < _data.size() );
+    return _data[index];
+}
+
+int DedispersionSpectra::dmIndex( float dm ) const {
     return _dmBin.binIndex(dm);
 }
 

@@ -10,7 +10,7 @@ namespace lofar {
 /**
  *@details DedispersionEvent 
  */
-DedispersionEvent::DedispersionEvent( unsigned dmIndex, unsigned timeIndex, const DedispersionSpectra* d )
+DedispersionEvent::DedispersionEvent( int dmIndex, unsigned timeIndex, const DedispersionSpectra* d )
       : _dm(dmIndex), _time(timeIndex), _data(d)
 {
 }
@@ -29,7 +29,7 @@ unsigned DedispersionEvent::timeBin() const
 
 float DedispersionEvent::dm() const
 {
-      return  _data->dm( _dm ); 
+    return  _data->dm( _dm ); 
 }
 
 float DedispersionEvent::amplitude() const

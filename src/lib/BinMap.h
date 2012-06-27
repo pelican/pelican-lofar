@@ -40,11 +40,19 @@ class BinMap
         /// set the width of each bin
         void setBinWidth(double);
 
+        // give the bin Index of the value.
+        // n.b no range checks are made
+        // so passing endValue() will return an invalid index
         int binIndex(double) const;
         double width() const { return _width; };
         unsigned int numberBins() const { return _nBins; };
         double startValue() const { return _lower; }
+
+        // the max value representing the non-inclusive
+        // range of the bin such that all values<endValue() 
         double endValue() const { return _lower + _width*_nBins; }
+
+        double lastBinValue() const { return _lower +_width*(_nBins-1); }
         // the value represented by the left hand edge of the bin
         double binStart(unsigned int index) const;
         // the value represented by the right hand edge of the bin

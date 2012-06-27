@@ -44,6 +44,7 @@ set(lofarTest_src
     src/BinMapTest.cpp
     src/DataStreamingTest.cpp
     src/DedispersionDataAnalysisOutputTest.cpp
+    src/DedispersionSpectraTest.cpp
     #src/FilterBankAdapterTest.cpp
     #src/LofarChunkerTest.cpp
     src/LockingContainerTest.cpp;
