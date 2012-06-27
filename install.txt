@@ -1,0 +1,21 @@
+Build Instructions
+------------------
+
+Dependencies:
+cmake
+cuda
+qt4 (>4.2)
+pelican
+
+Setup A Build Directory
+-----------------------
+e.g. for your src code at /path/to/pelican-lofar/src
+
+mkdir build
+cd build
+cmake -DCMAKE_BUILD_TYPE=release /path/to/pelican-lofar/src
+
+You may need to specify where the various dependencies are. This can be done 
+with more -D options to cmake. See the documentation at the top of
+the relevant FindXXX.cmake files in the /path/to/pelican-lofar/src/cmake
+directory to find the correct variables to set.
