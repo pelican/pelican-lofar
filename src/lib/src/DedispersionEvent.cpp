@@ -22,6 +22,10 @@ DedispersionEvent::~DedispersionEvent()
 {
 }
 
+double DedispersionEvent::getTime() const { 
+    return _data->getTime( _time );
+}
+
 unsigned DedispersionEvent::timeBin() const
 {
    return _time;

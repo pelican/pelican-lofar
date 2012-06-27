@@ -26,6 +26,7 @@ class DedispersionEvent
         DedispersionEvent( int dmIndex, unsigned timeIndex, const DedispersionSpectra* data );
         ~DedispersionEvent();
         unsigned timeBin() const;
+        double getTime() const;
         float dm() const;
         float amplitude() const;
 
