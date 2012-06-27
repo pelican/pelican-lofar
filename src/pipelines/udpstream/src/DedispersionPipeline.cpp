@@ -114,7 +114,7 @@ void DedispersionPipeline::dedispersionAnalysis( DataBlob* blob ) {
     DedispersionSpectra* data = static_cast<DedispersionSpectra*>(blob);
     if ( _dedispersionAnalyser->analyse(data, &result) )
     {
-        dataOutput( &result );
+        dataOutput( &result, "DedispersionDataAnalysis" );
         foreach( const SpectrumDataSetStokes* d, result.data()->inputDataBlobs()) {
             dataOutput( d, "SignalFoundSpectrum" );
         }
