@@ -1,11 +1,14 @@
 Build Instructions
 ------------------
 
-Dependencies:
-cmake
-cuda
-qt4 (>4.2)
-pelican
+Dependencies
+------------
+  cmake
+  qt4 (>4.2)
+  pelican
+  cuda toolkit (optional)
+  boost (signals, smart pointers, and program options)
+  
 
 Setup A Build Directory
 -----------------------
@@ -19,3 +22,9 @@ You may need to specify where the various dependencies are. This can be done
 with more -D options to cmake. See the documentation at the top of
 the relevant FindXXX.cmake files in the /path/to/pelican-lofar/src/cmake
 directory to find the correct variables to set.
+
+If all has gone well CMake will of created you build directory and makefiles.
+To build the project you should now type your systems make command such as
+make on linux or nmake on windows.
+
+make
