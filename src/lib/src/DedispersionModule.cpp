@@ -30,11 +30,9 @@ namespace lofar {
  *    <sampleNumber value="512">
  *       The total number of time samples to dedisperse at once
  *    </sampleNumber>
- *    <sampleTime seconds="0.3">
- *       The time represented by each time sample (in seconds)
- *    </sampleNumber>
  *    <frequencyChannel1 MHz="150.0">
- *       The frequency of the first channel (highest freq)
+ *       The frequency of the first channel (lowest or highest 
+ *       depending on bandwidth +ve or -ve)
  *    </frequencyChannel1>
  *    <channelBandwidth MHz="-0.03">
  *       The width of each frequency channel. Must be -ve such
@@ -49,16 +47,13 @@ DedispersionModule::DedispersionModule( const ConfigNode& config )
     // Get configuration options
     //unsigned int nChannels = config.getOption("outputChannelsPerSubband", "value", "512").toUInt();
     _numSamplesBuffer = config.getOption("sampleNumber", "value", "512").toUInt();
-    _invert = config.getOption("invertedData", "value", "1").toUInt();
     _tdms = config.getOption("dedispersionSamples", "value", "1984").toUInt();
     _dmStep = config.getOption("dedispersionStepSize", "value", "0.0").toFloat();
     _dmLow = config.getOption("dedispersionMinimum", "value", "0.0").toFloat();
     if( _dmLow < 0.0 ) { _dmLow = 0.0; }
     _fch1 = config.getOption("frequencyChannel1", "MHz", "0.0").toDouble();
     _foff = config.getOption("channelBandwidth", "MHz", "1.0").toDouble();
-    _tsamp = config.getOption("sampleTime", "seconds", "0.0").toDouble();
-    if( _tsamp == 0.000 ) { throw QString("DedispersionModule: must specify a sampleTime"); }
-    if( _foff >= 0 ) { throw QString("DedispersionModule: channelBandwidth must be a negative number"); }
+    _invert = ( _foff >= 0 )?1:0;
     if( _fch1 == 0 ) { throw QString("DedispersionModule: frequencyChannel1 must be a positve number"); }
 
     unsigned int maxBuffers = config.getOption("numberOfBuffers", "value", "2").toUInt();
@@ -130,9 +125,13 @@ void DedispersionModule::resize( const SpectrumDataSet<float>* streamData ) {
         // calculate dispersion measure shifts
         _dmshifts.clear();
         for ( int c = 0; c < _nChannels; ++c ) {
-            _dmshifts.append(  4148.741601 * ((1.0 / (_fch1 + (_foff * c)) / 
-                               (_fch1 + (_foff * c))) - (1.0 / _fch1 / _fch1)) );
+            float val= 4148.741601 * ((1.0 / (_fch1 + (_foff * c)) / 
+                               (_fch1 + (_foff * c))) - (1.0 / _fch1 / _fch1));
+            (_invert)?_dmshifts.push_front(val):_dmshifts.push_back(val);
+            //_dmshifts.append(  4148.741601 * ((1.0 / (_fch1 + (_foff * c)) / 
+            //                   (_fch1 + (_foff * c))) - (1.0 / _fch1 / _fch1)) );
         }
+        _tsamp = streamData->getBlockRate();
         _maxshift = ((_dmLow + _dmStep * (_tdms - 1)) * _dmshifts[_nChannels - 1])/_tsamp;
         std::cout << "resize: maxSamples = " << maxSamples << std::endl;
         std::cout << "resize: dmLow = " << _dmLow << std::endl;
