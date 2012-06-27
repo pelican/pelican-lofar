@@ -22,7 +22,8 @@ class SpectrumDataSetStokes;
  * @brief
  *     Stokes x DM x time
  * @details
- *    The dm spectra is a function of DM value vs. the total integral of the power output at that dm
+ *    The dm spectra is a function of DM value vs. the total integral 
+ *    of the power output at that dm.
  *    This class reprepesnts a collection of these spectra, one for each time slice
  */
 
@@ -44,6 +45,7 @@ class DedispersionSpectra : public DataBlob
         inline QVector<float>& data() { return _data; }
 
         /// the inegrated power for the specified dm and timeslice
+        /// range of timeslice is 1-timeSamples()
         float dmAmplitude( unsigned timeSlice, float dm ) const;
 
         /// return the index of the bin for a given dm value
@@ -56,8 +58,9 @@ class DedispersionSpectra : public DataBlob
         }
         void setInputDataBlobs( const QList< SpectrumDataSetStokes* >& );
 
-        /// return the maximum DM that can be represented in the data
-        double dmMax() const { return _dmBin.endValue(); }
+        /// return the start of the maximum DM that can be represented in the data
+        float dmMax() const { return _dmBin.lastBinValue(); }
+
         /// return the number of dm bins
         int dmBins() const { return _dmBin.numberBins(); }
         inline int timeSamples() const { return _timeBins; }
