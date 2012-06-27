@@ -4,6 +4,7 @@
 #include <QtCore/QTextStream>
 #include "pelican/utility/ConfigNode.h"
 #include "pelican/data/DataBlob.h"
+#include <cstring>
 #include <iostream>
 
 namespace pelican {
@@ -23,6 +24,14 @@ DedispersionDataAnalysisOutput::DedispersionDataAnalysisOutput( const ConfigNode
     {
         addFile( filename );
     }
+    // MJD of 1/1/11 is 55562
+    struct tm tm;
+    if ( strptime("2011-1-1 1:0:0", "%Y-%m-%d %H:%M:%S", &tm) != NULL ){
+        _epoch = mktime(&tm);
+    }
+    else {
+        throw( QString("SigprocStokesWriter: unable to set epoch.") );
+    }
 }
 
 /**
@@ -31,6 +40,7 @@ DedispersionDataAnalysisOutput::DedispersionDataAnalysisOutput( const ConfigNode
 DedispersionDataAnalysisOutput::~DedispersionDataAnalysisOutput()
 {
     foreach( QTextStream* stream, _streams) {
+        stream->flush();
         delete stream;
     }
     foreach( QIODevice* device, _devices ) {
@@ -51,6 +61,8 @@ void DedispersionDataAnalysisOutput::addFile(const QString& filename)
               << "# ------\n"
               << "# Time|Dm|Amplitude\n"
               << "# ------\n";
+         out->setRealNumberPrecision( 11 );
+         out->flush();
     }
     else {
         std::cerr << "DedispersionDataAnalysisOutput: unable to open file for writing: " << filename.toStdString() << std::endl;
@@ -64,8 +76,10 @@ void DedispersionDataAnalysisOutput::sendStream(const QString& /*streamName*/, c
         const DedispersionDataAnalysis* data = static_cast<const DedispersionDataAnalysis*>(dataBlob);
         foreach( QTextStream* out, _streams ) {
             foreach( const DedispersionEvent& e, data->events() ) {
-                *out << e.timeBin() << "," << e.dm() << "," << e.amplitude() << "\n";
+                double mjdStamp = (e.getTime()-_epoch)/86400 + 55562.0;
+                *out << mjdStamp << "," << e.dm() << "," << e.amplitude() << "\n";
             }
+            out->flush();
         }
     }
 }
