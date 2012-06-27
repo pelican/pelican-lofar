@@ -102,6 +102,7 @@ class DedispersionModule : public AsyncronousModule
         void _cleanBuffers();
 
     private:
+        bool _invert;
         QVector<float> _means;
         QVector<float> _rmss;
         unsigned _tdms; 

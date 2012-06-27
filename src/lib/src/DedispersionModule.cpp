@@ -49,6 +49,7 @@ DedispersionModule::DedispersionModule( const ConfigNode& config )
     // Get configuration options
     //unsigned int nChannels = config.getOption("outputChannelsPerSubband", "value", "512").toUInt();
     _numSamplesBuffer = config.getOption("sampleNumber", "value", "512").toUInt();
+    _invert = config.getOption("invertedData", "value", "true").toBool();
     _tdms = config.getOption("dedispersionSamples", "value", "1984").toUInt();
     _dmStep = config.getOption("dedispersionStepSize", "value", "0.0").toFloat();
     _dmLow = config.getOption("dedispersionMinimum", "value", "0.0").toFloat();
@@ -65,7 +66,7 @@ DedispersionModule::DedispersionModule( const ConfigNode& config )
 
     // setup the data buffers and objects required for each job
     for( unsigned int i=0; i < maxBuffers; ++i ) {
-        _buffersList.append( new DedispersionBuffer(_numSamplesBuffer, 1) );
+        _buffersList.append( new DedispersionBuffer(_numSamplesBuffer, 1, _invert) );
         GPU_Job tmp;
         _jobs.append( tmp );
         DedispersionSpectra tmp2;
@@ -119,7 +120,7 @@ void DedispersionModule::resize( const SpectrumDataSet<float>* streamData ) {
         _cleanBuffers();
         // set up the time/freq buffers
         for( unsigned int i=0; i < maxBuffers; ++i ) {
-            _buffersList.append( new DedispersionBuffer(maxSamples, sampleSize) );
+            _buffersList.append( new DedispersionBuffer(maxSamples, sampleSize, _invert) );
         }
         _buffers.reset( &_buffersList );
         _currentBuffer = _buffers.next();
@@ -226,6 +227,7 @@ void DedispersionModule::dedisperse( DedispersionBuffer* buffer, DedispersionSpe
     job->addKernel( kernelPtr );
     job->addCallBack( boost::bind( &DedispersionModule::gpuJobFinished, this, job, kernelPtr, dataOut ) );
     dataOut->setInputDataBlobs( buffer->inputDataBlobs() );
+    dataOut->setFirstSample( buffer->firstSampleNumber() );
     submit( job );
     //std::cout << "dedispersionModule: current jobs = " << gpuManager()->jobsQueued() << std::endl;
 }
