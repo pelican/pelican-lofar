@@ -38,6 +38,7 @@ class DedispersionDataAnalysisOutput : public AbstractOutputStream
     private:
         QList<QTextStream*> _streams;
         QList<QIODevice*> _devices;
+        time_t _epoch;
 };
 
 PELICAN_DECLARE(AbstractOutputStream, DedispersionDataAnalysisOutput)
