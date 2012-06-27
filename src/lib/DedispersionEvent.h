@@ -23,14 +23,14 @@ class DedispersionSpectra;
 class DedispersionEvent
 {
     public:
-        DedispersionEvent( unsigned dmIndex, unsigned timeIndex, const DedispersionSpectra* data );
+        DedispersionEvent( int dmIndex, unsigned timeIndex, const DedispersionSpectra* data );
         ~DedispersionEvent();
         unsigned timeBin() const;
         float dm() const;
         float amplitude() const;
 
     private:
-        unsigned _dm;
+        int _dm;
         unsigned _time;
         const DedispersionSpectra* _data;
 };

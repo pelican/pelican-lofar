@@ -47,11 +47,12 @@ void DedispersionSpectraTest::test_dmIndex()
     CPPUNIT_ASSERT_DOUBLES_EQUAL( max, spectra.dmMax(), 0.0001 );
     CPPUNIT_ASSERT_EQUAL( (int)dedispersionBins, spectra.dmBins() );
     //CPPUNIT_ASSERT_EQUAL( maxDmAmplitude , spectra.dm( max ) );
-    CPPUNIT_ASSERT_EQUAL( dedispersionBins - 1, spectra.dmIndex( max ) );
+    CPPUNIT_ASSERT_EQUAL( (int)dedispersionBins - 1, spectra.dmIndex( max ) );
     CPPUNIT_ASSERT_EQUAL( (int)timebins, spectra.timeSamples() );
     // try accessing the max amplitude
     // expect not to fail
     CPPUNIT_ASSERT_EQUAL( maxDmAmplitude, spectra.dmAmplitude( timebins-1 , max ) );
+    CPPUNIT_ASSERT_EQUAL( maxDmAmplitude, spectra.dmAmplitude( timebins-1 , (int)dedispersionBins - 1 ) );
 }
 
 } // namespace lofar

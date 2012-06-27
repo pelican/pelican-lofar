@@ -47,9 +47,10 @@ class DedispersionSpectra : public DataBlob
         /// the inegrated power for the specified dm and timeslice
         /// range of timeslice is 0->(timeSamples()-1)
         float dmAmplitude( unsigned timeSlice, float dm ) const;
+        float dmAmplitude( unsigned timeSlice, int dm ) const;
 
         /// return the index of the bin for a given dm value
-        unsigned int dmIndex( float dm ) const;
+        int dmIndex( float dm ) const;
         float dm( unsigned dm ) const;
 
         /// return a list of pointers to the objects representing input data
