@@ -49,7 +49,7 @@ DedispersionModule::DedispersionModule( const ConfigNode& config )
     // Get configuration options
     //unsigned int nChannels = config.getOption("outputChannelsPerSubband", "value", "512").toUInt();
     _numSamplesBuffer = config.getOption("sampleNumber", "value", "512").toUInt();
-    _invert = config.getOption("invertedData", "value", "true").toBool();
+    _invert = config.getOption("invertedData", "value", "1").toUInt();
     _tdms = config.getOption("dedispersionSamples", "value", "1984").toUInt();
     _dmStep = config.getOption("dedispersionStepSize", "value", "0.0").toFloat();
     _dmLow = config.getOption("dedispersionMinimum", "value", "0.0").toFloat();
