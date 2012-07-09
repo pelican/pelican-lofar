@@ -45,6 +45,15 @@ set(lib_src
     src/WeightedSpectrumDataSet.cpp
     src/GPU_MemoryMap.cpp
 )
+if(LOFAR_DAL_FOUND)
+    list(APPEND lib_src
+            src/H5Writer.cpp
+        )
+    list(APPEND pelican-lofar_externals 
+            ${LOFAR_DAL_LIBRARIES}
+        )
+    include_directories( ${LOFAR_DAL_INCLUDE_DIR} )
+endif(LOFAR_DAL_FOUND)
 if(CUDA_FOUND)
     list(APPEND lib_src
             src/AsyncronousModule.cpp
