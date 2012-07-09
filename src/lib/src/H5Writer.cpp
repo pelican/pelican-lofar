@@ -1,5 +1,6 @@
 #include "SpectrumDataSet.h"
 #include "H5Writer.h"
+#include "dal/dal_config.h"
 
 #include <string>
 #include <cstring>
@@ -83,7 +84,7 @@ H5Writer::H5Writer(const ConfigNode& configNode )
     // Observation specific
     // Chilbolton:14 Nancay:12 Effelsberg:13
     _site = configNode.getOption("TelescopeID", "value", "14").toUInt();
-    _telescope = configNode.getOption("TelescopeName", "value", "UK608")
+    _telescope = configNode.getOption("TelescopeName", "value", "UK608");
     _machine = configNode.getOption("MachineID", "value", "10").toUInt();
     _raString = configNode.getOption("RAJ", "value", "000000.0");
     _decString = configNode.getOption("DecJ", "value", "000000.0");
@@ -126,6 +127,7 @@ void H5Writer::writeHeader(SpectrumDataSetStokes* stokes){
       singlePolFile.append(".h5");
 
       //-------------- File  -----------------
+/*
       DAL::BF_File* bf_file = new DAL::BF_File (singlePolFile.toUtf8().data(), "CREATE");
       std::cout << "Opened: " << singlePolFile << " for writing" << std::endl;
       Attribute<std::string> telescope = bf_file->telescope();
@@ -157,7 +159,7 @@ void H5Writer::writeHeader(SpectrumDataSetStokes* stokes){
       t.append="Time";
       t.append="Spectral";
       types.set(t);
-
+*/
 
     }
     // Fill up the relevant DAL variables
