@@ -58,7 +58,7 @@ class TimeSeriesDataSet : public DataBlob
         unsigned nTimesPerBlock() const { return _nTimesPerBlock; }
 
     public:
-        /// Return the block rate (time-span of the entire chunk)
+        /// Return the block rate (time sample resolution in secs)
         double getBlockRate() const { return _blockRate; }
 
         /// Return the block rate (time-span of the entire chunk)
@@ -66,6 +66,7 @@ class TimeSeriesDataSet : public DataBlob
 
         /// Return the lofar time-stamp.
         double getLofarTimestamp() const { return _lofarTimestamp; }
+        double getEndLofarTimestamp() const { return _lofarTimestamp + _nTimeBlocks*nTimesPerBlock*_blockRate; }
 
         /// Set the lofar time-stamp.
         void setLofarTimestamp(double timestamp) { _lofarTimestamp = timestamp; }
