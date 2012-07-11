@@ -18,7 +18,6 @@ PipelineWrapper::PipelineWrapper( PipelineApplication* app)
     :  _app_(app)
 {
     //
-    timerInit(&_runTime_);
     _pipelineWrapperIterationCount = 1;
 }
 
