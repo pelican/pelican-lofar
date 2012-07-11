@@ -103,6 +103,7 @@ class AdapterTimeSeriesDataSet : public AbstractStreamAdapter
         unsigned _nPolarisations;
         unsigned _sampleBits;
         unsigned _clock;
+        double _lastTimestamp;
 
         size_t _packetSize;
         size_t _headerSize;

@@ -111,8 +111,13 @@ void AdapterTimeSeriesDataSet::deserialise(QIODevice* in)
 //            timestamp.setStationClockSpeed(_clock * 1000000);
 //            timestamp.setStamp (header.timestamp, header.blockSequenceNumber);
             unsigned totBlocks = _clock == 160 ? 156250 : (header.timestamp % 2 == 0 ? 195313 : 195312);
-            _timeData->setLofarTimestamp(header.timestamp + ((1.0 * header.blockSequenceNumber) / totBlocks));
+            double thisTimestamp = header.timestamp + ((1.0 * header.blockSequenceNumber) / totBlocks);
+            _timeData->setLofarTimestamp(thisTimestamp);
             _timeData->setBlockRate(1.0 / totBlocks );
+            if (thisTimestamp - _lastTimestamp > 1.0 / totBlocks){
+              std::cout << "Adapter: data out of sequence -- " << thisTimestamp - _lastTimestamp << std::endl;
+            }
+            _lastTimestamp = _timeData -> getEndLofarTimestamp();
         }
 
         // Read the useful data (depends on configured dimensions).
