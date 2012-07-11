@@ -66,7 +66,7 @@ class TimeSeriesDataSet : public DataBlob
 
         /// Return the lofar time-stamp.
         double getLofarTimestamp() const { return _lofarTimestamp; }
-        double getEndLofarTimestamp() const { return _lofarTimestamp + _nTimeBlocks*nTimesPerBlock*_blockRate; }
+        double getEndLofarTimestamp() const { return _lofarTimestamp + _nTimeBlocks*_nTimesPerBlock*_blockRate; }
 
         /// Set the lofar time-stamp.
         void setLofarTimestamp(double timestamp) { _lofarTimestamp = timestamp; }
