@@ -17,13 +17,6 @@ TimingPipeline::TimingPipeline() : AbstractPipeline()
 {
     _iteration = 0;
 
-    // Initialise timer data.
-    timerInit(&_ppfTime);
-    timerInit(&_rfiClipper);
-    timerInit(&_stokesTime);
-    timerInit(&_integratorTime);
-    timerInit(&_outputTime);
-    timerInit(&_totalTime);
 }
 
 
@@ -121,7 +114,7 @@ void TimingPipeline::run(QHash<QString, DataBlob*>& remoteData)
 //    if (_iteration > 43000) stop();
     if (_iteration * _totalSamplesPerChunk >= 16*16384*5) {
         stop();
-    timerReport(&adapterTime, "Adapter Time");
+    timerReport(&(adapter->timeData()), "Adapter Time");
     timerReport(&_ppfTime, "Polyphase Filter");
     timerReport(&_stokesTime, "Stokes Generator");
     timerReport(&_rfiClipper, "RFI_Clipper");
@@ -131,8 +124,8 @@ void TimingPipeline::run(QHash<QString, DataBlob*>& remoteData)
     cout << endl;
     cout << "Total (average) allowed time per iteration = "
          << _totalSamplesPerChunk * 5.12e-6 << " sec" << endl;
-    cout << "Total (average) actual time per iteration = "
-         << adapterTime.timeAverage + _totalTime.timeAverage << " sec" << endl;
+    //cout << "Total (average) actual time per iteration = "
+    //     << adapterTime.timeAverage + _totalTime.timeAverage << " sec" << endl;
     cout << "nSubbands = " << timeSeries->nSubbands() << endl;
     cout << "nPols = " << timeSeries->nPolarisations() << endl;
     cout << "nBlocks = " << timeSeries->nTimeBlocks() << endl;

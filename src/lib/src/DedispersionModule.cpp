@@ -190,15 +190,24 @@ void DedispersionModule::dedisperse( WeightedSpectrumDataSet* weightedData )
     unsigned int maxSamples = streamData->nTimeBlocks();
     do {
         if( _currentBuffer->addSamples( streamData, &sampleNumber ) == 0 ) {
+            timerStart(&_launchTimer);
+            timerStart(&_bufferTimer);
             //(*_currentBuffer)->dump("input.data");
             DedispersionBuffer* next = _buffers.next();
             next->clear();
+            timerUpdate(&_bufferTimer);
             {   // lock mutex scope
                 // lock here to ensure there is just a single hit on the 
                 // lock mutex for each buffer
+                timerStart(&_bufferLockTimer);
                 QMutexLocker l( &lockerMutex );
+                timerUpdate(&_bufferLockTimer);
+                timerStart(&_blobLockTimer);
                 lockAllUnprotected( _blobs );
+                timerUpdate(&_blobLockTimer);
+                timerStart(&_copyTimer);
                 lockAllUnprotected( _currentBuffer->copy( next, _maxshift ) );
+                timerUpdate(&_copyTimer);
                 // ensure lock is maintianed for the next buffer
                 // if not already marked by the maxshift copy
                 if( sampleNumber != maxSamples && ! next->inputDataBlobs().contains(streamData) )
@@ -207,6 +216,7 @@ void DedispersionModule::dedisperse( WeightedSpectrumDataSet* weightedData )
             _blobs.clear();
             dedisperse( _currentBuffer, _dedispersionDataBuffer.next() );
             _currentBuffer = next;
+            timerUpdate(&_launchTimer);
         }
     }
     while( sampleNumber != maxSamples );

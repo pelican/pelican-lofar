@@ -14,6 +14,7 @@
 #include "GPU_Kernel.h"
 #include "GPU_MemoryMap.h"
 #include "SpectrumDataSet.h"
+#include "timer.h"
 
 /**
  * @file DedispersionModule.h
@@ -128,6 +129,14 @@ class DedispersionModule : public AsyncronousModule
 
         QList<DedispersionKernel*> _kernelList; // collection of pre-configured kernels
         LockingPtrContainer<DedispersionKernel> _kernels;
+
+        // Timers
+        DEFINE_TIMER( _copyTimer )
+        DEFINE_TIMER( _blobLockTimer )
+        DEFINE_TIMER( _bufferLockTimer )
+        DEFINE_TIMER( _bufferTimer )
+        DEFINE_TIMER( _launchTimer )
+
 };
 
 PELICAN_DECLARE_MODULE(DedispersionModule)

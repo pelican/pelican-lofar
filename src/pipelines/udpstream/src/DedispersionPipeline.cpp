@@ -28,12 +28,6 @@ DedispersionPipeline::DedispersionPipeline( const QString& streamIdentifier )
      _stokesGenerator = 0;
 
     // Initialise timer data.
-    timerInit(&_ppfTime);
-    timerInit(&_rfiClipperTime);
-    timerInit(&_stokesTime);
-    timerInit(&_integratorTime);
-    timerInit(&_dedispersionTime);
-    timerInit(&_totalTime);
 #ifdef TIMING_ENABLED
     _iteration = 0;
 #endif // TIMING_ENABLED
