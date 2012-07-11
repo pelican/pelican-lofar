@@ -21,6 +21,7 @@ using std::endl;
 namespace pelican {
 namespace lofar {
 
+TimerData AdapterTimeSeriesDataSet::adapterTime;
 
 /**
  * @details
