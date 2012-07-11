@@ -29,11 +29,10 @@ DedispersionPipeline::DedispersionPipeline( const QString& streamIdentifier )
 
     // Initialise timer data.
     timerInit(&_ppfTime);
-    timerInit(&_rfiClipper);
+    timerInit(&_rfiClipperTime);
     timerInit(&_stokesTime);
     timerInit(&_integratorTime);
     timerInit(&_dedispersionTime);
-    timerInit(&_outputTime);
     timerInit(&_totalTime);
 #ifdef TIMING_ENABLED
     _iteration = 0;
@@ -114,10 +113,10 @@ void DedispersionPipeline::run(QHash<QString, DataBlob*>& remoteData)
     _weightedIntStokes->reset(stokes);
 
     // Clips RFI and modifies blob in place
-    timerStart(&_rfiClipper);
+    timerStart(&_rfiClipperTime);
     _rfiClipper->run(_weightedIntStokes);
     dataOutput(&(_weightedIntStokes->stats()), "RFI_Stats");
-    timerUpdate(&_rfiClipper);
+    timerUpdate(&_rfiClipperTime);
 
     timerStart(&_integratorTime);
     _stokesIntegrator->run(stokes, _intStokes);
@@ -131,17 +130,17 @@ void DedispersionPipeline::run(QHash<QString, DataBlob*>& remoteData)
 
 #ifdef TIMING_ENABLED
     timerUpdate(&_totalTime);
-    if( ++_iteration%2000 == 0 ) {
+    if( ++_iteration%_dedispersionModule->numberOfSamples()*2 == 0 ) {
         timerReport(&adapterTime, "Adapter Time");
         timerReport(&_ppfTime, "Polyphase Filter");
         timerReport(&_stokesTime, "Stokes Generator");
-        timerReport(&_rfiClipper, "RFI_Clipper");
-        //    	timerReport(&_integratorTime, "Stokes Integrator");
-        timerReport(&_outputTime, "Output");
+        timerReport(&_rfiClipperTime, "RFI_Clipper");
+        timerReport(&_integratorTime, "Stokes Integrator");
+        timerReport(&_dedispersionTime, "DedispersionModule");
         timerReport(&_totalTime, "Pipeline Time (excluding adapter)");
         std::cout << endl;
         std::cout << "Total (average) allowed time per iteration = "
-            << _totalSamplesPerChunk * 5.12e-6 << " sec" << "\n";
+            << timeSeries->getBlockRate() << " sec" << "\n";
         std::cout << "Total (average) actual time per iteration = "
             << adapterTime.timeAverage + _totalTime.timeAverage << " sec" << "\n";
         std::cout << std::endl;

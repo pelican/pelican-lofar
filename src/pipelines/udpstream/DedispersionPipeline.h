@@ -80,9 +80,9 @@ class DedispersionPipeline : public AbstractPipeline
         TimerData _ppfTime;
         TimerData _stokesTime;
         TimerData _integratorTime;
-        TimerData _outputTime;
+        TimerData _dedispersionTime;
         TimerData _totalTime;
-        TimerData _rfiClipper;
+        TimerData _rfiClipperTime;
         unsigned _iteration;
 #endif
 };
