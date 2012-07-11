@@ -27,6 +27,17 @@ DedispersionPipeline::DedispersionPipeline( const QString& streamIdentifier )
      _stokesIntegrator = 0;
      _stokesGenerator = 0;
 
+    // Initialise timer data.
+    timerInit(&_ppfTime);
+    timerInit(&_rfiClipper);
+    timerInit(&_stokesTime);
+    timerInit(&_integratorTime);
+    timerInit(&_dedispersionTime);
+    timerInit(&_outputTime);
+    timerInit(&_totalTime);
+#ifdef TIMING_ENABLED
+    _iteration = 0;
+#endif // TIMING_ENABLED
 }
 
 /**
@@ -78,6 +89,8 @@ void DedispersionPipeline::init()
 
 void DedispersionPipeline::run(QHash<QString, DataBlob*>& remoteData)
 {
+    timerStart(&_totalTime);
+
     // Get pointer to the remote time series data blob.
     // This is a block of data containing a number of time series of length
     // N for each sub-band and polarisation.
@@ -87,25 +100,53 @@ void DedispersionPipeline::run(QHash<QString, DataBlob*>& remoteData)
     // Run the polyphase channeliser.
     // Generates spectra from a blocks of time series indexed by sub-band
     // and polarisation.
+    timerStart(&_ppfTime);
     _ppfChanneliser->run(timeSeries, _spectra);
+    timerUpdate(&_ppfTime);
 
     // Convert spectra in X, Y polarisation into spectra with stokes parameters.
+    timerStart(&_stokesTime);
     SpectrumDataSetStokes* stokes=_stokesBuffer->next();
     _stokesGenerator->run(_spectra, stokes);
+    timerUpdate(&_stokesTime);
 
     // set up a suitable datablob fro the rfi clipper
     _weightedIntStokes->reset(stokes);
 
     // Clips RFI and modifies blob in place
+    timerStart(&_rfiClipper);
     _rfiClipper->run(_weightedIntStokes);
     dataOutput(&(_weightedIntStokes->stats()), "RFI_Stats");
+    timerUpdate(&_rfiClipper);
 
+    timerStart(&_integratorTime);
     _stokesIntegrator->run(stokes, _intStokes);
     dataOutput(_intStokes, "SpectrumDataSetStokes");
+    timerUpdate(&_integratorTime);
 
     // start the asyncronous chain of events
+    timerStart(&_dedispersionTime);
     _dedispersionModule->dedisperse( _weightedIntStokes );
+    timerUpdate(&_dedispersionTime);
 
+#ifdef TIMING_ENABLED
+    timerUpdate(&_totalTime);
+    if( ++_iteration%2000 == 0 ) {
+        timerReport(&adapterTime, "Adapter Time");
+        timerReport(&_ppfTime, "Polyphase Filter");
+        timerReport(&_stokesTime, "Stokes Generator");
+        timerReport(&_rfiClipper, "RFI_Clipper");
+        //    	timerReport(&_integratorTime, "Stokes Integrator");
+        timerReport(&_outputTime, "Output");
+        timerReport(&_totalTime, "Pipeline Time (excluding adapter)");
+        std::cout << endl;
+        std::cout << "Total (average) allowed time per iteration = "
+            << _totalSamplesPerChunk * 5.12e-6 << " sec" << "\n";
+        std::cout << "Total (average) actual time per iteration = "
+            << adapterTime.timeAverage + _totalTime.timeAverage << " sec" << "\n";
+        std::cout << std::endl;
+    }
+#endif
 }
 
 void DedispersionPipeline::dedispersionAnalysis( DataBlob* blob ) {

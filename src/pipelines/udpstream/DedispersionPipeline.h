@@ -17,6 +17,7 @@
 #include "DedispersionSpectra.h"
 #include "DedispersionAnalyser.h"
 #include "DedispersionDataAnalysisOutput.h"
+#include "timer.h"
 
 
 /**
@@ -74,6 +75,16 @@ class DedispersionPipeline : public AbstractPipeline
         LockingPtrContainer<SpectrumDataSetStokes>* _stokesBuffer;
         WeightedSpectrumDataSet* _weightedIntStokes;
 
+#ifdef TIMING_ENABLED
+        // Timers.
+        TimerData _ppfTime;
+        TimerData _stokesTime;
+        TimerData _integratorTime;
+        TimerData _outputTime;
+        TimerData _totalTime;
+        TimerData _rfiClipper;
+        unsigned _iteration;
+#endif
 };
 
 } // namespace lofar
