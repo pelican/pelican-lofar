@@ -217,6 +217,11 @@ void DedispersionModule::dedisperse( WeightedSpectrumDataSet* weightedData )
             dedisperse( _currentBuffer, _dedispersionDataBuffer.next() );
             _currentBuffer = next;
             timerUpdate(&_launchTimer);
+            timerReport(&_launchTimer, "Launch Total");
+            timerReport(&_blobLockTimer, "blobLockTimer" );
+            timerReport(&_bufferLockTimer, "bufferLockTimer" );
+            timerReport(&_copyTimer,"copyTimer");
+            timerReport(&_bufferTimer,"bufferTimer");
         }
     }
     while( sampleNumber != maxSamples );
