@@ -125,7 +125,7 @@ void DedispersionPipeline::run(QHash<QString, DataBlob*>& remoteData)
 #ifdef TIMING_ENABLED
     timerUpdate(&_totalTime);
     if( ++_iteration%_dedispersionModule->numberOfSamples()/(timeSeries->nTimeBlocks()*timeSeries->nTimesPerBlock()) == 0 ) {
-        //timerReport(&adapterTime, "Adapter Time");
+        timerReport(&AdapterTimeSeriesDataSet::adapterTime, "Adapter Time");
         timerReport(&_ppfTime, "Polyphase Filter");
         timerReport(&_stokesTime, "Stokes Generator");
         timerReport(&_rfiClipperTime, "RFI_Clipper");
@@ -135,8 +135,8 @@ void DedispersionPipeline::run(QHash<QString, DataBlob*>& remoteData)
         std::cout << endl;
         std::cout << "Total (average) allowed time per iteration = "
             << timeSeries->getBlockRate() << " sec" << "\n";
-//        std::cout << "Total (average) actual time per iteration = "
-//            << adapterTime.timeAverage + _totalTime.timeAverage << " sec" << "\n";
+        std::cout << "Total (average) actual time per iteration = "
+            << AdapterTimeSeriesDataSet::adapterTime.timeAverage + _totalTime.timeAverage << " sec" << "\n";
         std::cout << std::endl;
     }
 #endif

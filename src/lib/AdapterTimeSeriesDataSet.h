@@ -113,7 +113,8 @@ class AdapterTimeSeriesDataSet : public AbstractStreamAdapter
         std::vector<char> _dataTemp;
         std::vector<char> _paddingTemp;
 
-        DEFINE_TIMER(adapterTime)
+     public:
+        static TimerData adapterTime;
 };
 
 
