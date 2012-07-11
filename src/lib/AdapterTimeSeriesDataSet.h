@@ -12,7 +12,6 @@
  * @file AdapterTimeSeriesDataSet.h
  */
 
-extern TimerData adapterTime;
 
 namespace pelican {
 
@@ -113,6 +112,8 @@ class AdapterTimeSeriesDataSet : public AbstractStreamAdapter
         std::vector<char> _headerTemp;
         std::vector<char> _dataTemp;
         std::vector<char> _paddingTemp;
+
+        DEFINE_TIMER(adapterTimer)
 };
 
 

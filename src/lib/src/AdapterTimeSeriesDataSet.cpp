@@ -17,7 +17,6 @@ using std::cout;
 using std::cerr;
 using std::endl;
 
-TimerData adapterTime;
 
 namespace pelican {
 namespace lofar {
@@ -60,7 +59,6 @@ AdapterTimeSeriesDataSet::AdapterTimeSeriesDataSet(const ConfigNode& config)
     _dataTemp.resize(_dataSize);
     _paddingTemp.resize(_paddingSize + 1);
 
-    timerInit(&adapterTime);
 }
 
 

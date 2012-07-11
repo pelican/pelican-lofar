@@ -41,6 +41,7 @@ set(lib_src
     src/StokesGenerator.cpp
     src/StokesIntegrator.cpp
     src/SigprocStokesWriter.cpp
+    src/TimerData.cpp
     src/LofarDataSplittingChunker.cpp
     src/WeightedSpectrumDataSet.cpp
     src/GPU_MemoryMap.cpp
