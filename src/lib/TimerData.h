@@ -34,6 +34,7 @@ class TimerData
         double timeElapsed;
         double timeMin;
         double timeMax;
+        double timeLast;
         double timeAverage;
 
     private:
@@ -46,6 +47,7 @@ void TimerData::report( const char* message ) const {
     printf("-- Minimum: %.6f sec\n", timeMin);
     printf("-- Maximum: %.6f sec\n", timeMax);
     printf("-- Average: %.6f sec\n", timeAverage);
+    printf("-- Latest: %.6f sec\n", timeLast);
     printf("-- Counter: %d\n", counter);
     printf("----------------------------------------------------\n");
 }

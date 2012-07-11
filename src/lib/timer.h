@@ -52,6 +52,7 @@ static inline void timerUpdate(TimerData* data)
     int counter = data->counter;
     data->timeAverage = (elapsed + counter * data->timeAverage) / (counter + 1);
     data->counter++;
+    data->timeLast = elapsed;
 }
 #else
 #define timerUpdate(TimerData)

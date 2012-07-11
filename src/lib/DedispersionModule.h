@@ -135,10 +135,9 @@ class DedispersionModule : public AsyncronousModule
 
         // Timers
         DEFINE_TIMER( _copyTimer )
-        DEFINE_TIMER( _blobLockTimer )
-        DEFINE_TIMER( _bufferLockTimer )
         DEFINE_TIMER( _bufferTimer )
         DEFINE_TIMER( _launchTimer )
+        DEFINE_TIMER( _dedisperseTimer )
 
 };
 

@@ -124,7 +124,7 @@ void DedispersionPipeline::run(QHash<QString, DataBlob*>& remoteData)
 
 #ifdef TIMING_ENABLED
     timerUpdate(&_totalTime);
-    if( ++_iteration%_dedispersionModule->numberOfSamples()*2 == 0 ) {
+    if( ++_iteration%_dedispersionModule->numberOfSamples()/(timeSeries->nTimeBlocks()*timeSeries->nTimesPerBlock()) == 0 ) {
         //timerReport(&adapterTime, "Adapter Time");
         timerReport(&_ppfTime, "Polyphase Filter");
         timerReport(&_stokesTime, "Stokes Generator");

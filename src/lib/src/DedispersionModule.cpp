@@ -199,12 +199,8 @@ void DedispersionModule::dedisperse( WeightedSpectrumDataSet* weightedData )
             {   // lock mutex scope
                 // lock here to ensure there is just a single hit on the 
                 // lock mutex for each buffer
-                timerStart(&_bufferLockTimer);
                 QMutexLocker l( &lockerMutex );
-                timerUpdate(&_bufferLockTimer);
-                timerStart(&_blobLockTimer);
                 lockAllUnprotected( _blobs );
-                timerUpdate(&_blobLockTimer);
                 timerStart(&_copyTimer);
                 lockAllUnprotected( _currentBuffer->copy( next, _maxshift ) );
                 timerUpdate(&_copyTimer);
@@ -214,12 +210,13 @@ void DedispersionModule::dedisperse( WeightedSpectrumDataSet* weightedData )
                     lockUnprotected( streamData );
             }
             _blobs.clear();
-            dedisperse( _currentBuffer, _dedispersionDataBuffer.next() );
+            timerStart( &_dedisperseTimer );
+            QtConcurrent::run( this, &DedispersionModule::dedisperse, _currentBuffer, _dedispersionDataBuffer.next() );
+            timerUpdate( &_dedisperseTimer );
             _currentBuffer = next;
             timerUpdate(&_launchTimer);
             timerReport(&_launchTimer, "Launch Total");
-            timerReport(&_blobLockTimer, "blobLockTimer" );
-            timerReport(&_bufferLockTimer, "bufferLockTimer" );
+            timerReport(&_dedisperseTimer, "Dedispersing Time");
             timerReport(&_copyTimer,"copyTimer");
             timerReport(&_bufferTimer,"bufferTimer");
         }
