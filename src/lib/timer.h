@@ -5,8 +5,10 @@
 #include <stdlib.h>
 #include <cfloat>
 #include <sys/time.h>
-
 #include "TimerData.h"
+
+namespace pelican {
+namespace lofar {
 
 #ifdef TIMING_ENABLED
 static inline void timerReport(TimerData* data, const char* message)
@@ -25,9 +27,9 @@ static inline double timerSec()
 }
 
 #ifdef TIMING_ENABLED
-#define DEFINE_TIMER(timer) TimeData(timer) timer;
+#define DEFINE_TIMER(t) TimerData t;
 #else
-#define DEFINE_TIMER(timer)
+#define DEFINE_TIMER(t) 
 #endif
 
 #ifdef TIMING_ENABLED
@@ -55,4 +57,6 @@ static inline void timerUpdate(TimerData* data)
 #define timerUpdate(TimerData)
 #endif
 
+} // end pelican-lofar namespace
+} // end pelican
 #endif

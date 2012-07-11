@@ -114,7 +114,7 @@ void TimingPipeline::run(QHash<QString, DataBlob*>& remoteData)
 //    if (_iteration > 43000) stop();
     if (_iteration * _totalSamplesPerChunk >= 16*16384*5) {
         stop();
-    timerReport(&(adapter->timeData()), "Adapter Time");
+    //timerReport(&(adapter->timeData()), "Adapter Time");
     timerReport(&_ppfTime, "Polyphase Filter");
     timerReport(&_stokesTime, "Stokes Generator");
     timerReport(&_rfiClipper, "RFI_Clipper");
