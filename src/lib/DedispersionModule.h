@@ -94,6 +94,9 @@ class DedispersionModule : public AsyncronousModule
         //  will be lost.
         void resize( const SpectrumDataSet<float>* streamData );
 
+        /// return the number of samples collected before dedispersion
+        unsigned numberOfSamples() const { return _numSamplesBuffer; }
+
         /// deprecated
         int maxshift() const { return _maxshift; }
 
