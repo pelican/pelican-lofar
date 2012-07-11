@@ -2,6 +2,7 @@
 #include "DedispersionDataAnalysisOutput.h"
 #include "DedispersionDataAnalysis.h"
 #include "DedispersionSpectra.h"
+#include "SpectrumDataSet.h"
 #include "pelican/utility/ConfigNode.h"
 #include "pelican/utility/test/TestFile.h"
 #include <QFile>
@@ -41,7 +42,11 @@ void DedispersionDataAnalysisOutputTest::test_method()
     // create an ouput stream
     test::TestFile file(true);
     QString filename = file.filename();
+    SpectrumDataSetStokes sblob;
+    QList<SpectrumDataSetStokes*> sblobs;
+    sblobs.append( &sblob );
     DedispersionSpectra data; data.resize(10,10,1.0,0.1);
+    data.setInputDataBlobs( sblobs );
     DedispersionDataAnalysis blob1;
     blob1.reset(&data);
     blob1.addEvent( 1, 1);
