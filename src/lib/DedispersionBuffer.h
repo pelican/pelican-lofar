@@ -1,6 +1,7 @@
 #ifndef DEDISPERSIONBUFFER_H
 #define DEDISPERSIONBUFFER_H
 #include <QVector>
+#include "timer.h"
 
 
 /**
@@ -52,7 +53,9 @@ class DedispersionBuffer
         unsigned int addSamples( SpectrumDataSetStokes* weightedData, unsigned *sampleNumber );
 
         /// return the amount of empty space in the buffer (in samples)
-        unsigned int spaceRemaining() const;
+        inline unsigned int spaceRemaining() const {
+            return _nsamp - _sampleCount;
+        };
         unsigned int numberOfSamples() const { return _sampleCount; };
 
         /// return the first sample number (in the first datablob)
@@ -86,7 +89,7 @@ class DedispersionBuffer
         float _rms;
         bool _invertChannels;
         unsigned int  _firstSample;
-        
+        DEFINE_TIMER(_addSampleTimer);
 };
 
 } // namespace lofar

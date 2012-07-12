@@ -75,10 +75,6 @@ const QList<SpectrumDataSetStokes*>& DedispersionBuffer::copy( DedispersionBuffe
     return buf->_inputBlobs;
 }
 
-unsigned DedispersionBuffer::spaceRemaining() const {
-    return _nsamp - _sampleCount;
-}
-
 unsigned DedispersionBuffer::addSamples( SpectrumDataSetStokes* streamData, unsigned *sampleNumber ) {
     if( ! _inputBlobs.contains(streamData) )
         _inputBlobs.append(streamData);
@@ -103,16 +99,33 @@ unsigned DedispersionBuffer::_addSamples( SpectrumDataSetStokes* streamData,
         _firstSample = *sampleNumber;
     }
     unsigned maxSamples = std::min( numSamples, spaceRemaining() + *sampleNumber );
-    for(unsigned t = *sampleNumber; t < maxSamples; ++t) {
-        for (unsigned s = 0; s < nSubbands; ++s) {
-            const float* data = streamData->spectrumData(t, (_invertChannels) ? nSubbands - 1 - s : s, 0);
-            for (unsigned c = 0; c < nChannels; ++c) {
-                _timedata[ ((s * nChannels) + c ) * _nsamp + _sampleCount ] = data[(_invertChannels) ? nChannels - 1 - c : c];
+    timerStart(&_addSampleTimer);
+    if( _invertChannels ) {
+        for(unsigned t = *sampleNumber; t < maxSamples; ++t) {
+            for (unsigned s = 0; s < nSubbands; ++s) {
+                int bsize = s*nChannels;
+                const float* data = streamData->spectrumData(t, nSubbands-1- s, 0);
+                for (unsigned c = 0; c < nChannels; ++c) {
+                    _timedata[ (bsize + c ) * _nsamp + _sampleCount ] = data[nChannels-1-c];
+                }
             }
+            ++_sampleCount;
         }
-        ++_sampleCount;
+    } else {
+        for(unsigned t = *sampleNumber; t < maxSamples; ++t) {
+            for (unsigned s = 0; s < nSubbands; ++s) {
+                const float* data = streamData->spectrumData(t, s, 0);
+                int bsize = s*nChannels;
+                for (unsigned c = 0; c < nChannels; ++c) {
+                    _timedata[ (bsize + c ) * _nsamp + _sampleCount ] = data[c];
+                }
+            }
+            ++_sampleCount;
+        }
     }
     *sampleNumber = maxSamples;
+    timerUpdate(&_addSampleTimer);
+    timerReport(&_addSampleTimer, "DedispersionBuffer::addSamples");
     return spaceRemaining();
 }
 
