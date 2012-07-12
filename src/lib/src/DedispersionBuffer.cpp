@@ -100,24 +100,27 @@ unsigned DedispersionBuffer::_addSamples( SpectrumDataSetStokes* streamData,
     }
     unsigned maxSamples = std::min( numSamples, spaceRemaining() + *sampleNumber );
     timerStart(&_addSampleTimer);
+    int start = *sampleNumber;
     if( _invertChannels ) {
-        for(unsigned t = *sampleNumber; t < maxSamples; ++t) {
-            for (unsigned s = 0; s < nSubbands; ++s) {
-                int bsize = s*nChannels;
-                const float* data = streamData->spectrumData(t, nSubbands-1- s, 0);
-                for (unsigned c = 0; c < nChannels; ++c) {
-                    _timedata[ (bsize + c ) * _nsamp + _sampleCount ] = data[nChannels-1-c];
+        int nChannelsMinusOne = nChannels - 1;
+        int nSubbandsMinusOne= nSubbands - 1;
+        for(int t = start; t < (int)maxSamples; ++t) {
+            for (int s = 0; s < (int)nSubbands; ++s) {
+                int bsize = s*nChannels * _nsamp + _sampleCount;
+                const float* data = streamData->spectrumData(t, nSubbandsMinusOne-s, 0);
+                for (int c = 0; c < (int)nChannels; ++c) {
+                    _timedata[ bsize + (c * _nsamp ) ] = data[nChannelsMinusOne-c];
                 }
             }
             ++_sampleCount;
         }
     } else {
-        for(unsigned t = *sampleNumber; t < maxSamples; ++t) {
-            for (unsigned s = 0; s < nSubbands; ++s) {
+        for(int t = start; t < (int)maxSamples; ++t) {
+            for (int s = 0; s < (int)nSubbands; ++s) {
                 const float* data = streamData->spectrumData(t, s, 0);
-                int bsize = s*nChannels;
-                for (unsigned c = 0; c < nChannels; ++c) {
-                    _timedata[ (bsize + c ) * _nsamp + _sampleCount ] = data[c];
+                int bsize = s*nChannels * _nsamp + _sampleCount;
+                for (int c = 0; c < (int)nChannels; ++c) {
+                    _timedata[ bsize + ( c * _nsamp ) ] = data[c];
                 }
             }
             ++_sampleCount;
