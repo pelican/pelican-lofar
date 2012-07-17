@@ -24,14 +24,14 @@ message("*****************************************************************")
 #=== Set compiler flags.
 if(CMAKE_COMPILER_IS_GNUCXX)
     set(CMAKE_CXX_FLAGS_RELEASE "-O3 -DQT_NO_DEBUG -DNDEBUG")
-    set(CMAKE_CXX_FLAGS_PROFILE "-pg")
+    set(CMAKE_CXX_FLAGS_PROFILE "-pg -DNDEBUG -DQT_NO_DEBUG -O2")
     set(CMAKE_EXE_LINKER_FLAG_PROFILE "-pg")
     add_definitions(-Wall -Wextra -pedantic -Wno-long-long -Wno-variadic-macros)
     add_definitions(-Wno-deprecated -Wno-unknown-pragmas)
     list(APPEND CPP_PLATFORM_LIBS util dl)
 elseif(CMAKE_CXX_COMPILER MATCHES icpc)
     set(CMAKE_CXX_FLAGS_RELEASE "-O3 -DNDEBUG -DQT_NO_DEBUG -DQT_NO_DEBUG_OUTPUT")
-    add_definitions(-Wall)
+    add_definitions(-Wall -std=c99)
     add_definitions(-Wcheck)
     add_definitions(-wd1125) # virtual override intended warning
     add_definitions(-wd1572) # remove floating-pointe equality warning.

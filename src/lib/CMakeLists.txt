@@ -82,6 +82,12 @@ if(CUDA_FOUND)
 else(CUDA_FOUND)
     set(cuda_libs)
 endif(CUDA_FOUND)
+if(HDF5_FOUND)
+    include_directories(${HDF5_INCLUDE_DIR})
+    set(hdf5_libs hdf5)
+else(HDF5_FOUND)
+    set(hdf5_libs)
+endif(HDF5_FOUND)
 
 # === Create pelican-lofar library.
 add_library(pelican-lofar_static STATIC ${moc_src} ${lib_src} )
@@ -107,6 +113,7 @@ set(pelican-lofar_externals
     ${FFTW3_FFTWF_LIBRARY}
     ${LAPACK_LIBRARIES}
     ${cuda_libs}
+    ${hdf5_libs}
 )
 
 target_link_libraries(pelican-lofar_static ${pelican-lofar_externals})
