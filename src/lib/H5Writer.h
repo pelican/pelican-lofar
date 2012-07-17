@@ -29,28 +29,27 @@ class SpectrumDataSetStokes;
 
 class H5Writer : public AbstractOutputStream
 {
+    // lifted from lofar RTCP/Interface/include/Interface/Parset.h
+    enum StokesType { STOKES_I = 0, STOKES_IQUV, STOKES_XXYY, INVALID_STOKES = -1 };
+
     public:
-	/// Constructor
+    /// Constructor
         H5Writer( const ConfigNode& config );
 
-	/// Destructor
+    /// Destructor
         ~H5Writer();
 
-	/// File path
-        QString filepath() { return _filepath; }
+    /// File path
+        QString filepath() { return _filePath; }
 
     protected:
+        void _writeHeader(SpectrumDataSetStokes* stokes);
         virtual void sendStream(const QString& streamName, const DataBlob* dataBlob);
 
     private:
         // Header helpers
-        void WriteString(QString string);
-        void WriteInt(QString name, int value);
-        void WriteFloat(QString name, float value);
-        void WriteDouble(QString name, double value);
-        void WriteLong(QString name, long value);
-        void writeHeader(SpectrumDataSetStokes* stokes);
-        // Data helpers
+        void _updateHeader();
+
     protected:
         // buffer and write data in blocks
         void _write(char*,size_t);
@@ -58,7 +57,8 @@ class H5Writer : public AbstractOutputStream
 
     private:
         bool              _first;
-        QString           _filepath;
+        QString           _filePath;
+        QString           _fileName;
         std::ofstream     _file;
         std::vector<char>  _buffer;
         QString       _sourceName, _raString, _decString, _telescope;
