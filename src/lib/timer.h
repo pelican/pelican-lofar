@@ -19,13 +19,6 @@ static inline void timerReport(TimerData* data, const char* message)
 #define timerReport(TimerData, char)
 #endif
 
-static inline double timerSec()
-{
-    struct timeval t;
-    gettimeofday(&t, NULL);
-    return t.tv_sec + (t.tv_usec * 1.0e-6);
-}
-
 #ifdef TIMING_ENABLED
 #define DEFINE_TIMER(t) TimerData t;
 #else
@@ -35,8 +28,7 @@ static inline double timerSec()
 #ifdef TIMING_ENABLED
 static inline void timerStart(TimerData* data)
 {
-    data->timeStart = timerSec();
-    data->timeElapsed = 0.0;
+    data->tick();
 }
 #else
 #define timerStart(TimerData) 
@@ -45,14 +37,7 @@ static inline void timerStart(TimerData* data)
 #ifdef TIMING_ENABLED
 static inline void timerUpdate(TimerData* data)
 {
-    double elapsed = timerSec() - data->timeStart;
-    data->timeElapsed = elapsed;
-    if (elapsed < data->timeMin) data->timeMin = elapsed;
-    if (elapsed > data->timeMax) data->timeMax = elapsed;
-    int counter = data->counter;
-    data->timeAverage = (elapsed + counter * data->timeAverage) / (counter + 1);
-    data->counter++;
-    data->timeLast = elapsed;
+    data->tock():
 }
 #else
 #define timerUpdate(TimerData)

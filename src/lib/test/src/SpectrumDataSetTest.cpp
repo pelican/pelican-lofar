@@ -200,7 +200,8 @@ void SpectrumDataSetTest::test_access_performance()
     std::complex<float> value(1.0, 2.0);
     std::complex<float> * spectrum;
 
-    double start = timerSec();
+    TimerData timer;
+    timer.tick();
     for (unsigned b = 0; b < nTimeBlocks; ++b) {
         for (unsigned s = 0; s < nSubbands; ++s) {
             for (unsigned p = 0; p < nPolarisations; ++p)
@@ -214,10 +215,10 @@ void SpectrumDataSetTest::test_access_performance()
             }
         }
     }
-    double end = timerSec();
+    timer.tock();
     cout << endl << "----------------------------" << endl;
     cout << "SpectrumDataSetTest::test_access_performance()" << endl;
-    cout << "Elapsed = " << end - start << " s."<< endl;
+    cout << "Elapsed = " << timer.timeElapsed << " s."<< endl;
     cout << "----------------------------" << endl;
 
 }

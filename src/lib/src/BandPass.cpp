@@ -85,7 +85,7 @@ void BandPass::reBin(const BinMap& map)
     }
 }
 
-void BandPass::_buildData(const BinMap& map, float scale, float offset) {
+void BandPass::_buildData(const BinMap& map, float scale, float /*offset*/) {
     int mapId = map.hash();
     _dataSets.insert(mapId, QVector<float>(map.numberBins()) );
     for( unsigned int i=0; i < map.numberBins(); ++i ) {
