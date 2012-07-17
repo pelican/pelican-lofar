@@ -46,15 +46,27 @@ set(lib_src
     src/WeightedSpectrumDataSet.cpp
     src/GPU_MemoryMap.cpp
 )
+# Lofar DAL enables the H5Writer
 if(LOFAR_DAL_FOUND)
     list(APPEND lib_src
             src/H5Writer.cpp
         )
-    list(APPEND pelican-lofar_externals 
+    set(lofar_dal_libs
             ${LOFAR_DAL_LIBRARIES}
         )
     include_directories( ${LOFAR_DAL_INCLUDE_DIR} )
+else(LOFAR_DAL_FOUND)
+    set(lofar_dal_libs)
 endif(LOFAR_DAL_FOUND)
+
+# HDF5 is needed to support the DAL
+if(HDF5_FOUND)
+    include_directories(${HDF5_INCLUDE_DIR})
+    set(hdf5_libs hdf5)
+else(HDF5_FOUND)
+    set(hdf5_libs)
+endif(HDF5_FOUND)
+
 if(CUDA_FOUND)
     list(APPEND lib_src
             src/AsyncronousModule.cpp
@@ -82,12 +94,6 @@ if(CUDA_FOUND)
 else(CUDA_FOUND)
     set(cuda_libs)
 endif(CUDA_FOUND)
-if(HDF5_FOUND)
-    include_directories(${HDF5_INCLUDE_DIR})
-    set(hdf5_libs hdf5)
-else(HDF5_FOUND)
-    set(hdf5_libs)
-endif(HDF5_FOUND)
 
 # === Create pelican-lofar library.
 add_library(pelican-lofar_static STATIC ${moc_src} ${lib_src} )
@@ -113,6 +119,7 @@ set(pelican-lofar_externals
     ${FFTW3_FFTWF_LIBRARY}
     ${LAPACK_LIBRARIES}
     ${cuda_libs}
+    ${lofar_dal_libs}
     ${hdf5_libs}
 )
 
