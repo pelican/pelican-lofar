@@ -31,13 +31,13 @@ static inline void timerStart(TimerData* data)
     data->tick();
 }
 #else
-#define timerStart(TimerData) 
+#define timerStart(TimerData)
 #endif
 
 #ifdef TIMING_ENABLED
 static inline void timerUpdate(TimerData* data)
 {
-    data->tock():
+    data->tock();
 }
 #else
 #define timerUpdate(TimerData)

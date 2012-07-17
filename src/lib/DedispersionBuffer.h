@@ -89,7 +89,7 @@ class DedispersionBuffer
         float _rms;
         bool _invertChannels;
         unsigned int  _firstSample;
-        DEFINE_TIMER(_addSampleTimer);
+        DEFINE_TIMER(_addSampleTimer)
 };
 
 } // namespace lofar
