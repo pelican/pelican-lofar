@@ -1,11 +1,16 @@
+//#include "dal/hdf5/File.h"
+//#include "dal/hdf5/Group.h"
+//#include "dal/hdf5/Dataset.h"
+//#include "dal/hdf5/Attribute.h"
 #include "SpectrumDataSet.h"
 #include "H5Writer.h"
-#include "dal/dal_config.h"
 
 #include <string>
 #include <cstring>
 #include <iostream>
 #include <fstream>
+#include <complex>
+#include <vector>
 
 namespace pelican {
 namespace lofar {
