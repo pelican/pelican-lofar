@@ -63,7 +63,7 @@ void DedispersionPipeline::init()
     _ppfChanneliser = (PPFChanneliser *) createModule("PPFChanneliser");
     _stokesGenerator = (StokesGenerator *) createModule("StokesGenerator");
     _rfiClipper = (RFI_Clipper *) createModule("RFI_Clipper");
-    _stokesIntegrator = (StokesIntegrator *) createModule("StokesIntegrator");
+    //    _stokesIntegrator = (StokesIntegrator *) createModule("StokesIntegrator");
     _dedispersionModule = (DedispersionModule*) createModule("DedispersionModule");
     _dedispersionAnalyser = (DedispersionAnalyser*) createModule("DedispersionAnalyser");
     _dedispersionModule->connect( boost::bind( &DedispersionPipeline::dedispersionAnalysis, this, _1 ) );
@@ -72,7 +72,7 @@ void DedispersionPipeline::init()
     // Create local datablobs
     _spectra = (SpectrumDataSetC32*) createBlob("SpectrumDataSetC32");
     _stokesData = createBlobs<SpectrumDataSetStokes>("SpectrumDataSetStokes", history);
-    _intStokes = (SpectrumDataSetStokes*) createBlob("SpectrumDataSetStokes");
+    //   _intStokes = (SpectrumDataSetStokes*) createBlob("SpectrumDataSetStokes");
     _stokesBuffer = new LockingPtrContainer<SpectrumDataSetStokes>(&_stokesData);
     _weightedIntStokes = (WeightedSpectrumDataSet*) createBlob("WeightedSpectrumDataSet");
 
@@ -113,8 +113,8 @@ void DedispersionPipeline::run(QHash<QString, DataBlob*>& remoteData)
     timerUpdate(&_rfiClipperTime);
 
     timerStart(&_integratorTime);
-    _stokesIntegrator->run(stokes, _intStokes);
-    dataOutput(_intStokes, "SpectrumDataSetStokes");
+    //    _stokesIntegrator->run(stokes, _intStokes);
+    //    dataOutput(_intStokes, "SpectrumDataSetStokes");
     timerUpdate(&_integratorTime);
 
     // start the asyncronous chain of events
