@@ -4,6 +4,7 @@
 
 #include "SpectrumDataSet.h"
 #include "H5Writer.h"
+#include "TimeStamp.h"
 
 #include <string>
 #include <cstring>
@@ -19,10 +20,10 @@ namespace lofar {
 // Constructor
 // TODO: For now we write in 32-bit format...
 H5Writer::H5Writer(const ConfigNode& configNode )
-  : AbstractOutputStream(configNode), _first(true)
+  : AbstractOutputStream(configNode)
 {
     _filePath = configNode.getOption("file", "filepath");
-    _fileName = configNode.getOption("file", "filename", "LofarBFData");
+    _observationID= configNode.getOption("observation", "id", "");
     _datatype = configNode.getOption("Stokes_0_or_Voltages_1", "value", "1").toUInt();
 
     // By definition for LOFAR RSP boards, the following should not change:
@@ -84,7 +85,6 @@ H5Writer::H5Writer(const ConfigNode& configNode )
 
     _cur = 0;
 
-    _first = (configNode.hasAttribute("writeHeader") && configNode.getAttribute("writeHeader").toLower() == "true" );
 
     // Observation specific
     // Chilbolton:14 Nancay:12 Effelsberg:13
@@ -108,24 +108,23 @@ H5Writer::H5Writer(const ConfigNode& configNode )
 }
 
 void H5Writer::_writeHeader(SpectrumDataSetStokes* stokes){
-    double _timeStamp = stokes->getLofarTimestamp();
-    struct tm tm;
-    time_t _epoch;
-    // MJD of 1/1/11 is 55562
-    if ( strptime("2011-1-1 1:0:0", "%Y-%m-%d %H:%M:%S", &tm) != NULL ){
-      _epoch = mktime(&tm);
-    }
-    else {
-        throw( QString("H5Writer: unable to set epoch.") );
-    }
-    double _mjdStamp = (_timeStamp-_epoch)/86400 + 55562.0;
+    time_t _timeStamp = stokes->getLofarTimestamp();
+    TimeStamp timeStamp( _timeStamp );
+    double _mjdStamp = timeStamp.mjd();
     std::cout << "MJD timestamp:" << std::fixed << _mjdStamp << std::endl;
 
-
     // Create a total of _nPols h5 files for writing
-    
+    // each with the standard lofar file name format
+    // ref doc LOFAR-USG-ICD-005 
+    // L<Observation ID>_<Optional Descriptors>_<Filetype>.<Extension>
+    // Where optional contains: Sx - Stokes value,  and date/time
+
+    char timestr[22];
+    strftime(timestr, sizeof timestr, "D%Y%m%dT%H%M%S.0Z", gmtime(&_timeStamp) );
     for (unsigned i=0; i<_nPols; ++i){
-      QString h5Basename = _fileName + QString("_S0%1.h5").arg(i);
+      QString fileName = "L" + _observationID + "_" + QString("_S%1").arg(i)
+                         + timestr + "_bf" ;
+      QString h5Basename = fileName + QString(".h5");
       QString h5Filename = _filePath + "/" + h5Basename;
 
       //-------------- File  -----------------
@@ -197,7 +196,7 @@ void H5Writer::_writeHeader(SpectrumDataSetStokes* stokes){
       beam.channelWidthUnit()  .value = "MHz";
 
       std::vector<std::string> stokesVars;
-      int stokesType=STOKES_IQUV;
+      int stokesType=STOKES_I;
       int stokesNr=0; // only write the I part
       switch(stokesType) {
         case STOKES_I:
@@ -297,7 +296,7 @@ void H5Writer::_writeHeader(SpectrumDataSetStokes* stokes){
       maxdims[0] = -1;
       maxdims[1] = _nChannels; //itsNrChannels;
 
-      QString rawBasename = _fileName + ".raw";
+      QString rawBasename = fileName + ".raw";
       QString rawFilename = _filePath + "/" + rawBasename;
       _file.open(rawFilename.toStdString().c_str(),
                         std::ios::out | std::ios::binary);
@@ -337,17 +336,27 @@ void H5Writer::sendStream(const QString& /*streamName*/, const DataBlob* incomin
     DataBlob* blob = const_cast<DataBlob*>(incoming);
 
     if( (stokes = (SpectrumDataSetStokes*) dynamic_cast<SpectrumDataSetStokes*>(blob))){
-
-        if (_first){
-            _first = false;
-            _writeHeader(stokes);
-        }
-
         unsigned nSamples = stokes->nTimeBlocks();
         unsigned nSubbands = stokes->nSubbands();
         unsigned nChannels = stokes->nChannels();
         unsigned nPolarisations = stokes->nPolarisations();
         float const * data = stokes->data();
+
+        // check format of stokes is consistent with the current stream
+        // if not then we close the existing stream and open up a new one
+        if( nSubbands != _nSubbands || nChannels != _nChannels ||
+            nPolarisations != _nPols ) 
+        {
+            // close down any existing stream
+            _updateHeader();
+            _file.close();
+            // start the new stream
+            _nSubbands = nSubbands;
+            _nPols = nPolarisations;
+            _nChannels = nChannels;
+            _writeHeader(stokes);
+        }
+
 
         switch (_nBits) {
             case 32: {

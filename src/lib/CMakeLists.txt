@@ -37,6 +37,7 @@ set(lib_src
     src/RTMS_Data.cpp
     src/SpectrumDataSet.cpp
     src/TimeSeriesDataSet.cpp
+    src/TimeStamp.cpp
     src/PPFChanneliser.cpp
     src/StokesGenerator.cpp
     src/StokesIntegrator.cpp
@@ -121,6 +122,7 @@ set(pelican-lofar_externals
     ${cuda_libs}
     ${lofar_dal_libs}
     ${hdf5_libs}
+    rt
 )
 
 target_link_libraries(pelican-lofar_static ${pelican-lofar_externals})
