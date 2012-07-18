@@ -37,6 +37,7 @@ set(lib_src
     src/RTMS_Data.cpp
     src/SpectrumDataSet.cpp
     src/TimeSeriesDataSet.cpp
+    src/TimeStamp.cpp
     src/PPFChanneliser.cpp
     src/StokesGenerator.cpp
     src/StokesIntegrator.cpp
