@@ -77,7 +77,7 @@ void DedispersionDataAnalysisOutput::sendStream(const QString& /*streamName*/, c
         foreach( QTextStream* out, _streams ) {
             foreach( const DedispersionEvent& e, data->events() ) {
                 double mjdStamp = (e.getTime()-_epoch)/86400 + 55562.0;
-                *out << mjdStamp << "," << e.dm() << "," << e.amplitude() << "\n";
+                *out << mjdStamp << ", " << e.dm() << ", " << e.amplitude() << "\n";
             }
             out->flush();
         }
