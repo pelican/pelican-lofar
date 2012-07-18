@@ -37,7 +37,7 @@ class RFI_Clipper : public AbstractModule
 
     private:
         BinMap  _map;
-        std::vector<float> _copyI;
+        //        std::vector<float> _copyI;
         BandPass  _bandPass;
         bool _active;
         float _startFrequency;
