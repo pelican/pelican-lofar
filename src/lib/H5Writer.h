@@ -56,9 +56,8 @@ class H5Writer : public AbstractOutputStream
         inline void _float2int(const float *f, int *i);
 
     private:
-        bool              _first;
         QString           _filePath;
-        QString           _fileName;
+        QString           _observationID;
         std::ofstream     _file;
         std::vector<char>  _buffer;
         QString       _sourceName, _raString, _decString, _telescope;
