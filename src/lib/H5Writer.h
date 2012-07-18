@@ -13,6 +13,9 @@
 #include <QtCore/QFile>
 #include <fstream>
 
+namespace DAL {
+  class BF_File;
+}
 namespace pelican {
 namespace lofar {
 
@@ -59,6 +62,11 @@ class H5Writer : public AbstractOutputStream
         QString           _filePath;
         QString           _observationID;
         std::ofstream     _file;
+        long _fileBegin;
+        DAL::BF_File* _bfFile;
+        int _beamNr;
+        int _sapNr;
+        std::vector<ssize_t> _maxdims;
         std::vector<char>  _buffer;
         QString       _sourceName, _raString, _decString, _telescope;
         float         _fch1, _foff, _tsamp, _refdm, _clock, _ra, _dec;

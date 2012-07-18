@@ -20,7 +20,8 @@ namespace lofar {
 // Constructor
 // TODO: For now we write in 32-bit format...
 H5Writer::H5Writer(const ConfigNode& configNode )
-  : AbstractOutputStream(configNode)
+  : AbstractOutputStream(configNode), _bfFile(0),_beamNr(0), _sapNr(0),
+        _nChannels(0), _nSubbands(0), _nPols(0)
 {
     _filePath = configNode.getOption("file", "filepath");
     _observationID= configNode.getOption("observation", "id", "");
@@ -128,46 +129,46 @@ void H5Writer::_writeHeader(SpectrumDataSetStokes* stokes){
       QString h5Filename = _filePath + "/" + h5Basename;
 
       //-------------- File  -----------------
-      DAL::BF_File* file = new DAL::BF_File( h5Filename.toStdString(), DAL::BF_File::CREATE);
+      if( _bfFile ) delete _bfFile;
+      _bfFile = new DAL::BF_File( h5Filename.toStdString(), DAL::BF_File::CREATE);
 
       // Common Attributes
       std::vector<std::string> stationList; stationList.push_back(_telescope.toStdString());
-      file->groupType().value = "Root";
-      file->fileName().value = h5Basename.toStdString();
-      file->fileType().value = "bf";
-      file->telescope().value = _telescope.toStdString();
-      file->observer().value = "unknown";
-      file->observationNofStations().value = 1;
-      file->observationStationsList().value = stationList;
-      // TODO file->pipelineName().value = _currentPipelineName;
-      file->pipelineVersion().value = ""; // TODO
-      file->docName() .value   = "ICD 3: Beam-Formed Data";
-      file->docVersion().value = "2.04.27";
-      file->notes().value      = "";
-      file->createOfflineOnline().value = "Online";
-      file->BFFormat().value   = "TAB";
-      file->BFVersion().value  = QString("Artemis H5Writer using DAL %1 and HDF5 %2")
+      _bfFile->groupType().value = "Root";
+      _bfFile->fileName().value = h5Basename.toStdString();
+      _bfFile->fileType().value = "bf";
+      _bfFile->telescope().value = _telescope.toStdString();
+      _bfFile->observer().value = "unknown";
+      _bfFile->observationNofStations().value = 1;
+      _bfFile->observationStationsList().value = stationList;
+      // TODO _bfFile->pipelineName().value = _currentPipelineName;
+      _bfFile->pipelineVersion().value = ""; // TODO
+      _bfFile->docName() .value   = "ICD 3: Beam-Formed Data";
+      _bfFile->docVersion().value = "2.04.27";
+      _bfFile->notes().value      = "";
+      _bfFile->createOfflineOnline().value = "Online";
+      _bfFile->BFFormat().value   = "TAB";
+      _bfFile->BFVersion().value  = QString("Artemis H5Writer using DAL %1 and HDF5 %2")
                                       .arg(DAL::get_lib_version().c_str())
                                       .arg(DAL::get_dal_hdf5_version().c_str())
                                       .toStdString();
 
       // Observation Times
-      //file->observationStartUTC().value = toUTC(_Time);
-      file->observationStartMJD().value = _mjdStamp;
-      //file.observationStartTAI().value = toTAI(_startTime);
+      //_bfFile->observationStartUTC().value = toUTC(_Time);
+      _bfFile->observationStartMJD().value = _mjdStamp;
+      //_bfFile.observationStartTAI().value = toTAI(_startTime);
       
       //  -- Telescope Settings --
-      file->clockFrequencyUnit().value = "MHz";
-      file->clockFrequency().value = _clock;
-      file->observationNofBitsPerSample().value = _nBits;
-      file->bandwidth().value = _nSubbands * _foff;
-      file->bandwidthUnit().value = "MHz";
-      //file->totalIntegrationTime().value = nrBlocks * _integration;
+      _bfFile->clockFrequencyUnit().value = "MHz";
+      _bfFile->clockFrequency().value = _clock;
+      _bfFile->observationNofBitsPerSample().value = _nBits;
+      _bfFile->bandwidth().value = _nSubbands * _foff;
+      _bfFile->bandwidthUnit().value = "MHz";
+      //_bfFile->totalIntegrationTime().value = nrBlocks * _integration;
       
       //-------------- subarray pointing  -----------------
-      file->nofSubArrayPointings().value = 1;
-      int sapNr = 0;
-      DAL::BF_SubArrayPointing sap = file->subArrayPointing(sapNr);
+      _bfFile->nofSubArrayPointings().value = 1;
+      DAL::BF_SubArrayPointing sap = _bfFile->subArrayPointing(_sapNr);
       sap.create();
       sap.groupType().value = "SubArrayPointing";
       //sap.expTimeStartUTC().value = toUTC(_startTime);
@@ -181,8 +182,7 @@ void H5Writer::_writeHeader(SpectrumDataSetStokes* stokes){
       sap.nofBeams().value = 1;
 
       //-------------- Beam -----------------
-      int beamNr = 0;
-      DAL::BF_BeamGroup beam = sap.beam(beamNr);
+      DAL::BF_BeamGroup beam = sap.beam(_beamNr);
       beam.create();
       beam.groupType().value = "Beam";
       beam.nofStations().value = 1;
@@ -288,20 +288,24 @@ void H5Writer::_writeHeader(SpectrumDataSetStokes* stokes){
 
       // =============== Stokes Data ================
       DAL::BF_StokesDataset stokesDS = beam.stokes(stokesNr);
-      std::vector<ssize_t> dims(2), maxdims(2);
+      std::vector<ssize_t> dims(2);
 
-      dims[0] = 1; //itsNrSamples * nrBlocks;
-      dims[1] = _nChannels;
+      dims[0] = 0; // no data yet
+      dims[1] = _nTotalSubbands;
 
-      maxdims[0] = -1;
-      maxdims[1] = _nChannels; //itsNrChannels;
+      _maxdims[0] = -1; // no fixed length
+      _maxdims[1] = _nTotalSubbands; //itsNrChannels;
 
       QString rawBasename = fileName + ".raw";
       QString rawFilename = _filePath + "/" + rawBasename;
       _file.open(rawFilename.toStdString().c_str(),
                         std::ios::out | std::ios::binary);
+      _fileBegin = _file.tellp(); // store storage loc of first byte to 
+                                  // be able to calculate exact data size later
+                                  // N.B. using other methods for filesize may only
+                                  // be accurate to the nearest disk block/sector
 
-      stokesDS.create(dims, maxdims, rawBasename.toStdString(),
+      stokesDS.create(dims, _maxdims, rawBasename.toStdString(),
                       (QSysInfo::ByteOrder == QSysInfo::BigEndian) ? 
                                 DAL::BF_StokesDataset::BIG 
                                 : DAL::BF_StokesDataset::LITTLE);
@@ -320,11 +324,18 @@ H5Writer::~H5Writer()
 {
     _updateHeader();
     _file.close();
+    delete _bfFile;
 }
 
 void H5Writer::_updateHeader() {
-    // TODO ensure dimesions of binary file are specified in the header
-    // meta data
+    if( _bfFile ) {
+        DAL::BF_SubArrayPointing sap = _bfFile->subArrayPointing(_sapNr);
+        DAL::BF_BeamGroup beam = sap.beam(_beamNr);
+        DAL::BF_StokesDataset stokesDS = beam.stokes(0);
+        // update the data dimensions according to the file size
+        _maxdims[0] = (_file.tellp() - _fileBegin)/(_maxdims[1] * _nBits/8);
+        stokesDS.resize( _maxdims );
+    }
 }
 
 // ---------------------------- Header helpers --------------------------
