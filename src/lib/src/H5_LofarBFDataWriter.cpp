@@ -126,11 +126,11 @@ void H5_LofarBFDataWriter::_writeHeader(SpectrumDataSetStokes* stokes){
       QString fileName = "L" + _observationID + "_" + QString("_S%1").arg(i)
                          + timestr + "_bf" ;
       QString h5Basename = fileName + QString(".h5");
-      QString h5Filename = _filePath + "/" + h5Basename;
+      _h5Filename = _filePath + "/" + h5Basename;
 
       //-------------- File  -----------------
       if( _bfFile ) delete _bfFile;
-      _bfFile = new DAL::BF_File( h5Filename.toStdString(), DAL::BF_File::CREATE);
+      _bfFile = new DAL::BF_File( _h5Filename.toStdString(), DAL::BF_File::CREATE);
 
       // Common Attributes
       std::vector<std::string> stationList; stationList.push_back(_telescope.toStdString());
@@ -297,8 +297,8 @@ void H5_LofarBFDataWriter::_writeHeader(SpectrumDataSetStokes* stokes){
       _maxdims[1] = _nTotalSubbands; //itsNrChannels;
 
       QString rawBasename = fileName + ".raw";
-      QString rawFilename = _filePath + "/" + rawBasename;
-      _file.open(rawFilename.toStdString().c_str(),
+      _rawFilename = _filePath + "/" + rawBasename;
+      _file.open(_rawFilename.toStdString().c_str(),
                         std::ios::out | std::ios::binary);
       _fileBegin = _file.tellp(); // store storage loc of first byte to 
                                   // be able to calculate exact data size later

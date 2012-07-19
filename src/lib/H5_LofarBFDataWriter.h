@@ -45,6 +45,10 @@ class H5_LofarBFDataWriter : public AbstractOutputStream
     /// File path
         QString filepath() { return _filePath; }
 
+        /// the name of the currently opened raw data file
+        const QString& rawFilename() const { return _rawFilename; }
+        const QString& metaFilename() const { return _h5Filename; }
+
     protected:
         void _writeHeader(SpectrumDataSetStokes* stokes);
         virtual void sendStream(const QString& streamName, const DataBlob* dataBlob);
@@ -62,8 +66,10 @@ class H5_LofarBFDataWriter : public AbstractOutputStream
         QString           _filePath;
         QString           _observationID;
         std::ofstream     _file;
-        long _fileBegin;
-        DAL::BF_File* _bfFile;
+        long              _fileBegin;
+        DAL::BF_File*     _bfFile;
+        QString           _rawFilename;
+        QString           _h5Filename;
         int _beamNr;
         int _sapNr;
         std::vector<ssize_t> _maxdims;
