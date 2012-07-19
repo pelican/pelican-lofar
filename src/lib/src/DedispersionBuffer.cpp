@@ -105,21 +105,18 @@ unsigned DedispersionBuffer::_addSamples( SpectrumDataSetStokes* streamData,
         int nChannelsMinusOne = nChannels - 1;
         int nSubbandsMinusOne= nSubbands - 1;
         // Try varying x, from 6 down.  Also try it with this commented out.
-        
         //        omp_set_num_threads(6);
         int s, c;
         int localSampleCount = _sampleCount;
 #pragma omp parallel for private(s,c) schedule(dynamic)
-        for(int t = start; t < maxSamples; t++) {
-          for (s = 0; s < nSubbands; s++) {
-            int bsize = s*nChannels*_nsamp + localSampleCount + t - start;
-            const float* data = streamData->spectrumData(t, nSubbandsMinusOne - s, 0);
-            for (c = 0; c < nChannels; c++) {
-              _timedata[(bsize + (c * _nsamp))] = data[nChannelsMinusOne - c];
+        for(int t = start; t < (int)maxSamples; ++t ) {
+            for (s = 0; s < (int)nSubbands; ++s ) {
+                int bsize = s*nChannels*_nsamp + localSampleCount + t - start;
+                const float* data = streamData->spectrumData(t, nSubbandsMinusOne - s, 0);
+                for (c = 0; c < (int)nChannels; ++c ) {
+                    _timedata[(bsize + (c * _nsamp))] = data[nChannelsMinusOne - c];
+                }
             }
-          }
-          //          #pragma omp atomic
-          //          ++_sampleCount;
         }
         _sampleCount += (maxSamples - start);
     } else {
