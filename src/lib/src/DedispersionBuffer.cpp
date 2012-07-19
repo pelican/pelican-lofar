@@ -63,7 +63,7 @@ const QList<SpectrumDataSetStokes*>& DedispersionBuffer::copy( DedispersionBuffe
             buf->_sampleCount = 0; // offset position to write to
             blobSample = s - sampleNum;
         } else {
-            // Take all the samples from this blob
+            // Take all the samples from this blob, we will need more
             buf->_sampleCount = sampleNum - s;// offset position to write to
             blobSample = 0;
         }
@@ -107,30 +107,33 @@ unsigned DedispersionBuffer::_addSamples( SpectrumDataSetStokes* streamData,
         // Try varying x, from 6 down.  Also try it with this commented out.
         //        omp_set_num_threads(6);
         int s, c;
-        int localSampleCount = _sampleCount;
+        int localSampleCount = _sampleCount - start; // create a copy for omp to lock
 #pragma omp parallel for private(s,c) schedule(dynamic)
         for(int t = start; t < (int)maxSamples; ++t ) {
             for (s = 0; s < (int)nSubbands; ++s ) {
-                int bsize = s*nChannels*_nsamp + localSampleCount + t - start;
+                int bsize = s*nChannels*_nsamp + localSampleCount + t;
                 const float* data = streamData->spectrumData(t, nSubbandsMinusOne - s, 0);
                 for (c = 0; c < (int)nChannels; ++c ) {
                     _timedata[(bsize + (c * _nsamp))] = data[nChannelsMinusOne - c];
                 }
             }
         }
-        _sampleCount += (maxSamples - start);
     } else {
+        int s, c;
+        int localSampleCount = _sampleCount - start; // create a copy for omp to lock
+#pragma omp parallel for private(s,c) schedule(dynamic)
         for(int t = start; t < (int)maxSamples; ++t) {
-            for (int s = 0; s < (int)nSubbands; ++s) {
+            int sampleOffset = localSampleCount + t;
+            for ( s = 0; s < (int)nSubbands; ++s) {
                 const float* data = streamData->spectrumData(t, s, 0);
-                int bsize = s*nChannels * _nsamp + _sampleCount;
-                for (int c = 0; c < (int)nChannels; ++c) {
+                int bsize = s*nChannels * _nsamp + sampleOffset;
+                for ( c = 0; c < (int)nChannels; ++c) {
                     _timedata[ bsize + ( c * _nsamp ) ] = data[c];
                 }
             }
-            ++_sampleCount;
         }
     }
+    _sampleCount += (maxSamples - start);
     *sampleNumber = maxSamples;
     timerUpdate(&_addSampleTimer);
     timerReport(&_addSampleTimer, "DedispersionBuffer::addSamples");
