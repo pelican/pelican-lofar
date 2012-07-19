@@ -30,39 +30,41 @@ H5_LofarBFDataWriterTest::~H5_LofarBFDataWriterTest()
 
 void H5_LofarBFDataWriterTest::setUp()
 {
-    _fileDir = QDir::tempPath() + "/_H5_LofarBFDataWriterTest_";
+    _fileDir = "/_H5_LofarBFDataWriterTest_";
 #if QT_VERSION >= 0x040400
     _fileDir += QString().setNum( QCoreApplication::applicationPid() );
 #endif
-
+    _fullFileDir=QDir::tempPath() + _fileDir;
+    if( ! QDir::temp().mkpath( _fullFileDir ) )
+        CPPUNIT_FAIL("unable to create temporary directory " + _fullFileDir.toStdString() );
 }
 
 void H5_LofarBFDataWriterTest::tearDown()
 {
-     // attempt to clean up the temp directory
-     QDir dir(_fileDir);
-     if( dir.match( QDir::tempPath()+"/*", _fileDir ) ) { // avoid any nasty surprises
-         if (dir.exists()) {
-            foreach(QFileInfo info, dir.entryInfoList(QDir::NoDotAndDotDot | QDir::Files )) {
-      //          QFile::remove(info.absoluteFilePath());
-std::cout << "remove file " << info.absoluteFilePath().toStdString();
-
-            }
-std::cout << "remove dir " << _fileDir.toStdString();
-      //      dir.rmdir(_fileDir);
+    // attempt to clean up the temp directory
+    QDir dir( QDir::tempPath() + "/" + _fileDir ); // dont use _fullFilePath for safety
+    if (dir.exists()) {
+        foreach(QFileInfo info, dir.entryInfoList(QDir::NoDotAndDotDot | QDir::Files )) {
+            QFile::remove(info.absoluteFilePath());
         }
-     }
+        //std::cout << "remove dir " << _fullFileDir.toStdString();
+        dir.rmdir( QDir::tempPath() + _fileDir);
+    }
 }
 
 void H5_LofarBFDataWriterTest::test_method()
 {
     // generate some test data
     DedispersionDataGenerator stokesData;
-    unsigned nSamples = 200;
+    unsigned nSamples = 20;
     unsigned nBlocks = 64;
+    unsigned nSubbands = 4;
     float dm = 10.0;
+    unsigned pol=0; // only one polarisation
     stokesData.setTimeSamplesPerBlock( nSamples );
+    stokesData.setSubbands( nSubbands );
     QList<SpectrumDataSetStokes*> spectrumData = stokesData.generate( nBlocks, dm );
+    stokesData.setSubbands( nSubbands* 2 );
     QList<SpectrumDataSetStokes*> spectrumData2 = stokesData.generate( nBlocks *2, dm );
 
     try {
@@ -79,40 +81,43 @@ void H5_LofarBFDataWriterTest::test_method()
       // Single DataBlob
       // Expect:
       // Files to be generated
-      QString xml = "<H5_LofarBFDataWriter>\n"
+      QString xml = "<H5_LofarBFDataWriter>\n" +
+                    QString("<file filepath=\"%1\"").arg( _fullFileDir )
+                    + " />"
                     "</H5_LofarBFDataWriter>";
       ConfigNode c;
       c.setFromString(xml);
       QString rawFile, h5File;
 
+      CPPUNIT_ASSERT_EQUAL( 1, (int)spectrumData[0]->nPolarisations() );
       H5_LofarBFDataWriter out( c );
       out.send("data", spectrumData[0] );
-      rawFile = out.rawFilename();
-      h5File = out.metaFilename();
+      rawFile = out.rawFilename( pol );
+      h5File = out.metaFilename( pol );
       // check files exists
       QFile f(rawFile);
       CPPUNIT_ASSERT( f.exists() );
-      CPPUNIT_ASSERT_EQUAL( spectrumData[0]->size(), (int)f.size() );
       QFile hf(h5File);
       CPPUNIT_ASSERT( hf.exists() );
+      CPPUNIT_ASSERT_EQUAL( (int)(spectrumData[0]->size() * sizeof(float)), (int)f.size() );
 
       // add more data of the same dimension 
       // expect the raw data file to increase in size
       // and the current file names to be the same
       out.send("data", spectrumData[1] );
-      CPPUNIT_ASSERT_EQUAL( rawFile.toStdString(), out.rawFilename().toStdString() );
-      CPPUNIT_ASSERT_EQUAL( h5File.toStdString(), out.metaFilename().toStdString() );
-      CPPUNIT_ASSERT_EQUAL( spectrumData[0]->size() + spectrumData[1]->size(), (int)f.size() );
+      CPPUNIT_ASSERT_EQUAL( rawFile.toStdString(), out.rawFilename( pol ).toStdString() );
+      CPPUNIT_ASSERT_EQUAL( h5File.toStdString(), out.metaFilename( pol ).toStdString() );
+      CPPUNIT_ASSERT_EQUAL( (int)(spectrumData[0]->size() + spectrumData[1]->size()) * (int)sizeof(float) , (int)f.size() );
 
       // add more data of different dimension
       // expect new files to be generated
-      QString rawFile2 = out.rawFilename();
       out.send("data", spectrumData2[0] );
+      QString rawFile2 = out.rawFilename( pol );
       CPPUNIT_ASSERT( rawFile != rawFile2 );
-      CPPUNIT_ASSERT( h5File != out.metaFilename() );
+      CPPUNIT_ASSERT( h5File != out.metaFilename( pol ) );
       QFile f2(rawFile2);
       CPPUNIT_ASSERT( f2.exists() );
-      CPPUNIT_ASSERT_EQUAL( spectrumData[2]->size(), (int)f2.size() );
+      CPPUNIT_ASSERT_EQUAL( (int)(spectrumData2[0]->size() * sizeof(float)), (int)f2.size() );
 
     }
     } catch( QString& s )

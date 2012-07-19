@@ -11,6 +11,7 @@
 #include <QWaitCondition>
 #include <QList>
 #include <fstream>
+#include <time.h>
 #include <boost/bind.hpp>
 
 
@@ -52,6 +53,7 @@ QList<SpectrumDataSetStokes*> DedispersionDataGenerator::generate( int numberOfB
         stokes->resize(nSamples, nSubbands, 1, nChannels);
         data.append(stokes);
         stokes->setBlockRate( tsamp );
+        stokes->setLofarTimestamp(  time(NULL) );
 
         int offset = i * nSamples;
         //stokes->setLofarTimestamp(channeliserOutput->getLofarTimestamp());

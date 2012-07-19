@@ -11,6 +11,8 @@
 
 #include <QtCore/QDataStream>
 #include <QtCore/QFile>
+#include <QtCore/QVector>
+#include <QtCore/QList>
 #include <fstream>
 
 namespace DAL {
@@ -46,8 +48,14 @@ class H5_LofarBFDataWriter : public AbstractOutputStream
         QString filepath() { return _filePath; }
 
         /// the name of the currently opened raw data file
-        const QString& rawFilename() const { return _rawFilename; }
-        const QString& metaFilename() const { return _h5Filename; }
+        const QString rawFilename( int polarisation ) const { 
+                if( polarisation > (int)_nPols ) return "";
+                return _rawFilename[polarisation]; 
+        }
+        const QString metaFilename( int polarisation ) const { 
+                if( polarisation > (int)_nPols ) return "";
+                return _h5Filename[polarisation]; 
+        }
 
     protected:
         void _writeHeader(SpectrumDataSetStokes* stokes);
@@ -55,21 +63,21 @@ class H5_LofarBFDataWriter : public AbstractOutputStream
 
     private:
         // Header helpers
-        void _updateHeader();
+        void _updateHeader( int polarisation );
 
     protected:
-        // buffer and write data in blocks
-        void _write(char*,size_t);
         inline void _float2int(const float *f, int *i);
+        void _setChannels( unsigned n );
+        void _setPolsToWrite(unsigned p);
 
     private:
         QString           _filePath;
         QString           _observationID;
-        std::ofstream     _file;
-        long              _fileBegin;
-        DAL::BF_File*     _bfFile;
-        QString           _rawFilename;
-        QString           _h5Filename;
+        QVector<std::ofstream*>    _file;
+        QVector<long>              _fileBegin;
+        QVector<DAL::BF_File*>     _bfFiles;
+        QVector<QString>           _rawFilename;
+        QVector<QString>           _h5Filename;
         int _beamNr;
         int _sapNr;
         std::vector<ssize_t> _maxdims;

@@ -20,10 +20,10 @@ namespace lofar {
 // Constructor
 // TODO: For now we write in 32-bit format...
 H5_LofarBFDataWriter::H5_LofarBFDataWriter(const ConfigNode& configNode )
-  : AbstractOutputStream(configNode), _bfFile(0),_beamNr(0), _sapNr(0),
+  : AbstractOutputStream(configNode), _beamNr(0), _sapNr(0),
         _nChannels(0), _nSubbands(0), _nPols(0)
 {
-    _filePath = configNode.getOption("file", "filepath");
+    _filePath = configNode.getOption("file", "filepath", ".");
     _observationID= configNode.getOption("observation", "id", "");
     _datatype = configNode.getOption("Stokes_0_or_Voltages_1", "value", "1").toUInt();
 
@@ -32,8 +32,6 @@ H5_LofarBFDataWriter::H5_LofarBFDataWriter(const ConfigNode& configNode )
     _nTotalSubbands = configNode.getOption("totalComplexSubbands", "value", "512").toUInt();
 
     // Parameters that change for every observation
-    _nChannels = configNode.getOption("outputChannelsPerSubband", "value", "128").toUInt();
-    _nSubbands = configNode.getOption("subbandsPerPacket", "value", "1").toUInt();
     _topsubband     = configNode.getOption("topSubbandIndex", "value", "150").toFloat();
     _integration    = configNode.getOption("integrateTimeBins", "value", "1").toUInt();
     _nBits = configNode.getOption("dataBits", "value", "32").toUInt();
@@ -60,32 +58,13 @@ H5_LofarBFDataWriter::H5_LofarBFDataWriter(const ConfigNode& configNode )
       _fch1     = configNode.getOption("fch1", "value", "1400.0").toFloat();
     }
 
-    if( configNode.getOption("foff", "value" ) == "" ){ 
-      _foff = -_clock / (_nRawPols * _nTotalSubbands) / float(_nChannels);
-    }
-    else{
-      _foff = configNode.getOption("foff", "value", "1.0").toFloat();
-    }
-
-    // Observation sampling time
-    if( configNode.getOption("tsamp", "value" ) == "" ){ 
-      _tsamp = (_nRawPols * _nTotalSubbands) * _nChannels * _integration / _clock/ 1e6;
-    }
-    else{
-      _tsamp=configNode.getOption("tsamp", "value", "1.0").toFloat();
-    }
-
     // Number of polarisations to write out, 1 for total power or 4
     // for stokes and complex voltages
-    _nPols=configNode.getOption("params", "nPolsToWrite", "1").toUInt();
-
-    // Number of total numbers
-    _nchans=_nChannels * _nSubbands;
+    _setPolsToWrite(configNode.getOption("params", "nPolsToWrite", "1").toUInt());
 
     _buffSize = configNode.getOption("params", "bufferSize", "5120").toUInt();
 
     _cur = 0;
-
 
     // Observation specific
     // Chilbolton:14 Nancay:12 Effelsberg:13
@@ -105,70 +84,120 @@ H5_LofarBFDataWriter::H5_LofarBFDataWriter(const ConfigNode& configNode )
     }
 
     _buffer.resize(_buffSize);
+    _maxdims.resize(2);
+}
 
+// Destructor
+H5_LofarBFDataWriter::~H5_LofarBFDataWriter()
+{
+    _setPolsToWrite(0);
+}
+
+void H5_LofarBFDataWriter::_setChannels( unsigned n ) {
+    _nChannels = n;
+    _nchans= _nChannels * _nSubbands;
+    _tsamp = (_nRawPols * _nTotalSubbands) * _nChannels * _integration / _clock/ 1e6;
+    _foff = -_clock / (_nRawPols * _nTotalSubbands) / float(_nChannels);
+}
+
+void H5_LofarBFDataWriter::_setPolsToWrite( unsigned n ) {
+    _nPols = n;
+    // clean up existing
+    for(int i=0; i < (int)_bfFiles.size(); ++i ) {
+        _updateHeader( i );
+        if( _file.size() < i ) {
+            _file[i]->flush();
+            _file[i]->close();
+            delete _file[i];
+        }
+        delete _bfFiles[i];
+    }
+    // setup for new number of pols
+    _bfFiles.resize(n);
+    _file.resize(n);
+    _h5Filename.resize(n);
+    _rawFilename.resize(n);
+    _fileBegin.resize(n);
 }
 
 void H5_LofarBFDataWriter::_writeHeader(SpectrumDataSetStokes* stokes){
     time_t _timeStamp = stokes->getLofarTimestamp();
     TimeStamp timeStamp( _timeStamp );
     double _mjdStamp = timeStamp.mjd();
-    std::cout << "MJD timestamp:" << std::fixed << _mjdStamp << std::endl;
 
     // Create a total of _nPols h5 files for writing
     // each with the standard lofar file name format
     // ref doc LOFAR-USG-ICD-005 
     // L<Observation ID>_<Optional Descriptors>_<Filetype>.<Extension>
     // Where optional contains: Sx - Stokes value,  and date/time
-
     char timestr[22];
-    strftime(timestr, sizeof timestr, "D%Y%m%dT%H%M%S.0Z", gmtime(&_timeStamp) );
+    strftime(timestr, sizeof timestr, "D%Y%m%dT%H%M%S.", gmtime(&_timeStamp) );
+
+    // --- remove any old streams
     for (unsigned i=0; i<_nPols; ++i){
-      QString fileName = "L" + _observationID + "_" + QString("_S%1").arg(i)
-                         + timestr + "_bf" ;
-      QString h5Basename = fileName + QString(".h5");
-      _h5Filename = _filePath + "/" + h5Basename;
+      if( _bfFiles[i] ) {
+          _updateHeader( i );
+          _file[i]->flush();
+          _file[i]->close();
+          delete _bfFiles[i]; _bfFiles[i] = 0;
+      }
+    }
+    // generate the new headers
+    _nSubbands = stokes->nSubbands();
+    _setChannels( stokes->nChannels() );
+    for (unsigned i=0; i<_nPols; ++i){
+      // generate a unique - non existing filename
+      QString fileName, h5Basename, tmp;
+      int version = -1;
+      do {
+          fileName = "L" + _observationID + QString("_S%1").arg(i)
+              + timestr + QString("%1Z_bf").arg(++version);
+          h5Basename = fileName + QString(".h5");
+          tmp = _filePath + "/" + h5Basename;
+      } while ( QFile::exists( tmp ) );
+      _h5Filename[i] = tmp;
 
       //-------------- File  -----------------
-      if( _bfFile ) delete _bfFile;
-      _bfFile = new DAL::BF_File( _h5Filename.toStdString(), DAL::BF_File::CREATE);
+      DAL::BF_File* bfFile =  new DAL::BF_File( _h5Filename[i].toStdString(), DAL::BF_File::CREATE);
+      _bfFiles[i] = bfFile;
 
       // Common Attributes
       std::vector<std::string> stationList; stationList.push_back(_telescope.toStdString());
-      _bfFile->groupType().value = "Root";
-      _bfFile->fileName().value = h5Basename.toStdString();
-      _bfFile->fileType().value = "bf";
-      _bfFile->telescope().value = _telescope.toStdString();
-      _bfFile->observer().value = "unknown";
-      _bfFile->observationNofStations().value = 1;
-      _bfFile->observationStationsList().value = stationList;
-      // TODO _bfFile->pipelineName().value = _currentPipelineName;
-      _bfFile->pipelineVersion().value = ""; // TODO
-      _bfFile->docName() .value   = "ICD 3: Beam-Formed Data";
-      _bfFile->docVersion().value = "2.04.27";
-      _bfFile->notes().value      = "";
-      _bfFile->createOfflineOnline().value = "Online";
-      _bfFile->BFFormat().value   = "TAB";
-      _bfFile->BFVersion().value  = QString("Artemis H5_LofarBFDataWriter using DAL %1 and HDF5 %2")
+      bfFile->groupType().value = "Root";
+      bfFile->fileName().value = h5Basename.toStdString();
+      bfFile->fileType().value = "bf";
+      bfFile->telescope().value = _telescope.toStdString();
+      bfFile->observer().value = "unknown";
+      bfFile->observationNofStations().value = 1;
+      bfFile->observationStationsList().value = stationList;
+      // TODO bfFile->pipelineName().value = _currentPipelineName;
+      bfFile->pipelineVersion().value = ""; // TODO
+      bfFile->docName() .value   = "ICD 3: Beam-Formed Data";
+      bfFile->docVersion().value = "2.04.27";
+      bfFile->notes().value      = "";
+      bfFile->createOfflineOnline().value = "Online";
+      bfFile->BFFormat().value   = "TAB";
+      bfFile->BFVersion().value  = QString("Artemis H5_LofarBFDataWriter using DAL %1 and HDF5 %2")
                                       .arg(DAL::get_lib_version().c_str())
                                       .arg(DAL::get_dal_hdf5_version().c_str())
                                       .toStdString();
 
       // Observation Times
-      //_bfFile->observationStartUTC().value = toUTC(_Time);
-      _bfFile->observationStartMJD().value = _mjdStamp;
-      //_bfFile.observationStartTAI().value = toTAI(_startTime);
+      //bfFile->observationStartUTC().value = toUTC(_Time);
+      bfFile->observationStartMJD().value = _mjdStamp;
+      //bfFile.observationStartTAI().value = toTAI(_startTime);
       
       //  -- Telescope Settings --
-      _bfFile->clockFrequencyUnit().value = "MHz";
-      _bfFile->clockFrequency().value = _clock;
-      _bfFile->observationNofBitsPerSample().value = _nBits;
-      _bfFile->bandwidth().value = _nSubbands * _foff;
-      _bfFile->bandwidthUnit().value = "MHz";
-      //_bfFile->totalIntegrationTime().value = nrBlocks * _integration;
+      bfFile->clockFrequencyUnit().value = "MHz";
+      bfFile->clockFrequency().value = _clock;
+      bfFile->observationNofBitsPerSample().value = _nBits;
+      bfFile->bandwidth().value = _nSubbands * _foff;
+      bfFile->bandwidthUnit().value = "MHz";
+      //bfFile->totalIntegrationTime().value = nrBlocks * _integration;
       
       //-------------- subarray pointing  -----------------
-      _bfFile->nofSubArrayPointings().value = 1;
-      DAL::BF_SubArrayPointing sap = _bfFile->subArrayPointing(_sapNr);
+      bfFile->nofSubArrayPointings().value = 1;
+      DAL::BF_SubArrayPointing sap = bfFile->subArrayPointing(_sapNr);
       sap.create();
       sap.groupType().value = "SubArrayPointing";
       //sap.expTimeStartUTC().value = toUTC(_startTime);
@@ -297,10 +326,11 @@ void H5_LofarBFDataWriter::_writeHeader(SpectrumDataSetStokes* stokes){
       _maxdims[1] = _nTotalSubbands; //itsNrChannels;
 
       QString rawBasename = fileName + ".raw";
-      _rawFilename = _filePath + "/" + rawBasename;
-      _file.open(_rawFilename.toStdString().c_str(),
+      _rawFilename[i] = _filePath + "/" + rawBasename;
+      if( ! _file[i] ) _file[i] = new std::ofstream;
+      _file[i]->open(_rawFilename[i].toStdString().c_str(),
                         std::ios::out | std::ios::binary);
-      _fileBegin = _file.tellp(); // store storage loc of first byte to 
+      _fileBegin[i] = _file[i]->tellp(); // store storage loc of first byte to 
                                   // be able to calculate exact data size later
                                   // N.B. using other methods for filesize may only
                                   // be accurate to the nearest disk block/sector
@@ -319,21 +349,14 @@ void H5_LofarBFDataWriter::_writeHeader(SpectrumDataSetStokes* stokes){
     }
 }
 
-// Destructor
-H5_LofarBFDataWriter::~H5_LofarBFDataWriter()
-{
-    _updateHeader();
-    _file.close();
-    delete _bfFile;
-}
 
-void H5_LofarBFDataWriter::_updateHeader() {
-    if( _bfFile ) {
-        DAL::BF_SubArrayPointing sap = _bfFile->subArrayPointing(_sapNr);
+void H5_LofarBFDataWriter::_updateHeader( int pol ) {
+    if( _bfFiles[pol] ) {
+        DAL::BF_SubArrayPointing sap = _bfFiles[pol]->subArrayPointing(_sapNr);
         DAL::BF_BeamGroup beam = sap.beam(_beamNr);
         DAL::BF_StokesDataset stokesDS = beam.stokes(0);
         // update the data dimensions according to the file size
-        _maxdims[0] = (_file.tellp() - _fileBegin)/(_maxdims[1] * _nBits/8);
+        _maxdims[0] = (_file[pol]->tellp() - _fileBegin[pol])/(_maxdims[1] * _nBits/8);
         stokesDS.resize( _maxdims );
     }
 }
@@ -355,16 +378,11 @@ void H5_LofarBFDataWriter::sendStream(const QString& /*streamName*/, const DataB
 
         // check format of stokes is consistent with the current stream
         // if not then we close the existing stream and open up a new one
-        if( nSubbands != _nSubbands || nChannels != _nChannels ||
-            nPolarisations != _nPols ) 
-        {
-            // close down any existing stream
-            _updateHeader();
-            _file.close();
-            // start the new stream
-            _nSubbands = nSubbands;
-            _nPols = nPolarisations;
-            _nChannels = nChannels;
+        if( _nPols > nPolarisations ) {
+                _setPolsToWrite( nPolarisations );
+                _writeHeader(stokes);
+        } else if( nSubbands != _nSubbands || nChannels != _nChannels ) {
+            // start the new stream if the data has changed
             _writeHeader(stokes);
         }
 
@@ -377,7 +395,7 @@ void H5_LofarBFDataWriter::sendStream(const QString& /*streamName*/, const DataB
                                 long index = stokes->index(s, nSubbands, 
                                           p, nPolarisations, t, nChannels );
                                 for(int i = nChannels - 1; i >= 0 ; --i) {
-                                _file.write(reinterpret_cast<const char*>(&data[index + i]), 
+                                _file[p]->write(reinterpret_cast<const char*>(&data[index + i]), 
                                             sizeof(float));
                                 }
                             }
@@ -394,7 +412,7 @@ void H5_LofarBFDataWriter::sendStream(const QString& /*streamName*/, const DataB
                                 for(int i = nChannels - 1; i >= 0 ; --i) {
                                     int ci;
                                     _float2int(&data[index + i],&ci);
-                                    _file.write((const char*)&ci,sizeof(unsigned char));
+                                    _file[p]->write((const char*)&ci,sizeof(unsigned char));
                                 }
                             }
                         }
@@ -404,6 +422,9 @@ void H5_LofarBFDataWriter::sendStream(const QString& /*streamName*/, const DataB
             default:
                 throw(QString("H5_LofarBFDataWriter: %1 bit datafiles not yet supported"));
                 break;
+        }
+        for (unsigned p = 0; p < _nPols; ++p) {
+           _file[p]->flush();
         }
 /*
         for (unsigned t = 0; t < nSamples; ++t) {
@@ -429,28 +450,12 @@ void H5_LofarBFDataWriter::sendStream(const QString& /*streamName*/, const DataB
             }
         }
 */
-        _file.flush();
     }
     else {
         std::cerr << "H5_LofarBFDataWriter::send(): "
                 "Only SpectrumDataSetStokes data can be written by the SigprocWriter" << std::endl;
         return;
     }
-}
-
-void H5_LofarBFDataWriter::_write(char* data, size_t size)
-{
-    int max = _buffer.capacity() -1;
-    int ptr = (_cur + size) % max;
-    if( ptr <= _cur ) {
-        int dsize = max - _cur;
-        std::memcpy(&_buffer[_cur], data, dsize );
-        _file.write(&_buffer[0], max);
-        _cur = 0; size -= dsize; data += dsize * sizeof(char);
-    }
-    std::cout << "max=" << max << " ptr=" << ptr << " cur=" << _cur << " size=" << size << "data=" << data << std::endl;
-    std::memcpy( &_buffer[_cur], data, size);
-    _cur=ptr;
 }
 
 void H5_LofarBFDataWriter::_float2int(const float *f, int *i)

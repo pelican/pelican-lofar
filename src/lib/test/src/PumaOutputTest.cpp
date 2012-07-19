@@ -33,9 +33,6 @@ void PumaOutputTest::setUp()
 #if QT_VERSION >= 0x040400
        _filename += QString().setNum( QCoreApplication::applicationPid() );
 #endif
-    int argc = 1;
-    char *argv[] = {(char*)"lofartest"};
-    _app = new QCoreApplication(argc,argv);
 }
 
 void PumaOutputTest::tearDown()
@@ -43,7 +40,6 @@ void PumaOutputTest::tearDown()
     QFile f(_filename);
     if( f.exists() )
         f.remove();
-    delete _app;
 }
 
 void PumaOutputTest::test_configuration()

@@ -41,6 +41,7 @@ class H5_LofarBFDataWriterTest : public CppUnit::TestFixture
 
     private:
         QString _fileDir;
+        QString _fullFileDir;
 };
 
 } // namespace lofar

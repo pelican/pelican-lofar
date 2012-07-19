@@ -68,6 +68,9 @@ class DedispersionDataGenerator
         /// create a dedispersion object (processdd by the dedispersion module)
         DedispersionSpectra* dedispersionData( float dedispersionMeasure );
 
+        /// set the number of subbands to generate
+        void setSubbands( unsigned s ) { nSubbands = s; }
+
 
     protected:
         void copyData( DataBlob* in, DedispersionSpectra* out ) const;
