@@ -32,12 +32,10 @@ namespace lofar {
  *    </sampleNumber>
  *    <frequencyChannel1 MHz="150.0">
  *       The frequency of the first channel (lowest or highest 
- *       depending on bandwidth +ve or -ve)
+ *       depending on channelBandwidth +ve or -ve)
  *    </frequencyChannel1>
  *    <channelBandwidth MHz="-0.03">
- *       The width of each frequency channel. Must be -ve such
- *       that frequencyChannel1 + nChannels*channelBandwidth =
- *       lowest frequency.
+ *       The width of each frequency channel.
  *    </channelBandwidth>
  * </DedispersionModule>
  */

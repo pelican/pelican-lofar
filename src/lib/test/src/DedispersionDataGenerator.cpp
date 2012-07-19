@@ -51,6 +51,7 @@ QList<SpectrumDataSetStokes*> DedispersionDataGenerator::generate( int numberOfB
         SpectrumDataSetStokes* stokes = new SpectrumDataSetStokes;
         stokes->resize(nSamples, nSubbands, 1, nChannels);
         data.append(stokes);
+        stokes->setBlockRate( tsamp );
 
         int offset = i * nSamples;
         //stokes->setLofarTimestamp(channeliserOutput->getLofarTimestamp());

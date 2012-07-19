@@ -63,15 +63,13 @@ void DedispersionModuleTest::test_multipleBuffersPerBlob()
             " <invertedData value=\"0\" />"
             " <sampleNumber value=\"%1\" />"
             " <frequencyChannel1 MHz=\"%2\"/>"
-            " <sampleTime seconds=\"%3\"/>"
-            " <channelBandwidth MHz=\"%4\"/>"
-            " <dedispersionSamples value=\"%5\" />"
+            " <channelBandwidth MHz=\"%3\"/>"
+            " <dedispersionSamples value=\"%4\" />"
             " <dedispersionStepSize value=\"0.1\" />"
             " <numberOfBuffers value=\"3\" />"
             "</DedispersionModule>")
         .arg( nSamples / multiple  ) // block size should match the buffer size to ensure we get two calls to the GPU
         .arg( stokesData.startFrequency())
-        .arg( stokesData.timeOfSample())
         .arg( stokesData.bandwidthOfSample())
         .arg( ddSamples );
      config.setFromString(configString);
@@ -130,15 +128,13 @@ void DedispersionModuleTest::test_multipleBlobsPerBufferUnaligned ()
             " <invertedData value=\"0\" />"
              " <sampleNumber value=\"%1\" />"
              " <frequencyChannel1 MHz=\"%2\"/>"
-             " <sampleTime seconds=\"%3\"/>"
-             " <channelBandwidth MHz=\"%4\"/>"
-            " <dedispersionSamples value=\"%5\" />"
+             " <channelBandwidth MHz=\"%3\"/>"
+            " <dedispersionSamples value=\"%4\" />"
             " <dedispersionStepSize value=\"0.1\" />"
             " <numberOfBuffers value=\"2\" />"
             "</DedispersionModule>")
         .arg( nSamples * multiple  ) // block size should match the buffer size to ensure we get two calls to the GPU
         .arg( stokesData.startFrequency())
-        .arg( stokesData.timeOfSample())
         .arg( stokesData.bandwidthOfSample())
         .arg( ddSamples );
      config.setFromString(configString);
@@ -229,15 +225,13 @@ void DedispersionModuleTest::test_multipleBlobsPerBuffer ()
             " <invertedData value=\"0\" />"
             " <sampleNumber value=\"%1\" />"
             " <frequencyChannel1 MHz=\"%2\"/>"
-            " <sampleTime seconds=\"%3\"/>"
-            " <channelBandwidth MHz=\"%4\"/>"
-            " <dedispersionSamples value=\"%5\" />"
+            " <channelBandwidth MHz=\"%3\"/>"
+            " <dedispersionSamples value=\"%4\" />"
             " <dedispersionStepSize value=\"0.1\" />"
             " <numberOfBuffers value=\"3\" />"
             "</DedispersionModule>")
         .arg( nSamples * 2 ) // block size should match the buffer size to ensure we get two calls to the GPU
         .arg( stokesData.startFrequency())
-        .arg( stokesData.timeOfSample())
         .arg( stokesData.bandwidthOfSample())
         .arg( ddSamples );
      config.setFromString(configString);
@@ -319,15 +313,13 @@ void DedispersionModuleTest::test_multipleBlobs ()
             " <invertedData value=\"0\" />"
             " <sampleNumber value=\"%1\" />"
             " <frequencyChannel1 MHz=\"%2\"/>"
-            " <sampleTime seconds=\"%3\"/>"
-            " <channelBandwidth MHz=\"%4\"/>"
-            " <dedispersionSamples value=\"%5\" />"
+            " <channelBandwidth MHz=\"%3\"/>"
+            " <dedispersionSamples value=\"%4\" />"
             " <dedispersionStepSize value=\"0.1\" />"
             " <numberOfBuffers value=\"3\" />"
             "</DedispersionModule>")
         .arg( nSamples ) // block size should match the buffer size to ensure we get two calls to the GPU
         .arg( stokesData.startFrequency())
-        .arg( stokesData.timeOfSample())
         .arg( stokesData.bandwidthOfSample())
         .arg( ddSamples );
     config.setFromString(configString);
@@ -357,7 +349,7 @@ void DedispersionModuleTest::test_method()
         float dm = 10.0;
         unsigned ddSamples = 200;
         unsigned nBlocks = 1;
-        unsigned nSamples = 6400;
+        unsigned nSamples = 3200;
         DedispersionDataGenerator stokesData;
         stokesData.setTimeSamplesPerBlock( nSamples );
         QList<SpectrumDataSetStokes*> spectrumData = stokesData.generate( nBlocks, dm );
@@ -376,14 +368,12 @@ void DedispersionModuleTest::test_method()
                                          " <invertedData value=\"0\" />"
                                          " <sampleNumber value=\"%1\" />"
                                          " <frequencyChannel1 MHz=\"%2\"/>"
-                                         " <sampleTime seconds=\"%3\"/>"
-                                         " <channelBandwidth MHz=\"%4\"/>"
-                                         " <dedispersionSamples value=\"%5\" />"
+                                         " <channelBandwidth MHz=\"%3\"/>"
+                                         " <dedispersionSamples value=\"%4\" />"
                                          " <dedispersionStepSize value=\"0.1\" />"
                                          "</DedispersionModule>")
                                         .arg( nSamples )
                                         .arg( stokesData.startFrequency())
-                                        .arg( stokesData.timeOfSample())
                                         .arg( stokesData.bandwidthOfSample())
                                         .arg( ddSamples );
           config.setFromString(configString);
@@ -428,6 +418,7 @@ void DedispersionModuleTest::test_dataConsistency() {
     for( int i=0; i < (int)(2.0*multiple); ++i ) { // 2 full buffers worth
        SpectrumDataSetStokes* d = new SpectrumDataSetStokes;
        d->resize( nTimeBlocks, nSubbands, nPol, nChan );
+       d->setBlockRate( 0.00032768 );
        // set unique data for each data point
        float* data = d->data();
        for(int j=0; j < d->size(); ++j ) {
@@ -443,7 +434,7 @@ void DedispersionModuleTest::test_dataConsistency() {
          ddm.onChainCompletion( boost::bind( &DedispersionModuleTest::connectFinished, this ) );
          _connectData = 0;
          _connectCount = 0;
-        _chainFinished = 0;
+         _chainFinished = 0;
          int i;
          for(i=0; i < spectrumData.size(); ++i ) {
              WeightedSpectrumDataSet weightedData(spectrumData[i]);
@@ -478,7 +469,6 @@ ConfigNode DedispersionModuleTest::testConfig(unsigned nSamples) const
                 " <invertedData value=\"0\" />"
                 " <sampleNumber value=\"%1\" />"
                 " <frequencyChannel1 MHz=\"150.0\"/>"
-                " <sampleTime seconds=\"0.00032768\"/>"
                 " <channelBandwidth MHz=\"-0.0292969\"/>" // -6.0/(nSubbands*nChannels);
                 " <dedispersionSamples value=\"200\" />"
                 " <dedispersionStepSize value=\"0.1\" />"
