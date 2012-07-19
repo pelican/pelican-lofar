@@ -3,7 +3,7 @@
 #include <dal/lofar/Coordinates.h>
 
 #include "SpectrumDataSet.h"
-#include "H5Writer.h"
+#include "H5_LofarBFDataWriter.h"
 #include "TimeStamp.h"
 
 #include <string>
@@ -19,7 +19,7 @@ namespace lofar {
 
 // Constructor
 // TODO: For now we write in 32-bit format...
-H5Writer::H5Writer(const ConfigNode& configNode )
+H5_LofarBFDataWriter::H5_LofarBFDataWriter(const ConfigNode& configNode )
   : AbstractOutputStream(configNode), _bfFile(0),_beamNr(0), _sapNr(0),
         _nChannels(0), _nSubbands(0), _nPols(0)
 {
@@ -108,7 +108,7 @@ H5Writer::H5Writer(const ConfigNode& configNode )
 
 }
 
-void H5Writer::_writeHeader(SpectrumDataSetStokes* stokes){
+void H5_LofarBFDataWriter::_writeHeader(SpectrumDataSetStokes* stokes){
     time_t _timeStamp = stokes->getLofarTimestamp();
     TimeStamp timeStamp( _timeStamp );
     double _mjdStamp = timeStamp.mjd();
@@ -148,7 +148,7 @@ void H5Writer::_writeHeader(SpectrumDataSetStokes* stokes){
       _bfFile->notes().value      = "";
       _bfFile->createOfflineOnline().value = "Online";
       _bfFile->BFFormat().value   = "TAB";
-      _bfFile->BFVersion().value  = QString("Artemis H5Writer using DAL %1 and HDF5 %2")
+      _bfFile->BFVersion().value  = QString("Artemis H5_LofarBFDataWriter using DAL %1 and HDF5 %2")
                                       .arg(DAL::get_lib_version().c_str())
                                       .arg(DAL::get_dal_hdf5_version().c_str())
                                       .toStdString();
@@ -218,7 +218,7 @@ void H5Writer::_writeHeader(SpectrumDataSetStokes* stokes){
           break;
 
         default:
-          throw(QString("H5Writer:  INVALID_STOKES"));
+          throw(QString("H5_LofarBFDataWriter:  INVALID_STOKES"));
           return;
       }
       beam.complexVoltage().value = stokesType;
@@ -320,14 +320,14 @@ void H5Writer::_writeHeader(SpectrumDataSetStokes* stokes){
 }
 
 // Destructor
-H5Writer::~H5Writer()
+H5_LofarBFDataWriter::~H5_LofarBFDataWriter()
 {
     _updateHeader();
     _file.close();
     delete _bfFile;
 }
 
-void H5Writer::_updateHeader() {
+void H5_LofarBFDataWriter::_updateHeader() {
     if( _bfFile ) {
         DAL::BF_SubArrayPointing sap = _bfFile->subArrayPointing(_sapNr);
         DAL::BF_BeamGroup beam = sap.beam(_beamNr);
@@ -341,7 +341,7 @@ void H5Writer::_updateHeader() {
 // ---------------------------- Header helpers --------------------------
 //
 // Write data blob to disk
-void H5Writer::sendStream(const QString& /*streamName*/, const DataBlob* incoming)
+void H5_LofarBFDataWriter::sendStream(const QString& /*streamName*/, const DataBlob* incoming)
 {
     SpectrumDataSetStokes* stokes;
     DataBlob* blob = const_cast<DataBlob*>(incoming);
@@ -402,7 +402,7 @@ void H5Writer::sendStream(const QString& /*streamName*/, const DataBlob* incomin
                 }
                 break;
             default:
-                throw(QString("H5Writer: %1 bit datafiles not yet supported"));
+                throw(QString("H5_LofarBFDataWriter: %1 bit datafiles not yet supported"));
                 break;
         }
 /*
@@ -421,7 +421,7 @@ void H5Writer::sendStream(const QString& /*streamName*/, const DataBlob* incomin
                                 _file.write((const char*)&ci,sizeof(unsigned char));
                                 break;
                             default:
-                                throw(QString("H5Writer:"));
+                                throw(QString("H5_LofarBFDataWriter:"));
                                 break;
                         }
                     }
@@ -432,13 +432,13 @@ void H5Writer::sendStream(const QString& /*streamName*/, const DataBlob* incomin
         _file.flush();
     }
     else {
-        std::cerr << "H5Writer::send(): "
+        std::cerr << "H5_LofarBFDataWriter::send(): "
                 "Only SpectrumDataSetStokes data can be written by the SigprocWriter" << std::endl;
         return;
     }
 }
 
-void H5Writer::_write(char* data, size_t size)
+void H5_LofarBFDataWriter::_write(char* data, size_t size)
 {
     int max = _buffer.capacity() -1;
     int ptr = (_cur + size) % max;
@@ -453,7 +453,7 @@ void H5Writer::_write(char* data, size_t size)
     _cur=ptr;
 }
 
-void H5Writer::_float2int(const float *f, int *i)
+void H5_LofarBFDataWriter::_float2int(const float *f, int *i)
 {
     float ftmp;
     ftmp = (*f>_cropMax)? (_cropMax) : *f;

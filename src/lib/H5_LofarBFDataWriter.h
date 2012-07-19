@@ -1,8 +1,8 @@
-#ifndef H5WRITER_H
-#define H5WRITER_H
+#ifndef H5_LOFARBFDATAWRITER_H
+#define H5_LOFARBFDATAWRITER_H
 
 /**
- * @file H5Writer.h
+ * @file H5_LofarBFDataWriter.h
  */
 
 #include "pelican/output/AbstractOutputStream.h"
@@ -22,7 +22,7 @@ namespace lofar {
 class SpectrumDataSetStokes;
 
 /**
- * @class H5Writer
+ * @class H5_LofarBFDataWriter
  *
  * @brief
  *
@@ -30,17 +30,17 @@ class SpectrumDataSetStokes;
  *
  */
 
-class H5Writer : public AbstractOutputStream
+class H5_LofarBFDataWriter : public AbstractOutputStream
 {
     // lifted from lofar RTCP/Interface/include/Interface/Parset.h
     enum StokesType { STOKES_I = 0, STOKES_IQUV, STOKES_XXYY, INVALID_STOKES = -1 };
 
     public:
     /// Constructor
-        H5Writer( const ConfigNode& config );
+        H5_LofarBFDataWriter( const ConfigNode& config );
 
     /// Destructor
-        ~H5Writer();
+        ~H5_LofarBFDataWriter();
 
     /// File path
         QString filepath() { return _filePath; }
@@ -78,9 +78,9 @@ class H5Writer : public AbstractOutputStream
         unsigned int  _nBits,_datatype;
 };
 
-PELICAN_DECLARE(AbstractOutputStream, H5Writer)
+PELICAN_DECLARE(AbstractOutputStream, H5_LofarBFDataWriter)
 
 } // namespace lofar
 } // namespace pelican
 
-#endif // H5WRITER_H
+#endif // H5_LOFARBFDATAWRITER_H

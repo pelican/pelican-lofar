@@ -47,10 +47,10 @@ set(lib_src
     src/WeightedSpectrumDataSet.cpp
     src/GPU_MemoryMap.cpp
 )
-# Lofar DAL enables the H5Writer
+# Lofar DAL enables the H5_LofarBFDataWriter
 if(LOFAR_DAL_FOUND)
     list(APPEND lib_src
-            src/H5Writer.cpp
+            src/H5_LofarBFDataWriter.cpp
         )
     set(lofar_dal_libs
             ${LOFAR_DAL_LIBRARIES}
