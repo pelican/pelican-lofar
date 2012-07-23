@@ -81,12 +81,10 @@ class H5_LofarBFDataWriter : public AbstractOutputStream
         int _beamNr;
         int _sapNr;
         std::vector<ssize_t> _maxdims;
-        std::vector<char>  _buffer;
         QString       _sourceName, _raString, _decString, _telescope;
         float         _fch1, _foff, _tsamp, _refdm, _clock, _ra, _dec;
         float         _cropMin, _cropMax, _scaleDelta, _nRange; // for scaling floats to lesser values
         int           _nchans, _nTotalSubbands;
-        int           _buffSize, _cur;
         unsigned int  _nRawPols, _nChannels, _nSubbands, _integration, _nPols;
         unsigned int  _nSubbandsToStore, _topsubband, _lbahba, _site, _machine;
         unsigned int  _nBits,_datatype;

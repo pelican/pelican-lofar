@@ -62,10 +62,6 @@ H5_LofarBFDataWriter::H5_LofarBFDataWriter(const ConfigNode& configNode )
     // for stokes and complex voltages
     _setPolsToWrite(configNode.getOption("params", "nPolsToWrite", "1").toUInt());
 
-    _buffSize = configNode.getOption("params", "bufferSize", "5120").toUInt();
-
-    _cur = 0;
-
     // Observation specific
     // Chilbolton:14 Nancay:12 Effelsberg:13
     _site = configNode.getOption("TelescopeID", "value", "14").toUInt();
@@ -83,7 +79,6 @@ H5_LofarBFDataWriter::H5_LofarBFDataWriter(const ConfigNode& configNode )
       _sourceName.append(_decString.left(5));
     }
 
-    _buffer.resize(_buffSize);
     _maxdims.resize(2);
 }
 
