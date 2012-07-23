@@ -27,9 +27,29 @@ class SpectrumDataSetStokes;
  * @class H5_LofarBFDataWriter
  *
  * @brief
- *
+ *    OutputStreamer that genererates Lofar Beamformed Format
+ *    H5 files
  * @details
- *
+ *    <H5_LofarBFDataWriter>
+ *        <file filepath="dir/to/save/output/files">
+ *        <observation id="MyArtemisObservation" />
+ *        <LBA_0_or_HBA_1 value="1">
+ *            Define which array this refers to
+ *        </LBA_0_or_HBA_1>
+ *        <clock value="200">
+ *            could be 160
+ *        </clock>
+ *        <fch1 value="150" />
+ *        <topSubbandIndex value="150" >
+ *            Used to calculate the frequency of the first channel
+ *            fch1 - only used if fch1 is not set
+ *        </topSubbandIndex>
+ *        <params nPolsToWrite="1" >
+ *              the number of stokes parameters to write
+ *              - each param will be written to a separate
+ *              data file.
+ *        </params>
+ *    </H5_LofarBFDataWriter>
  */
 
 class H5_LofarBFDataWriter : public AbstractOutputStream
@@ -38,13 +58,10 @@ class H5_LofarBFDataWriter : public AbstractOutputStream
     enum StokesType { STOKES_I = 0, STOKES_IQUV, STOKES_XXYY, INVALID_STOKES = -1 };
 
     public:
-    /// Constructor
         H5_LofarBFDataWriter( const ConfigNode& config );
-
-    /// Destructor
         ~H5_LofarBFDataWriter();
 
-    /// File path
+        /// return the file path
         QString filepath() { return _filePath; }
 
         /// the name of the currently opened raw data file
@@ -87,7 +104,7 @@ class H5_LofarBFDataWriter : public AbstractOutputStream
         int           _nchans, _nTotalSubbands;
         unsigned int  _nRawPols, _nChannels, _nSubbands, _integration, _nPols;
         unsigned int  _nSubbandsToStore, _topsubband, _lbahba, _site, _machine;
-        unsigned int  _nBits,_datatype;
+        unsigned int  _nBits;
 };
 
 PELICAN_DECLARE(AbstractOutputStream, H5_LofarBFDataWriter)

@@ -25,7 +25,6 @@ H5_LofarBFDataWriter::H5_LofarBFDataWriter(const ConfigNode& configNode )
 {
     _filePath = configNode.getOption("file", "filepath", ".");
     _observationID= configNode.getOption("observation", "id", "");
-    _datatype = configNode.getOption("Stokes_0_or_Voltages_1", "value", "1").toUInt();
 
     // By definition for LOFAR RSP boards, the following should not change:
     _nRawPols = configNode.getOption("nRawPolarisations", "value", "2").toUInt();
