@@ -45,7 +45,8 @@ void StokesGenerator::run(const SpectrumDataSetC32* channeliserOutput,
     const Complex* dataPolX, *dataPolY;
     float *I, *Q, *U, *V;
     float powerX, powerY;
-    Complex XxYstar;
+    float XxYstarReal;
+    float XxYstarImag;
 
     const Complex* dataPolDataBlock = channeliserOutput->data();
     for (unsigned t = 0; t < nSamples; ++t) {
@@ -73,13 +74,20 @@ void StokesGenerator::run(const SpectrumDataSetC32* channeliserOutput,
             //std::cout << "  dataPolIndexY=" << dataPolIndexY << std::endl;
             // std::cout << I << " "<< Q <<" "<< U << " "<< V <<std::endl;
             for (unsigned c = 0; c < nChannels; ++c) {
-                // XxYstar=dataPolX[c]*conj(dataPolY[c]);
-                powerX = _sqr(dataPolX[c].real()) + _sqr(dataPolX[c].imag());
-                powerY = _sqr(dataPolY[c].real()) + _sqr(dataPolY[c].imag());
+                float Xr = dataPolX[c].real();
+                float Xi = dataPolX[c].imag();
+                float Yr = dataPolY[c].real();
+                float Yi = dataPolY[c].imag();
+                XxYstarReal = Xr*Yr + Xi*Yi;
+                XxYstarImag = Xi*Yr - Xr*Yi;
+
+                powerX = _sqr(Xr) + _sqr(Xi);
+                powerY = _sqr(Yr) + _sqr(Yi);
+
                 I[c] = powerX + powerY;
                 Q[c] = powerX - powerY;
-                U[c] = 2.0f * real(XxYstar);
-                V[c] = 2.0f * imag(XxYstar);
+                U[c] = 2.0f * XxYstarReal;
+                V[c] = 2.0f * XxYstarImag;
             }
         }
     }
@@ -105,6 +113,8 @@ void StokesGenerator::run(const TimeSeriesDataSetC32* streamData,
     stokes->resize(nSamples * nSamps, nSubbands, 4, 1);
 
     const Complex* dataPolX, *dataPolY;
+    float XxYstarReal;
+    float XxYstarImag;
     float *I, *Q, *U, *V;
     float powerX, powerY;
 
@@ -118,12 +128,21 @@ void StokesGenerator::run(const TimeSeriesDataSetC32* streamData,
                 U = stokes->spectrumData(t * nSamps + c, s, 2);
                 V = stokes->spectrumData(t * nSamps + c, s, 3);
                 // NOTE: We have one channel per subband since we are not channelising
-                powerX = _sqr(dataPolX[0].real()) + _sqr(dataPolX[0].imag());
-                powerY = _sqr(dataPolY[0].real()) + _sqr(dataPolY[0].imag());
-                I[0] = powerX + powerY;
-                Q[0] = powerX - powerY;
-                U[0] = 2.0f * real(dataPolX[0] * conj(dataPolY[0]));
-                V[0] = 2.0f * imag(dataPolX[0] * conj(dataPolY[0]));
+                float Xr = dataPolX[c].real();
+                float Xi = dataPolX[c].imag();
+                float Yr = dataPolY[c].real();
+                float Yi = dataPolY[c].imag();
+                XxYstarReal = Xr*Yr + Xi*Yi;
+                XxYstarImag = Xi*Yr - Xr*Yi;
+
+                powerX = _sqr(Xr) + _sqr(Xi);
+                powerY = _sqr(Yr) + _sqr(Yi);
+
+                I[c] = powerX + powerY;
+                Q[c] = powerX - powerY;
+                U[c] = 2.0f * XxYstarReal;
+                V[c] = 2.0f * XxYstarImag;
+
             }
         }
     }
