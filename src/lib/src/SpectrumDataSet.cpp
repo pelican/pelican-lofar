@@ -10,6 +10,12 @@
 namespace pelican {
 namespace lofar {
 
+SpectrumDataSetBase::SpectrumDataSetBase(const QString& type) 
+    : DataBlob(type), _nSubbands(0), _nPolarisations(0), _nTimeBlocks(0),
+        _nChannels(0), _blockRate(0), _startTimestamp(0)
+{
+}
+
 /**
  * @details
  * Writes the contents of the subband spectra to an ASCII file.

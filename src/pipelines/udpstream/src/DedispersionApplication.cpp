@@ -6,6 +6,7 @@
 #include "BandPassPipeline.h"
 #include "pelican/core/PipelineApplication.h"
 #include "pelican/core/PipelineSwitcher.h"
+#include "LofarOutputStreamers.h"
 
 
 namespace pelican {

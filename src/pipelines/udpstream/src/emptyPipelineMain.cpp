@@ -3,6 +3,7 @@
 #include "LofarStreamDataClient.h"
 #include "EmptyPipeline.h"
 #include "AdapterTimeSeriesDataSet.h"
+#include "LofarOutputStreamers.h"
 
 #include <QtCore/QCoreApplication>
 
