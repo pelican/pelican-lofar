@@ -61,7 +61,7 @@ void DedispersionDataAnalysisOutput::addFile(const QString& filename)
               << "# ------\n"
               << "# Time|Dm|Amplitude\n"
               << "# ------\n";
-         out->setRealNumberPrecision( 11 );
+         out->setRealNumberPrecision( 14 );
          out->flush();
     }
     else {
@@ -77,7 +77,7 @@ void DedispersionDataAnalysisOutput::sendStream(const QString& /*streamName*/, c
         foreach( QTextStream* out, _streams ) {
             foreach( const DedispersionEvent& e, data->events() ) {
                 double mjdStamp = (e.getTime()-_epoch)/86400 + 55562.0;
-                *out << mjdStamp << ", " << e.dm() << ", " << e.amplitude() << "\n";
+                *out << left << mjdStamp << ",   " << e.dm() << ", " << e.amplitude() << "\n";
             }
             out->flush();
         }
