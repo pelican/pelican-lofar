@@ -74,9 +74,11 @@ void DedispersionDataAnalysisOutput::sendStream(const QString& /*streamName*/, c
 {
     if( dataBlob->type() == "DedispersionDataAnalysis" ) {
         const DedispersionDataAnalysis* data = static_cast<const DedispersionDataAnalysis*>(dataBlob);
+        float rms = data->getRMS();
         foreach( QTextStream* out, _streams ) {
             foreach( const DedispersionEvent& e, data->events() ) {
                 double mjdStamp = (e.getTime()-_epoch)/86400 + 55562.0;
+                float SNR = e.amplitude()/rms;
                 *out << left << mjdStamp << ",   " << e.dm() << ", " << e.amplitude() << "\n";
             }
             out->flush();

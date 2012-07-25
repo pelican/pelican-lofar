@@ -35,6 +35,7 @@ int DedispersionAnalyser::analyse( DedispersionSpectra* data,
     int nSubbands = d[0]->nSubbands();
 
     float rms = std::sqrt((float)nChannels*(float)nSubbands);
+    result->setRMS(rms);
 
     std::cout << "---------------" << nChannels << " " << nSubbands << std::endl;
     // Calculate the mean

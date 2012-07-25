@@ -49,9 +49,16 @@ class DedispersionDataAnalysis : public DataBlob
         /// return a list of events found
         const QList<DedispersionEvent>& events() const;
 
+        /// Return the rms of the data if it has been set;                                                                                                  
+        float getRMS() const { return _rms; }
+
+        /// Set the rms of the data;                                                                                                                        
+        void setRMS(float rms) { _rms = rms; }
+
     private:
         const DedispersionSpectra* _data;
         EventIndexT _eventIndex;
+        float _rms;
 };
 
 PELICAN_DECLARE_DATABLOB(DedispersionDataAnalysis)
