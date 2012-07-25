@@ -25,15 +25,68 @@ namespace lofar {
  *
  * @details
  */
+class SpectrumDataSetBase : public DataBlob
+{
+    public:
+        SpectrumDataSetBase(const QString& type);
+        virtual ~SpectrumDataSetBase() {};
+
+        /// Returns the number of spectra in the data blob.
+        inline unsigned nSpectra() const
+        { return _nTimeBlocks * _nSubbands * _nPolarisations; }
+
+        /// Returns the number of blocks of sub-band spectra.
+        inline unsigned nTimeBlocks() const { return _nTimeBlocks; }
+
+        /// Returns the number of sub-bands in the data.
+        inline unsigned nSubbands() const { return _nSubbands; }
+
+        /// Returns the number of polarisations in the data.
+        inline unsigned nPolarisations() const { return _nPolarisations; }
+
+        /// Return the number of channels for the spectrum specified by index @p i
+        inline unsigned nChannels() const { return _nChannels; }
+
+        /// Return the time (in seconds) of the corresponding timeSlice
+        double getTime( unsigned sampleNumber ) const { 
+            return _startTimestamp + sampleNumber * _blockRate;
+        }
+
+        /// Return the block rate (time-span of the each timeslice)
+        double getBlockRate() const { return _blockRate; }
+
+        /// Set the block rate (time-span of each timeslice)
+        void setBlockRate(double blockRate) { _blockRate = blockRate; }
+
+        /// Return the lofar time-stamp
+        inline double getLofarTimestamp() const { return _startTimestamp; }
+
+        /// Set the lofar time-stamp
+        void setLofarTimestamp(double timestamp)
+        { _startTimestamp = timestamp; }
+
+        /// calculates what the index should be given the block, subband, polarisation (primarily used as an aid to optimisation).
+        static inline long index(unsigned subband, unsigned numSubbands,
+                   unsigned polarisation, unsigned numPolarisations,
+                   unsigned block, unsigned numChannels);
+
+    protected:
+        unsigned _nSubbands;
+        unsigned _nPolarisations;
+        unsigned _nTimeBlocks;
+        unsigned _nChannels;
+
+        double  _blockRate;
+        double  _startTimestamp;
+};
 
 template <class T>
-class SpectrumDataSet : public DataBlob
+class SpectrumDataSet : public SpectrumDataSetBase
 {
     public:
         /// Constructs an empty sub-band spectra data blob.
         SpectrumDataSet(const QString& type = "SpectrumDataSet")
-        : DataBlob(type), _nSubbands(0), _nPolarisations(0), _nTimeBlocks(0),
-          _nChannels(0), _blockRate(0), _lofarTimestamp(0) {}
+        : SpectrumDataSetBase(type) {}
 
         /// Destroys the object.
         virtual ~SpectrumDataSet() {}
@@ -57,41 +110,6 @@ class SpectrumDataSet : public DataBlob
         }
 
     public:
-        /// Returns the number of spectra in the data blob.
-        unsigned nSpectra() const
-        { return _nTimeBlocks * _nSubbands * _nPolarisations; }
-
-        /// Returns the number of blocks of sub-band spectra.
-        unsigned nTimeBlocks() const { return _nTimeBlocks; }
-
-        /// Returns the number of sub-bands in the data.
-        unsigned nSubbands() const { return _nSubbands; }
-
-        /// Returns the number of polarisations in the data.
-        unsigned nPolarisations() const { return _nPolarisations; }
-
-        /// Return the number of channels for the spectrum specified by index @p i
-        unsigned nChannels() const
-        { return _nChannels; }
-
-        /// Return the time (in seconds) of the corresponding timeSlice
-        double getTime( unsigned sampleNumber ) const { 
-            return _lofarTimestamp + sampleNumber * _blockRate;
-        }
-
-        /// Return the block rate (time-span of the entire chunk)
-        double getBlockRate() const { return _blockRate; }
-
-        /// Return the block rate (time-span of the entire chunk)
-        void setBlockRate(double blockRate) { _blockRate = blockRate; }
-
-        /// Return the lofar time-stamp
-        double getLofarTimestamp() const
-        { return _lofarTimestamp; }
-
-        /// Set the lofar time-stamp
-        void setLofarTimestamp(double timestamp)
-        { _lofarTimestamp = timestamp; }
 
         /// Return the overall size of the data
         int size() const;
@@ -144,10 +162,6 @@ class SpectrumDataSet : public DataBlob
         T const * spectrumData(unsigned b, unsigned s, unsigned p) const
         { return &_data[_index(s, p, b)]; }
 
-        /// calculates what the index should be given the block, subband, polarisation (primarily used as an aid to optimisation).
-        static inline long index(unsigned subband, unsigned numSubbands,
-                   unsigned polarisation, unsigned numPolarisations,
-                   unsigned block, unsigned numChannels);
 
     private:
         /// Returns the data index for a given time block @p b, sub-band @p s and polarisation @p p
@@ -156,14 +170,6 @@ class SpectrumDataSet : public DataBlob
     protected:
         std::vector<T> _data;
 
-    private:
-        unsigned _nSubbands;
-        unsigned _nPolarisations;
-        unsigned _nTimeBlocks;
-        unsigned _nChannels;
-
-        double  _blockRate;
-        double  _lofarTimestamp;
 };
 
 
@@ -180,7 +186,7 @@ inline void SpectrumDataSet<T>::clear()
     _data.clear();
     _nTimeBlocks = _nSubbands = _nPolarisations = _nChannels = 0;
     _blockRate = 0;
-    _lofarTimestamp = 0;
+    _startTimestamp = 0;
 }
 
 template <typename T>
@@ -207,9 +213,7 @@ inline int SpectrumDataSet<T>::size() const
     return _data.size();
 }
 
-
-template <typename T>
-inline long SpectrumDataSet<T>::index( unsigned subband, unsigned numSubbands,
+inline long SpectrumDataSetBase::index( unsigned subband, unsigned numSubbands,
         unsigned polarisation, unsigned numPolarisations, unsigned block,
         unsigned numChannels)
 {

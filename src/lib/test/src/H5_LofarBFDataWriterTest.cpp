@@ -12,6 +12,13 @@ namespace pelican {
 
 namespace lofar {
 
+// Test class to enable provide a non-op version for testing
+class TestH5_LofarBFDataWriter : public H5_LofarBFDataWriter {
+    TestH5_LofarBFDataWriter( const ConfigNode& config );
+    ~TestH5_LofarBFDataWriter();
+    virtual void _writeData( const SpectrumDataSetBase* ) {};
+};
+
 CPPUNIT_TEST_SUITE_REGISTRATION( H5_LofarBFDataWriterTest );
 /**
  *@details H5_LofarBFDataWriterTest 
@@ -74,7 +81,7 @@ void H5_LofarBFDataWriterTest::test_method()
       // Be able to construct the object
       QString xml;
       ConfigNode c;
-      H5_LofarBFDataWriter out( c );
+      TestH5_LofarBFDataWriter out( c );
     }
     { // Use Case:
       // Empty Configuration
@@ -90,7 +97,7 @@ void H5_LofarBFDataWriterTest::test_method()
       QString rawFile, h5File;
 
       CPPUNIT_ASSERT_EQUAL( 1, (int)spectrumData[0]->nPolarisations() );
-      H5_LofarBFDataWriter out( c );
+      TestH5_LofarBFDataWriter out( c );
       out.send("data", spectrumData[0] );
       rawFile = out.rawFilename( pol );
       h5File = out.metaFilename( pol );
@@ -99,15 +106,14 @@ void H5_LofarBFDataWriterTest::test_method()
       CPPUNIT_ASSERT( f.exists() );
       QFile hf(h5File);
       CPPUNIT_ASSERT( hf.exists() );
-      CPPUNIT_ASSERT_EQUAL( (int)(spectrumData[0]->size() * sizeof(float)), (int)f.size() );
 
       // add more data of the same dimension 
-      // expect the raw data file to increase in size
-      // and the current file names to be the same
+      // epect the raw data file to remain 0 size as this is
+      // not implemented in the base class
+      // The current file names should be the same
       out.send("data", spectrumData[1] );
       CPPUNIT_ASSERT_EQUAL( rawFile.toStdString(), out.rawFilename( pol ).toStdString() );
       CPPUNIT_ASSERT_EQUAL( h5File.toStdString(), out.metaFilename( pol ).toStdString() );
-      CPPUNIT_ASSERT_EQUAL( (int)(spectrumData[0]->size() + spectrumData[1]->size()) * (int)sizeof(float) , (int)f.size() );
 
       // add more data of different dimension
       // expect new files to be generated
@@ -117,7 +123,6 @@ void H5_LofarBFDataWriterTest::test_method()
       CPPUNIT_ASSERT( h5File != out.metaFilename( pol ) );
       QFile f2(rawFile2);
       CPPUNIT_ASSERT( f2.exists() );
-      CPPUNIT_ASSERT_EQUAL( (int)(spectrumData2[0]->size() * sizeof(float)), (int)f2.size() );
 
     }
     } catch( QString& s )

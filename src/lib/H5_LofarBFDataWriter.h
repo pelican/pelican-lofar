@@ -21,7 +21,7 @@ namespace DAL {
 namespace pelican {
 namespace lofar {
 
-class SpectrumDataSetStokes;
+class SpectrumDataSetBase;
 
 /**
  * @class H5_LofarBFDataWriter
@@ -54,8 +54,9 @@ class SpectrumDataSetStokes;
 
 class H5_LofarBFDataWriter : public AbstractOutputStream
 {
-    // lifted from lofar RTCP/Interface/include/Interface/Parset.h
-    enum StokesType { STOKES_I = 0, STOKES_IQUV, STOKES_XXYY, INVALID_STOKES = -1 };
+    protected:
+        // lifted from lofar RTCP/Interface/include/Interface/Parset.h
+        enum StokesType { STOKES_I = 0, STOKES_IQUV, STOKES_XXYY, INVALID_STOKES = -1 };
 
     public:
         H5_LofarBFDataWriter( const ConfigNode& config );
@@ -75,22 +76,30 @@ class H5_LofarBFDataWriter : public AbstractOutputStream
         }
 
     protected:
-        void _writeHeader(SpectrumDataSetStokes* stokes);
+        void _writeHeader(SpectrumDataSetBase* stokes);
         virtual void sendStream(const QString& streamName, const DataBlob* dataBlob);
 
     private:
         // Header helpers
         void _updateHeader( int polarisation );
+        virtual void _writeData( const SpectrumDataSetBase* ) = 0;
 
     protected:
         inline void _float2int(const float *f, int *i);
         void _setChannels( unsigned n );
         void _setPolsToWrite(unsigned p);
+        inline unsigned polsToWrite() const { return _nPols; }
+
+    protected:
+        bool          _complexVoltages;
+        unsigned int  _nBits;
+        QVector<std::ofstream*>    _file;
+        bool    _separateFiles; 
+        StokesType        _stokesType;
 
     private:
         QString           _filePath;
         QString           _observationID;
-        QVector<std::ofstream*>    _file;
         QVector<long>              _fileBegin;
         QVector<DAL::BF_File*>     _bfFiles;
         QVector<QString>           _rawFilename;
@@ -104,10 +113,15 @@ class H5_LofarBFDataWriter : public AbstractOutputStream
         int           _nchans, _nTotalSubbands;
         unsigned int  _nRawPols, _nChannels, _nSubbands, _integration, _nPols;
         unsigned int  _nSubbandsToStore, _topsubband, _lbahba, _site, _machine;
-        unsigned int  _nBits;
 };
 
-PELICAN_DECLARE(AbstractOutputStream, H5_LofarBFDataWriter)
+void H5_LofarBFDataWriter::_float2int(const float *f, int *i)
+{
+    float ftmp;
+    ftmp = (*f>_cropMax)? (_cropMax) : *f;
+    *i = (ftmp<_cropMin) ? 0 : (int)rint((ftmp-_cropMin)*_nRange/_scaleDelta);
+}
+
 
 } // namespace lofar
 } // namespace pelican
