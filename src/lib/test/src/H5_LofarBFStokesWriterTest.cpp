@@ -52,10 +52,10 @@ void H5_LofarBFStokesWriterTest::test_method()
         // Stream out - most checks are done in the Base class test
         // so we only need to check that the output file is of the
         // correct size
-      QString xml = "<H5_LofarBFDataWriter>\n" +
+      QString xml = "<H5_LofarBFStokesWriter>\n" +
                    QString("<file filepath=\"%1\"").arg( _testDir->absolutePath() )
                     + " />"
-                    "</H5_LofarBFDataWriter>";
+                    "</H5_LofarBFStokesWriter>";
       ConfigNode c;
       c.setFromString(xml);
       QString rawFile, h5File;

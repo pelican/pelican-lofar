@@ -70,6 +70,7 @@ if(HDF5_FOUND)
     list(APPEND lofarTest_src
          src/H5_LofarBFDataWriterTest.cpp
          src/H5_LofarBFStokesWriterTest.cpp
+         src/H5_LofarBFVoltageWriterTest.cpp
         )
 endif(HDF5_FOUND)
 add_executable(lofarTest ${lofarTest_src})

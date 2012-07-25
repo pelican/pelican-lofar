@@ -29,6 +29,7 @@ class H5_LofarBFStokesWriter : public H5_LofarBFDataWriter
 
     private:
         virtual void _writeData( const SpectrumDataSetBase* d );
+
 };
 
 PELICAN_DECLARE(AbstractOutputStream, H5_LofarBFStokesWriter)

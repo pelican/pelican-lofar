@@ -35,6 +35,9 @@ H5_LofarBFDataWriter::H5_LofarBFDataWriter(const ConfigNode& configNode )
     _integration    = configNode.getOption("integrateTimeBins", "value", "1").toUInt();
     _nBits = configNode.getOption("dataBits", "value", "32").toUInt();
 
+    // Number of polarisations components to write out, 1 - 4
+    _setPolsToWrite(configNode.getOption("params", "nPolsToWrite", "1").toUInt());
+
     // For LOFAR, either 160 or 200, usually 200
     _clock = configNode.getOption("clock", "value", "200").toFloat();
 
@@ -56,10 +59,6 @@ H5_LofarBFDataWriter::H5_LofarBFDataWriter(const ConfigNode& configNode )
     else{
       _fch1 = configNode.getOption("fch1", "value", "1400.0").toFloat();
     }
-
-    // Number of polarisations to write out, 1 for total power or 4
-    // for stokes and complex voltages
-    _setPolsToWrite(configNode.getOption("params", "nPolsToWrite", "1").toUInt());
 
     // Observation specific
     // Chilbolton:14 Nancay:12 Effelsberg:13
@@ -100,16 +99,30 @@ void H5_LofarBFDataWriter::_setPolsToWrite( unsigned n ) {
     // clean up existing
     for(int i=0; i < (int)_bfFiles.size(); ++i ) {
         _updateHeader( i );
-        if( _file.size() < i ) {
-            _file[i]->flush();
-            _file[i]->close();
-            delete _file[i];
+        if( _separateFiles ) {
+            if( _file.size() > i ) {
+                _file[i]->flush();
+                _file[i]->close();
+                delete _file[i];
+            }
         }
         delete _bfFiles[i];
     }
     // setup for new number of pols
     _bfFiles.resize(n);
     _file.resize(n);
+    if( _separateFiles ) {
+        for(int i=0; i<_file.size(); ++i ) {
+           _file[i] = new std::ofstream;
+        }
+    }
+    else {
+        // redirect all ofstreams to the same file
+        _file[0] = new std::ofstream;
+        for(int i=1; i<_file.size(); ++i ) {
+            _file[i] = _file[0];
+        }
+    }
     _h5Filename.resize(n);
     _rawFilename.resize(n);
     _fileBegin.resize(n);
@@ -132,8 +145,10 @@ void H5_LofarBFDataWriter::_writeHeader(SpectrumDataSetBase* stokes){
     for (unsigned i=0; i<_nPols; ++i){
       if( _bfFiles[i] ) {
           _updateHeader( i );
-          _file[i]->flush();
-          _file[i]->close();
+          if( _file[i] ) {
+              _file[i]->flush();
+              _file[i]->close();
+          }
           delete _bfFiles[i]; _bfFiles[i] = 0;
       }
     }
@@ -145,7 +160,7 @@ void H5_LofarBFDataWriter::_writeHeader(SpectrumDataSetBase* stokes){
       QString fileName, h5Basename, tmp;
       int version = -1;
       do {
-          fileName = "L" + _observationID + QString("_S%1").arg(i)
+          fileName = "L" + _observationID + QString("_S%1_").arg(i)
               + timestr + QString("%1Z_bf").arg(++version);
           h5Basename = fileName + QString(".h5");
           tmp = _filePath + "/" + h5Basename;
@@ -321,7 +336,6 @@ void H5_LofarBFDataWriter::_writeHeader(SpectrumDataSetBase* stokes){
 
       QString rawBasename = fileName + ".raw";
       _rawFilename[i] = _filePath + "/" + rawBasename;
-      if( ! _file[i] ) _file[i] = new std::ofstream;
       _file[i]->open(_rawFilename[i].toStdString().c_str(),
                         std::ios::out | std::ios::binary);
       _fileBegin[i] = _file[i]->tellp(); // store storage loc of first byte to 
@@ -366,13 +380,18 @@ void H5_LofarBFDataWriter::sendStream(const QString& /*streamName*/, const DataB
     if( (stokes = (SpectrumDataSetBase*) dynamic_cast<SpectrumDataSetBase*>(blob))){
         unsigned nSubbands = stokes->nSubbands();
         unsigned nChannels = stokes->nChannels();
-        unsigned nPolarisations = stokes->nPolarisations();
+        unsigned nPolarisations = stokes->nPolarisationComponents();
 
         // check format of stokes is consistent with the current stream
         // if not then we close the existing stream and open up a new one
-        if( _nPols > nPolarisations ) {
-                _setPolsToWrite( nPolarisations );
-                _writeHeader(stokes);
+        // First thing to check is the number of polarisations are consistent
+        // with that being asked for. Unfortunately the nPolarisations() method
+        // does not mean the same thing in each dataset so we need to call a 
+        // specialisation to tell us how this maps on to the number of components
+        // we want to write out (_nPols)
+        if( _nPols != nPolarisations ) {
+            _setPolsToWrite( nPolarisations );
+            _writeHeader(stokes);
         } else if( nSubbands != _nSubbands || nChannels != _nChannels ) {
             // start the new stream if the data has changed
             _writeHeader(stokes);
