@@ -47,7 +47,8 @@ set(lofarTest_src
     src/DedispersionSpectraTest.cpp
     #src/FilterBankAdapterTest.cpp
     #src/LofarChunkerTest.cpp
-    src/LockingContainerTest.cpp;
+    src/H5_LofarBFDataWriterTest.cpp
+    src/LockingContainerTest.cpp
     src/LofarDataSplittingChunkerTest.cpp
     #src/PelicanBlobClientTest.cpp
     src/PPF_ChanneliserTest.cpp
@@ -62,7 +63,7 @@ if(CUDA_FOUND)
             src/GPU_ParamTest.cpp
             src/DedispersionBufferTest.cpp
             src/DedispersionModuleTest.cpp
-            src/DedispersionAnalyserTest.cpp
+        #    src/DedispersionAnalyserTest.cpp
         )
 endif(CUDA_FOUND)
 
