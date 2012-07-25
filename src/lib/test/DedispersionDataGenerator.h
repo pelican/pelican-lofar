@@ -65,8 +65,10 @@ class DedispersionDataGenerator
         /// fill each block with the specified number of samples
         void setTimeSamplesPerBlock( unsigned num ) { nSamples = num; }
 
+#ifdef CUDA_FOUND
         /// create a dedispersion object (processdd by the dedispersion module)
         DedispersionSpectra* dedispersionData( float dedispersionMeasure );
+#endif
 
         /// set the number of subbands to generate
         void setSubbands( unsigned s ) { nSubbands = s; }

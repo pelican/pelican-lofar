@@ -16,6 +16,7 @@
 #include "SpectrumDataSet.h"
 #include "timer.h"
 
+#ifdef CUDA_FOUND
 /**
  * @file DedispersionModule.h
  */
@@ -144,4 +145,5 @@ class DedispersionModule : public AsyncronousModule
 PELICAN_DECLARE_MODULE(DedispersionModule)
 } // namespace lofar
 } // namespace pelican
+#endif // CUDA_FOUND
 #endif // DEDISPERSIONMODULE_H 

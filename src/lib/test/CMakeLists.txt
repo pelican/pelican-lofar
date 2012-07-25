@@ -12,6 +12,7 @@ set(lofarTestLib_src
     src/LofarPipelineTester.cpp
     src/LofarDataBlobGenerator.cpp
     src/PipelineWrapper.cpp
+    src/DedispersionDataGenerator.cpp
 )
 
 # CUDA routines
@@ -22,7 +23,6 @@ if( CUDA_FOUND )
     CUDA_COMPILE( cuda_obj ${cuda_src} )
     list(APPEND lofarTestLib_src 
          src/TestCudaVectorAdd.cpp
-         src/DedispersionDataGenerator.cpp
         )
 endif( CUDA_FOUND )
 
@@ -47,7 +47,7 @@ set(lofarTest_src
     src/DedispersionSpectraTest.cpp
     #src/FilterBankAdapterTest.cpp
     #src/LofarChunkerTest.cpp
-    src/LockingContainerTest.cpp;
+    src/LockingContainerTest.cpp
     src/LofarDataSplittingChunkerTest.cpp
     #src/PelicanBlobClientTest.cpp
     src/PPF_ChanneliserTest.cpp
@@ -62,10 +62,14 @@ if(CUDA_FOUND)
             src/GPU_ParamTest.cpp
             src/DedispersionBufferTest.cpp
             src/DedispersionModuleTest.cpp
-            src/DedispersionAnalyserTest.cpp
+        #    src/DedispersionAnalyserTest.cpp
         )
 endif(CUDA_FOUND)
-
+if(HDF5_FOUND)
+    list(APPEND lofarTest_src
+         src/H5_LofarBFDataWriterTest.cpp
+        )
+endif(HDF5_FOUND)
 add_executable(lofarTest ${lofarTest_src})
 set_target_properties(lofarTest PROPERTIES 
     COMPILE_FLAGS "${OpenMP_CXX_FLAGS}"
@@ -113,6 +117,7 @@ set_target_properties(ppf_performance_test PROPERTIES
     COMPILE_FLAGS "${OpenMP_CXX_FLAGS}"
     LINK_FLAGS "${OpenMP_CXX_FLAGS}"
 )
+
 target_link_libraries(ppf_performance_test
     pelican-lofar_static
     ${PELICAN_LIBRARY}

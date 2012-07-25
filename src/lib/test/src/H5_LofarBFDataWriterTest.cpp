@@ -14,8 +14,9 @@ namespace lofar {
 
 // Test class to enable provide a non-op version for testing
 class TestH5_LofarBFDataWriter : public H5_LofarBFDataWriter {
-    TestH5_LofarBFDataWriter( const ConfigNode& config );
-    ~TestH5_LofarBFDataWriter();
+    public:
+    TestH5_LofarBFDataWriter( const ConfigNode& config ) : H5_LofarBFDataWriter(config) { _stokesType = STOKES_I; };
+    ~TestH5_LofarBFDataWriter() {};
     virtual void _writeData( const SpectrumDataSetBase* ) {};
 };
 
