@@ -32,6 +32,7 @@ DedispersionDataAnalysisOutput::DedispersionDataAnalysisOutput( const ConfigNode
     else {
         throw( QString("SigprocStokesWriter: unable to set epoch.") );
     }
+    _indexOfDump = 0;
 }
 
 /**
@@ -81,6 +82,8 @@ void DedispersionDataAnalysisOutput::sendStream(const QString& /*streamName*/, c
                 float SNR = e.amplitude()/rms;
                 *out << left << mjdStamp << ",   " << e.dm() << ", " << SNR << "\n";
             }
+            ++_indexOfDump;
+            *out << "# Written buffer :" << _indexOfDump << "\n";
             out->flush();
         }
     }
