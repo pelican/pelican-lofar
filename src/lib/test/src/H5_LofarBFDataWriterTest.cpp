@@ -6,6 +6,7 @@
 #include <QFileInfo>
 #include "DedispersionDataGenerator.h"
 #include "SpectrumDataSet.h"
+#include "TestDir.h"
 
 
 namespace pelican {
@@ -38,26 +39,12 @@ H5_LofarBFDataWriterTest::~H5_LofarBFDataWriterTest()
 
 void H5_LofarBFDataWriterTest::setUp()
 {
-    _fileDir = "/_H5_LofarBFDataWriterTest_";
-#if QT_VERSION >= 0x040400
-    _fileDir += QString().setNum( QCoreApplication::applicationPid() );
-#endif
-    _fullFileDir=QDir::tempPath() + _fileDir;
-    if( ! QDir::temp().mkpath( _fullFileDir ) )
-        CPPUNIT_FAIL("unable to create temporary directory " + _fullFileDir.toStdString() );
+    _testDir = new test::TestDir( "H5_LofarBFDataWriterTest", true );
 }
 
 void H5_LofarBFDataWriterTest::tearDown()
 {
-    // attempt to clean up the temp directory
-    QDir dir( QDir::tempPath() + "/" + _fileDir ); // dont use _fullFilePath for safety
-    if (dir.exists()) {
-        foreach(QFileInfo info, dir.entryInfoList(QDir::NoDotAndDotDot | QDir::Files )) {
-            QFile::remove(info.absoluteFilePath());
-        }
-        //std::cout << "remove dir " << _fullFileDir.toStdString();
-        dir.rmdir( QDir::tempPath() + _fileDir);
-    }
+    delete _testDir;
 }
 
 void H5_LofarBFDataWriterTest::test_method()
@@ -90,7 +77,7 @@ void H5_LofarBFDataWriterTest::test_method()
       // Expect:
       // Files to be generated
       QString xml = "<H5_LofarBFDataWriter>\n" +
-                    QString("<file filepath=\"%1\"").arg( _fullFileDir )
+                    QString("<file filepath=\"%1\"").arg( _testDir->absolutePath() )
                     + " />"
                     "</H5_LofarBFDataWriter>";
       ConfigNode c;
