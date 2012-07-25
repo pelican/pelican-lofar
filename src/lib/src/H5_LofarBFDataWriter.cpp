@@ -345,7 +345,7 @@ void H5_LofarBFDataWriter::_writeHeader(SpectrumDataSetBase* stokes){
 
 
 void H5_LofarBFDataWriter::_updateHeader( int pol ) {
-    if( _bfFiles[pol] ) {
+    if( _bfFiles[pol] && _file[pol] ) {
         DAL::BF_SubArrayPointing sap = _bfFiles[pol]->subArrayPointing(_sapNr);
         DAL::BF_BeamGroup beam = sap.beam(_beamNr);
         DAL::BF_StokesDataset stokesDS = beam.stokes(0);

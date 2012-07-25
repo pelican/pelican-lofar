@@ -47,7 +47,6 @@ set(lofarTest_src
     src/DedispersionSpectraTest.cpp
     #src/FilterBankAdapterTest.cpp
     #src/LofarChunkerTest.cpp
-#    src/H5_LofarBFDataWriterTest.cpp
     src/LockingContainerTest.cpp
     src/LofarDataSplittingChunkerTest.cpp
     #src/PelicanBlobClientTest.cpp
@@ -66,7 +65,11 @@ if(CUDA_FOUND)
         #    src/DedispersionAnalyserTest.cpp
         )
 endif(CUDA_FOUND)
-
+if(HDF5_FOUND)
+    list(APPEND lofarTest_src
+         src/H5_LofarBFDataWriterTest.cpp
+        )
+endif(HDF5_FOUND)
 add_executable(lofarTest ${lofarTest_src})
 set_target_properties(lofarTest PROPERTIES 
     COMPILE_FLAGS "${OpenMP_CXX_FLAGS}"
