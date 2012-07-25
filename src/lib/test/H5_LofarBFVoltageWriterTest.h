@@ -1,21 +1,21 @@
-#ifndef H5_LOFARBFDATAWRITERTEST_H
-#define H5_LOFARBFDATAWRITERTEST_H
+#ifndef H5_LOFARBFVOLTAGEWRITERTEST_H
+#define H5_LOFARBFVOLTAGEWRITERTEST_H
 
 #include <cppunit/extensions/HelperMacros.h>
-#include <QDir>
 
 /**
- * @file H5_LofarBFDataWriterTest.h
+ * @file H5_LofarBFVoltageWriterTest.h
  */
 
 namespace pelican {
+
 namespace lofar {
 namespace test {
     class TestDir;
 }
 
 /**
- * @class H5_LofarBFDataWriterTest
+ * @class H5_LofarBFVoltageWriterTest
  *  
  * @brief
  * 
@@ -23,10 +23,10 @@ namespace test {
  * 
  */
 
-class H5_LofarBFDataWriterTest : public CppUnit::TestFixture
+class H5_LofarBFVoltageWriterTest : public CppUnit::TestFixture
 {
     public:
-        CPPUNIT_TEST_SUITE( H5_LofarBFDataWriterTest );
+        CPPUNIT_TEST_SUITE( H5_LofarBFVoltageWriterTest );
         CPPUNIT_TEST( test_method );
         CPPUNIT_TEST_SUITE_END();
 
@@ -38,8 +38,8 @@ class H5_LofarBFDataWriterTest : public CppUnit::TestFixture
         void test_method();
 
     public:
-        H5_LofarBFDataWriterTest(  );
-        ~H5_LofarBFDataWriterTest();
+        H5_LofarBFVoltageWriterTest(  );
+        ~H5_LofarBFVoltageWriterTest();
 
     private:
         test::TestDir* _testDir;
@@ -47,4 +47,4 @@ class H5_LofarBFDataWriterTest : public CppUnit::TestFixture
 
 } // namespace lofar
 } // namespace pelican
-#endif // H5_LOFARBFDATAWRITERTEST_H 
+#endif // H5_LOFARBFVOLTAGEWRITERTEST_H 
