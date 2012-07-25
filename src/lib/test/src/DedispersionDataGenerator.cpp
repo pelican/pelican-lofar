@@ -80,6 +80,7 @@ QList<SpectrumDataSetStokes*> DedispersionDataGenerator::generate( int numberOfB
     return data;
 }
 
+#ifdef CUDA_FOUND
 DedispersionSpectra* DedispersionDataGenerator::dedispersionData( float dedispersionMeasure ) {
     /// generate stokes data and process it using the dedispersion module
     double dedispersionStep = 0.1;
@@ -118,6 +119,7 @@ DedispersionSpectra* DedispersionDataGenerator::dedispersionData( float dedisper
 
     return outputData;
 }
+#endif
 
 void DedispersionDataGenerator::copyData( DataBlob* in, DedispersionSpectra* out ) const {
      *out = *(static_cast<DedispersionSpectra*>(in));
