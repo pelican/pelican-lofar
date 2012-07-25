@@ -68,12 +68,18 @@ class DedispersionSpectra : public DataBlob
         inline int timeSamples() const { return _timeBins; }
 
         double getTime( unsigned int sampleNumber ) const;
+        /// Return the rms of the data if it has been set;
+        float getRMS() const { return _rms; }
+
+        /// Set the rms of the data;                                                                                           
+        void setRMS(float rms) { _rms = rms; }
 
     private:
         BinMap _dmBin;
         unsigned _timeBins;
         unsigned _dedispersionBins;
         unsigned _firstSampleNumber;
+        float _rms;
         QVector<float> _data;
         QList<SpectrumDataSetStokes* > _inputBlobs;
 };

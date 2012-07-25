@@ -51,6 +51,8 @@ set(lib_src
 if(LOFAR_DAL_FOUND)
     list(APPEND lib_src
             src/H5_LofarBFDataWriter.cpp
+            src/H5_LofarBFStokesWriter.cpp
+            src/H5_LofarBFVoltageWriter.cpp
         )
     set(lofar_dal_libs
             ${LOFAR_DAL_LIBRARIES}

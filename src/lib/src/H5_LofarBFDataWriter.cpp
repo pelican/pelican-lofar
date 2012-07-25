@@ -48,13 +48,13 @@ H5_LofarBFDataWriter::H5_LofarBFDataWriter(const ConfigNode& configNode )
       }
       else{
         if (_clock == 200)
-          _fch1     = 100 + _clock / (_nRawPols * _nTotalSubbands) * _topsubband;
+          _fch1 = 100 + _clock / (_nRawPols * _nTotalSubbands) * _topsubband;
         if (_clock == 160)
-          _fch1     = 160 + _clock / (_nRawPols * _nTotalSubbands) * _topsubband;
+          _fch1 = 160 + _clock / (_nRawPols * _nTotalSubbands) * _topsubband;
       }
     }
     else{
-      _fch1     = configNode.getOption("fch1", "value", "1400.0").toFloat();
+      _fch1 = configNode.getOption("fch1", "value", "1400.0").toFloat();
     }
 
     // Number of polarisations to write out, 1 for total power or 4
@@ -79,6 +79,7 @@ H5_LofarBFDataWriter::H5_LofarBFDataWriter(const ConfigNode& configNode )
     }
 
     _maxdims.resize(2);
+    _separateFiles = true; // only separte files/pol currently supported
 }
 
 // Destructor
@@ -114,7 +115,7 @@ void H5_LofarBFDataWriter::_setPolsToWrite( unsigned n ) {
     _fileBegin.resize(n);
 }
 
-void H5_LofarBFDataWriter::_writeHeader(SpectrumDataSetStokes* stokes){
+void H5_LofarBFDataWriter::_writeHeader(SpectrumDataSetBase* stokes){
     time_t _timeStamp = stokes->getLofarTimestamp();
     TimeStamp timeStamp( _timeStamp );
     double _mjdStamp = timeStamp.mjd();
@@ -219,9 +220,8 @@ void H5_LofarBFDataWriter::_writeHeader(SpectrumDataSetStokes* stokes){
       beam.channelWidthUnit()  .value = "MHz";
 
       std::vector<std::string> stokesVars;
-      int stokesType=STOKES_I;
       int stokesNr=0; // only write the I part
-      switch(stokesType) {
+      switch(_stokesType) {
         case STOKES_I:
           stokesVars.push_back("I");
           break;
@@ -244,7 +244,7 @@ void H5_LofarBFDataWriter::_writeHeader(SpectrumDataSetStokes* stokes){
           throw(QString("H5_LofarBFDataWriter:  INVALID_STOKES"));
           return;
       }
-      beam.complexVoltage().value = stokesType;
+      beam.complexVoltage().value = _complexVoltages;
       std::vector<std::string> stokesComponents(1, stokesVars[stokesNr]);
 
       // Coordinates within Beam
@@ -360,15 +360,13 @@ void H5_LofarBFDataWriter::_updateHeader( int pol ) {
 // Write data blob to disk
 void H5_LofarBFDataWriter::sendStream(const QString& /*streamName*/, const DataBlob* incoming)
 {
-    SpectrumDataSetStokes* stokes;
+    SpectrumDataSetBase* stokes;
     DataBlob* blob = const_cast<DataBlob*>(incoming);
 
-    if( (stokes = (SpectrumDataSetStokes*) dynamic_cast<SpectrumDataSetStokes*>(blob))){
-        unsigned nSamples = stokes->nTimeBlocks();
+    if( (stokes = (SpectrumDataSetBase*) dynamic_cast<SpectrumDataSetBase*>(blob))){
         unsigned nSubbands = stokes->nSubbands();
         unsigned nChannels = stokes->nChannels();
         unsigned nPolarisations = stokes->nPolarisations();
-        float const * data = stokes->data();
 
         // check format of stokes is consistent with the current stream
         // if not then we close the existing stream and open up a new one
@@ -379,85 +377,16 @@ void H5_LofarBFDataWriter::sendStream(const QString& /*streamName*/, const DataB
             // start the new stream if the data has changed
             _writeHeader(stokes);
         }
+        _writeData( stokes ); // subclass actually writes the data
 
-
-        switch (_nBits) {
-            case 32: {
-                    for (unsigned t = 0; t < nSamples; ++t) {
-                        for (unsigned p = 0; p < _nPols; ++p) {
-                            for (int s = nSubbands - 1; s >= 0 ; --s) {
-                                long index = stokes->index(s, nSubbands, 
-                                          p, nPolarisations, t, nChannels );
-                                for(int i = nChannels - 1; i >= 0 ; --i) {
-                                _file[p]->write(reinterpret_cast<const char*>(&data[index + i]), 
-                                            sizeof(float));
-                                }
-                            }
-                        }
-                    }
-                }
-                break;
-            case 8: {
-                    for (unsigned t = 0; t < nSamples; ++t) {
-                        for (unsigned p = 0; p < _nPols; ++p) {
-                            for (int s = nSubbands - 1; s >= 0 ; --s) {
-                                long index = stokes->index(s, nSubbands, 
-                                          p, nPolarisations, t, nChannels );
-                                for(int i = nChannels - 1; i >= 0 ; --i) {
-                                    int ci;
-                                    _float2int(&data[index + i],&ci);
-                                    _file[p]->write((const char*)&ci,sizeof(unsigned char));
-                                }
-                            }
-                        }
-                    }
-                }
-                break;
-            default:
-                throw(QString("H5_LofarBFDataWriter: %1 bit datafiles not yet supported"));
-                break;
-        }
+        // flush the file streams
         for (unsigned p = 0; p < _nPols; ++p) {
            _file[p]->flush();
         }
-/*
-        for (unsigned t = 0; t < nSamples; ++t) {
-            for (unsigned p = 0; p < _nPols; ++p) {
-                for (int s = nSubbands - 1; s >= 0 ; --s) {
-                    data = stokes->spectrumData(t, s, p);
-                    for(int i = nChannels - 1; i >= 0 ; --i) {
-                        switch (_nBits) {
-                            case 32:
-                                _file.write(reinterpret_cast<const char*>(&data[i]), sizeof(float));
-                                break;
-                            case 8:
-                                int ci = ;
-                                _float2int(&data[i],1,8,_scaleMin,_scaleMax,&ci);
-                                _file.write((const char*)&ci,sizeof(unsigned char));
-                                break;
-                            default:
-                                throw(QString("H5_LofarBFDataWriter:"));
-                                break;
-                        }
-                    }
-                }
-            }
-        }
-*/
-    }
-    else {
-        std::cerr << "H5_LofarBFDataWriter::send(): "
-                "Only SpectrumDataSetStokes data can be written by the SigprocWriter" << std::endl;
-        return;
     }
 }
 
-void H5_LofarBFDataWriter::_float2int(const float *f, int *i)
-{
-    float ftmp;
-    ftmp = (*f>_cropMax)? (_cropMax) : *f;
-    *i = (ftmp<_cropMin) ? 0 : (int)rint((ftmp-_cropMin)*_nRange/_scaleDelta);
-}
+
 
 } // namepsace lofar
 } // namepsace pelican
