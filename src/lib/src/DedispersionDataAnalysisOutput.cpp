@@ -79,7 +79,7 @@ void DedispersionDataAnalysisOutput::sendStream(const QString& /*streamName*/, c
             foreach( const DedispersionEvent& e, data->events() ) {
                 double mjdStamp = (e.getTime()-_epoch)/86400 + 55562.0;
                 float SNR = e.amplitude()/rms;
-                *out << left << mjdStamp << ",   " << e.dm() << ", " << e.amplitude() << "\n";
+                *out << left << mjdStamp << ",   " << e.dm() << ", " << SNR << "\n";
             }
             out->flush();
         }
