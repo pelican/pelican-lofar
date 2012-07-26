@@ -354,6 +354,7 @@ void H5_LofarBFDataWriter::_writeHeader(SpectrumDataSetBase* stokes){
       stokesDS.nofChannels().value = std::vector<unsigned>(_nSubbands, _nChannels);
       stokesDS.nofSubbands().value = _nSubbands;
       stokesDS.nofSamples().value = dims[0];
+      _bfFiles[i]->flush();
     }
 }
 
@@ -366,6 +367,7 @@ void H5_LofarBFDataWriter::_updateHeader( int pol ) {
         // update the data dimensions according to the file size
         _maxdims[0] = (_file[pol]->tellp() - _fileBegin[pol])/(_maxdims[1] * _nBits/8);
         stokesDS.resize( _maxdims );
+        _bfFiles[pol]->flush();
     }
 }
 
