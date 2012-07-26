@@ -328,11 +328,11 @@ void H5_LofarBFDataWriter::_writeHeader(SpectrumDataSetBase* stokes){
       DAL::BF_StokesDataset stokesDS = beam.stokes(stokesNr);
       std::vector<ssize_t> dims(2);
 
-      dims[0] = 0; // no data yet
-      dims[1] = _nTotalSubbands;
+      dims[0] = 0; //stokes->nTimeBlocks(); // no data yet
+      dims[1] = _nSubbands * _nChannels;
 
       _maxdims[0] = -1; // no fixed length
-      _maxdims[1] = _nTotalSubbands; //itsNrChannels;
+      _maxdims[1] = dims[1];
 
       QString rawBasename = fileName + ".raw";
       _rawFilename[i] = _filePath + "/" + rawBasename;
@@ -342,7 +342,6 @@ void H5_LofarBFDataWriter::_writeHeader(SpectrumDataSetBase* stokes){
                                   // be able to calculate exact data size later
                                   // N.B. using other methods for filesize may only
                                   // be accurate to the nearest disk block/sector
-
       stokesDS.create(dims, _maxdims, rawBasename.toStdString(),
                       (QSysInfo::ByteOrder == QSysInfo::BigEndian) ? 
                                 DAL::BF_StokesDataset::BIG 
@@ -367,6 +366,7 @@ void H5_LofarBFDataWriter::_updateHeader( int pol ) {
         // update the data dimensions according to the file size
         _maxdims[0] = (_file[pol]->tellp() - _fileBegin[pol])/(_maxdims[1] * _nBits/8);
         stokesDS.resize( _maxdims );
+        stokesDS.nofSamples().value = _maxdims[0];
         _bfFiles[pol]->flush();
     }
 }
