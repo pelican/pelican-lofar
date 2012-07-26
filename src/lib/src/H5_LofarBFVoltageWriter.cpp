@@ -19,6 +19,8 @@ H5_LofarBFVoltageWriter::H5_LofarBFVoltageWriter( const ConfigNode& config )
     } else {
         _stokesType = STOKES_XXYY;
     }
+    _setPolsToWrite(4); // only support writing all 4 pols
+                        // as _writeData() assumes this to work
 }
 
 /**

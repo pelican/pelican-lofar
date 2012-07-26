@@ -18,7 +18,16 @@ namespace lofar {
  * @brief
  *   Write our Stokes data blobs in Lofar H5 format
  * @details
- * 
+ *     
+ *    <H5_LofarBFStokesWriter>
+ *        <params nPolsToWrite="1" >
+ *              the number of stokes parameters to write
+ *              - each param will be written to a separate
+ *              data file.
+ *        </params>
+ *    </H5_LofarBFStokesWriter>
+ *
+ *   other html tags from the base class should also be set
  */
 
 class H5_LofarBFStokesWriter : public H5_LofarBFDataWriter

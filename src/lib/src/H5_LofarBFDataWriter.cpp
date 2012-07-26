@@ -35,8 +35,6 @@ H5_LofarBFDataWriter::H5_LofarBFDataWriter(const ConfigNode& configNode )
     _integration    = configNode.getOption("integrateTimeBins", "value", "1").toUInt();
     _nBits = configNode.getOption("dataBits", "value", "32").toUInt();
 
-    // Number of polarisations components to write out, 1 - 4
-    _setPolsToWrite(configNode.getOption("params", "nPolsToWrite", "1").toUInt());
 
     // For LOFAR, either 160 or 200, usually 200
     _clock = configNode.getOption("clock", "value", "200").toFloat();
@@ -97,6 +95,8 @@ void H5_LofarBFDataWriter::_setChannels( unsigned n ) {
 void H5_LofarBFDataWriter::_setPolsToWrite( unsigned n ) {
     _nPols = n;
     // clean up existing
+    // n.b only delete _file after calls to 
+    // _updateHeader
     for(int i=0; i < (int)_bfFiles.size(); ++i ) {
         _updateHeader( i );
         if( _separateFiles ) {
@@ -108,6 +108,7 @@ void H5_LofarBFDataWriter::_setPolsToWrite( unsigned n ) {
         }
         delete _bfFiles[i];
     }
+    if( ! _separateFiles ) delete _file[0];
     // setup for new number of pols
     _bfFiles.resize(n);
     _file.resize(n);
@@ -386,12 +387,7 @@ void H5_LofarBFDataWriter::sendStream(const QString& /*streamName*/, const DataB
 
         // check format of stokes is consistent with the current stream
         // if not then we close the existing stream and open up a new one
-        // First thing to check is the number of polarisations are consistent
-        // with that being asked for. Unfortunately the nPolarisations() method
-        // does not mean the same thing in each dataset so we need to call a 
-        // specialisation to tell us how this maps on to the number of components
-        // we want to write out (_nPols)
-        if( _nPols != nPolarisations ) {
+        if( _nPols > nPolarisations ) {
             _setPolsToWrite( nPolarisations );
             _writeHeader(stokes);
         } else if( nSubbands != _nSubbands || nChannels != _nChannels ) {
