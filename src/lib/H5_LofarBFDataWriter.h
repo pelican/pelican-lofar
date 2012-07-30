@@ -30,7 +30,7 @@ class SpectrumDataSetBase;
  *    OutputStreamer that genererates Lofar Beamformed Format
  *    H5 files
  * @details
- *    <H5_LofarBFDataWriter>
+ *    common configuration elements for inheriting classes
  *        <file filepath="dir/to/save/output/files">
  *        <observation id="MyArtemisObservation" />
  *        <LBA_0_or_HBA_1 value="1">
@@ -44,12 +44,6 @@ class SpectrumDataSetBase;
  *            Used to calculate the frequency of the first channel
  *            fch1 - only used if fch1 is not set
  *        </topSubbandIndex>
- *        <params nPolsToWrite="1" >
- *              the number of stokes parameters to write
- *              - each param will be written to a separate
- *              data file.
- *        </params>
- *    </H5_LofarBFDataWriter>
  */
 
 class H5_LofarBFDataWriter : public AbstractOutputStream

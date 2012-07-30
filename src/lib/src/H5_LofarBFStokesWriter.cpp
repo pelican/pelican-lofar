@@ -19,6 +19,9 @@ H5_LofarBFStokesWriter::H5_LofarBFStokesWriter( const ConfigNode& config )
     } else {
         _stokesType = STOKES_IQUV;
     }
+
+    // Number of polarisations components to write out, 1 - 4
+    _setPolsToWrite(config.getOption("params", "nPolsToWrite", "1").toUInt());
 }
 
 /**
