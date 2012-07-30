@@ -39,12 +39,12 @@ int DedispersionAnalyser::analyse( DedispersionSpectra* data,
 
     std::cout << "---------------" << nChannels << " " << nSubbands << std::endl;
     // Calculate the mean
-    double mean = 0.0, stddev = 0.0;
+    //double mean = 0.0, stddev = 0.0;
     double total = 0.0;
 
     QVector<float> dataVector = data->data();
-    int vals=dataVector.size();
     /*
+    int vals=dataVector.size();
     for( int j = 0; j < vals; ++j ) {
         total += dataVector[j];
     }
