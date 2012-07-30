@@ -1,6 +1,7 @@
 #ifndef H5_LOFARBFVOLTAGEWRITER_H
 #define H5_LOFARBFVOLTAGEWRITER_H
 
+#ifdef HDF5_FOUND
 
 #include "H5_LofarBFDataWriter.h"
 
@@ -15,11 +16,11 @@ class SpectrumDataSetC32;
 
 /**
  * @class H5_LofarBFVoltageWriter
- *  
+ *
  * @brief
  *    Class to write out h5 Lofar data format voltages
  * @details
- * 
+ *
  */
 
 class H5_LofarBFVoltageWriter : public H5_LofarBFDataWriter
@@ -36,6 +37,9 @@ class H5_LofarBFVoltageWriter : public H5_LofarBFDataWriter
 
 PELICAN_DECLARE(AbstractOutputStream, H5_LofarBFVoltageWriter)
 
+
 } // namespace lofar
 } // namespace pelican
+
+#endif // HDF5_FOUND
 #endif // H5_LOFARBFVOLTAGEWRITER_H 

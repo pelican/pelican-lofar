@@ -1,6 +1,7 @@
 #ifndef H5_LOFARBFSTOKESWRITER_H
 #define H5_LOFARBFSTOKESWRITER_H
 
+#ifdef HDF5_FOUND
 
 #include "H5_LofarBFDataWriter.h"
 
@@ -14,11 +15,11 @@ namespace lofar {
 
 /**
  * @class H5_LofarBFStokesWriter
- *  
+ *
  * @brief
  *   Write our Stokes data blobs in Lofar H5 format
  * @details
- *     
+ *
  *    <H5_LofarBFStokesWriter>
  *        <params nPolsToWrite="1" >
  *              the number of stokes parameters to write
@@ -43,6 +44,9 @@ class H5_LofarBFStokesWriter : public H5_LofarBFDataWriter
 
 PELICAN_DECLARE(AbstractOutputStream, H5_LofarBFStokesWriter)
 
+
 } // namespace lofar
 } // namespace pelican
+
+#endif // HDF5_FOUND
 #endif // H5_LOFARBFSTOKESWRITER_H 
