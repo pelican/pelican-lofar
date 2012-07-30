@@ -83,6 +83,7 @@ void H5_LofarBFDataWriterTest::test_method()
       QString xml = "<H5_LofarBFDataWriter>\n" +
                     QString("<file filepath=\"%1\"").arg( _testDir->absolutePath() )
                     + " />"
+                    "<checkPoint interval=\"1\" />"
                     "</H5_LofarBFDataWriter>";
       ConfigNode c;
       c.setFromString(xml);

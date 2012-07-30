@@ -35,6 +35,7 @@ H5_LofarBFDataWriter::H5_LofarBFDataWriter(const ConfigNode& configNode )
     _integration    = configNode.getOption("integrateTimeBins", "value", "1").toUInt();
     _nBits = configNode.getOption("dataBits", "value", "32").toUInt();
 
+    _checkPoint = configNode.getOption("checkPoint", "interval", "2000" ).toUInt();
 
     // For LOFAR, either 160 or 200, usually 200
     _clock = configNode.getOption("clock", "value", "200").toFloat();
@@ -127,6 +128,7 @@ void H5_LofarBFDataWriter::_setPolsToWrite( unsigned n ) {
     _h5Filename.resize(n);
     _rawFilename.resize(n);
     _fileBegin.resize(n);
+    _count = 0;
 }
 
 void H5_LofarBFDataWriter::_writeHeader(SpectrumDataSetBase* stokes){
@@ -359,6 +361,11 @@ void H5_LofarBFDataWriter::_writeHeader(SpectrumDataSetBase* stokes){
 }
 
 
+void H5_LofarBFDataWriter::_updateHeaders() {
+    for(int i=0; i < (int)_bfFiles.size(); ++i ) {
+        _updateHeader( i );
+    }
+}
 void H5_LofarBFDataWriter::_updateHeader( int pol ) {
     if( _bfFiles[pol] && _file[pol] ) {
         DAL::BF_SubArrayPointing sap = _bfFiles[pol]->subArrayPointing(_sapNr);
@@ -396,9 +403,13 @@ void H5_LofarBFDataWriter::sendStream(const QString& /*streamName*/, const DataB
         }
         _writeData( stokes ); // subclass actually writes the data
 
-        // flush the file streams
-        for (unsigned p = 0; p < _nPols; ++p) {
-           _file[p]->flush();
+        // force save to disk at the checkPoint interval
+        if( ++_count%_checkPoint == 0 ) {
+            // flush the file streams
+            for (unsigned p = 0; p < _nPols; ++p) {
+               _file[p]->flush();
+            }
+            _updateHeaders();
         }
     }
 }
