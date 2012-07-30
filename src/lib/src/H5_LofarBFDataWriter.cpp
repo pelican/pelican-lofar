@@ -24,7 +24,9 @@ H5_LofarBFDataWriter::H5_LofarBFDataWriter(const ConfigNode& configNode )
         _nChannels(0), _nSubbands(0), _nPols(0)
 {
     _filePath = configNode.getOption("file", "filepath", ".");
-    _observationID= configNode.getOption("observation", "id", "");
+    _label = _clean( configNode.getOption("file", "label", "") );
+    if( _label != "" ) _label = "_" + _label;
+    _observationID= _clean(configNode.getOption("observation", "id", ""));
 
     // By definition for LOFAR RSP boards, the following should not change:
     _nRawPols = configNode.getOption("nRawPolarisations", "value", "2").toUInt();
@@ -84,6 +86,15 @@ H5_LofarBFDataWriter::H5_LofarBFDataWriter(const ConfigNode& configNode )
 H5_LofarBFDataWriter::~H5_LofarBFDataWriter()
 {
     _setPolsToWrite(0);
+}
+
+QString H5_LofarBFDataWriter::_clean( const QString& dirty ) {
+    // ensure dangerous characters are removed for filename
+    QString string = dirty;
+    string.replace(QChar('.'),QChar('_'));
+    string.replace(QChar('/'),QChar('_'));
+    string.replace(QChar(' '),QChar('_'));
+    return string;
 }
 
 void H5_LofarBFDataWriter::_setChannels( unsigned n ) {
@@ -164,7 +175,7 @@ void H5_LofarBFDataWriter::_writeHeader(SpectrumDataSetBase* stokes){
       int version = -1;
       do {
           fileName = "L" + _observationID + QString("_S%1_").arg(i)
-              + timestr + QString("%1Z_bf").arg(++version);
+              + timestr + QString("%1Z%2_bf").arg(++version).arg(_label);
           h5Basename = fileName + QString(".h5");
           tmp = _filePath + "/" + h5Basename;
       } while ( QFile::exists( tmp ) );

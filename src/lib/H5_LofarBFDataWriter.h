@@ -31,7 +31,10 @@ class SpectrumDataSetBase;
  *    H5 files
  * @details
  *    common configuration elements for inheriting classes
- *        <file filepath="dir/to/save/output/files">
+ *        <file filepath="dir/to/save/output/files" label="">
+ *             filepath=directory in which to store files
+ *             label=additional string to add to file name
+ *        </file>
  *        <observation id="MyArtemisObservation" />
  *        <LBA_0_or_HBA_1 value="1">
  *            Define which array this refers to
@@ -72,6 +75,7 @@ class H5_LofarBFDataWriter : public AbstractOutputStream
     protected:
         void _writeHeader(SpectrumDataSetBase* stokes);
         virtual void sendStream(const QString& streamName, const DataBlob* dataBlob);
+        QString _clean( const QString& string );
 
     private:
         // Header helpers
@@ -95,6 +99,7 @@ class H5_LofarBFDataWriter : public AbstractOutputStream
 
     private:
         QString           _filePath;
+        QString           _label;
         QString           _observationID;
         QVector<long>              _fileBegin;
         QVector<DAL::BF_File*>     _bfFiles;
