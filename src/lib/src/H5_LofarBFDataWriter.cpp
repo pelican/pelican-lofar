@@ -31,7 +31,7 @@ H5_LofarBFDataWriter::H5_LofarBFDataWriter(const ConfigNode& configNode )
     // By definition for LOFAR RSP boards, the following should not change:
     _nRawPols = configNode.getOption("nRawPolarisations", "value", "2").toUInt();
     _nTotalSubbands = configNode.getOption("totalComplexSubbands", "value", "512").toUInt();
-
+    _nChannels = configNode.getOption("outputChannelsPerSubband", "value", "128").toUInt();
     // Parameters that change for every observation
     _topsubband     = configNode.getOption("topSubbandIndex", "value", "150").toFloat();
     _integration    = configNode.getOption("integrateTimeBins", "value", "1").toUInt();
@@ -99,7 +99,7 @@ QString H5_LofarBFDataWriter::_clean( const QString& dirty ) {
 void H5_LofarBFDataWriter::_setChannels( unsigned n ) {
     _nChannels = n;
     _nchans= _nChannels * _nSubbands;
-    _tsamp = (_nRawPols * _nTotalSubbands) * _nChannels * _integration / _clock/ 1e6;
+    _tsamp = (_nRawPols * _nTotalSubbands) * _nChannels / _clock/ 1e6;
     _foff = -_clock / (_nRawPols * _nTotalSubbands) / float(_nChannels);
 }
 
@@ -211,9 +211,9 @@ void H5_LofarBFDataWriter::_writeHeader(SpectrumDataSetBase* stokes){
       
       //  -- Telescope Settings --
       bfFile->clockFrequencyUnit().value = "MHz";
-      bfFile->clockFrequency().value = _clock;
+      bfFile->clockFrequency().value = _clock * 1e6;
       bfFile->observationNofBitsPerSample().value = _nBits;
-      bfFile->bandwidth().value = _nSubbands * _foff;
+      bfFile->bandwidth().value = _nSubbands * _nChannels * _foff;
       bfFile->bandwidthUnit().value = "MHz";
       //bfFile->totalIntegrationTime().value = nrBlocks * _integration;
       
@@ -243,11 +243,18 @@ void H5_LofarBFDataWriter::_writeHeader(SpectrumDataSetBase* stokes){
       mytargets.push_back(_sourceName.toStdString() );  // 1 target only
       beam.targets().value=mytargets;
       beam.nofStokes().value = 1;
+      //      beam.nofStokes().value = i; // thisStokes
       beam.channelsPerSubband().value = _nChannels;
       beam.channelWidthUnit()  .value = "MHz";
+      beam.samplingRate().value = 1 / _tsamp;
+      beam.samplingTime().value = _tsamp;
+      beam.subbandWidth().value = -_clock / (_nRawPols * _nTotalSubbands) * 1e6; // Mysteriously, in Hz
+      beam.beamFrequencyCenter().value = _fch1 + 0.5 * _nSubbands * _nChannels * _foff ;
+      beam.observationNofStokes().value = stokes->nPolarisationComponents();
+      
 
       std::vector<std::string> stokesVars;
-      int stokesNr=0; // only write the I part
+      int stokesNr=0; // only write one parameter per file
       switch(_stokesType) {
         case STOKES_I:
           stokesVars.push_back("I");
@@ -272,7 +279,7 @@ void H5_LofarBFDataWriter::_writeHeader(SpectrumDataSetBase* stokes){
           return;
       }
       beam.complexVoltage().value = _complexVoltages;
-      std::vector<std::string> stokesComponents(1, stokesVars[stokesNr]);
+      //      std::vector<std::string> stokesComponents(1, stokesVars[stokesNr]);
 
       // Coordinates within Beam
       DAL::CoordinatesGroup coord = beam.coordinates();
@@ -337,7 +344,8 @@ void H5_LofarBFDataWriter::_writeHeader(SpectrumDataSetBase* stokes){
 
 
       // =============== Stokes Data ================
-      DAL::BF_StokesDataset stokesDS = beam.stokes(stokesNr);
+      //      DAL::BF_StokesDataset stokesDS = beam.stokes(stokesNr);
+      DAL::BF_StokesDataset stokesDS = beam.stokes(i);
       std::vector<ssize_t> dims(2);
 
       dims[0] = 0; //stokes->nTimeBlocks(); // no data yet
@@ -361,7 +369,8 @@ void H5_LofarBFDataWriter::_writeHeader(SpectrumDataSetBase* stokes){
       stokesDS.groupType().value = "bfData";
       stokesDS.dataType() .value = "float";
 
-      stokesDS.stokesComponent().value = stokesVars[stokesNr];
+      //      stokesDS.stokesComponent().value = stokesVars[stokesNr];
+      stokesDS.stokesComponent().value = stokesVars[i];
       stokesDS.nofChannels().value = std::vector<unsigned>(_nSubbands, _nChannels);
       stokesDS.nofSubbands().value = _nSubbands;
       stokesDS.nofSamples().value = dims[0];
@@ -374,7 +383,8 @@ void H5_LofarBFDataWriter::_updateHeader( int pol ) {
     if( _bfFiles[pol] && _file[pol] ) {
         DAL::BF_SubArrayPointing sap = _bfFiles[pol]->subArrayPointing(_sapNr);
         DAL::BF_BeamGroup beam = sap.beam(_beamNr);
-        DAL::BF_StokesDataset stokesDS = beam.stokes(0);
+        //        DAL::BF_StokesDataset stokesDS = beam.stokes(0);
+        DAL::BF_StokesDataset stokesDS = beam.stokes(pol);
         // update the data dimensions according to the file size
         _maxdims[0] = (_file[pol]->tellp() - _fileBegin[pol])/(_maxdims[1] * _nBits/8);
         stokesDS.resize( _maxdims );
@@ -395,7 +405,6 @@ void H5_LofarBFDataWriter::sendStream(const QString& /*streamName*/, const DataB
         unsigned nSubbands = stokes->nSubbands();
         unsigned nChannels = stokes->nChannels();
         unsigned nPolarisations = stokes->nPolarisationComponents();
-
         // check format of stokes is consistent with the current stream
         // if not then we close the existing stream and open up a new one
         if( _nPols > nPolarisations ) {
