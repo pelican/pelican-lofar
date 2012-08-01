@@ -55,6 +55,7 @@ void H5_LofarBFStokesWriterTest::test_method()
       QString xml = "<H5_LofarBFStokesWriter>\n" +
                    QString("<file filepath=\"%1\"").arg( _testDir->absolutePath() )
                     + " />"
+                    "<checkPoint interval=\"1\" />"
                     "</H5_LofarBFStokesWriter>";
       ConfigNode c;
       c.setFromString(xml);

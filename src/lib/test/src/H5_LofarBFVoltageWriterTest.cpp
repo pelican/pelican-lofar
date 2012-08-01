@@ -50,6 +50,7 @@ void H5_LofarBFVoltageWriterTest::test_method()
       QString xml = "<H5_LofarBFVoltageWriter>\n" +
                    QString("<file filepath=\"%1\"").arg( _testDir->absolutePath() )
                     + " />"
+                    "<checkPoint interval=\"1\" />"
                     "</H5_LofarBFVoltageWriter>";
       ConfigNode c;
       c.setFromString(xml);

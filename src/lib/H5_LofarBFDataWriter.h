@@ -80,7 +80,9 @@ class H5_LofarBFDataWriter : public AbstractOutputStream
     private:
         // Header helpers
         void _updateHeader( int polarisation );
+        void _updateHeaders();
         virtual void _writeData( const SpectrumDataSetBase* ) = 0;
+        unsigned int  _count, _checkPoint; // mark number of iterations for checkpointing
 
     protected:
         inline void _float2int(const float *f, int *i);

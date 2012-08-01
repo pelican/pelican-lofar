@@ -14,8 +14,7 @@
 #include "AdapterTimeSeriesDataSet.h"
 #include "TimeSeriesDataSet.h"
 #include "SpectrumDataSet.h"
-#include "H5_LofarBFVoltageWriter.h"
-#include "SigprocStokesWriter.h"
+#include "LofarOutputStreamers.h"
 
 /**
  * @file H5CVPipeline.h
@@ -37,6 +36,7 @@ class H5CVPipeline : public AbstractPipeline
     public:
 	/// Constructor
         H5CVPipeline( const QString& streamIdentifier );
+
 	/// Destructor
         ~H5CVPipeline();
 
