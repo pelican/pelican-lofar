@@ -6,7 +6,7 @@
 #include "pelican/data/DataBlob.h"
 #include <cstring>
 #include <iostream>
-
+#include <time.h>
 namespace pelican {
 
 namespace lofar {
@@ -18,8 +18,15 @@ namespace lofar {
 DedispersionDataAnalysisOutput::DedispersionDataAnalysisOutput( const ConfigNode& configNode )
     : AbstractOutputStream(configNode)
 {
-    QString filename = configNode.getOption("file", "name");
-    // initialise file connections
+    QString filepath = configNode.getOption("file", "name");
+    char timestr[22];
+    time_t     now = time(0);
+    struct tm  tstruct;
+    char       buf[80];
+    tstruct = *localtime(&now);
+    strftime(timestr, sizeof timestr, "D%Y%m%dT%H%M%S", &tstruct );
+    QString filename;
+    filename = filepath + QString("_") + timestr + QString(".dat");
     if( filename != "" )
     {
         addFile( filename );

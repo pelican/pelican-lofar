@@ -1,6 +1,6 @@
 #include "SpectrumDataSet.h"
 #include "SigprocStokesWriter.h"
-
+#include "time.h"
 #include <string>
 #include <cstring>
 #include <iostream>
@@ -82,7 +82,17 @@ SigprocStokesWriter::SigprocStokesWriter(const ConfigNode& configNode )
     }
     // Open file
     _buffer.resize(_buffSize);
-    _file.open(_filepath.toUtf8().data(), std::ios::out | std::ios::binary);
+
+    char timestr[22];
+    time_t     now = time(0);
+    struct tm  tstruct;
+    char       buf[80];
+    tstruct = *localtime(&now);
+    strftime(timestr, sizeof timestr, "D%Y%m%dT%H%M%S", &tstruct );
+    QString fileName;
+    fileName = _filepath + QString("_") + timestr + QString(".dat");
+    //    _file.open(_filepath.toUtf8().data(), std::ios::out | std::ios::binary);
+    _file.open(fileName.toUtf8().data(), std::ios::out | std::ios::binary);
 }
 
 void SigprocStokesWriter::writeHeader(SpectrumDataSetStokes* stokes){
