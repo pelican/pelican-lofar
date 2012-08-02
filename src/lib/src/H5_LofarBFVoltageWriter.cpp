@@ -14,11 +14,15 @@ H5_LofarBFVoltageWriter::H5_LofarBFVoltageWriter( const ConfigNode& config )
     : H5_LofarBFDataWriter( config )
 {
     _complexVoltages = true;
+    /*
     if( _separateFiles ) {
         _stokesType = STOKES_I;
     } else {
         _stokesType = STOKES_XXYY;
     }
+    */
+    _stokesType = STOKES_XXYY; // always the case for complex volts (Chris, we need to talk about this)
+    
     _setPolsToWrite(4); // only support writing all 4 pols
                         // as _writeData() assumes this to work
 }
