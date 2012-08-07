@@ -5,6 +5,7 @@
 #include "SpectrumDataSet.h"
 #include "H5_LofarBFDataWriter.h"
 #include "TimeStamp.h"
+#include "BinMap.h"
 
 #include <string>
 #include <cstring>
@@ -37,7 +38,7 @@ H5_LofarBFDataWriter::H5_LofarBFDataWriter(const ConfigNode& configNode )
     _integration    = configNode.getOption("integrateTimeBins", "value", "1").toUInt();
     _nBits = configNode.getOption("dataBits", "value", "32").toUInt();
 
-    _checkPoint = configNode.getOption("checkPoint", "interval", "2000" ).toUInt();
+    _checkPoint = configNode.getOption("checkPoint", "interval", "20000" ).toUInt();
 
     // For LOFAR, either 160 or 200, usually 200
     _clock = configNode.getOption("clock", "value", "200").toFloat();
@@ -256,7 +257,6 @@ void H5_LofarBFDataWriter::_writeHeader(SpectrumDataSetBase* stokes){
       
 
       std::vector<std::string> stokesVars;
-      int stokesNr=0; // only write one parameter per file
       switch(_stokesType) {
         case STOKES_I:
           stokesVars.push_back("I");
@@ -330,18 +330,23 @@ void H5_LofarBFDataWriter::_writeHeader(SpectrumDataSetBase* stokes){
       spectralCoordinate->referencePixel().value = 0; // not used
       spectralCoordinate->increment()     .value = 0; // not used
       spectralCoordinate->pc()            .value = unitvector; // not used
-/*
-      for( unsigned sb = 0; sb < nrSubbands; ++sb ) {
-        const double subbandBeginFreq = beamCenterFrequencies[sb] - 0.5 * subbandBandwidth;
 
-        for(unsigned ch = 0; ch < itsInfo.nrChannels; ch++) {
-          spectralPixels.push_back(spectralPixels.size());
-          spectralWorld .push_back(subbandBeginFreq + ch * channelBandwidth);
-        }
+      BinMap freqMap( _nSubbands * _nChannels );
+      freqMap.setStart( _fch1 );
+      freqMap.setBinWidth( _foff );
+
+      std::vector<double> spectralWorld;
+      for( unsigned sb = 0; sb < freqMap.numberBins(); ++sb ) {
+          spectralWorld.push_back(freqMap.binStart(sb));
       }
-
+      spectralCoordinate->axisValuesWorld().value = spectralWorld;
+/*
+      // wonder what this is supposed to do?
+      std::vector<unsigned> spectralPixels;
+      for( unsigned sb = 0; sb < freqMap.numberBins(); ++sb ) {
+          spectralPixels.push_back(spectralPixels.size());
+      }
       spectralCoordinate.get()->axisValuesPixel().value = spectralPixels;
-      spectralCoordinate.get()->axisValuesWorld().value = spectralWorld;
 */
 
 
