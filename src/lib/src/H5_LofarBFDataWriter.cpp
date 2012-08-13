@@ -87,6 +87,8 @@ H5_LofarBFDataWriter::H5_LofarBFDataWriter(const ConfigNode& configNode )
 H5_LofarBFDataWriter::~H5_LofarBFDataWriter()
 {
     _setPolsToWrite(0);
+    timerReport(&_writeTimer,"_writeData total");
+    timerReport(&_sendStreamTimer,"_sendStream total");
 }
 
 QString H5_LofarBFDataWriter::_clean( const QString& dirty ) {
@@ -413,6 +415,7 @@ void H5_LofarBFDataWriter::sendStream(const QString& /*streamName*/, const DataB
     SpectrumDataSetBase* stokes;
     DataBlob* blob = const_cast<DataBlob*>(incoming);
 
+    timerStart(&_sendStreamTimer);
     if( (stokes = (SpectrumDataSetBase*) dynamic_cast<SpectrumDataSetBase*>(blob))){
         unsigned nSubbands = stokes->nSubbands();
         unsigned nChannels = stokes->nChannels();
@@ -426,7 +429,9 @@ void H5_LofarBFDataWriter::sendStream(const QString& /*streamName*/, const DataB
             // start the new stream if the data has changed
             _writeHeader(stokes);
         }
+        timerStart(&_writeTimer);
         _writeData( stokes ); // subclass actually writes the data
+        timerUpdate(&_writeTimer);
 
         // force save to disk at the checkPoint interval
         if( ++_count%_checkPoint == 0 ) {
@@ -437,6 +442,7 @@ void H5_LofarBFDataWriter::sendStream(const QString& /*streamName*/, const DataB
             _updateHeaders();
         }
     }
+    timerUpdate(&_sendStreamTimer);
 }
 
 

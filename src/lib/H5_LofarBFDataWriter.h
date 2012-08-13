@@ -14,6 +14,7 @@
 #include <QtCore/QVector>
 #include <QtCore/QList>
 #include <fstream>
+#include "timer.h"
 
 namespace DAL {
   class BF_File;
@@ -114,6 +115,8 @@ class H5_LofarBFDataWriter : public AbstractOutputStream
         int           _nchans, _nTotalSubbands;
         unsigned int  _nRawPols, _nChannels, _nSubbands, _integration, _nPols;
         unsigned int  _nSubbandsToStore, _topsubband, _lbahba, _site, _machine;
+        DEFINE_TIMER( _writeTimer )
+        DEFINE_TIMER( _sendStreamTimer)
 };
 
 void H5_LofarBFDataWriter::_float2int(const float *f, int *i)
