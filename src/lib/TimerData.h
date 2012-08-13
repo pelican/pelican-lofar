@@ -50,11 +50,11 @@ class TimerData
 void TimerData::report( const char* message ) const {
     printf("--------------------Timer Report--------------------\n");
     printf("-- %s\n", message);
-    printf("-- Minimum: %.6f sec\n", timeMin);
-    printf("-- Maximum: %.6f sec\n", timeMax);
-    printf("-- Average: %.6f sec\n", timeAverage);
-    printf("-- Latest: %.6f sec\n", timeElapsed);
-    printf("-- Thread: %.6f sec\n", threadElapsed);
+    printf("-- Minimum: %.8f sec\n", timeMin);
+    printf("-- Maximum: %.8f sec\n", timeMax);
+    printf("-- Average: %.8f sec\n", timeAverage);
+    printf("-- Latest : %.8f sec\n", timeElapsed);
+    printf("-- Thread : %.8f sec\n", threadElapsed);
     printf("-- Counter: %d\n", counter);
     printf("----------------------------------------------------\n");
 }
