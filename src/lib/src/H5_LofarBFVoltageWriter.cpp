@@ -43,18 +43,19 @@ void H5_LofarBFVoltageWriter::_writeData(const SpectrumDataSetBase* d ) {
     unsigned nSubbands = spec->nSubbands();
     unsigned nChannels = spec->nChannels();
     unsigned nPolarisations = spec->nPolarisations();
-    std::complex<float> const* data = spec->data();
+    float const* data = (const float*)spec->data();
 
     switch (_nBits) {
         case 32: {
              for (unsigned t = 0; t < nSamples; ++t) {
                  for (unsigned p = 0; p < nPolarisations; ++p ) {
+                     int pindex=p*2;
                      for (int s = nSubbands - 1; s >= 0 ; --s) {
                          long index = spec->index(s, nSubbands, 
-                                 p, nPolarisations, t, nChannels );
+                                 p, nPolarisations, t, nChannels ) * 2;
                          for(int i = nChannels - 1; i >= 0 ; --i) {
-                             _file[p*2]->write(reinterpret_cast<const char*>(&data[index + i].real()), sizeof(float));
-                             _file[p*2+1]->write(reinterpret_cast<const char*>(&data[index + i].imag()), sizeof(float));
+                             _file[pindex]->write(reinterpret_cast<const char*>(&data[index + i]), sizeof(float));
+                             _file[pindex+1]->write(reinterpret_cast<const char*>(&data[index + i + 1]), sizeof(float));
                          }
                      }
                  }
@@ -66,12 +67,12 @@ void H5_LofarBFVoltageWriter::_writeData(const SpectrumDataSetBase* d ) {
                     for (unsigned p = 0; p < nPolarisations; ++p ) {
                         for (int s = nSubbands - 1; s >= 0 ; --s) {
                             long index = spec->index(s, nSubbands, 
-                                    p, nPolarisations, t, nChannels );
+                                    p, nPolarisations, t, nChannels ) * 2;
                             for(int i = nChannels - 1; i >= 0 ; --i) {
                                 int ci;
-                                _float2int(&data[index + i].real(),&ci);
+                                _float2int(&data[index + i],&ci);
                                 _file[p*2]->write((const char*)&ci,sizeof(unsigned char));
-                                _float2int(&data[index + i].imag(),&ci);
+                                _float2int(&data[index + i + 1],&ci);
                                 _file[p*2+1]->write((const char*)&ci,sizeof(unsigned char));
                             }
                         }
