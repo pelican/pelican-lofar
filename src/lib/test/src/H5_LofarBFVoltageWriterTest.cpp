@@ -58,6 +58,7 @@ void H5_LofarBFVoltageWriterTest::test_method()
       QString rawFile, h5File;
       H5_LofarBFVoltageWriter out( c );
       out.send("data", &data );
+      out.flush();
       for(int pol=0; pol < polMax; ++pol ) {
           rawFile = out.rawFilename( pol );
           h5File = out.metaFilename( pol );
@@ -100,7 +101,7 @@ void H5_LofarBFVoltageWriterTest::test_performance()
       TimerData t;
       int sampleIterations = 10;
       int sampleSize = data.size() * sampleIterations * sizeof(std::complex<float>) * 8;
-      for( int j=0; j<10; ++j ) {
+      for( int j=0; j<15; ++j ) {
           t.tick();
           for(int i=0; i<sampleIterations; ++i ) {
               out.send("data", &data );
