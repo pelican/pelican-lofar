@@ -86,7 +86,6 @@ SigprocStokesWriter::SigprocStokesWriter(const ConfigNode& configNode )
     char timestr[22];
     time_t     now = time(0);
     struct tm  tstruct;
-    char       buf[80];
     tstruct = *localtime(&now);
     strftime(timestr, sizeof timestr, "D%Y%m%dT%H%M%S", &tstruct );
     QString fileName;

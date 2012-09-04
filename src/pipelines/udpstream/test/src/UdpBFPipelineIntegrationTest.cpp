@@ -91,7 +91,7 @@ void UdpBFPipelineIntegrationTest::test_topdownInit()
         // Instantiate a data stream, a packet splitting server,
         // and a suitable Client
         // Expect:
-        // Everything to stay up and data to be propagated doewn the chain
+        // Everything to stay up and data to be propagated down the chain
         //
         data.start();
         CPPUNIT_ASSERT_EQUAL( (unsigned long)0, client1.count() );

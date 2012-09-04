@@ -21,7 +21,7 @@ CorrelationCheckModule::~CorrelationCheckModule()
 {
 }
 
-void CorrelationCheckModule::run(const QMap<QString, RTMS_Data>& map)
+void CorrelationCheckModule::run(const QMap<QString, RTMS_Data>& /*map*/)
 {
     // TODO
 }
