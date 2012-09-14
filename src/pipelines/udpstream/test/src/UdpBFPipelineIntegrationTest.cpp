@@ -99,7 +99,7 @@ void UdpBFPipelineIntegrationTest::test_topdownInit()
         startServer();
         client1.startup();
         client2.startup();
-        while( ! client1.count() ) { QCoreApplication::processEvents(); usleep(5); }
+        while( ! client1.count() ) { QCoreApplication::processEvents(QEventLoop::WaitForMoreEvents, 10); }
         clientCalledCount1 = client1.count();
         CPPUNIT_ASSERT( clientCalledCount1 >= 1 );
 
@@ -113,7 +113,7 @@ void UdpBFPipelineIntegrationTest::test_topdownInit()
         data.wait();
         clientCalledCount1 = client1.count();
         data.start();
-        do { QCoreApplication::processEvents(); usleep(5); }
+        do { QCoreApplication::processEvents( QEventLoop::WaitForMoreEvents, 10); }
         while( !( clientCalledCount1 < client1.count()) );
         clientCalledCount1 = client1.count();
 
@@ -127,7 +127,7 @@ void UdpBFPipelineIntegrationTest::test_topdownInit()
         startServer();
         sleep(1);
         CPPUNIT_ASSERT( _server->pid() != 0 );
-        do { QCoreApplication::processEvents(); usleep(5); }
+        do { QCoreApplication::processEvents( QEventLoop::WaitForMoreEvents, 10); }
         while( !( clientCalledCount1 < client1.count()) );
         clientCalledCount1 = client1.count();
 
