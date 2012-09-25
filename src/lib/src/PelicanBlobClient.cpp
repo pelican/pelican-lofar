@@ -1,7 +1,7 @@
 // Pelican headers.
 #include "pelican/comms/PelicanClientProtocol.h"
 #include "pelican/comms/StreamDataRequest.h"
-#include "pelican/data/DataRequirements.h"
+#include "pelican/data/DataSpec.h"
 #include "pelican/comms/DataBlobResponse.h"
 #include "pelican/comms/ServerResponse.h"
 
@@ -108,7 +108,7 @@ void PelicanBlobClient::connectToLofarPelican()
 
         // Define the data type which the client will except and send request
         StreamDataRequest req;
-        DataRequirements require;
+        DataSpec require;
         require.setStreamData(_blobType);
         req.addDataOption(require);
 

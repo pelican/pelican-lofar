@@ -4,6 +4,7 @@
 #include "SpectrumDataSet.h"
 #include "TestDir.h"
 #include "pelican/utility/ConfigNode.h"
+#include "TimerData.h"
 
 
 namespace pelican {
@@ -57,6 +58,7 @@ void H5_LofarBFVoltageWriterTest::test_method()
       QString rawFile, h5File;
       H5_LofarBFVoltageWriter out( c );
       out.send("data", &data );
+      out.flush();
       for(int pol=0; pol < polMax; ++pol ) {
           rawFile = out.rawFilename( pol );
           h5File = out.metaFilename( pol );
@@ -72,6 +74,42 @@ void H5_LofarBFVoltageWriterTest::test_method()
           //CPPUNIT_ASSERT_EQUAL( 2 * polarisationSetSize , (int)f.size() );
       }
 
+    } catch( QString& s )
+    {
+        CPPUNIT_FAIL(s.toStdString());
+    }
+}
+
+void H5_LofarBFVoltageWriterTest::test_performance()
+{
+    SpectrumDataSetC32 data;
+    data.resize(128*16,31,2,64); // timeblocks, subbands, pol, channels
+    
+    try {
+        // Use case:
+        // Stream out - most checks are done in the Base class test
+        // so we only need to check that the output file is of the
+        // correct size
+      QString xml = "<H5_LofarBFVoltageWriter>\n" +
+                   QString("<file filepath=\"%1\"").arg( _testDir->absolutePath() )
+                    + " />"
+                    "<checkPoint interval=\"100000\" />"
+                    "</H5_LofarBFVoltageWriter>";
+      ConfigNode c;
+      c.setFromString(xml);
+      H5_LofarBFVoltageWriter out( c );
+      TimerData t;
+      int sampleIterations = 10;
+      int sampleSize = data.size() * sampleIterations * sizeof(std::complex<float>) * 8;
+      for( int j=0; j<15; ++j ) {
+          t.tick();
+          for(int i=0; i<sampleIterations; ++i ) {
+              out.send("data", &data );
+          }
+          t.tock();
+          float rate = (sampleSize/t.timeElapsed)/1e6;
+          std::cout << "Data Write rate = "  << rate << " MBits/s" << std::endl;
+      }
     } catch( QString& s )
     {
         CPPUNIT_FAIL(s.toStdString());

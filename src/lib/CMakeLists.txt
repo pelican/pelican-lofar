@@ -18,6 +18,7 @@ set(lib_src
     src/EmbraceChunker.cpp
     src/FilterBankHeader.cpp
     src/FilterBankAdapter.cpp
+    src/FileWriter.cpp
     src/OutputHDF5Lofar.cpp
     src/GPU_Job.cpp
     src/GPU_Resource.cpp

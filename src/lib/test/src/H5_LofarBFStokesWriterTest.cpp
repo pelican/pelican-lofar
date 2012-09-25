@@ -62,6 +62,7 @@ void H5_LofarBFStokesWriterTest::test_method()
       QString rawFile, h5File;
       H5_LofarBFStokesWriter out( c );
       out.send("data", spectrumData[0] );
+      out.flush();
       rawFile = out.rawFilename( pol );
       h5File = out.metaFilename( pol );
       QFile f(rawFile);
@@ -71,6 +72,7 @@ void H5_LofarBFStokesWriterTest::test_method()
       CPPUNIT_ASSERT_EQUAL( (int)(spectrumData[0]->size() * sizeof(float)), (int)f.size() ); 
       // add more data to verify file grows
       out.send("data", spectrumData[1] );
+      out.flush();
       CPPUNIT_ASSERT_EQUAL( (int)(spectrumData[0]->size() + spectrumData[1]->size()) * (int)sizeof(float) , (int)f.size() );
 
     } catch( QString& s )

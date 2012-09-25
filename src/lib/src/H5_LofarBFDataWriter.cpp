@@ -123,18 +123,20 @@ void H5_LofarBFDataWriter::_setPolsToWrite( unsigned n ) {
         }
         delete _bfFiles[i];
     }
-    if( ! _separateFiles ) delete _file[0];
+    if( ! _separateFiles ) {
+        delete _file[0];
+    }
     // setup for new number of pols
     _bfFiles.resize(n);
     _file.resize(n);
     if( _separateFiles ) {
         for(int i=0; i<_file.size(); ++i ) {
-           _file[i] = new std::ofstream;
+           _file[i] = new fileType;
         }
     }
     else {
         // redirect all ofstreams to the same file
-        _file[0] = new std::ofstream;
+        _file[0] = new fileType;
         for(int i=1; i<_file.size(); ++i ) {
             _file[i] = _file[0];
         }
@@ -365,8 +367,8 @@ void H5_LofarBFDataWriter::_writeHeader(SpectrumDataSetBase* stokes){
 
       QString rawBasename = fileName + ".raw";
       _rawFilename[i] = _filePath + "/" + rawBasename;
-      _file[i]->open(_rawFilename[i].toStdString().c_str(),
-                        std::ios::out | std::ios::binary);
+      _file[i]->open(_rawFilename[i].toStdString().c_str());
+                        //std::ios::out | std::ios::binary);
       _fileBegin[i] = _file[i]->tellp(); // store storage loc of first byte to 
                                   // be able to calculate exact data size later
                                   // N.B. using other methods for filesize may only
@@ -435,17 +437,18 @@ void H5_LofarBFDataWriter::sendStream(const QString& /*streamName*/, const DataB
 
         // force save to disk at the checkPoint interval
         if( ++_count%_checkPoint == 0 ) {
-            // flush the file streams
-            for (unsigned p = 0; p < _nPols; ++p) {
-               _file[p]->flush();
-            }
             _updateHeaders();
         }
     }
     timerUpdate(&_sendStreamTimer);
 }
 
-
+void H5_LofarBFDataWriter::flush() {
+    for (unsigned p = 0; p < _nPols; ++p) {
+       _file[p]->flush();
+    }
+    _updateHeaders();
+}
 
 } // namepsace lofar
 } // namepsace pelican

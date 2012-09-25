@@ -132,6 +132,30 @@ RFI_Clipper::~RFI_Clipper()
    *
    */
 
+static inline void clipSample( SpectrumDataSetStokes* stokesAll, float* W, unsigned t ) {
+    float* I = stokesAll->data();
+    unsigned nSubbands = stokesAll->nSubbands();
+    unsigned nPolarisations= stokesAll->nPolarisations();
+    unsigned nChannels= stokesAll->nChannels();
+    // Clip entire spectrum
+    for (unsigned s = 0; s < nSubbands; ++s) {
+        long index = stokesAll->index(s, nSubbands,
+                0, nPolarisations,
+                t, nChannels );
+        for (unsigned c = 0; c < nChannels; ++c) {
+            I[index + c] = 0.0;
+            W[index + c] = 0.0;
+            for(unsigned int pol = 1; pol < nPolarisations; ++pol ) {
+                long index = stokesAll->index(s, nSubbands,
+                        pol, nPolarisations, t, nChannels );
+                I[index + c] = 0.0;
+                W[index +c] = 0.0;
+            }
+        }
+    }
+}
+
+
 // RFI clipper to be used with Stokes-I out of Stokes Generator
 //void RFI_Clipper::run(SpectrumDataSetStokes* stokesAll)
 void RFI_Clipper::run( WeightedSpectrumDataSet* weightedStokes )
@@ -304,6 +328,8 @@ void RFI_Clipper::run( WeightedSpectrumDataSet* weightedStokes )
         }
 
         // Clip entire spectrum
+        clipSample( stokesAll, W, t );
+/*
         for (unsigned s = 0; s < nSubbands; ++s) {
           long index = stokesAll->index(s, nSubbands,
                                       0, nPolarisations,
@@ -319,6 +345,7 @@ void RFI_Clipper::run( WeightedSpectrumDataSet* weightedStokes )
             }
           }
         }
+*/
 
       }
       else {
@@ -372,6 +399,7 @@ void RFI_Clipper::run( WeightedSpectrumDataSet* weightedStokes )
         // if the buffer isn't full, update the average properly
         if (_num != _maxHistory ) {
             //          _runningMedian = (_runningMedian * (float) _num + median)/(float) (_num+1);
+            clipSample( stokesAll, W, t );
             _runningMedian = (_runningMedian * (float) _num + medianDelta)/(float) (_num+1);
             _runningRMS = (_runningRMS * (float) _num + spectrumRMS)/(float) (_num+1);
             // store the integral of _historyNewSum and _historyNewSum^2 from the buffer

@@ -26,12 +26,12 @@ set(pipelineTest_src
 if(CUDA_FOUND)
     list(APPEND pipelineTest_src
          src/DedispersionPipelineTest.cpp
-	)
+)
 endif(CUDA_FOUND)
 
 set( pipelineTest_moc_headers
      LofarTestClient.h
-   )
+)
 
 QT4_WRAP_CPP(pipelineTest_src ${pipelineTest_moc_headers})
 

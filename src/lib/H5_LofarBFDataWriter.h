@@ -14,6 +14,7 @@
 #include <QtCore/QVector>
 #include <QtCore/QList>
 #include <fstream>
+#include "FileWriter.h"
 #include "timer.h"
 
 namespace DAL {
@@ -72,6 +73,8 @@ class H5_LofarBFDataWriter : public AbstractOutputStream
                 if( polarisation > (int)_nPols ) return "";
                 return _h5Filename[polarisation]; 
         }
+        // ensure all data is flushed to disk
+        void flush();
 
     protected:
         void _writeHeader(SpectrumDataSetBase* stokes);
@@ -92,9 +95,11 @@ class H5_LofarBFDataWriter : public AbstractOutputStream
         inline unsigned polsToWrite() const { return _nPols; }
 
     protected:
+        //typedef   std::ofstream fileType;
+        typedef   FileWriter fileType;
         bool          _complexVoltages;
         unsigned int  _nBits;
-        QVector<std::ofstream*>    _file;
+        QVector<fileType*>    _file;
         bool    _separateFiles; 
         StokesType        _stokesType;
 

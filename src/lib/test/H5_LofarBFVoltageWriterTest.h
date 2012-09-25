@@ -28,6 +28,7 @@ class H5_LofarBFVoltageWriterTest : public CppUnit::TestFixture
     public:
         CPPUNIT_TEST_SUITE( H5_LofarBFVoltageWriterTest );
         CPPUNIT_TEST( test_method );
+        //CPPUNIT_TEST( test_performance ); // not on by default
         CPPUNIT_TEST_SUITE_END();
 
     public:
@@ -36,6 +37,7 @@ class H5_LofarBFVoltageWriterTest : public CppUnit::TestFixture
 
         // Test Methods
         void test_method();
+        void test_performance();
 
     public:
         H5_LofarBFVoltageWriterTest(  );

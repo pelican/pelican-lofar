@@ -24,6 +24,9 @@ LofarDataBlobGenerator::LofarDataBlobGenerator( const ConfigNode& configNode,
     _nChannels = 32;
     _nSamples = 6400;
     _counter = 0;
+    _availableStreams.addStreamData( "TimeSeriesDataSetC32" );
+    _availableStreams.addStreamData( "LofarTimeStream1" );
+    _availableStreams.addStreamData( "LofarTimeStream2" );
 }
 
 /**
@@ -37,7 +40,7 @@ AbstractDataClient::DataBlobHash LofarDataBlobGenerator::getData(
         AbstractDataClient::DataBlobHash& dataHash ) {
     DataBlobHash validHash;
 
-    foreach(const DataRequirements& req, dataRequirements()) {
+    foreach(const DataSpec& req, dataRequirements()) {
         foreach(const QString& type, req.serviceData() )
         {
             if( ! dataHash.contains(type) )
@@ -55,6 +58,9 @@ AbstractDataClient::DataBlobHash LofarDataBlobGenerator::getData(
     return validHash;
 }
 
+const DataSpec& LofarDataBlobGenerator::dataSpec() const {
+    return _availableStreams;
+}
 
 TimeSeriesDataSetC32* LofarDataBlobGenerator::generateTimeSeriesData( TimeSeriesDataSetC32* timeSeries ) const {
     // if weve seen this object before don't regenrate it 
@@ -68,10 +74,11 @@ TimeSeriesDataSetC32* LofarDataBlobGenerator::generateTimeSeriesData( TimeSeries
 
     // Generate channel profile by scanning though frequencies.
     unsigned nSteps   = 1000;     // Number of steps in profile.
-    double sampleRate = 50.0e6; // Hz
+    double sampleRate = 10.0e6; // Hz
     double startFreq  = 8.0e6;   // Hz
     double freqInc    = 0.01e6;    // Frequency increment of profile steps.
     std::vector<double> freqs(nSteps);
+    timeSeries->setBlockRate(1.0 / nBlocks);
 
     for (unsigned k = 0; k < nSteps; ++k)
     {
