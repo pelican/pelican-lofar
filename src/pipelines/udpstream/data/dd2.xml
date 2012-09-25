@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE pelican>
+
+<configuration version="1.0">
+
+  <pipeline>
+
+    <clients>
+      <PelicanServerClient>
+        <server host="127.0.0.1" port="2000"/>
+        <data type="LofarTimeStream2" adapter="AdapterTimeSeriesDataSet"/>
+      </PelicanServerClient>
+    </clients>
+
+    <adapters>
+      <AdapterTimeSeriesDataSet>
+        <subbandsPerPacket value="30"/> <!-- 31 or 61 or 62 -->
+        <import file="/data/Commissioning/Brenda/mycommon.xml"/>
+        <!--   -->
+        <fixedSizePackets value="false" />
+      </AdapterTimeSeriesDataSet>
+    </adapters>
+
+    <pipelineConfig>
+         <DedispersionPipeline>
+             <history value="1280" />
+         </DedispersionPipeline>
+    </pipelineConfig>
+
+    <modules>
+      <PPFChanneliser>
+        <import file="/data/Commissioning/Brenda/mycommon.xml"/>
+        <!--   -->
+        <processingThreads value="6" />
+        <filter nTaps="8" filterWindow="kaiser"/>
+      </PPFChanneliser>
+
+      <StokesGenerator>
+      </StokesGenerator>
+
+      <RFI_Clipper active="true" channelRejectionRMS="3.5"
+                   spectrumRejectionRMS="6.0">
+	<zeroDMing active="true" />
+	<BandPassData file="/data/Commissioning/Brenda/band220-249.bp" />
+	<Band matching="true" />
+	<History maximum="50000" />
+      </RFI_Clipper>
+
+      <DedispersionModule>
+	 <sampleNumber value="8192" />
+	 <frequencyChannel1 MHz="142.96875"/>
+	 <sampleTime seconds="0.00032768"/>
+	 <channelBandwidth MHz="0.003051757812"/>
+	 <dedispersionSamples value="1500" />
+	 <dedispersionStepSize value="0.1" />
+	 <dedispersionMinimum value="0.0" />
+	 <numberOfBuffers value="3" />
+      </DedispersionModule>
+
+      <DedispersionAnalyser>
+        <detectionThreshold in_sigma="6.0" />
+      </DedispersionAnalyser>
+
+      <StokesIntegrator>
+        <import file="/data/Commissioning/Brenda/mycommon.xml"/>
+      </StokesIntegrator>
+
+    </modules>
+
+    <output>
+
+      <dataStreams>
+        <!-- <stream name="SpectrumDataSetStokes" listeners="PelicanTCPBlobServer" />  -->
+	<!--stream name="LofarTimeStream1" listeners="DataBlobFile" /> -->
+        <!--stream name="SpectrumDataSetStokes" listeners="SigprocStokesWriter"/> -->
+	<stream name="DedispersionDataAnalysis" listeners="DedispersionDataAnalysisOutput" />
+	<stream name="SignalFoundSpectrum" listeners="SigprocStokesWriter" />
+      </dataStreams>
+
+      <streamers>
+        <!-- <PelicanTCPBlobServer active="true" >
+             <connection port="6969" />
+        </PelicanTCPBlobServer>
+        -->
+	<DataBlobFile active="false">
+	  <file name="timeseriesStream1.data" type="homogeneous" />
+	</DataBlobFile>
+        <SigprocStokesWriter active="true" writeHeader="false">
+          <import file="/data/Commissioning/Brenda/mycommon.xml"/>
+            <dataBits value="32" />
+	      <scale max="100" min="0" />
+          <topSubbandIndex value="280"/>
+          <LBA_0_or_HBA_1 value="1" />
+          <subbandsPerPacket value="30"/>
+          <!-- -->
+          <file filepath="/data/Commissioning/Brenda/Vivace1/2012-08-13/test2" /><!--Change-->
+          <params telescope="LOFAR" nPolsToWrite="1"/><!--Change-->
+          <RAJ value="033259.36" />
+          <DecJ value="543443.57"/>
+          <TelescopeID value="3"/>
+          <MachineID value="10"/>
+        </SigprocStokesWriter>
+	<DedispersionDataAnalysisOutput active="true">
+          <file name="/data/Commissioning/Brenda/Vivace1/2012-08-13/dm2" />
+	</DedispersionDataAnalysisOutput>
+      </streamers>
+      
+    </output>
+
+  </pipeline>
+</configuration>
