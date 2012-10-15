@@ -23,17 +23,20 @@ class DedispersionSpectra;
 class DedispersionEvent
 {
     public:
-        DedispersionEvent( int dmIndex, unsigned timeIndex, const DedispersionSpectra* data );
+  DedispersionEvent( int dmIndex, unsigned timeIndex, const DedispersionSpectra* data, float mfBinFactor, float mfBinValue );
         ~DedispersionEvent();
         unsigned timeBin() const;
         double getTime() const;
         float dm() const;
         float amplitude() const;
+        float mfValue() const;
+        float mfBinning() const;
 
     private:
         int _dm;
         unsigned _time;
         const DedispersionSpectra* _data;
+        float _mfBinValue, _mfBinFactor;
 };
 
 } // namespace lofar

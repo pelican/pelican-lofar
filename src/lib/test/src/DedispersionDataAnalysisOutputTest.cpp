@@ -49,7 +49,7 @@ void DedispersionDataAnalysisOutputTest::test_method()
     data.setInputDataBlobs( sblobs );
     DedispersionDataAnalysis blob1;
     blob1.reset(&data);
-    blob1.addEvent( 1, 1);
+    blob1.addEvent( 1, 1, 1, 1);
     CPPUNIT_ASSERT_EQUAL( 1, blob1.eventsFound() );
     ConfigNode config;
     {

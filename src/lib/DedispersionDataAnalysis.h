@@ -35,7 +35,7 @@ class DedispersionDataAnalysis : public DataBlob
         ~DedispersionDataAnalysis();
 
         /// add an event
-        void addEvent( unsigned dm, unsigned timeBin );
+        void addEvent( unsigned dm, unsigned timeBin, float mfBinFactor, float mfBinValue );
 
         /// return the number of events found
         int eventsFound() const; 

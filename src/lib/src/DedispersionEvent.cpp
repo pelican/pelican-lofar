@@ -10,8 +10,8 @@ namespace lofar {
 /**
  *@details DedispersionEvent 
  */
-DedispersionEvent::DedispersionEvent( int dmIndex, unsigned timeIndex, const DedispersionSpectra* d )
-      : _dm(dmIndex), _time(timeIndex), _data(d)
+  DedispersionEvent::DedispersionEvent( int dmIndex, unsigned timeIndex, const DedispersionSpectra* d, float mfBinFactor, float mfBinValue )
+  : _dm(dmIndex), _time(timeIndex), _data(d), _mfBinFactor(mfBinFactor), _mfBinValue(mfBinValue)
 {
 }
 
@@ -29,6 +29,16 @@ double DedispersionEvent::getTime() const {
 unsigned DedispersionEvent::timeBin() const
 {
    return _time;
+}
+
+float DedispersionEvent::mfBinning() const
+{
+   return _mfBinFactor;
+}
+
+float DedispersionEvent::mfValue() const
+{
+   return _mfBinValue;
 }
 
 float DedispersionEvent::dm() const
