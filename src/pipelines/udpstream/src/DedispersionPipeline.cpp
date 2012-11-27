@@ -18,8 +18,9 @@ namespace lofar {
 DedispersionPipeline::DedispersionPipeline( const QString& streamIdentifier )
     : AbstractPipeline(), _streamIdentifier(streamIdentifier)
 {
-     _spectra = 0;
+  //     _spectra = 0;
      _stokesBuffer = 0;
+     _rawBuffer = 0;
      _dedispersionModule = 0;
      _dedispersionAnalyser = 0;
      _ppfChanneliser = 0;
@@ -41,6 +42,7 @@ DedispersionPipeline::~DedispersionPipeline()
     delete _dedispersionModule;
     delete _dedispersionAnalyser;
     delete _stokesBuffer;
+    delete _rawBuffer;
     delete _ppfChanneliser;
     delete _rfiClipper;
     delete _stokesIntegrator;
@@ -70,10 +72,12 @@ void DedispersionPipeline::init()
     _dedispersionModule->unlockCallback( boost::bind( &DedispersionPipeline::updateBufferLock, this, _1 ) );
 
     // Create local datablobs
-    _spectra = (SpectrumDataSetC32*) createBlob("SpectrumDataSetC32");
+    //    _spectra = (SpectrumDataSetC32*) createBlob("SpectrumDataSetC32");
+    _spectra = createBlobs<SpectrumDataSetC32>("SpectrumDataSetC32", history);
     _stokesData = createBlobs<SpectrumDataSetStokes>("SpectrumDataSetStokes", history);
     //   _intStokes = (SpectrumDataSetStokes*) createBlob("SpectrumDataSetStokes");
     _stokesBuffer = new LockingPtrContainer<SpectrumDataSetStokes>(&_stokesData);
+    _rawBuffer = new LockingPtrContainer<SpectrumDataSetC32>(&_spectra);
     _weightedIntStokes = (WeightedSpectrumDataSet*) createBlob("WeightedSpectrumDataSet");
 
     // Request remote data
@@ -94,13 +98,17 @@ void DedispersionPipeline::run(QHash<QString, DataBlob*>& remoteData)
     // Generates spectra from a blocks of time series indexed by sub-band
     // and polarisation.
     timerStart(&_ppfTime);
-    _ppfChanneliser->run(timeSeries, _spectra);
+    SpectrumDataSetC32* spectra=_rawBuffer->next();
+    //    _ppfChanneliser->run(timeSeries, _spectra);
+    _ppfChanneliser->run(timeSeries, spectra);
     timerUpdate(&_ppfTime);
 
     // Convert spectra in X, Y polarisation into spectra with stokes parameters.
     timerStart(&_stokesTime);
     SpectrumDataSetStokes* stokes=_stokesBuffer->next();
-    _stokesGenerator->run(_spectra, stokes);
+    //    _stokesGenerator->run(_spectra, stokes);
+    stokes->setRawData(spectra);
+    _stokesGenerator->run(spectra, stokes);
     timerUpdate(&_stokesTime);
 
     // set up a suitable datablob fro the rfi clipper
@@ -152,6 +160,7 @@ void DedispersionPipeline::dedispersionAnalysis( DataBlob* blob ) {
         if (result.eventsFound() > 4){
             foreach( const SpectrumDataSetStokes* d, result.data()->inputDataBlobs()) {
                     dataOutput( d, "SignalFoundSpectrum" );
+		    dataOutput( d->getRawData(), "RawDataFoundSpectrum" );
             }
         }
     }
@@ -161,6 +170,8 @@ void DedispersionPipeline::updateBufferLock( const QList<DataBlob*>& freeData ) 
      // find WeightedDataBlobs that can be unlocked
      foreach( DataBlob* blob, freeData ) {
         Q_ASSERT( blob->type() == "SpectrumDataSetStokes" );
+	// unlock the pointers to the raw buffer
+	_rawBuffer->unlock( static_cast<SpectrumDataSetC32*>(blob)->getRawData() );
         _stokesBuffer->unlock( static_cast<SpectrumDataSetStokes*>(blob) );
      }
 }

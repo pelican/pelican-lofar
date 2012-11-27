@@ -308,6 +308,14 @@ class SpectrumDataSetStokes : public SpectrumDataSet<float>
 
         /// Deserialises the data blob.
         void deserialise(QIODevice&, QSysInfo::Endian);
+
+	/// Methods to link to the associated raw data (spectrumDataSetC32)
+	void setRawData(const SpectrumDataSetC32* raw){ _raw = raw; }
+	const SpectrumDataSetC32* getRawData() const {return _raw;}
+
+    private:
+	const SpectrumDataSetC32* _raw;
+
 };
 
 
