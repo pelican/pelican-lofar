@@ -51,7 +51,9 @@ DedispersionPipeline::~DedispersionPipeline()
     foreach(SpectrumDataSetStokes* d, _stokesData ) {
         delete d;
     }
-    delete _spectra;
+    foreach(SpectrumDataSetC32* d, _spectra) {
+        delete d;
+    }
 }
 
 void DedispersionPipeline::init()
@@ -171,7 +173,7 @@ void DedispersionPipeline::updateBufferLock( const QList<DataBlob*>& freeData ) 
      foreach( DataBlob* blob, freeData ) {
         Q_ASSERT( blob->type() == "SpectrumDataSetStokes" );
 	// unlock the pointers to the raw buffer
-	_rawBuffer->unlock( static_cast<SpectrumDataSetC32*>(blob)->getRawData() );
+	_rawBuffer->unlock( static_cast<SpectrumDataSetStokes*>(blob)->getRawData() );
         _stokesBuffer->unlock( static_cast<SpectrumDataSetStokes*>(blob) );
      }
 }

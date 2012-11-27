@@ -63,6 +63,9 @@ int DedispersionAnalyser::analyse( DedispersionSpectra* data,
     int tdms = data->dmBins();
     int nsamp = data->timeSamples();
 
+    // Add a dummy event to get the timestamp of the first bin in the blob
+    result->addEvent( 0, 0, 1, 0.0 );
+
     for(int dm_count = 0; dm_count < tdms; ++dm_count) {
       QVector<float> outputBin1;
       QVector<float> outputBin2;
@@ -75,6 +78,7 @@ int DedispersionAnalyser::analyse( DedispersionSpectra* data,
       outputBin4.resize(8);
       outputBin8.resize(4);
       outputBin16.resize(2);
+
       //    outputBin8.resize(1);
       
       for(int i=0; i < nsamp/32; ++i) {
@@ -111,7 +115,8 @@ int DedispersionAnalyser::analyse( DedispersionSpectra* data,
         for(int j=0; j < 2; ++j) {
           int index = i*32 + 16*j;
           outputBin16[j]= outputBin8[2*j] + outputBin8[2*j+1];
-          if (outputBin16[j] >= _detectionThreshold * rms * 4){
+          //          if (outputBin16[j] >= _detectionThreshold * rms * 4){
+          if (outputBin16[j] >= _detectionThreshold * rms * 6.0){
             //            result->addEvent( dm_count, index );
             result->addEvent( dm_count, index, 16, outputBin16[j] );
 
@@ -119,7 +124,8 @@ int DedispersionAnalyser::analyse( DedispersionSpectra* data,
         }
         int index = i*32;
         outputBin32 = outputBin16[0] + outputBin16[1];
-        if (outputBin32 >= _detectionThreshold * rms * 5.657){
+        //        if (outputBin32 >= _detectionThreshold * rms * 5.657){
+        if (outputBin32 >= _detectionThreshold * rms * 8.0){
           //          result->addEvent( dm_count, index );
           result->addEvent( dm_count, index, 32, outputBin32);
 
