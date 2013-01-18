@@ -50,10 +50,12 @@ void H5_LofarBFVoltageWriter::_writeData(const SpectrumDataSetBase* d ) {
              for (unsigned t = 0; t < nSamples; ++t) {
                  for (unsigned p = 0; p < nPolarisations; ++p ) {
                      int pindex=p*2;
-                     for (int s = nSubbands - 1; s >= 0 ; --s) {
+                     //                     for (int s = nSubbands - 1; s >= 0 ; --s) {
+                     for (int s = 0; s < nSubbands; ++s) {
                          long index = spec->index(s, nSubbands, 
                                  p, nPolarisations, t, nChannels ) * 2;
-                         for(int i = nChannels - 1; i >= 0 ; --i) {
+                         //                         for(int i = nChannels - 1; i >= 0 ; --i) {
+                         for(int i = 0; i < nChannels ; ++i) {
                              _file[pindex]->write(reinterpret_cast<const char*>(&data[index + i]), sizeof(float));
                              _file[pindex+1]->write(reinterpret_cast<const char*>(&data[index + i + 1]), sizeof(float));
                          }

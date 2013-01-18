@@ -35,7 +35,9 @@ H5CVPipeline::~H5CVPipeline()
  */
 void H5CVPipeline::init()
 {
-    // Create modules
+    ConfigNode c = config( QString("H5Pipeline") );
+    _totalIterations= c.getOption("totalIterations", "value", "10000").toInt();    // Create modules
+    std::cout << _totalIterations << std::endl;
     ppfChanneliser = (PPFChanneliser *) createModule("PPFChanneliser");
     //    stokesGenerator = (StokesGenerator *) createModule("StokesGenerator");
     //    rfiClipper = (RFI_Clipper *) createModule("RFI_Clipper");
@@ -66,7 +68,7 @@ void H5CVPipeline::run(QHash<QString, DataBlob*>& remoteData)
     // This is a block of data containing a number of time series of length
     // N for each sub-band and polarisation.
     timeSeries = (TimeSeriesDataSetC32*) remoteData[_streamIdentifier];
-    //dataOutput( timeSeries, _streamIdentifier);
+    dataOutput( timeSeries, _streamIdentifier);
 
     // Run the polyphase channeliser.
     // Generates spectra from a blocks of time series indexed by sub-band
@@ -90,11 +92,11 @@ void H5CVPipeline::run(QHash<QString, DataBlob*>& remoteData)
 //    stop();
 
     if (_iteration % 100 == 0)
-        cout << "Finished the CV beamforming pipeline, iteration " << _iteration << endl;
+      cout << "Finished the CV beamforming pipeline, iteration " << _iteration << " out of " << _totalIterations << endl;
 
     _iteration++;
 
-    //    if (_iteration > 750000) stop();
+    if (_iteration == _totalIterations) stop();
 }
 
 } // namespace lofar

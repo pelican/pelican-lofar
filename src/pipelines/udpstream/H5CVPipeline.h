@@ -47,6 +47,7 @@ class H5CVPipeline : public AbstractPipeline
         void run(QHash<QString, DataBlob*>& remoteData);
 
     private:
+        int _totalIterations;
         QString _streamIdentifier;
 
         /// Module pointers

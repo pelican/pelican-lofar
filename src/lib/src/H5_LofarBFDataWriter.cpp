@@ -104,7 +104,8 @@ void H5_LofarBFDataWriter::_setChannels( unsigned n ) {
     _nChannels = n;
     _nchans= _nChannels * _nSubbands;
     _tsamp = (_nRawPols * _nTotalSubbands) * _nChannels / _clock/ 1e6;
-    _foff = -_clock / (_nRawPols * _nTotalSubbands) / float(_nChannels);
+    //    _foff = -_clock / (_nRawPols * _nTotalSubbands) / float(_nChannels);
+    _foff = _clock / (_nRawPols * _nTotalSubbands) / float(_nChannels);
 }
 
 void H5_LofarBFDataWriter::_setPolsToWrite( unsigned n ) {
@@ -255,8 +256,10 @@ void H5_LofarBFDataWriter::_writeHeader(SpectrumDataSetBase* stokes){
       beam.channelWidthUnit()  .value = "MHz";
       beam.samplingRate().value = 1 / _tsamp;
       beam.samplingTime().value = _tsamp;
-      beam.subbandWidth().value = -_clock / (_nRawPols * _nTotalSubbands) * 1e6; // Mysteriously, in Hz
-      beam.beamFrequencyCenter().value = _fch1 + 0.5 * _nSubbands * _nChannels * _foff ;
+      //      beam.subbandWidth().value = -_clock / (_nRawPols * _nTotalSubbands) * 1e6; // Mysteriously, in Hz
+      beam.subbandWidth().value = _clock / (_nRawPols * _nTotalSubbands) * 1e6; // Mysteriously, in Hz
+      //      beam.beamFrequencyCenter().value = _fch1 + 0.5 * _nSubbands * _nChannels * _foff - 0.5 * _nChannels * _foff  ;
+      beam.beamFrequencyCenter().value = _fch1 - 0.5 * _nSubbands * _nChannels * _foff + 0.5 * _nChannels * _foff  ;
       beam.observationNofStokes().value = stokes->nPolarisationComponents();
       
 
@@ -336,7 +339,8 @@ void H5_LofarBFDataWriter::_writeHeader(SpectrumDataSetBase* stokes){
       spectralCoordinate->pc()            .value = unitvector; // not used
 
       BinMap freqMap( _nSubbands * _nChannels );
-      freqMap.setStart( _fch1 );
+      //      freqMap.setStart( _fch1 );
+      freqMap.setStart( _fch1 - _nSubbands * _nChannels * _foff );
       freqMap.setBinWidth( _foff );
 
       std::vector<double> spectralWorld;
