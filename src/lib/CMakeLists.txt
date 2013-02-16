@@ -43,6 +43,7 @@ set(lib_src
     src/StokesGenerator.cpp
     src/StokesIntegrator.cpp
     src/SigprocStokesWriter.cpp
+    src/TriggerOutput.cpp
     src/TimerData.cpp
     src/LofarDataSplittingChunker.cpp
     src/WeightedSpectrumDataSet.cpp
