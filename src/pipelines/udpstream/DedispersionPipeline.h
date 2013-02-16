@@ -13,6 +13,7 @@
 #include "TimeSeriesDataSet.h"
 #include "SpectrumDataSet.h"
 #include "SigprocStokesWriter.h"
+#include "TriggerOutput.h"
 #include "DedispersionModule.h"
 #include "DedispersionSpectra.h"
 #include "DedispersionAnalyser.h"

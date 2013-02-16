@@ -159,6 +159,7 @@ void DedispersionPipeline::dedispersionAnalysis( DataBlob* blob ) {
     if ( _dedispersionAnalyser->analyse(data, &result) )
     {
         dataOutput( &result, "DedispersionDataAnalysis" );
+        dataOutput( &result, "TriggerInput" );
         if (result.eventsFound() > 4){
             foreach( const SpectrumDataSetStokes* d, result.data()->inputDataBlobs()) {
                     dataOutput( d, "SignalFoundSpectrum" );
