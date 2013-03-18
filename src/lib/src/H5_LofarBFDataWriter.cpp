@@ -149,7 +149,8 @@ void H5_LofarBFDataWriter::_setPolsToWrite( unsigned n ) {
 }
 
 void H5_LofarBFDataWriter::_writeHeader(SpectrumDataSetBase* stokes){
-    time_t _timeStamp = stokes->getLofarTimestamp();
+    time_t _timeStampLabel = stokes->getLofarTimestamp();
+    double _timeStamp = stokes->getLofarTimestamp();
     TimeStamp timeStamp( _timeStamp );
     double _mjdStamp = timeStamp.mjd();
 
@@ -159,7 +160,7 @@ void H5_LofarBFDataWriter::_writeHeader(SpectrumDataSetBase* stokes){
     // L<Observation ID>_<Optional Descriptors>_<Filetype>.<Extension>
     // Where optional contains: Sx - Stokes value,  and date/time
     char timestr[22];
-    strftime(timestr, sizeof timestr, "D%Y%m%dT%H%M%S.", gmtime(&_timeStamp) );
+    strftime(timestr, sizeof timestr, "D%Y%m%dT%H%M%S.", gmtime(&_timeStampLabel) );
 
     // --- remove any old streams
     for (unsigned i=0; i<_nPols; ++i){
