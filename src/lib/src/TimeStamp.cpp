@@ -9,7 +9,7 @@ namespace lofar {
 /**
  *@details TimeStamp 
  */
-TimeStamp::TimeStamp( time_t t )
+TimeStamp::TimeStamp( double t )
    : _time(t), _mjd(0.0)
 {
 }
@@ -30,7 +30,7 @@ double TimeStamp::mjd() const {
 double TimeStamp::mjdEpoch() {
     struct tm tm;
     // MJD of 1/1/11 is 55562
-    strptime("2011-1-1 1:0:0", "%Y-%m-%d %H:%M:%S", &tm);
+    strptime("2011-1-1 0:0:0", "%Y-%m-%d %H:%M:%S", &tm);
     static time_t _mjdEpoch = mktime(&tm);
     return _mjdEpoch;
 }

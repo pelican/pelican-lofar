@@ -23,16 +23,19 @@ namespace lofar {
 class TimeStamp
 {
     public:
-        TimeStamp( time_t time = 0.0 );
+        TimeStamp( double time = 0.0 );
         ~TimeStamp();
         inline double timestamp() const { return _time; };
         double mjd() const;
         static double mjdEpoch();
 
     private:
-        time_t _time;
-        mutable time_t _mjd;
-        static time_t _mjdEpoch;
+        //        time_t _time;
+        //        mutable time_t _mjd;
+        //        static time_t _mjdEpoch;
+        double _time;
+        mutable double _mjd;
+        static double _mjdEpoch;
 };
 
 } // namespace lofar
