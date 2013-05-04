@@ -105,7 +105,8 @@ void DedispersionModule::resize( const SpectrumDataSet<float>* streamData ) {
     unsigned int nChannels = streamData->nChannels();
     unsigned int nSubbands = streamData->nSubbands();
     unsigned int nPolarisations = streamData->nPolarisations();
-    unsigned sampleSize = nSubbands * nChannels * nPolarisations;
+    //    unsigned sampleSize = nSubbands * nChannels * nPolarisations;
+    unsigned sampleSize = nSubbands * nChannels;
     if( sampleSize != _currentBuffer->sampleSize() ) {
         unsigned maxBuffers = _buffersList.size();
         unsigned maxSamples = _currentBuffer->maxSamples();
@@ -186,8 +187,12 @@ void DedispersionModule::dedisperse( WeightedSpectrumDataSet* weightedData )
     unsigned int sampleNumber = 0; // marker to indicate the number of samples succesfully 
                                    // transferred to the buffer from the Datablob
     unsigned int maxSamples = streamData->nTimeBlocks();
+    float lostData = 0.0;
     do {
         if( _currentBuffer->addSamples( streamData, &sampleNumber ) == 0 ) {
+          lostData = (float)_currentBuffer->numZeros()/(float)_currentBuffer->elements();
+          std::cout << " lost data fraction: " << lostData << std::endl;
+          if (lostData > 0.1) _currentBuffer->fillWithZeros();
             timerStart(&_launchTimer);
             timerStart(&_bufferTimer);
             //(*_currentBuffer)->dump("input.data");

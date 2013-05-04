@@ -88,6 +88,7 @@ unsigned DedispersionBuffer::_addSamples( SpectrumDataSetStokes* streamData,
     unsigned int nChannels = streamData->nChannels();
     unsigned int nSubbands = streamData->nSubbands();
     unsigned int nPolarisations = streamData->nPolarisations();
+    nPolarisations = 1; // dedispersion on total power only
     if( nSubbands * nChannels * nPolarisations != _sampleSize ) {
         std::cerr  << "DedispersionBuffer: input data sample size(" <<  nSubbands * nChannels * nPolarisations
                    << ") does not match buffer sample size (" << _sampleSize << ")" << std::endl;

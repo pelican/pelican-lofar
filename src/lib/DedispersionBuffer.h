@@ -34,7 +34,9 @@ class DedispersionBuffer
 
         size_t size() const { return _timedata.size() * sizeof(float); };
         void setSampleCapacity(unsigned int maxSamples);
-
+        unsigned int numZeros() const { return _timedata.count(0.0); };
+        unsigned int elements() const { return _timedata.size(); };
+        void fillWithZeros() { _timedata.fill(0.0); };
         /// return the max number of samples that can be fitted in the buffer
         //  set with setSampleCapacity
         unsigned maxSamples() const { return _nsamp; }
