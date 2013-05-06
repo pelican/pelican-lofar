@@ -9,6 +9,9 @@
 #include "pelican/utility/ConfigNode.h"
 #include "pelican/utility/pelicanTimer.h"
 #include "omp.h"
+#include <boost/random/mersenne_twister.hpp>
+#include <boost/random/normal_distribution.hpp>
+#include <boost/random/variate_generator.hpp>
 //#include "openmp.h"
 namespace pelican {
 namespace lofar {
@@ -133,6 +136,14 @@ RFI_Clipper::~RFI_Clipper()
    */
 
 static inline void clipSample( SpectrumDataSetStokes* stokesAll, float* W, unsigned t ) {
+    typedef boost::mt19937                     ENG;    // Mersenne Twister
+    typedef boost::normal_distribution<double> DIST;   // Normal Distribution
+    typedef boost::variate_generator<ENG,DIST> GEN;    // Variate generator
+ 
+    ENG  eng;
+    DIST dist(0,1);
+    GEN  gen(eng,dist);
+ 
     float* I = stokesAll->data();
     unsigned nSubbands = stokesAll->nSubbands();
     unsigned nPolarisations= stokesAll->nPolarisations();
@@ -145,12 +156,20 @@ static inline void clipSample( SpectrumDataSetStokes* stokesAll, float* W, unsig
         for (unsigned c = 0; c < nChannels; ++c) {
             I[index + c] = 0.0;
             W[index + c] = 0.0;
+          //            I[index + c] = gen();
+          //            W[index + c] = gen();
+
+            // The following is for clipping the polarization
+            /*
             for(unsigned int pol = 1; pol < nPolarisations; ++pol ) {
                 long index = stokesAll->index(s, nSubbands,
                         pol, nPolarisations, t, nChannels );
-                I[index + c] = 0.0;
-                W[index +c] = 0.0;
+                I[index + c] = gen();
+                W[index + c] = gen();
+                //                I[index + c] = 0.0;
+                //                W[index +c] = 0.0;
             }
+            */
         }
     }
 }
@@ -230,15 +249,19 @@ void RFI_Clipper::run( WeightedSpectrumDataSet* weightedStokes )
           // population of used channels for diagnostic purposes and
           // monitoring
           
-          if (I[index + c] - bandPass[binLocal] - median> margin ) {
+          if (fabs(I[index + c] - bandPass[binLocal] - median)> margin ) {
             I[index + c] = 0.0;
             W[index +c] = 0.0;
+
+            // The following is for polarization
+            /*
             for(unsigned int pol = 1; pol < nPolarisations; ++pol ) {
               long index = stokesAll->index(s, nSubbands,
                                           pol, nPolarisations, t, nChannels );
               I[index + c] = 0.0;
               W[index +c] = 0.0;
             }
+            */
           }
           else{
             
@@ -295,9 +318,9 @@ void RFI_Clipper::run( WeightedSpectrumDataSet* weightedStokes )
       float medianDelta = median + _bandPass.median();
 
 
-      if (fabs(median) > spectrumRMStolerance) {
+      if (fabs(median) > spectrumRMStolerance || goodChannels < 0.5*nChannels) {
       //      if (fabs(spectrumSum) > spectrumRMStolerance) {
-        if (_badSpectra == 0) {
+        /*if (_badSpectra == 0) {
           std::cout 
             << "-------- RFI_Clipper----- Spectrum Average: " << spectrumSum << std::endl
             << " Median DataLevel: " << medianDelta 
@@ -310,7 +333,7 @@ void RFI_Clipper::run( WeightedSpectrumDataSet* weightedStokes )
             << " ModelRMS: " <<  _bandPass.rms() << std::endl
             << " _num:" << _num 
             << std::endl << std::endl;
-        }
+            }*/
 
         //  Count how many bad spectra in a row. If number exceeds
         //  history, then reset model to parameters from bandpass file

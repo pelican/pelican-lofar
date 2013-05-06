@@ -63,75 +63,80 @@ int DedispersionAnalyser::analyse( DedispersionSpectra* data,
     int tdms = data->dmBins();
     int nsamp = data->timeSamples();
 
-    // Add a dummy event to get the timestamp of the first bin in the blob
-    result->addEvent( 0, 0, 1, 0.0 );
+    // Check if the buffer is lost
 
-    for(int dm_count = 0; dm_count < tdms; ++dm_count) {
-      QVector<float> outputBin1;
-      QVector<float> outputBin2;
-      QVector<float> outputBin4;
-      QVector<float> outputBin8;
-      QVector<float> outputBin16;
-      float outputBin32;
-      outputBin1.resize(32);
-      outputBin2.resize(16);
-      outputBin4.resize(8);
-      outputBin8.resize(4);
-      outputBin16.resize(2);
-
-      //    outputBin8.resize(1);
-      
-      for(int i=0; i < nsamp/32; ++i) {
-        for(int j=0; j < 32; ++j) {
-          int index = i*32 + j;
-          outputBin1[j]= dataVector[dm_count*nsamp + index]; 
-          if (outputBin1[j] >= _detectionThreshold * rms){
-            result->addEvent( dm_count, index, 1, outputBin1[j] );
+    if ( data->getLost() != 1 )
+      {
+        // Add a dummy event to get the timestamp of the first bin in the blob
+        result->addEvent( 0, 0, 1, 0.0 );
+        
+        for(int dm_count = 0; dm_count < tdms; ++dm_count) {
+          QVector<float> outputBin1;
+          QVector<float> outputBin2;
+          QVector<float> outputBin4;
+          QVector<float> outputBin8;
+          QVector<float> outputBin16;
+          float outputBin32;
+          outputBin1.resize(32);
+          outputBin2.resize(16);
+          outputBin4.resize(8);
+          outputBin8.resize(4);
+          outputBin16.resize(2);
+          
+          //    outputBin8.resize(1);
+          
+          for(int i=0; i < nsamp/32; ++i) {
+            for(int j=0; j < 32; ++j) {
+              int index = i*32 + j;
+              outputBin1[j]= dataVector[dm_count*nsamp + index]; 
+              if (outputBin1[j] >= _detectionThreshold * rms){
+                result->addEvent( dm_count, index, 1, outputBin1[j] );
+              }
+            }
+            for(int j=0; j < 16; ++j) {
+              int index = i*32 + 2*j;
+              outputBin2[j]= outputBin1[2*j] + outputBin1[2*j+1];
+              if (outputBin2[j] >= _detectionThreshold * rms * 1.4142){
+                result->addEvent( dm_count, index, 2, outputBin2[j] );
+              }
+            }
+            for(int j=0; j < 8; ++j) {
+              int index = i*32 + 4*j;
+              outputBin4[j]= outputBin2[2*j] + outputBin2[2*j+1];
+              if (outputBin4[j] >= _detectionThreshold * rms * 2){
+                result->addEvent( dm_count, index, 4, outputBin4[j] );
+                //            result->addEvent( dm_count, index );
+              }
+            }
+            for(int j=0; j < 4; ++j) {
+              int index = i*32 + 8*j;
+              outputBin8[j]= outputBin4[2*j] + outputBin4[2*j+1];
+              if (outputBin8[j] >= _detectionThreshold * rms * 2.8284){
+                result->addEvent( dm_count, index, 8, outputBin8[j] );
+                //            result->addEvent( dm_count, index );
+              }
+            }
+            for(int j=0; j < 2; ++j) {
+              int index = i*32 + 16*j;
+              outputBin16[j]= outputBin8[2*j] + outputBin8[2*j+1];
+              //          if (outputBin16[j] >= _detectionThreshold * rms * 4){
+              if (outputBin16[j] >= _detectionThreshold * rms * 6.0){
+                //            result->addEvent( dm_count, index );
+                result->addEvent( dm_count, index, 16, outputBin16[j] );
+                
+              }
+            }
+            int index = i*32;
+            outputBin32 = outputBin16[0] + outputBin16[1];
+            //        if (outputBin32 >= _detectionThreshold * rms * 5.657){
+            if (outputBin32 >= _detectionThreshold * rms * 8.0){
+              //          result->addEvent( dm_count, index );
+              result->addEvent( dm_count, index, 32, outputBin32);
+              
+            }
           }
-        }
-        for(int j=0; j < 16; ++j) {
-          int index = i*32 + 2*j;
-          outputBin2[j]= outputBin1[2*j] + outputBin1[2*j+1];
-          if (outputBin2[j] >= _detectionThreshold * rms * 1.4142){
-            result->addEvent( dm_count, index, 2, outputBin2[j] );
-          }
-        }
-        for(int j=0; j < 8; ++j) {
-          int index = i*32 + 4*j;
-          outputBin4[j]= outputBin2[2*j] + outputBin2[2*j+1];
-          if (outputBin4[j] >= _detectionThreshold * rms * 2){
-            result->addEvent( dm_count, index, 4, outputBin4[j] );
-            //            result->addEvent( dm_count, index );
-          }
-        }
-        for(int j=0; j < 4; ++j) {
-          int index = i*32 + 8*j;
-          outputBin8[j]= outputBin4[2*j] + outputBin4[2*j+1];
-          if (outputBin8[j] >= _detectionThreshold * rms * 2.8284){
-            result->addEvent( dm_count, index, 8, outputBin8[j] );
-            //            result->addEvent( dm_count, index );
-          }
-        }
-        for(int j=0; j < 2; ++j) {
-          int index = i*32 + 16*j;
-          outputBin16[j]= outputBin8[2*j] + outputBin8[2*j+1];
-          //          if (outputBin16[j] >= _detectionThreshold * rms * 4){
-          if (outputBin16[j] >= _detectionThreshold * rms * 6.0){
-            //            result->addEvent( dm_count, index );
-            result->addEvent( dm_count, index, 16, outputBin16[j] );
-
-          }
-        }
-        int index = i*32;
-        outputBin32 = outputBin16[0] + outputBin16[1];
-        //        if (outputBin32 >= _detectionThreshold * rms * 5.657){
-        if (outputBin32 >= _detectionThreshold * rms * 8.0){
-          //          result->addEvent( dm_count, index );
-          result->addEvent( dm_count, index, 32, outputBin32);
-
         }
       }
-    }
     /*
     for(int dm_count = 0; dm_count < tdms; ++dm_count) {
         for(int j=0; j < nsamp; ++j) {

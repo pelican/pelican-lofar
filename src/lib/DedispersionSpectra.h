@@ -74,12 +74,17 @@ class DedispersionSpectra : public DataBlob
         /// Set the rms of the data;                                                                                           
         void setRMS(float rms) { _rms = rms; }
 
+        /// Set flag for lost data;
+
+        void setLost(unsigned int lost) { _lost = lost; }
+        unsigned int getLost() const { return _lost; }
     private:
         BinMap _dmBin;
         unsigned _timeBins;
         unsigned _dedispersionBins;
         unsigned _firstSampleNumber;
         float _rms;
+        unsigned int _lost;
         QVector<float> _data;
         QList<SpectrumDataSetStokes* > _inputBlobs;
 };

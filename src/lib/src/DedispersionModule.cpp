@@ -187,12 +187,8 @@ void DedispersionModule::dedisperse( WeightedSpectrumDataSet* weightedData )
     unsigned int sampleNumber = 0; // marker to indicate the number of samples succesfully 
                                    // transferred to the buffer from the Datablob
     unsigned int maxSamples = streamData->nTimeBlocks();
-    float lostData = 0.0;
     do {
         if( _currentBuffer->addSamples( streamData, &sampleNumber ) == 0 ) {
-          lostData = (float)_currentBuffer->numZeros()/(float)_currentBuffer->elements();
-          std::cout << " lost data fraction: " << lostData << std::endl;
-          if (lostData > 0.1) _currentBuffer->fillWithZeros();
             timerStart(&_launchTimer);
             timerStart(&_bufferTimer);
             //(*_currentBuffer)->dump("input.data");
@@ -230,6 +226,12 @@ void DedispersionModule::dedisperse( WeightedSpectrumDataSet* weightedData )
 void DedispersionModule::dedisperse( DedispersionBuffer* buffer, DedispersionSpectra* dataOut )
 {
     // prepare the output data datablob
+    float lostData = (float)buffer->numZeros()/(float)buffer->elements();
+    std::cout << " lost data fraction: " << lostData << std::endl;
+    if (lostData > 0.1) 
+      dataOut->setLost(1);
+    else
+      dataOut->setLost(0);
     unsigned int nsamp = buffer->numSamples() - _maxshift;
     dataOut->resize( nsamp, _tdms, _dmLow, _dmStep );
     // Set up a job for the GPU processing kernel
