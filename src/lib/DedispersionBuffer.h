@@ -11,6 +11,7 @@
 namespace pelican {
 
 namespace lofar {
+class WeightedSpectrumDataSet;
 class SpectrumDataSetStokes;
 
 /**
@@ -52,7 +53,7 @@ class DedispersionBuffer
         // The space remaining in the buffer is provided in return value 
         // sampleNumber is updated to the last sample number from
         // the dataset that was included
-        unsigned int addSamples( SpectrumDataSetStokes* weightedData, unsigned *sampleNumber );
+        unsigned int addSamples( WeightedSpectrumDataSet* weightedData, QVector<float>& noiseTemplate, unsigned *sampleNumber );
 
         /// return the amount of empty space in the buffer (in samples)
         inline unsigned int spaceRemaining() const {
@@ -66,7 +67,7 @@ class DedispersionBuffer
         /// copy data from this object to the supplied DataBuffer object
         //  data is taken from the last offset samples in the 
         //  buffer
-        const QList<SpectrumDataSetStokes*>& copy( DedispersionBuffer* buf, unsigned int samples = 0 );
+        const QList<SpectrumDataSetStokes*>& copy( DedispersionBuffer* buf, QVector<float>& noiseTemplate, unsigned int samples = 0 );
 
         /// return the list of input data Blobs used to construct
         //  the data buffer
@@ -80,8 +81,8 @@ class DedispersionBuffer
         void dump( const QString& fileName ) const;
 
     private:
-        unsigned int _addSamples( SpectrumDataSetStokes* data, unsigned *sampleOffset,
-                                  unsigned numSamples /* max number fo samples to insert */ );
+        unsigned int _addSamples( WeightedSpectrumDataSet* data, QVector<float>& noiseTemplate, unsigned *sampleOffset, unsigned numSamples /* max number fo samples to insert */ );
+        unsigned int _addSamples( SpectrumDataSetStokes* data, QVector<float>& noiseTemplate, unsigned *sampleOffset, unsigned numSamples /* max number fo samples to insert */ );
         QList<SpectrumDataSetStokes* > _inputBlobs;
         QVector<float> _timedata;
         unsigned int _nsamp;

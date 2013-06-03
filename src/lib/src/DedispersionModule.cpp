@@ -12,6 +12,10 @@
 #include "GPU_NVidia.h"
 #include "GPU_Manager.h"
 #include <fstream>
+#include <boost/random/mersenne_twister.hpp>
+#include <boost/random/normal_distribution.hpp>
+#include <boost/math/distributions/chi_squared.hpp>
+#include <boost/random/variate_generator.hpp>
 
 extern "C" void cacheDedisperseLoop( float *outbuff, long outbufSize, float *buff, float mstartdm,
                                      float mdmstep, int tdms, const int numSamples,
@@ -120,6 +124,28 @@ void DedispersionModule::resize( const SpectrumDataSet<float>* streamData ) {
         _currentBuffer = _buffers.next();
 
         _nChannels = nChannels * nSubbands;
+        // Generate the noise template to replace flagged data
+        _noiseTemplate.resize( _numSamplesBuffer * _nChannels );
+        typedef boost::mt19937                     ENG;    // Mersenne Twister
+        typedef boost::normal_distribution<float>          DIST;   // Normal Distribution
+        typedef boost::variate_generator<ENG,DIST> GEN;    // Variate generator
+
+        ENG  eng;
+        DIST dist(0,1);
+        GEN  gen(eng,dist);
+
+        for (int i=0; i< _numSamplesBuffer * _nChannels; ++i) {
+          // chi-squared distribution with 4 degrees of freedom, like raw sampled total power
+          // set the mean to zero and rms to 1 (mean=4 and variance=8 -> rms = 2sqrt(2))
+          do {
+          float x1 = gen();
+          float x2 = gen();
+          float x3 = gen();
+          float x4 = gen();
+          _noiseTemplate[i] = (x1*x1 + x2*x2 + x3*x3 + x4*x4 - 4.0)/2.828427; 
+          } while (_noiseTemplate[i]>3.5) ;
+          //          _noiseTemplate[i] = (x1*x1 - 4.0)/2.828427; 
+        }
         std::cout << "resize: nChannels = " << _nChannels << std::endl;
         // calculate dispersion measure shifts
         _dmshifts.clear();
@@ -188,7 +214,9 @@ void DedispersionModule::dedisperse( WeightedSpectrumDataSet* weightedData )
                                    // transferred to the buffer from the Datablob
     unsigned int maxSamples = streamData->nTimeBlocks();
     do {
-        if( _currentBuffer->addSamples( streamData, &sampleNumber ) == 0 ) {
+      //        if( _currentBuffer->addSamples( streamData, &sampleNumber ) == 0 ) {
+      if( _currentBuffer->addSamples( weightedData, _noiseTemplate, &sampleNumber ) == 0 ) {
+        std::cout << "buffer ready" << std::endl;
             timerStart(&_launchTimer);
             timerStart(&_bufferTimer);
             //(*_currentBuffer)->dump("input.data");
@@ -201,7 +229,10 @@ void DedispersionModule::dedisperse( WeightedSpectrumDataSet* weightedData )
                 QMutexLocker l( &lockerMutex );
                 lockAllUnprotected( _blobs );
                 timerStart(&_copyTimer);
-                lockAllUnprotected( _currentBuffer->copy( next, _maxshift ) );
+                std::cout << "maxshift to be copied" << std::endl;
+                lockAllUnprotected( _currentBuffer->copy( next, _noiseTemplate, _maxshift ) );
+                std::cout << "maxshift copied" << std::endl;
+        
                 timerUpdate( &_copyTimer );
                 // ensure lock is maintianed for the next buffer
                 // if not already marked by the maxshift copy
@@ -226,12 +257,14 @@ void DedispersionModule::dedisperse( WeightedSpectrumDataSet* weightedData )
 void DedispersionModule::dedisperse( DedispersionBuffer* buffer, DedispersionSpectra* dataOut )
 {
     // prepare the output data datablob
+  /*
     float lostData = (float)buffer->numZeros()/(float)buffer->elements();
     std::cout << " lost data fraction: " << lostData << std::endl;
     if (lostData > 0.1) 
       dataOut->setLost(1);
     else
       dataOut->setLost(0);
+  */
     unsigned int nsamp = buffer->numSamples() - _maxshift;
     dataOut->resize( nsamp, _tdms, _dmLow, _dmStep );
     // Set up a job for the GPU processing kernel

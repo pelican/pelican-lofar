@@ -136,6 +136,7 @@ RFI_Clipper::~RFI_Clipper()
    */
 
 static inline void clipSample( SpectrumDataSetStokes* stokesAll, float* W, unsigned t ) {
+  /*
     typedef boost::mt19937                     ENG;    // Mersenne Twister
     typedef boost::normal_distribution<double> DIST;   // Normal Distribution
     typedef boost::variate_generator<ENG,DIST> GEN;    // Variate generator
@@ -143,7 +144,7 @@ static inline void clipSample( SpectrumDataSetStokes* stokesAll, float* W, unsig
     ENG  eng;
     DIST dist(0,1);
     GEN  gen(eng,dist);
- 
+  */ 
     float* I = stokesAll->data();
     unsigned nSubbands = stokesAll->nSubbands();
     unsigned nPolarisations= stokesAll->nPolarisations();
@@ -186,6 +187,7 @@ void RFI_Clipper::run( WeightedSpectrumDataSet* weightedStokes )
       static_cast<SpectrumDataSetStokes*>(weightedStokes->dataSet());
     SpectrumDataSet<float>* weights = weightedStokes->weights();
     float* I = stokesAll->data();
+    float *W = weights->data();
     unsigned nSamples = stokesAll->nTimeBlocks();
     unsigned nSubbands = stokesAll->nSubbands();
     unsigned nChannels = stokesAll->nChannels();
@@ -211,7 +213,6 @@ void RFI_Clipper::run( WeightedSpectrumDataSet* weightedStokes )
       float newSum = 0.0;
       float goodChannels = 0.0;
       float modelLevel = _bandPass.median();
-      float *W = weights->data();
       std::vector<float> copyI;
       copyI.resize(nBins);
 
@@ -267,6 +268,7 @@ void RFI_Clipper::run( WeightedSpectrumDataSet* weightedStokes )
             
             // Subtract the current model from the data 
             I[index+c] -= bandPass[binLocal]; //+ _zeroDMing * median ;
+            //W[index+c] = 1.0;
             // if the condition doesn't hold build up the statistical
             // description;
             //#pragma omp atomic
@@ -282,16 +284,13 @@ void RFI_Clipper::run( WeightedSpectrumDataSet* weightedStokes )
       }
       
       spectrumSum /= goodChannels;
-
+      
       // This is the RMS of the model subtracted data, in the
       // reference frame of the input
       double spectrumRMS = sqrt(spectrumSumSq/goodChannels - std::pow(spectrumSum,2));
-
       // If goodChannels is substantially lower than the total number,
       // the rms of the spectrum will also be lower, so it needs to be
-      // scaled by a factor sqrt(nBins/goodChannels)
-
-      spectrumRMS *= sqrt(nBins/goodChannels);
+      // scaled by a factor sqrt(nBins/goodChannels) THIS IS WRONG
 
       // Perform second test: Take a look at whether the median of the
       // spectrum is close to the model. If it isn't, it is likely
@@ -382,6 +381,10 @@ void RFI_Clipper::run( WeightedSpectrumDataSet* weightedStokes )
                                         t, nChannels );
           for (unsigned c = 0; c < nChannels; ++c) {
             // if the channel hasn't been clipped already, remove the spectrum average
+            I[index+c] -= (float)_zeroDMing * W[index+c] * spectrumSum;
+            I[index+c] /= spectrumRMS;//spectrumRMS;//modelRMS;
+            newSum += I[index+c];
+            /*
             if (W[index+c] != 0.0){
               if (_zeroDMing == 1){
                 I[index+c] -= spectrumSum;//spectrumRMS;//modelRMS;
@@ -391,6 +394,7 @@ void RFI_Clipper::run( WeightedSpectrumDataSet* weightedStokes )
               I[index+c] /= spectrumRMS;//spectrumRMS;//modelRMS;
               newSum += I[index+c];
             }
+            */
           }
         }
         // newSum contains the scaled and integrated spectrum, as a diagnostic

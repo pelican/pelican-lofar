@@ -35,6 +35,10 @@ UdpBFPipeline::~UdpBFPipeline()
  */
 void UdpBFPipeline::init()
 {
+    ConfigNode c = config( QString("H5Pipeline") );
+    _totalIterations= c.getOption("totalIterations", "value", "10000").toInt();    
+    std::cout << _totalIterations << std::endl;
+// Create modules
     // Create modules
     ppfChanneliser = (PPFChanneliser *) createModule("PPFChanneliser");
     stokesGenerator = (StokesGenerator *) createModule("StokesGenerator");
@@ -88,13 +92,12 @@ void UdpBFPipeline::run(QHash<QString, DataBlob*>& remoteData)
      dataOutput(intStokes, "SpectrumDataSetStokes");
 
 //    stop();
+     if (_iteration % 100 == 0)
+       cout << "Finished the CV beamforming pipeline, iteration " << _iteration << " out of " << _totalIterations << endl;
+     
+     _iteration++;
 
-    if (_iteration % 100 == 0)
-        cout << "Finished the UDP beamforming pipeline, iteration " << _iteration << endl;
-
-    _iteration++;
-
-    //    if (_iteration > 750000) stop();
+     if (_iteration == _totalIterations) stop();
 }
 
 } // namespace lofar

@@ -51,6 +51,7 @@ class DedispersionModule : public AsyncronousModule
               float _dmstep;
               float _tsamp;
               unsigned _tdms;
+              unsigned _totalNumberOfChannels;
               unsigned _nChans;
               unsigned _maxshift;
               unsigned _nsamples;
@@ -124,6 +125,7 @@ class DedispersionModule : public AsyncronousModule
         int _maxshift; // number of samples to overlap between processes
         int _nChannels; // number of Channels per sample
         DedispersionBuffer* _currentBuffer;
+        QVector<float> _noiseTemplate;
         QVector<float> _dmshifts;
 
         QVector<SpectrumDataSetStokes*> _blobs;

@@ -1,6 +1,7 @@
 #include "DedispersionBufferTest.h"
 #include "DedispersionBuffer.h"
 #include "SpectrumDataSet.h"
+#include "WeightedSpectrumDataSet.h"
 
 
 namespace pelican {
@@ -39,8 +40,11 @@ void DedispersionBufferTest::test_sizing()
      unsigned nPolarisations=2;
      unsigned nSubbands=2;
      unsigned sampleSize = nSubbands * nPolarisations * nChannels;
-     SpectrumDataSetStokes data;
-     data.resize( nSamples, nSubbands, nPolarisations, nChannels );
+     WeightedSpectrumDataSet data;
+     SpectrumDataSetStokes sdata;
+     QVector<float> noise;
+     //     SpectrumDataSetStokes data;
+     sdata.resize( nSamples, nSubbands, nPolarisations, nChannels );
      { // Use Case:
        // Default constructor
        // Expect:
@@ -51,7 +55,7 @@ void DedispersionBufferTest::test_sizing()
        CPPUNIT_ASSERT_EQUAL(0, (int)b.size() );
        CPPUNIT_ASSERT_EQUAL((unsigned int)0, b.numSamples() );
        CPPUNIT_ASSERT_EQUAL((unsigned int)0, b.spaceRemaining() );
-       CPPUNIT_ASSERT_EQUAL( b.maxSamples() , b.addSamples( &data, &sampleNumber ));
+       CPPUNIT_ASSERT_EQUAL( b.maxSamples() , b.addSamples( &data, noise, &sampleNumber ));
        CPPUNIT_ASSERT_EQUAL( (unsigned)0, sampleNumber );
      }
      { // Use Case:
@@ -64,19 +68,19 @@ void DedispersionBufferTest::test_sizing()
        CPPUNIT_ASSERT_EQUAL(nSamples * sampleSize* sizeof(float), b.size() );
        CPPUNIT_ASSERT_EQUAL((unsigned int)0, b.numSamples() );
        CPPUNIT_ASSERT_EQUAL(nSamples, b.spaceRemaining() );
-       CPPUNIT_ASSERT_EQUAL( (unsigned)0 , b.addSamples( &data, &sampleNumber ));
+       CPPUNIT_ASSERT_EQUAL( (unsigned)0 , b.addSamples( &data, noise, &sampleNumber ));
        CPPUNIT_ASSERT_EQUAL( nSamples, b.numSamples() );
        CPPUNIT_ASSERT_EQUAL((unsigned int)0, b.spaceRemaining() );
        CPPUNIT_ASSERT_EQUAL( nSamples, sampleNumber );
        // we should not be able to add any more data as the buffer is full
        sampleNumber = 0;
-       CPPUNIT_ASSERT_EQUAL( (unsigned)0 , b.addSamples( &data, &sampleNumber ));
+       CPPUNIT_ASSERT_EQUAL( (unsigned)0 , b.addSamples( &data, noise, &sampleNumber ));
        CPPUNIT_ASSERT_EQUAL( (unsigned)0, sampleNumber );
        // clear it and we should be able to use it again
        b.clear();
        CPPUNIT_ASSERT_EQUAL((unsigned int)0, b.numSamples() );
        CPPUNIT_ASSERT_EQUAL((unsigned int)10, b.spaceRemaining() );
-       CPPUNIT_ASSERT_EQUAL( (unsigned)0 , b.addSamples( &data, &sampleNumber ));
+       CPPUNIT_ASSERT_EQUAL( (unsigned)0 , b.addSamples( &data, noise, &sampleNumber ));
        CPPUNIT_ASSERT_EQUAL( nSamples, b.numSamples() );
        CPPUNIT_ASSERT_EQUAL((unsigned int)0, b.spaceRemaining() );
      }
@@ -88,7 +92,7 @@ void DedispersionBufferTest::test_sizing()
        unsigned samples = nSamples -2;
        DedispersionBuffer b( samples, sampleSize );
        sampleNumber = 0;
-       CPPUNIT_ASSERT_EQUAL( (unsigned)0 , b.addSamples( &data, &sampleNumber ));
+       CPPUNIT_ASSERT_EQUAL( (unsigned)0 , b.addSamples( &data, noise, &sampleNumber ));
        CPPUNIT_ASSERT_EQUAL((unsigned int)0, b.spaceRemaining() );
        CPPUNIT_ASSERT_EQUAL( samples, sampleNumber );
      }
@@ -100,7 +104,7 @@ void DedispersionBufferTest::test_sizing()
        unsigned samples = nSamples + 2;
        DedispersionBuffer b( samples,sampleSize );
        sampleNumber = 0;
-       CPPUNIT_ASSERT_EQUAL( (unsigned)2 , b.addSamples( &data, &sampleNumber ));
+       CPPUNIT_ASSERT_EQUAL( (unsigned)2 , b.addSamples( &data, noise, &sampleNumber ));
        CPPUNIT_ASSERT_EQUAL((unsigned int)2, b.spaceRemaining() );
        CPPUNIT_ASSERT_EQUAL( nSamples , sampleNumber );
      }
@@ -113,8 +117,11 @@ void DedispersionBufferTest::test_copy() {
      unsigned nSubbands=2;
      unsigned sampleSize = nSubbands * nPolarisations * nChannels;
      SpectrumDataSetStokes data;
+     WeightedSpectrumDataSet wdata;
+     QVector<float> noise;
      _fillData( &data, 1.0 );
      SpectrumDataSetStokes data2;
+     WeightedSpectrumDataSet wdata2;
      _fillData( &data2, 1000.0 );
      data.resize( nSamples, nSubbands, nPolarisations, nChannels );
      data2.resize( nSamples, nSubbands, nPolarisations, nChannels );
@@ -127,10 +134,10 @@ void DedispersionBufferTest::test_copy() {
        // Same datablob in each buffer, same number of samples in each
        DedispersionBuffer b1( nSamples,sampleSize );
        unsigned nSamp = 0;
-       b1.addSamples( &data, &nSamp );
+       b1.addSamples( &wdata, noise, &nSamp );
        CPPUNIT_ASSERT_EQUAL( 1, b1.inputDataBlobs().size() );
        DedispersionBuffer b2( nSamples,sampleSize );
-       b1.copy(&b2,nSamples);
+       b1.copy(&b2,noise,nSamples);
        CPPUNIT_ASSERT_EQUAL( 1, b2.inputDataBlobs().size() );
        CPPUNIT_ASSERT_EQUAL( b1.numberOfSamples(), b2.numberOfSamples() );
        CPPUNIT_ASSERT_EQUAL( &data, b2.inputDataBlobs()[0] );
@@ -143,12 +150,12 @@ void DedispersionBufferTest::test_copy() {
        // copy only the last sample
        DedispersionBuffer b1( 2*nSamples,sampleSize );
        unsigned nSamp = 0;
-       b1.addSamples( &data, &nSamp );
+       b1.addSamples( &wdata, noise, &nSamp );
        nSamp = 0;
-       b1.addSamples( &data2, &nSamp );
+       b1.addSamples( &wdata2, noise, &nSamp );
        CPPUNIT_ASSERT_EQUAL( 2 * nSamples , b1.numberOfSamples() );
        DedispersionBuffer b2( 2 * nSamples,sampleSize );
-       b1.copy(&b2, nSamples);
+       b1.copy(&b2, noise, nSamples);
        CPPUNIT_ASSERT_EQUAL( 2, b1.inputDataBlobs().size() );
        CPPUNIT_ASSERT_EQUAL( 1, b2.inputDataBlobs().size() );
        CPPUNIT_ASSERT_EQUAL( 2 * nSamples , b1.numberOfSamples() );
@@ -165,12 +172,12 @@ void DedispersionBufferTest::test_copy() {
        // the end of the first blob data.
        DedispersionBuffer b1( 2 * nSamples,sampleSize );
        unsigned nSamp = 0;
-       b1.addSamples( &data, &nSamp );
+       b1.addSamples( &wdata, noise, &nSamp );
        nSamp = 0;
-       b1.addSamples( &data2, &nSamp );
+       b1.addSamples( &wdata2, noise, &nSamp );
        CPPUNIT_ASSERT_EQUAL( 2 * nSamples , b1.numberOfSamples() );
        DedispersionBuffer b2( 2 * nSamples ,sampleSize );
-       b1.copy(&b2, nSamples + 1 );
+       b1.copy(&b2, noise, nSamples + 1 );
        CPPUNIT_ASSERT_EQUAL( 2, b2.inputDataBlobs().size() );
        CPPUNIT_ASSERT_EQUAL( nSamples + 1, b2.numberOfSamples() );
        CPPUNIT_ASSERT_EQUAL( &data, b2.inputDataBlobs()[0] );

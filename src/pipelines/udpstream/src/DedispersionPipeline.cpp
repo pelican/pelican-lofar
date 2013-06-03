@@ -119,7 +119,7 @@ void DedispersionPipeline::run(QHash<QString, DataBlob*>& remoteData)
     // Clips RFI and modifies blob in place
     timerStart(&_rfiClipperTime);
     _rfiClipper->run(_weightedIntStokes);
-    dataOutput(&(_weightedIntStokes->stats()), "RFI_Stats");
+    //    dataOutput(&(_weightedIntStokes->stats()), "RFI_Stats");
     timerUpdate(&_rfiClipperTime);
 
     timerStart(&_integratorTime);
@@ -163,7 +163,7 @@ void DedispersionPipeline::dedispersionAnalysis( DataBlob* blob ) {
         if (result.eventsFound() > 4){
             foreach( const SpectrumDataSetStokes* d, result.data()->inputDataBlobs()) {
                     dataOutput( d, "SignalFoundSpectrum" );
-		    dataOutput( d->getRawData(), "RawDataFoundSpectrum" );
+                    //		    dataOutput( d->getRawData(), "RawDataFoundSpectrum" );
             }
         }
     }

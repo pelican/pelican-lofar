@@ -40,8 +40,8 @@ PPFChanneliser::PPFChanneliser(const ConfigNode& config)
     _iOldestSamples.resize(_nThreads, 0);
 
     // Enforce even number of channels.
-    if (_nChannels%2)
-        throw _err("Number of channels needs to be even.");
+    if (_nChannels != 1 && _nChannels%2 == 1)
+       throw _err("Number of channels needs to be even.");
 
     // Generate the FIR coefficients;
     _generateFIRCoefficients(window, nTaps);
@@ -54,7 +54,6 @@ PPFChanneliser::PPFChanneliser(const ConfigNode& config)
     // Create the FFTW plan.
     _createFFTWPlan(_nChannels, _fftPlan);
 }
-
 
 /**
 * @details
@@ -99,11 +98,6 @@ void PPFChanneliser::run(const TimeSeriesDataSetC32* timeSeries,
     spectra->setLofarTimestamp(timeSeries->getLofarTimestamp());
     spectra->setBlockRate(timeSeries->getBlockRate() * _nChannels);
 
-    // Set up work buffers (if required).
-    unsigned nFilterTaps = _ppfCoeffs.nTaps();
-    if (!_buffersInitialised)
-        _setupWorkBuffers(nSubbands, nPolarisations, _nChannels, nFilterTaps);
-
     const float* coeffs = &_coeffs[0];
     unsigned threadId = 0, nThreads = 0, start = 0, end = 0;
     Complex *workBuffer = 0, *filteredSamples = 0;
@@ -111,52 +105,85 @@ void PPFChanneliser::run(const TimeSeriesDataSetC32* timeSeries,
     const Complex* timeStart = timeSeries->constData();
     Complex* spectraStart = spectra->data();
 
-    // Channeliser processing.
-    #pragma omp parallel \
-        shared(nTimeBlocks, nPolarisations, nSubbands, nFilterTaps, coeffs,\
-                timeStart, spectraStart) \
-        private(threadId, nThreads, start, end, workBuffer, filteredSamples, \
-                timeData)
+    if (_nChannels == 1)
     {
-        threadId = omp_get_thread_num();
-        nThreads = omp_get_num_threads();
+         // Loop over data to be channelised.
+         for (unsigned subband = 0; subband < nSubbands; ++subband)
+         {
+             for (unsigned pol = 0; pol < nPolarisations; ++pol)
+             {
+                 for (unsigned block = 0; block < nTimeBlocks; ++block)
+                 {
+                     // Get pointer to time series array.
+                     unsigned index = timeSeries->index(subband, nTimesPerBlock,
+                                  pol, nPolarisations, block, nTimeBlocks);
+                     timeData = &timeStart[index];
+                     for (unsigned t = 0; t < nTimesPerBlock; ++t) {
+                         // FFT the filtered sub-band data to form a new spectrum.
+                         unsigned indexSpectra = spectra->index(subband, nSubbands,
+                                 pol, nPolarisations, (nTimesPerBlock*block)+t, _nChannels);
+//                         spectraStart = &spectra->data()[indexSpectra];
+                         spectraStart[indexSpectra] = timeData[t];
+                     }
+                 }
+             }
+         }
 
-        // Assign processing threads in a round robin fashion to subbands.
-        _assign_threads(start, end, nSubbands, nThreads, threadId);
+    } else {
+        // Set up work buffers (if required).
+        unsigned nFilterTaps = _ppfCoeffs.nTaps();
+        if (!_buffersInitialised)
+            _setupWorkBuffers(nSubbands, nPolarisations, _nChannels, nFilterTaps);
 
-        // Pointer to work buffer for the thread.
-        filteredSamples = &_filteredData[threadId][0];
-
-        // Loop over data to be channelised.
-        for (unsigned subband = start; subband < end; ++subband)
+        // Channeliser processing.
+        #pragma omp parallel \
+            shared(nTimeBlocks, nPolarisations, nSubbands, nFilterTaps, coeffs,\
+                    timeStart, spectraStart) \
+            private(threadId, nThreads, start, end, workBuffer, filteredSamples, \
+                    timeData)
         {
-            for (unsigned pol = 0; pol < nPolarisations; ++pol)
+            threadId = omp_get_thread_num();
+            nThreads = omp_get_num_threads();
+
+            // Assign processing threads in a round robin fashion to subbands.
+            _assign_threads(start, end, nSubbands, nThreads, threadId);
+
+            // Pointer to work buffer for the thread.
+            filteredSamples = &_filteredData[threadId][0];
+
+            // Loop over data to be channelised.
+            for (unsigned subband = start; subband < end; ++subband)
             {
-                for (unsigned block = 0; block < nTimeBlocks; ++block)
+                for (unsigned pol = 0; pol < nPolarisations; ++pol)
                 {
-                    // Get pointer to time series array.
-                    unsigned index = timeSeries->index(subband, nTimesPerBlock,
-                                 pol, nPolarisations, block, nTimeBlocks);
-                    timeData = &timeStart[index];
+                    for (unsigned block = 0; block < nTimeBlocks; ++block)
+                    {
+                        // Get pointer to time series array.
+                        unsigned index = timeSeries->index(subband, nTimesPerBlock,
+                                     pol, nPolarisations, block, nTimeBlocks);
+                        timeData = &timeStart[index];
 
-                    // Get a pointer to the work buffer.
-                    workBuffer = &(_workBuffer[subband * nPolarisations + pol])[0];
+                        // Get a pointer to the work buffer.
+                        workBuffer = &(_workBuffer[subband * nPolarisations + pol])[0];
 
-                    // Update buffered (lagged) data for the sub-band.
-                    _updateBuffer(timeData, _nChannels, nFilterTaps, workBuffer);
+                        // Update buffered (lagged) data for the sub-band.
+                        _updateBuffer(timeData, _nChannels, nFilterTaps, workBuffer);
 
-                    // Apply the PPF.
-                    _filter(workBuffer, nFilterTaps, _nChannels, coeffs, filteredSamples);
+                        // Apply the PPF.
+                        _filter(workBuffer, nFilterTaps, _nChannels, coeffs, filteredSamples);
 
-                    // FFT the filtered sub-band data to form a new spectrum.
-                    unsigned indexSpectra = spectra->index(subband, nSubbands,
-                            pol, nPolarisations, block, _nChannels);
-                    _fft(filteredSamples, &spectraStart[indexSpectra]);
+                        // FFT the filtered sub-band data to form a new spectrum.
+                        unsigned indexSpectra = spectra->index(subband, nSubbands,
+                                pol, nPolarisations, block, _nChannels);
+                        _fft(filteredSamples, &spectraStart[indexSpectra]);
+                    }
                 }
             }
-        }
 
-    } // end of parallel region.
+        } // end of parallel region.
+
+    }
+
 }
 
 
