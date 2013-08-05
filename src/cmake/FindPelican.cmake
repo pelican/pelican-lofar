@@ -52,6 +52,16 @@ find_path(PELICAN_INCLUDE_DIR pelican
 )
 set(PELICAN_INCLUDES ${PELICAN_INCLUDE_DIR})
 
+# Find the lower level Pelican include directory.
+find_path(PELICAN2_INCLUDE_DIR core
+    PATHS
+    ${PELICAN_INSTALL_DIR}/include/pelican
+    $ENV{PELICAN_INSTALL_DIR}/include
+    /usr/include
+    /usr/local/include
+)
+list(APPEND PELICAN_INCLUDES ${PELICAN2_INCLUDE_DIR})
+
 
 # Find the Pelican library.
 find_library(PELICAN_LIBRARY pelican

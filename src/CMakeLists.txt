@@ -67,7 +67,7 @@ endif(CUDA_FOUND)
 
 # === Add directories to the include path (i.e. -I<directory> ...)
 include_directories(${PELICAN_INCLUDES})
-
+message(STATUS "AAAAAA ${PELICAN_INCLUDES}")
 # == Recurse into sub-directories defined in modules.cmake.
 include(modules.cmake)
 
