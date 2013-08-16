@@ -143,12 +143,18 @@ EmbraceSubbandSplittingChunker::EmbraceSubbandSplittingChunker(const ConfigNode&
 QIODevice* EmbraceSubbandSplittingChunker::newDevice()
 {
     QUdpSocket* socket = new QUdpSocket;
-
-    if (!socket->bind(port(), QUdpSocket::ShareAddress | QUdpSocket::ReuseAddressHint ))
+    const QHostAddress myhost(host());
+    std::cout << "IP address: " << host().toUtf8().constData() << std::endl;
+    if (!socket->bind( myhost, port(), QUdpSocket::ShareAddress | QUdpSocket::ReuseAddressHint ))
+      {
         cerr << "EmbraceSubbandSplittingChunker::newDevice(): "
         "Unable to bind to UDP port!" <<
         socket->errorString().toStdString() << std::endl;
-
+      }
+    else
+      {
+	std::cout << "Bound to socket" << std::endl;
+      }
     return socket;
 }
 
@@ -173,14 +179,16 @@ void EmbraceSubbandSplittingChunker::next(QIODevice* device)
 
     WritableData writableData1 = getDataStorage(_nPackets * _packetSizeStream1,
             chunkTypes().at(0));
-    WritableData writableData2 = getDataStorage(_nPackets * _packetSizeStream2,
+    WritableData writableData2;
+    if (_stream2Subbands != 0)
+    writableData2 = getDataStorage(_nPackets * _packetSizeStream2,
             chunkTypes().at(1));
 
     unsigned seqid, blockid;
     unsigned totBlocks, lostPackets, diff;
     unsigned packetCounter;
 
-    if (writableData1.isValid() && writableData2.isValid())
+    if (writableData1.isValid() )//&& writableData2.isValid())
     {
         // Loop over the number of UDP packets to put in a chunk.
         for (unsigned i = 0; i < _nPackets; ++i)
@@ -194,25 +202,22 @@ void EmbraceSubbandSplittingChunker::next(QIODevice* device)
 
             // Read the current packet from the socket.
             if (socket->readDatagram(reinterpret_cast<char*>(&currPacket), _packetSize) <= 0)
-            {
-                cerr << "EmbraceSubbandSplittingChunker::next(): "
-                        "Error while receiving UDP Packet!" << endl;
+	      {
+		cerr << "EmbraceSubbandSplittingChunker::next(): "
+		  "Error while receiving UDP Packet!" << endl;
                 i--;
                 continue;
-            }
-
+	      }
             // Check for endianness (Packet data is in little endian format).
 #if Q_BYTE_ORDER == Q_BIG_ENDIAN
             // TODO: Convert from little endian to big endian.
             throw QString("EmbraceSubbandSplittingChunker: Endianness not supported.");
             seqid   = currPacket.header.timestamp;
-            std::cout << seqid << std::endl;
             blockid = currPacket.header.blockSequenceNumber;
 #elif Q_BYTE_ORDER == Q_LITTLE_ENDIAN
             seqid   = currPacket.header.timestamp;
             blockid = currPacket.header.blockSequenceNumber;
 #endif
-
             // First time next has been run, initialise startTime and startBlockId.
             if (i == 0 && _startTime == 0) {
                 prevSeqid = _startTime = _startTime == 0 ? seqid : _startTime;
@@ -223,6 +228,8 @@ void EmbraceSubbandSplittingChunker::next(QIODevice* device)
             // the data cannot be trusted (ignore).
             if (seqid == ~0U || prevSeqid + 10 < seqid)
             {
+	      cerr << "EmbraceSubbandSplittingChunker::next(): "
+                "Rejecting packet due to problematic seqid" << endl;
                 _packetsRejected++;
                 i--;
                 continue;
@@ -237,7 +244,6 @@ void EmbraceSubbandSplittingChunker::next(QIODevice* device)
             lostPackets = 0;
             diff = (blockid >= prevBlockid) ?
                     (blockid - prevBlockid) : (blockid + totBlocks - prevBlockid);
-
             // Duplicated packets... ignore
             if (diff < _nSamples)
             {
@@ -277,6 +283,7 @@ void EmbraceSubbandSplittingChunker::next(QIODevice* device)
                 updateEmptyPacket(_emptyPacket1, prevSeqid, prevBlockid);
                 updateEmptyPacket(_emptyPacket2, prevSeqid, prevBlockid);
                 offsetStream1 = writePacket(&writableData1, _emptyPacket1, _packetSizeStream1, offsetStream1);
+		if (_stream2Subbands != 0)
                 offsetStream2 = writePacket(&writableData2, _emptyPacket2, _packetSizeStream2, offsetStream2);
 
                 // Check if the number of required packets is reached
@@ -301,21 +308,26 @@ void EmbraceSubbandSplittingChunker::next(QIODevice* device)
 		for (unsigned t = 0; t < _nSamples ; ++t){
                   for (unsigned s = 0 ; s < _nSubbands ; ++s){
                     _byte1OfStream1 = (_nSubbands * t + s) * 2 * sizeof(TYPES::i16complex);
-                    if (s > _stream1SubbandStart - 1 && s < _stream1SubbandStart + 1)
+                    if (s >= _stream1SubbandStart && s <= _stream1SubbandEnd)
                       {
                         unsigned _outputIndex = (_nSamples * (s - _stream1SubbandStart) + t) * 2 * sizeof(TYPES::i16complex);
                         memcpy(&outputPacket1.data[_outputIndex], &currPacket.data[_byte1OfStream1], 2 * sizeof(TYPES::i16complex));
+			//			std::cout << "1: input byte: " << _byte1OfStream1 << " output byte: " << _outputIndex << "s:" << s << std::endl;
                       }
-                    if (s > _stream2SubbandStart - 1 && s < _stream2SubbandStart + 1)
+                    if (s >= _stream2SubbandStart && s <= _stream2SubbandEnd)
                       {
                         unsigned _outputIndex = (_nSamples * (s - _stream2SubbandStart) + t) * 2 * sizeof(TYPES::i16complex);
                         memcpy(&outputPacket2.data[_outputIndex], &currPacket.data[_byte1OfStream1], 2 * sizeof(TYPES::i16complex));
+			//			std::cout << "2: input byte: " << _byte1OfStream1 << " output byte: " << _outputIndex <<  "s:" << s << std::endl;
                       }
                   }
                 }
 
+		if (_stream1Subbands != 0)
 		offsetStream1 = writePacket(&writableData1, outputPacket1, _packetSizeStream1, offsetStream1);
-                offsetStream2 = writePacket(&writableData2, outputPacket2, _packetSizeStream2, offsetStream2);
+
+		if (_stream2Subbands != 0)
+		  offsetStream2 = writePacket(&writableData2, outputPacket2, _packetSizeStream2, offsetStream2);
 
                 prevSeqid = seqid;
                 prevBlockid = blockid;
