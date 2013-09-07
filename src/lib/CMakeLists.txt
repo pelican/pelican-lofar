@@ -16,6 +16,9 @@ set(lib_src
     src/DedispersionBuffer.cpp
     src/DedispersionSpectra.cpp
     src/EmbraceChunker.cpp
+    src/EmbraceSubbandSplittingChunker.cpp
+    src/EmbracePowerGenerator.cpp
+    src/EmbraceFBWriter.cpp
     src/FilterBankHeader.cpp
     src/FilterBankAdapter.cpp
     src/FileWriter.cpp

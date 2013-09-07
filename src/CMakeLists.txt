@@ -67,7 +67,7 @@ endif(CUDA_FOUND)
 
 # === Add directories to the include path (i.e. -I<directory> ...)
 include_directories(${PELICAN_INCLUDES})
-
+message(STATUS "AAAAAA ${PELICAN_INCLUDES}")
 # == Recurse into sub-directories defined in modules.cmake.
 include(modules.cmake)
 
@@ -100,6 +100,32 @@ target_link_libraries(serverMain
     ${Boost_PROGRAM_OPTIONS_LIBRARY}
 )
 install(TARGETS serverMain DESTINATION ${BINARY_INSTALL_DIR})
+
+# === Create the Embrace server binary.
+include_directories(${CMAKE_SOURCE_DIR}/lib)
+add_executable(serverEmbrace serverEmbrace.cpp)
+target_link_libraries(serverEmbrace
+    pelican-lofar_static
+    ${PELICAN_LIBRARY}
+    ${QT_QTCORE_LIBRARY}
+    ${QT_QTXML_LIBRARY}
+    ${QT_QTNETWORK_LIBRARY}
+    ${Boost_PROGRAM_OPTIONS_LIBRARY}
+)
+install(TARGETS serverEmbrace DESTINATION ${BINARY_INSTALL_DIR})
+
+# === Create the Embrace server binary.
+include_directories(${CMAKE_SOURCE_DIR}/lib)
+add_executable(serverEmbrace2 serverEmbrace2.cpp)
+target_link_libraries(serverEmbrace2
+    pelican-lofar_static
+    ${PELICAN_LIBRARY}
+    ${QT_QTCORE_LIBRARY}
+    ${QT_QTXML_LIBRARY}
+    ${QT_QTNETWORK_LIBRARY}
+    ${Boost_PROGRAM_OPTIONS_LIBRARY}
+)
+install(TARGETS serverEmbrace2 DESTINATION ${BINARY_INSTALL_DIR})
 
 # === Doxygen documentation targets.
 include(UseDoxygen)

@@ -4,6 +4,8 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 set(pipeline_lib_src
     src/UdpBFPipeline.cpp
     src/UdpBFApplication.cpp
+    src/EmbraceBFPipeline.cpp
+    src/EmbraceBFApplication.cpp
     src/H5CVPipeline.cpp
     src/H5CVApplication.cpp
     src/TimingPipeline.cpp
@@ -117,6 +119,56 @@ target_link_libraries(udpBFPipelineStream2
     ${QT_QTXML_LIBRARY}
     ${QT_QTCORE_LIBRARY}
 )
+# === Build the EMBRACE Beamforming pipeline binary.
+add_executable(embraceBFPipeline src/embraceBFmain.cpp)
+set_target_properties(embraceBFPipeline PROPERTIES
+    COMPILE_FLAGS "${OpenMP_CXX_FLAGS}"
+    LINK_FLAGS "${OpenMP_CXX_FLAGS}"
+)
+target_link_libraries(embraceBFPipeline
+    pelicanMdsm
+    pelican-lofar_static
+    ${PELICAN_LIBRARY}
+    ${FFTW3_FFTW_LIBRARY}
+    ${FFTW3_FFTWF_LIBRARY}
+    ${QT_QTNETWORK_LIBRARY}
+    ${QT_QTXML_LIBRARY}
+    ${QT_QTCORE_LIBRARY}
+)
+
+# === Build the EMBRACE Beamforming pipeline binary for stream 1.
+add_executable(embraceBFPipelineStream1 src/embraceBFmainStream1.cpp)
+set_target_properties(embraceBFPipelineStream1 PROPERTIES
+    COMPILE_FLAGS "${OpenMP_CXX_FLAGS}"
+    LINK_FLAGS "${OpenMP_CXX_FLAGS}"
+)
+target_link_libraries(embraceBFPipelineStream1
+    pelicanMdsm
+    pelican-lofar_static
+    ${PELICAN_LIBRARY}
+    ${FFTW3_FFTW_LIBRARY}
+    ${FFTW3_FFTWF_LIBRARY}
+    ${QT_QTNETWORK_LIBRARY}
+    ${QT_QTXML_LIBRARY}
+    ${QT_QTCORE_LIBRARY}
+)
+
+# === Build the EMBRACE Beamforming pipeline binary for stream 2.
+add_executable(embraceBFPipelineStream2 src/embraceBFmainStream2.cpp)
+set_target_properties(embraceBFPipelineStream2 PROPERTIES
+    COMPILE_FLAGS "${OpenMP_CXX_FLAGS}"
+    LINK_FLAGS "${OpenMP_CXX_FLAGS}"
+)
+target_link_libraries(embraceBFPipelineStream2
+    pelicanMdsm
+    pelican-lofar_static
+    ${PELICAN_LIBRARY}
+    ${FFTW3_FFTW_LIBRARY}
+    ${FFTW3_FFTWF_LIBRARY}
+    ${QT_QTNETWORK_LIBRARY}
+    ${QT_QTXML_LIBRARY}
+    ${QT_QTCORE_LIBRARY}
+)
 # === Build the H5CV Beamforming pipeline binary.
 add_executable(h5CVPipeline src/h5CVmain.cpp)
 set_target_properties(h5CVPipeline PROPERTIES
@@ -203,12 +255,14 @@ target_link_libraries(timingPipeline
     ${QT_QTCORE_LIBRARY}
 )
 install(TARGETS emptyPipeline udpBFPipeline 
-                udpBFPipelineStream1 udpBFPipelineStream2 
+                udpBFPipelineStream1 udpBFPipelineStream2
+		embraceBFPipeline 
+                embraceBFPipelineStream1 embraceBFPipelineStream2 
 		h5CVPipeline h5CVPipelineStream1
 		h5CVPipelineStream2
                 DESTINATION ${BINARY_INSTALL_DIR})
 
-#install(TARGETS udpBFPipeline DESTINATION ${BINARY_INSTALL_DIR})
+#install(TARGETS udpBFPipeline embraceBFPipeline DESTINATION ${BINARY_INSTALL_DIR})
 
 include(CopyFiles)
 copy_files(${CMAKE_CURRENT_SOURCE_DIR}/data/*.xml . mdsmXmlFiles)

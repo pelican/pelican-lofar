@@ -52,6 +52,16 @@ find_path(PELICAN_INCLUDE_DIR pelican
 )
 set(PELICAN_INCLUDES ${PELICAN_INCLUDE_DIR})
 
+# Find the lower level Pelican include directory.
+find_path(PELICAN2_INCLUDE_DIR core
+    PATHS
+    ${PELICAN_INSTALL_DIR}/include/pelican
+    $ENV{PELICAN_INSTALL_DIR}/include
+    /usr/include
+    /usr/local/include
+)
+list(APPEND PELICAN_INCLUDES ${PELICAN2_INCLUDE_DIR})
+
 
 # Find the Pelican library.
 find_library(PELICAN_LIBRARY pelican
@@ -79,25 +89,25 @@ list(APPEND PELICAN_LIBRARIES ${PELICAN_TESTUTILS_LIBRARY})
 
 
 # Find Pelican cmake modules.
-find_path(PELICAN_CMAKE_MODULE_DIR FindPelicanInstall.cmake
-    PATHS
-    ${PELICAN_INSTALL_DIR}/share/pelican/cmake
-    $ENV{PELICAN_INSTALL_DIR}/share/pelican/cmake
-    /usr/
-    /usr/share
-    /usr/share/pelican
-    /usr/share/pelican/cmake
-    /usr/local/
-    /usr/local/share
-    /usr/local/share/pelican
-    /usr/local/share/pelican/cmake
-    PATH_SUFFIXES
-    share
-    cmake
-    pelican
-    DOC
-    "Location of Pelican cmake modules."
-)
+#find_path(PELICAN_CMAKE_MODULE_DIR FindPelicanInstall.cmake
+#    PATHS
+#    ${PELICAN_INSTALL_DIR}/share/pelican/cmake
+#    $ENV{PELICAN_INSTALL_DIR}/share/pelican/cmake
+#    /usr/
+#    /usr/share
+#    /usr/share/pelican
+#    /usr/share/pelican/cmake
+#    /usr/local/
+#    /usr/local/share
+#    /usr/local/share/pelican
+#    /usr/local/share/pelican/cmake
+#    PATH_SUFFIXES
+#    share
+#    cmake
+#    pelican
+#    DOC
+#    "Location of Pelican cmake modules."
+#)
 
 
 # Check for errors.
@@ -113,10 +123,10 @@ FIND_PACKAGE_HANDLE_STANDARD_ARGS(Pelican
     "ERROR: Could not find Pelican test utility library."
     PELICAN_TESTUTILS_LIBRARY
 )
-FIND_PACKAGE_HANDLE_STANDARD_ARGS(Pelican
-    "ERROR: Could not find Required Pelican cmake module path"
-    PELICAN_CMAKE_MODULE_DIR
-)
+#FIND_PACKAGE_HANDLE_STANDARD_ARGS(Pelican
+#    "ERROR: Could not find Required Pelican cmake module path"
+#    PELICAN_CMAKE_MODULE_DIR
+#)
 
 
 # Add the Pelican CMake modules into the CMake module path.
@@ -139,7 +149,7 @@ include_directories(${PELICAN_INCLUDES})
 # Put variables in the advanced section of the CMake cache.
 mark_as_advanced(
     PELICAN_FOUND
-    PELICAN_CMAKE_MODULE_DIR
+ #   PELICAN_CMAKE_MODULE_DIR
     PELICAN_INCLUDE_DIR
     PELICAN_INCLUDES
     PELICAN_LIBRARY
