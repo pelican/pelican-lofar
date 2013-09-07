@@ -68,7 +68,7 @@ class SigprocStokesWriter : public AbstractOutputStream
         int           _buffSize, _cur;
         unsigned int  _nRawPols, _nChannels, _nSubbands, _integration, _nPols;
         unsigned int  _nSubbandsToStore, _topsubband, _lbahba, _site, _machine;
-        unsigned int  _nBits;
+        unsigned int  _nBits, _integrationFreq;
 };
 
 PELICAN_DECLARE(AbstractOutputStream, SigprocStokesWriter)

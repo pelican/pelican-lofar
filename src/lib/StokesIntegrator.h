@@ -49,7 +49,8 @@ class StokesIntegrator : public AbstractModule
 
     private:
         unsigned _windowSize;
-        unsigned timeStart;
+	unsigned _binChannels;
+	//	unsigned timeStart;
 };
 
 

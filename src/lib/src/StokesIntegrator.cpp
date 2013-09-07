@@ -18,6 +18,7 @@ StokesIntegrator::StokesIntegrator(const ConfigNode& config)
     // Get the size for the integration window(step) from the parameter file.
 
     _windowSize    = config.getOption("integrateTimeBins", "value", "1").toUInt();
+    _binChannels    = config.getOption("integrateFrequencyChannels", "value", "1").toUInt();
 }
 
 
@@ -55,20 +56,24 @@ void StokesIntegrator::run(const SpectrumDataSetStokes* stokesGeneratorOutput,
     //std::cout << "_windowSize= " << _windowSize << std::endl;
 
     unsigned newSamples = nSamples/_windowSize;
+    unsigned newChannels = nChannels / _binChannels;
     const float* value;
-    float* value2;
     //    unsigned timeFloats = nPols*nSubbands*nChannels;
 
-    intStokes->resize(newSamples, nSubbands, nPols, nChannels);
+    //    intStokes->resize(newSamples, nSubbands, nPols, nChannels);
+    intStokes->resize(newSamples, nSubbands, nPols, newChannels);
+
+    // Not sure what business this has here
+    float* value2;
     value2 = intStokes->data();
-    for (unsigned i = 0; i < newSamples * nSubbands * nPols * nChannels; ++i)
+    for (unsigned i = 0; i < newSamples * nSubbands * nPols * newChannels; ++i)
         value2[i] = 0.0;
 
-    unsigned timeStart=0;
-    unsigned bufferCounter;
+
+    //    unsigned bufferCounter;
     //unsigned ts;
     //TIMER_START;
-
+    /* Code before frequency integrator
     for (unsigned u = 0; u < newSamples; ++u) {
       for (unsigned t = timeStart; t < _windowSize+timeStart; ++t) {
 	for (unsigned s = 0; s < nSubbands; ++s) {
@@ -84,6 +89,29 @@ void StokesIntegrator::run(const SpectrumDataSetStokes* stokesGeneratorOutput,
         }
         timeStart=timeStart+_windowSize;
     }
+    */
+    unsigned timeStart=0;
+    unsigned channelStart=0;
+
+    for (unsigned u = 0; u < newSamples; ++u) {
+      for (unsigned t = timeStart; t < _windowSize+timeStart; ++t) {
+	for (unsigned s = 0; s < nSubbands; ++s) {
+	  for (unsigned p = 0; p < nPols; ++p) {
+	    value = stokesGeneratorOutput->spectrumData(t, s, p);
+	    float* timeBuffer = intStokes->spectrumData(u,s,p);
+	    channelStart = 0;
+	    for (unsigned nc = 0; nc < newChannels; ++nc){
+	      for (unsigned c = channelStart; c < channelStart + _binChannels; ++c){
+		timeBuffer[nc]+= value[c];
+	      }
+	      channelStart += _binChannels;
+	    }
+	  }
+	}
+      }
+      timeStart=timeStart+_windowSize;
+    }
+
     // Set the timestamp of the first time sample
     intStokes->setLofarTimestamp(stokesGeneratorOutput->getLofarTimestamp());
 

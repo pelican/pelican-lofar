@@ -136,42 +136,23 @@ RFI_Clipper::~RFI_Clipper()
    */
 
 static inline void clipSample( SpectrumDataSetStokes* stokesAll, float* W, unsigned t ) {
-  /*
-    typedef boost::mt19937                     ENG;    // Mersenne Twister
-    typedef boost::normal_distribution<double> DIST;   // Normal Distribution
-    typedef boost::variate_generator<ENG,DIST> GEN;    // Variate generator
- 
-    ENG  eng;
-    DIST dist(0,1);
-    GEN  gen(eng,dist);
-  */ 
+
     float* I = stokesAll->data();
     unsigned nSubbands = stokesAll->nSubbands();
     unsigned nPolarisations= stokesAll->nPolarisations();
     unsigned nChannels= stokesAll->nChannels();
     // Clip entire spectrum
     for (unsigned s = 0; s < nSubbands; ++s) {
+      // The following is for clipping the polarization
+      for(unsigned int pol = 0; pol < nPolarisations; ++pol ) {
         long index = stokesAll->index(s, nSubbands,
-                0, nPolarisations,
+                pol, nPolarisations,
                 t, nChannels );
         for (unsigned c = 0; c < nChannels; ++c) {
             I[index + c] = 0.0;
             W[index + c] = 0.0;
-          //            I[index + c] = gen();
-          //            W[index + c] = gen();
-
-            // The following is for clipping the polarization
-            /*
-            for(unsigned int pol = 1; pol < nPolarisations; ++pol ) {
-                long index = stokesAll->index(s, nSubbands,
-                        pol, nPolarisations, t, nChannels );
-                I[index + c] = gen();
-                W[index + c] = gen();
-                //                I[index + c] = 0.0;
-                //                W[index +c] = 0.0;
-            }
-            */
         }
+      }
     }
 }
 
@@ -251,23 +232,22 @@ void RFI_Clipper::run( WeightedSpectrumDataSet* weightedStokes )
           // monitoring
           
           if (fabs(I[index + c] - bandPass[binLocal] - median)> margin ) {
-            I[index + c] = 0.0;
-            W[index +c] = 0.0;
-
             // The following is for polarization
-            /*
-            for(unsigned int pol = 1; pol < nPolarisations; ++pol ) {
+            for(unsigned int pol = 0; pol < nPolarisations; ++pol ) {
               long index = stokesAll->index(s, nSubbands,
-                                          pol, nPolarisations, t, nChannels );
+                                            pol, nPolarisations, t, nChannels );
               I[index + c] = 0.0;
               W[index +c] = 0.0;
             }
-            */
           }
           else{
             
             // Subtract the current model from the data 
-            I[index+c] -= bandPass[binLocal]; //+ _zeroDMing * median ;
+            for(unsigned int pol = 0; pol < nPolarisations; ++pol ) {
+              long index = stokesAll->index(s, nSubbands,
+                                            pol, nPolarisations, t, nChannels );
+              I[index+c] -= bandPass[binLocal]; //+ _zeroDMing * median ;
+            }
             //W[index+c] = 1.0;
             // if the condition doesn't hold build up the statistical
             // description;
@@ -283,11 +263,16 @@ void RFI_Clipper::run( WeightedSpectrumDataSet* weightedStokes )
         }
       }
       
+      if (goodChannels != 0)
       spectrumSum /= goodChannels;
       
       // This is the RMS of the model subtracted data, in the
       // reference frame of the input
-      double spectrumRMS = sqrt(spectrumSumSq/goodChannels - std::pow(spectrumSum,2));
+      double spectrumRMS = _bandPass.rms();
+      if (goodChannels != 0)
+        {
+          double spectrumRMS = sqrt(spectrumSumSq/goodChannels - std::pow(spectrumSum,2));
+        }
       // If goodChannels is substantially lower than the total number,
       // the rms of the spectrum will also be lower, so it needs to be
       // scaled by a factor sqrt(nBins/goodChannels) THIS IS WRONG
@@ -308,11 +293,18 @@ void RFI_Clipper::run( WeightedSpectrumDataSet* weightedStokes )
       // Re compute the median of the model subtracted data now that
       // we know the highest (by definition) values may have been
       // chopped off
+
+      // But the lowest ALSO!!! ARGH
+      // so here, the new mean is more reliable
+      /*
       if (goodChannels != nSubbands * nChannels){
         std::nth_element(copyI.begin(), copyI.begin()+goodChannels/2, copyI.begin()+goodChannels);
         median = (float)*(copyI.begin()+goodChannels/2);
       }
-
+      */
+      median = spectrumSum; // spectrumSum is the mean after removing
+                            // extreme values, so a good starting
+                            // poing.
       // medianDelta is the level of the incoming data
       float medianDelta = median + _bandPass.median();
 
@@ -342,6 +334,7 @@ void RFI_Clipper::run( WeightedSpectrumDataSet* weightedStokes )
           std::cout << "------ RFI_Clipper ----- Accepted a jump in the bandpass model to: " 
                     << medianDelta << " " << spectrumRMS  << std::endl << std::endl;
           _bandPass.setMedian(medianDelta);
+          //_bandPass.setRMS(_bandPass.rms()); // RMS from file
           _bandPass.setRMS(spectrumRMS); // RMS in incoming reference frame
           _badSpectra = 0;
           // reset _num for the history calculations
@@ -379,23 +372,32 @@ void RFI_Clipper::run( WeightedSpectrumDataSet* weightedStokes )
           long index = stokesAll->index(s, nSubbands,
                                         0, nPolarisations,
                                         t, nChannels );
-          for (unsigned c = 0; c < nChannels; ++c) {
-            // if the channel hasn't been clipped already, remove the spectrum average
-            I[index+c] -= (float)_zeroDMing * W[index+c] * spectrumSum;
-            I[index+c] /= spectrumRMS;//spectrumRMS;//modelRMS;
-            newSum += I[index+c];
-            /*
-            if (W[index+c] != 0.0){
-              if (_zeroDMing == 1){
-                I[index+c] -= spectrumSum;//spectrumRMS;//modelRMS;
-              }
-              // Scale the data by the RMS (this is potentially the last
-              // place the data gets fiddled with, so must be done here)
-              I[index+c] /= spectrumRMS;//spectrumRMS;//modelRMS;
-              newSum += I[index+c];
+          //          for(unsigned int pol = 0; pol < nPolarisations; ++pol ) {
+            long indexI = stokesAll->index(s, nSubbands,
+                                          0, nPolarisations, t, nChannels );
+            long indexQ = stokesAll->index(s, nSubbands,
+                                          1, nPolarisations, t, nChannels );
+            long indexU = stokesAll->index(s, nSubbands,
+                                          2, nPolarisations, t, nChannels );
+            long indexV = stokesAll->index(s, nSubbands,
+                                          3, nPolarisations, t, nChannels );
+            for (unsigned c = 0; c < nChannels; ++c) {
+              // if the channel hasn't been clipped already, remove the spectrum average
+              I[indexI+c] -= (float)_zeroDMing * W[indexI+c] * spectrumSum;
+              I[indexI+c] /= spectrumRMS;//spectrumRMS;//modelRMS;
+
+              I[indexQ+c] -= (float)_zeroDMing * W[indexQ+c] * spectrumSum;
+              I[indexQ+c] /= spectrumRMS;//spectrumRMS;//modelRMS;
+
+              I[indexU+c] -= (float)_zeroDMing * W[indexU+c] * spectrumSum;
+              I[indexU+c] /= spectrumRMS;//spectrumRMS;//modelRMS;
+
+              I[indexV+c] -= (float)_zeroDMing * W[indexV+c] * spectrumSum;
+              I[indexV+c] /= spectrumRMS;//spectrumRMS;//modelRMS;
+
+              newSum += I[indexI+c];
             }
-            */
-          }
+            //        }
         }
         // newSum contains the scaled and integrated spectrum, as a diagnostic
         // Yey! This spectrum has made it out of the clipper so consider it in the noise statistics

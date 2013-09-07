@@ -19,7 +19,9 @@ SigprocStokesWriter::SigprocStokesWriter(const ConfigNode& configNode )
     _nTotalSubbands = configNode.getOption("totalComplexSubbands", "value", "1").toUInt();
     _clock = configNode.getOption("clock", "value", "200").toFloat();
     _integration    = configNode.getOption("integrateTimeBins", "value", "1").toUInt();
+    _integrationFreq    = configNode.getOption("integrateFrequencyChannels", "value", "1").toUInt();
     _nChannels = configNode.getOption("outputChannelsPerSubband", "value", "128").toUInt();
+    _nChannels = _nChannels / _integrationFreq;
     _nRawPols = configNode.getOption("nRawPolarisations", "value", "2").toUInt();
     _nBits = configNode.getOption("dataBits", "value", "32").toUInt();
     _nRange = (int) pow(2.0,(double) _nBits)-1.0;
@@ -56,7 +58,7 @@ SigprocStokesWriter::SigprocStokesWriter(const ConfigNode& configNode )
       _foff     = configNode.getOption("foff", "value", "1.0").toFloat();
     }
     if( configNode.getOption("tsamp", "value" ) == "" ){ 
-      _tsamp    = (_nRawPols * _nTotalSubbands) * _nChannels * _integration / _clock/ 1e6;
+      _tsamp    = (_nRawPols * _nTotalSubbands) * _nChannels * _integrationFreq * _integration / _clock/ 1e6;
     }
     else{
       _tsamp     = configNode.getOption("tsamp", "value", "1.0").toFloat();
