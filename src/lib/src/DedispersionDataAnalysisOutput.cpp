@@ -32,7 +32,7 @@ DedispersionDataAnalysisOutput::DedispersionDataAnalysisOutput( const ConfigNode
     }
     // MJD of 1/1/11 is 55562
     struct tm tm;
-    if ( strptime("2011-1-1 1:0:0", "%Y-%m-%d %H:%M:%S", &tm) != NULL ){
+    if ( strptime("2011-1-1 0:0:0", "%Y-%m-%d %H:%M:%S", &tm) != NULL ){
         _epoch = mktime(&tm);
     }
     else {

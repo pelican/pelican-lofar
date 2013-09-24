@@ -51,9 +51,12 @@ DedispersionPipeline::~DedispersionPipeline()
     foreach(SpectrumDataSetStokes* d, _stokesData ) {
         delete d;
     }
+    // Uncomment the following for a raw data buffer
+    /*
     foreach(SpectrumDataSetC32* d, _spectra) {
         delete d;
     }
+    */
 }
 
 void DedispersionPipeline::init()
@@ -74,12 +77,13 @@ void DedispersionPipeline::init()
     _dedispersionModule->unlockCallback( boost::bind( &DedispersionPipeline::updateBufferLock, this, _1 ) );
 
     // Create local datablobs
-    //    _spectra = (SpectrumDataSetC32*) createBlob("SpectrumDataSetC32");
-    _spectra = createBlobs<SpectrumDataSetC32>("SpectrumDataSetC32", history);
+    _spectra = (SpectrumDataSetC32*) createBlob("SpectrumDataSetC32");
+    // Uncomment the next line for buffered raw data
+    //    _spectra = createBlobs<SpectrumDataSetC32>("SpectrumDataSetC32", history);
     _stokesData = createBlobs<SpectrumDataSetStokes>("SpectrumDataSetStokes", history);
     //   _intStokes = (SpectrumDataSetStokes*) createBlob("SpectrumDataSetStokes");
     _stokesBuffer = new LockingPtrContainer<SpectrumDataSetStokes>(&_stokesData);
-    _rawBuffer = new LockingPtrContainer<SpectrumDataSetC32>(&_spectra);
+    //    _rawBuffer = new LockingPtrContainer<SpectrumDataSetC32>(&_spectra);
     _weightedIntStokes = (WeightedSpectrumDataSet*) createBlob("WeightedSpectrumDataSet");
 
     // Request remote data
@@ -95,30 +99,43 @@ void DedispersionPipeline::run(QHash<QString, DataBlob*>& remoteData)
     // N for each sub-band and polarisation.
     timeSeries = (TimeSeriesDataSetC32*) remoteData[_streamIdentifier];
     dataOutput( timeSeries, _streamIdentifier);
+    //    std::cout << "PIPELINE: Got data" << std::endl;
 
     // Run the polyphase channeliser.
     // Generates spectra from a blocks of time series indexed by sub-band
     // and polarisation.
     timerStart(&_ppfTime);
-    SpectrumDataSetC32* spectra=_rawBuffer->next();
-    //    _ppfChanneliser->run(timeSeries, _spectra);
-    _ppfChanneliser->run(timeSeries, spectra);
+
+    // In case you are using a raw buffer, uncomment the following 2 lines
+    //    SpectrumDataSetC32* spectra=_rawBuffer->next();
+    //    _ppfChanneliser->run(timeSeries, spectra);
+
+    _ppfChanneliser->run(timeSeries, _spectra);
+    //    std::cout << "PIPELINE: PPF done" << std::endl;
+
     timerUpdate(&_ppfTime);
 
     // Convert spectra in X, Y polarisation into spectra with stokes parameters.
     timerStart(&_stokesTime);
     SpectrumDataSetStokes* stokes=_stokesBuffer->next();
-    //    _stokesGenerator->run(_spectra, stokes);
-    stokes->setRawData(spectra);
-    _stokesGenerator->run(spectra, stokes);
+    _stokesGenerator->run(_spectra, stokes);
+    //    std::cout << "PIPELINE: Stokes" << std::endl;
+
+    // In case you are using a raw buffer, uncomment the following 2 lines
+    //    stokes->setRawData(spectra);
+    //    _stokesGenerator->run(spectra, stokes);
+
     timerUpdate(&_stokesTime);
 
-    // set up a suitable datablob fro the rfi clipper
+    // set up a suitable datablob from the rfi clipper
     _weightedIntStokes->reset(stokes);
+    //    std::cout << "PIPELINE: Weighted Stokes" << std::endl;
 
     // Clips RFI and modifies blob in place
     timerStart(&_rfiClipperTime);
     _rfiClipper->run(_weightedIntStokes);
+    //    std::cout << "PIPELINE: RFI done" << std::endl;
+
     //    dataOutput(&(_weightedIntStokes->stats()), "RFI_Stats");
     timerUpdate(&_rfiClipperTime);
 
@@ -130,6 +147,7 @@ void DedispersionPipeline::run(QHash<QString, DataBlob*>& remoteData)
     // start the asyncronous chain of events
     timerStart(&_dedispersionTime);
     _dedispersionModule->dedisperse( _weightedIntStokes );
+    //    std::cout << "PIPELINE: Come out of dd" << std::endl;
     timerUpdate(&_dedispersionTime);
 
 #ifdef TIMING_ENABLED
@@ -154,6 +172,7 @@ void DedispersionPipeline::run(QHash<QString, DataBlob*>& remoteData)
 
 void DedispersionPipeline::dedispersionAnalysis( DataBlob* blob ) {
 //qDebug() << "analysis()";
+//  std::cout << "PIPELINE: in dd analysis" << std::endl;
     DedispersionDataAnalysis result;
     DedispersionSpectra* data = static_cast<DedispersionSpectra*>(blob);
     if ( _dedispersionAnalyser->analyse(data, &result) )
@@ -174,7 +193,7 @@ void DedispersionPipeline::updateBufferLock( const QList<DataBlob*>& freeData ) 
      foreach( DataBlob* blob, freeData ) {
         Q_ASSERT( blob->type() == "SpectrumDataSetStokes" );
 	// unlock the pointers to the raw buffer
-	_rawBuffer->unlock( static_cast<SpectrumDataSetStokes*>(blob)->getRawData() );
+        // _rawBuffer->unlock( static_cast<SpectrumDataSetStokes*>(blob)->getRawData() );
         _stokesBuffer->unlock( static_cast<SpectrumDataSetStokes*>(blob) );
      }
 }

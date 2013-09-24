@@ -66,6 +66,8 @@ void UdpBFPipeline::init()
  */
 void UdpBFPipeline::run(QHash<QString, DataBlob*>& remoteData)
 {
+  timerStart(&_totalTime);
+  
     // Get pointer to the remote time series data blob.
     // This is a block of data containing a number of time series of length
     // N for each sub-band and polarisation.
@@ -82,7 +84,9 @@ void UdpBFPipeline::run(QHash<QString, DataBlob*>& remoteData)
     // Clips RFI and modifies blob in place
     weightedIntStokes->reset(stokes);
 
+    timerStart(&_rfiClipperTime);
     rfiClipper->run(weightedIntStokes);
+    timerUpdate(&_rfiClipperTime);
     dataOutput(&(weightedIntStokes->stats()), "RFI_Stats");
 
     stokesIntegrator->run(stokes, intStokes);
@@ -98,6 +102,17 @@ void UdpBFPipeline::run(QHash<QString, DataBlob*>& remoteData)
      _iteration++;
 
      if (_iteration == _totalIterations) stop();
+     #ifdef TIMING_ENABLED
+     timerUpdate(&_totalTime);
+     if( _iteration % 100 == 0 )
+       {
+         timerReport(&_rfiClipperTime, "RFI_Clipper");
+         timerReport(&_totalTime, "Pipeline Time (excluding adapter)");
+         std::cout << std::endl;
+       }
+#endif
+
+
 }
 
 } // namespace lofar

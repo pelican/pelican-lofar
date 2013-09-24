@@ -48,7 +48,7 @@ class StokesGenerator : public AbstractModule
 
     private:
         float _sqr(float x) { return x * x; }
-
+        unsigned _numberOfStokes;
 };
 
 // Declare this class as a pelican module.

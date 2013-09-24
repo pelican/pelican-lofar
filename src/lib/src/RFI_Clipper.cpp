@@ -142,6 +142,7 @@ static inline void clipSample( SpectrumDataSetStokes* stokesAll, float* W, unsig
     unsigned nPolarisations= stokesAll->nPolarisations();
     unsigned nChannels= stokesAll->nChannels();
     // Clip entire spectrum
+#pragma omp parallel for num_threads(4)
     for (unsigned s = 0; s < nSubbands; ++s) {
       // The following is for clipping the polarization
       for(unsigned int pol = 0; pol < nPolarisations; ++pol ) {
@@ -200,7 +201,7 @@ void RFI_Clipper::run( WeightedSpectrumDataSet* weightedStokes )
       // create a copy of the data minus the model in order
       // to compute the median. The median is used as a single number
       // to characterise the offset of the data and the model.
-      //#pragma omp parallel for schedule(dynamic)
+#pragma omp parallel for num_threads(6) shared(copyI, bandPass, nSubbands, nPolarisations, t, nChannels)
       for (unsigned s = 0; s < nSubbands; ++s) {
         long index = stokesAll->index(s, nSubbands,
                                     0, nPolarisations,
@@ -217,7 +218,8 @@ void RFI_Clipper::run( WeightedSpectrumDataSet* weightedStokes )
 
       // Perform first test: look for individual very bright
       // channels in Stokes-I compared to the model and clip accordingly
-      //#pragma omp parallel for schedule(dynamic)
+      ////#pragma omp parallel for schedule(dynamic)
+      //#pragma omp parallel for num_threads(4) shared(t, nSubbands, nPolarisations, nChannels, I, W, spectrumSum, spectrumSumSq, goodChannels, bandPass)
       for (unsigned s = 0; s < nSubbands; ++s) {
         long index = stokesAll->index(s, nSubbands,
                                     0, nPolarisations,
@@ -251,13 +253,13 @@ void RFI_Clipper::run( WeightedSpectrumDataSet* weightedStokes )
             //W[index+c] = 1.0;
             // if the condition doesn't hold build up the statistical
             // description;
-            //#pragma omp atomic
+            //            #pragma omp atomic
             spectrumSum += I[index+c];
             // Use this for spectrum RMS calculation - This is the RMS
             // in the reference frame of the input
-            //#pragma omp atomic
+            //            #pragma omp atomic
             spectrumSumSq += (I[index+c]*I[index+c]);
-            //#pragma omp atomic
+            //            #pragma omp atomic
             ++goodChannels;
           }
         }
@@ -343,6 +345,7 @@ void RFI_Clipper::run( WeightedSpectrumDataSet* weightedStokes )
         }
 
         // Clip entire spectrum
+        //        std::cout << "Clipping sample" << std::endl;
         clipSample( stokesAll, W, t );
 /*
         for (unsigned s = 0; s < nSubbands; ++s) {
@@ -368,39 +371,23 @@ void RFI_Clipper::run( WeightedSpectrumDataSet* weightedStokes )
         // the data. Problem is, the data have been scaled by the
         // modelRMS, so spectrumSum needs to be scaled too, and a new
         // sum is computed
+//#pragma omp parallel for num_threads(4)
         for (unsigned s = 0; s < nSubbands; ++s) {
-          long index = stokesAll->index(s, nSubbands,
-                                        0, nPolarisations,
-                                        t, nChannels );
-          //          for(unsigned int pol = 0; pol < nPolarisations; ++pol ) {
-            long indexI = stokesAll->index(s, nSubbands,
-                                          0, nPolarisations, t, nChannels );
-            long indexQ = stokesAll->index(s, nSubbands,
-                                          1, nPolarisations, t, nChannels );
-            long indexU = stokesAll->index(s, nSubbands,
-                                          2, nPolarisations, t, nChannels );
-            long indexV = stokesAll->index(s, nSubbands,
-                                          3, nPolarisations, t, nChannels );
+          for(unsigned int pol = 0; pol < nPolarisations; ++pol ) {
+            long index = stokesAll->index(s, nSubbands,
+                                          pol, nPolarisations, t, nChannels );
             for (unsigned c = 0; c < nChannels; ++c) {
               // if the channel hasn't been clipped already, remove the spectrum average
-              I[indexI+c] -= (float)_zeroDMing * W[indexI+c] * spectrumSum;
-              I[indexI+c] /= spectrumRMS;//spectrumRMS;//modelRMS;
-
-              I[indexQ+c] -= (float)_zeroDMing * W[indexQ+c] * spectrumSum;
-              I[indexQ+c] /= spectrumRMS;//spectrumRMS;//modelRMS;
-
-              I[indexU+c] -= (float)_zeroDMing * W[indexU+c] * spectrumSum;
-              I[indexU+c] /= spectrumRMS;//spectrumRMS;//modelRMS;
-
-              I[indexV+c] -= (float)_zeroDMing * W[indexV+c] * spectrumSum;
-              I[indexV+c] /= spectrumRMS;//spectrumRMS;//modelRMS;
-
-              newSum += I[indexI+c];
+              I[index+c] -= (float)_zeroDMing * W[index+c] * spectrumSum;
+              I[index+c] /= spectrumRMS;//spectrumRMS;//modelRMS;
+              //#pragma omp atomic
+              newSum += I[index+c];
             }
-            //        }
+          }
         }
-        // newSum contains the scaled and integrated spectrum, as a diagnostic
-        // Yey! This spectrum has made it out of the clipper so consider it in the noise statistics
+        // newSum contains the scaled and integrated spectrum, as a
+        // diagnostic Yey! This spectrum has made it out of the
+        // clipper so consider it in the noise statistics
         _badSpectra = 0;
         ++goodSamples;
         blobSum += spectrumSum;
@@ -427,14 +414,15 @@ void RFI_Clipper::run( WeightedSpectrumDataSet* weightedStokes )
         
         // if the buffer isn't full, update the average properly
         if (_num != _maxHistory ) {
-            //          _runningMedian = (_runningMedian * (float) _num + median)/(float) (_num+1);
-            clipSample( stokesAll, W, t );
-            _runningMedian = (_runningMedian * (float) _num + medianDelta)/(float) (_num+1);
-            _runningRMS = (_runningRMS * (float) _num + spectrumRMS)/(float) (_num+1);
-            // store the integral of _historyNewSum and _historyNewSum^2 from the buffer
-            _integratedNewSum += newSum;
-            _integratedNewSumSq += pow(newSum,2);
-            ++_num;
+          //          _runningMedian = (_runningMedian * (float) _num + median)/(float) (_num+1);
+          //          std::cout << _num << std::endl;
+          clipSample( stokesAll, W, t );
+          _runningMedian = (_runningMedian * (float) _num + medianDelta)/(float) (_num+1);
+          _runningRMS = (_runningRMS * (float) _num + spectrumRMS)/(float) (_num+1);
+          // store the integral of _historyNewSum and _historyNewSum^2 from the buffer
+          _integratedNewSum += newSum;
+          _integratedNewSumSq += pow(newSum,2);
+          ++_num;
         }
         // Now the whole buffer is full. So I want to add the new
         // value and remove the first value from the running median
@@ -453,6 +441,7 @@ void RFI_Clipper::run( WeightedSpectrumDataSet* weightedStokes )
     
     // Now the chunk has finished. All that remains is to pass on the stats of the chunk
     // 1. update the model RMS first
+    // This is now done above for every time slice, so not important
     if (goodSamples !=0){
         blobRMS /= goodSamples;
         // _bandPass.setRMS(blobRMS);

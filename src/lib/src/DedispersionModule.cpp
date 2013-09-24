@@ -48,7 +48,8 @@ DedispersionModule::DedispersionModule( const ConfigNode& config )
 {
     // Get configuration options
     //unsigned int nChannels = config.getOption("outputChannelsPerSubband", "value", "512").toUInt();
-    _numSamplesBuffer = config.getOption("sampleNumber", "value", "512").toUInt();
+    float timeSamplesPow2 = config.getOption("timeBinsPerBufferPow2", "value", "15").toFloat();
+    _numSamplesBuffer = (int)pow(2.0,timeSamplesPow2);
     _tdms = config.getOption("dedispersionSamples", "value", "1984").toUInt();
     _dmStep = config.getOption("dedispersionStepSize", "value", "0.0").toFloat();
     _dmLow = config.getOption("dedispersionMinimum", "value", "0.0").toFloat();
@@ -205,52 +206,53 @@ void DedispersionModule::dedisperse( WeightedSpectrumDataSet* weightedData )
     //_rmss[_counter % _stages][index] = blobRMS * nChannels;
 
     // --------- copy spectrum data to buffer -----------------
-    SpectrumDataSetStokes* streamData = 
-                static_cast<SpectrumDataSetStokes*>(weightedData->dataSet());
-    _blobs.push_back( streamData ); // keep a list of blobs to lock
-    resize( streamData ); // ensure we have buffers scaled appropriately
-
-    unsigned int sampleNumber = 0; // marker to indicate the number of samples succesfully 
-                                   // transferred to the buffer from the Datablob
-    unsigned int maxSamples = streamData->nTimeBlocks();
-    do {
-      //        if( _currentBuffer->addSamples( streamData, &sampleNumber ) == 0 ) {
-      if( _currentBuffer->addSamples( weightedData, _noiseTemplate, &sampleNumber ) == 0 ) {
-        std::cout << "buffer ready" << std::endl;
-            timerStart(&_launchTimer);
-            timerStart(&_bufferTimer);
-            //(*_currentBuffer)->dump("input.data");
-            DedispersionBuffer* next = _buffers.next();
-            next->clear();
-            timerUpdate(&_bufferTimer);
-            {   // lock mutex scope
-                // lock here to ensure there is just a single hit on the 
-                // lock mutex for each buffer
-                QMutexLocker l( &lockerMutex );
-                lockAllUnprotected( _blobs );
-                timerStart(&_copyTimer);
-                std::cout << "maxshift to be copied" << std::endl;
-                lockAllUnprotected( _currentBuffer->copy( next, _noiseTemplate, _maxshift ) );
-                std::cout << "maxshift copied" << std::endl;
+  SpectrumDataSetStokes* streamData = 
+    static_cast<SpectrumDataSetStokes*>(weightedData->dataSet());
+  
+  _blobs.push_back( streamData ); // keep a list of blobs to lock
+  resize( streamData ); // ensure we have buffers scaled appropriately
+  
+  unsigned int sampleNumber = 0; // marker to indicate the number of samples succesfully 
+  // transferred to the buffer from the Datablob
+  unsigned int maxSamples = streamData->nTimeBlocks();
+  do {
+    //        if( _currentBuffer->addSamples( streamData, &sampleNumber ) == 0 ) {
+    if( _currentBuffer->addSamples( weightedData, _noiseTemplate, &sampleNumber ) == 0 ) {
+      //      std::cout << "buffer ready" << std::endl;
+      timerStart(&_launchTimer);
+      timerStart(&_bufferTimer);
+      //(*_currentBuffer)->dump("input.data");
+      DedispersionBuffer* next = _buffers.next();
+      next->clear();
+      timerUpdate(&_bufferTimer);
+      {   // lock mutex scope
+        // lock here to ensure there is just a single hit on the 
+        // lock mutex for each buffer
+        QMutexLocker l( &lockerMutex );
+        lockAllUnprotected( _blobs );
+        timerStart(&_copyTimer);
+        //        std::cout << "maxshift to be copied" << std::endl;
+        lockAllUnprotected( _currentBuffer->copy( next, _noiseTemplate, _maxshift ) );
+        //        std::cout << "maxshift copied" << std::endl;
         
-                timerUpdate( &_copyTimer );
-                // ensure lock is maintianed for the next buffer
-                // if not already marked by the maxshift copy
-                if( sampleNumber != maxSamples && ! next->inputDataBlobs().contains(streamData) )
-                    lockUnprotected( streamData );
-            }
-            _blobs.clear();
-            timerStart( &_dedisperseTimer );
-            QtConcurrent::run( this, &DedispersionModule::dedisperse, _currentBuffer, _dedispersionDataBuffer.next() );
-            timerUpdate( &_dedisperseTimer );
-            _currentBuffer = next;
-            timerUpdate(&_launchTimer);
-            timerReport(&_launchTimer, "Launch Total");
-            timerReport(&_dedisperseTimer, "Dedispersing Time");
-            timerReport(&_bufferTimer,"bufferTimer");
-            timerReport(&_copyTimer,"copyTimer");
-        }
+        timerUpdate( &_copyTimer );
+        // ensure lock is maintianed for the next buffer
+        // if not already marked by the maxshift copy
+        if( sampleNumber != maxSamples && ! next->inputDataBlobs().contains(streamData) )
+          lockUnprotected( streamData );
+      }
+      _blobs.clear();
+      timerStart( &_dedisperseTimer );
+      QtConcurrent::run( this, &DedispersionModule::dedisperse, _currentBuffer, _dedispersionDataBuffer.next() );
+      timerUpdate( &_dedisperseTimer );
+      _currentBuffer = next;
+      timerUpdate(&_launchTimer);
+      timerReport(&_launchTimer, "Launch Total");
+      timerReport(&_dedisperseTimer, "Dedispersing Time");
+      timerReport(&_bufferTimer,"bufferTimer");
+      timerReport(&_copyTimer,"copyTimer");
     }
+  }
     while( sampleNumber != maxSamples );
 }
 
@@ -266,6 +268,14 @@ void DedispersionModule::dedisperse( DedispersionBuffer* buffer, DedispersionSpe
       dataOut->setLost(0);
   */
     unsigned int nsamp = buffer->numSamples() - _maxshift;
+    /*
+    std::cout << nsamp << " " <<
+      _tdms << " " <<
+      _dmLow << " " <<
+      _dmStep << " " <<
+      dataOut << " " << 
+      std::endl;
+    */
     dataOut->resize( nsamp, _tdms, _dmLow, _dmStep );
     // Set up a job for the GPU processing kernel
     GPU_Job* job = _jobBuffer.next();
@@ -278,7 +288,7 @@ void DedispersionModule::dedisperse( DedispersionBuffer* buffer, DedispersionSpe
     dataOut->setInputDataBlobs( buffer->inputDataBlobs() );
     dataOut->setFirstSample( buffer->firstSampleNumber() );
     submit( job );
-    //std::cout << "dedispersionModule: current jobs = " << gpuManager()->jobsQueued() << std::endl;
+    //    std::cout << "dedispersionModule: current jobs = " << gpuManager()->jobsQueued() << std::endl;
 }
 
 void DedispersionModule::gpuJobFinished( GPU_Job* job, DedispersionKernel* kernel, DedispersionSpectra* dataOut ) {

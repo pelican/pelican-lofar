@@ -7,6 +7,8 @@
 #include <cmath>
 #include <complex>
 
+#include <omp.h>
+
 namespace pelican {
 namespace lofar {
 
@@ -15,6 +17,12 @@ namespace lofar {
 StokesGenerator::StokesGenerator(const ConfigNode& config)
 : AbstractModule(config)
 {
+  // Get the number of Stokes to produce, which can either be 1 or 4
+  _numberOfStokes = config.getOption("numberOfStokes", "value", "4").toUInt();
+  if (_numberOfStokes != 1 && _numberOfStokes != 4){
+    std::cout << "You can either generate 1 or 4 Stokes parameters. Change numberOfStokes in xml file." << std::endl;
+    exit (EXIT_FAILURE);
+  }
 }
 
 
@@ -32,67 +40,73 @@ StokesGenerator::~StokesGenerator()
 void StokesGenerator::run(const SpectrumDataSetC32* channeliserOutput,
         SpectrumDataSetStokes* stokes)
 {
-    typedef std::complex<float> Complex;
-    unsigned nSamples = channeliserOutput->nTimeBlocks();
-    unsigned nSubbands = channeliserOutput->nSubbands();
-    unsigned nChannels = channeliserOutput->nChannels();
-    Q_ASSERT( channeliserOutput->nPolarisations() >= 2 );
+  typedef std::complex<float> Complex;
+  unsigned nSamples = channeliserOutput->nTimeBlocks();
+  unsigned nSubbands = channeliserOutput->nSubbands();
+  unsigned nChannels = channeliserOutput->nChannels();
+  Q_ASSERT( channeliserOutput->nPolarisations() >= 2 );
+  
+  stokes->setLofarTimestamp(channeliserOutput->getLofarTimestamp());
+  stokes->setBlockRate(channeliserOutput->getBlockRate());
+  stokes->resize(nSamples, nSubbands, _numberOfStokes, nChannels);
+  
+  const Complex* dataPolDataBlock = channeliserOutput->data();
 
-    stokes->setLofarTimestamp(channeliserOutput->getLofarTimestamp());
-    stokes->setBlockRate(channeliserOutput->getBlockRate());
-    stokes->resize(nSamples, nSubbands, 4, nChannels);
-
-    const Complex* dataPolX, *dataPolY;
-    float *I, *Q, *U, *V;
-    float powerX, powerY;
-    float XxYstarReal;
-    float XxYstarImag;
-
-    const Complex* dataPolDataBlock = channeliserOutput->data();
-    for (unsigned t = 0; t < nSamples; ++t) {
-        for (unsigned s = 0; s < nSubbands; ++s) {
-            unsigned dataPolIndexX = channeliserOutput->index( s, nSubbands, 
-                                                               0,2,
-                                                               t, nChannels);
-            unsigned dataPolIndexY = channeliserOutput->index( s, nSubbands, 
-                                                               1,2,
-                                                               t, nChannels);
-            //unsigned indexStokes = stokes->index( s, nSubbands,
-            //                                      0,2,
-            //                                      t, nChannels );
-            //dataPolX = channeliserOutput->spectrumData(t, s, 0);
-            //dataPolY = channeliserOutput->spectrumData(t, s, 1);
-            dataPolX = &dataPolDataBlock[dataPolIndexX];
-            dataPolY = &dataPolDataBlock[dataPolIndexY];
-            // TODO speed up
-            I = stokes->spectrumData(t, s, 0);
-            Q = stokes->spectrumData(t, s, 1);
-            U = stokes->spectrumData(t, s, 2);
-            V = stokes->spectrumData(t, s, 3);
-            //std::cout << "nSamples=" << nSamples << " t=" << t << " s=" << s;
-            //std::cout << "  dataPolIndexX=" << dataPolIndexX;
-            //std::cout << "  dataPolIndexY=" << dataPolIndexY << std::endl;
-            // std::cout << I << " "<< Q <<" "<< U << " "<< V <<std::endl;
-            for (unsigned c = 0; c < nChannels; ++c) {
-                float Xr = dataPolX[c].real();
-                float Xi = dataPolX[c].imag();
-                float Yr = dataPolY[c].real();
-                float Yi = dataPolY[c].imag();
-                XxYstarReal = Xr*Yr + Xi*Yi;
-                XxYstarImag = Xi*Yr - Xr*Yi;
-
-                powerX = _sqr(Xr) + _sqr(Xi);
-                powerY = _sqr(Yr) + _sqr(Yi);
-
-                I[c] = powerX + powerY;
-                Q[c] = powerX - powerY;
-                U[c] = 2.0f * XxYstarReal;
-                V[c] = 2.0f * XxYstarImag;
-            }
+  for (unsigned t = 0; t < nSamples; ++t) {
+#pragma omp parallel for num_threads(4)
+    for (unsigned s = 0; s < nSubbands; ++s) {
+      const Complex* dataPolX, *dataPolY;
+      float *I, *Q, *U, *V;
+      float powerX, powerY;
+      float XxYstarReal;
+      float XxYstarImag;
+      
+      unsigned dataPolIndexX = channeliserOutput->index( s, nSubbands, 
+                                                         0,2,
+                                                         t, nChannels);
+      unsigned dataPolIndexY = channeliserOutput->index( s, nSubbands, 
+                                                         1,2,
+                                                         t, nChannels);
+      //unsigned indexStokes = stokes->index( s, nSubbands,
+      //                                      0,2,
+      //                                      t, nChannels );
+      //dataPolX = channeliserOutput->spectrumData(t, s, 0);
+      //dataPolY = channeliserOutput->spectrumData(t, s, 1);
+      dataPolX = &dataPolDataBlock[dataPolIndexX];
+      dataPolY = &dataPolDataBlock[dataPolIndexY];
+      // TODO speed up
+      I = stokes->spectrumData(t, s, 0);
+      if (_numberOfStokes == 4){
+        Q = stokes->spectrumData(t, s, 1);
+        U = stokes->spectrumData(t, s, 2);
+        V = stokes->spectrumData(t, s, 3);
+      }
+      //std::cout << "nSamples=" << nSamples << " t=" << t << " s=" << s;
+      //std::cout << "  dataPolIndexX=" << dataPolIndexX;
+      //std::cout << "  dataPolIndexY=" << dataPolIndexY << std::endl;
+      // std::cout << I << " "<< Q <<" "<< U << " "<< V <<std::endl;
+      for (unsigned c = 0; c < nChannels; ++c) {
+        float Xr = dataPolX[c].real();
+        float Xi = dataPolX[c].imag();
+        float Yr = dataPolY[c].real();
+        float Yi = dataPolY[c].imag();
+        XxYstarReal = Xr*Yr + Xi*Yi;
+        XxYstarImag = Xi*Yr - Xr*Yi;
+        
+        powerX = _sqr(Xr) + _sqr(Xi);
+        powerY = _sqr(Yr) + _sqr(Yi);
+        
+        I[c] = powerX + powerY;
+        if (_numberOfStokes == 4){
+          Q[c] = powerX - powerY;
+          U[c] = 2.0f * XxYstarReal;
+          V[c] = 2.0f * XxYstarImag;
         }
+      }
     }
+  }
 }
-
+  
 
 
 

@@ -19,6 +19,7 @@ DedispersionAnalyser::DedispersionAnalyser( const ConfigNode& config )
     // Get configuration options                                                                                                                      
     //unsigned int nChannels = config.getOption("outputChannelsPerSubband", "value", "512").toUInt();                                                 
     _detectionThreshold = config.getOption("detectionThreshold", "in_sigma", "6.0").toFloat();
+    _binPow2 = config.getOption("power2ForBinning", "value", "6").toUInt();
     _useStokesStats = config.getOption("useStokesStats", "0_or_1").toUInt();
 }
 
@@ -68,21 +69,66 @@ int DedispersionAnalyser::analyse( DedispersionSpectra* data,
     // Add a dummy event to get the timestamp of the first bin in the blob
     result->addEvent( 0, 0, 1, 0.0 );
     
+    // Compute 2^_binPowerOf2
+    unsigned int maxPow2 = pow(2,_binPow2);
+    unsigned int numberOfwidestBins = nsamp/maxPow2;
+    // Attempt at tidying up the stuff below
+    // Define a vector of _binPowerOf2 vectors
+    QVector < QVector <float> > binnedOutput;
+    binnedOutput.resize(_binPow2 + 1);
+    // resize in the other direction
+    // 1 bin for highest index, 2 for next, 4, 8 etc.
+    unsigned int currentPow2 = maxPow2;
+    for (int n = _binPow2 ; n > -1 ; --n){
+      binnedOutput[n].resize(maxPow2 / currentPow2);
+      currentPow2 /= 2;
+    }
+    // 
+    unsigned int numberOfWidestBins = nsamp / maxPow2;
     for(int dm_count = 0; dm_count < tdms; ++dm_count) {
+
+      /*
       QVector<float> outputBin1;
       QVector<float> outputBin2;
       QVector<float> outputBin4;
       QVector<float> outputBin8;
       QVector<float> outputBin16;
       float outputBin32;
+
       outputBin1.resize(32);
       outputBin2.resize(16);
       outputBin4.resize(8);
       outputBin8.resize(4);
       outputBin16.resize(2);
-      
+      */
       //    outputBin8.resize(1);
       
+      for (int i=0; i < numberOfWidestBins; ++i) {
+        currentPow2 = maxPow2;
+        // fill the bin1 Vector first and check
+        for (int j=0; j<maxPow2; ++j){
+          int index = i*32 + j;
+          binnedOutput[0][j]= dataVector[dm_count*nsamp + index]; 
+          float detection = _detectionThreshold * rms;// * sqrt((float)indexJ);
+          if (binnedOutput[0][j] >= detection){
+            result->addEvent( dm_count, index, 1, binnedOutput[0][j] );
+          }
+        }
+        for (int n = 1 ; n < _binPow2 + 1; ++n){
+          currentPow2 /= 2; // 
+          for (int j = 0; j < currentPow2; ++j){
+            int binFactor = maxPow2/currentPow2;
+            float detection = _detectionThreshold * rms * sqrt((float)binFactor);
+            int index = i*currentPow2 + binFactor * j;
+            binnedOutput[n][j] = binnedOutput[n-1][2*j] + binnedOutput[n-1][2*j+1];
+            if (binnedOutput[n][j] >= detection){
+              result->addEvent( dm_count, index, binFactor, binnedOutput[n][j] );
+            }
+          }
+        }
+      }
+    }
+        /*
       for(int i=0; i < nsamp/32; ++i) {
         for(int j=0; j < 32; ++j) {
           int index = i*32 + j;
@@ -139,7 +185,9 @@ int DedispersionAnalyser::analyse( DedispersionSpectra* data,
           
         }
       }
-    }
+      }
+        */
+
     /*
     for(int dm_count = 0; dm_count < tdms; ++dm_count) {
         for(int j=0; j < nsamp; ++j) {

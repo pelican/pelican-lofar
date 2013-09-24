@@ -16,9 +16,10 @@
 #define DIVINDM 20
 #else
 #if __CUDA_ARCH__ >= 200
-#define NUMREG 15
-#define DIVINT 15
-#define DIVINDM 57
+#define NUMREG 12
+#define DIVINT 6
+#define DIVINDM 80
+#define FDIVINDM 80.0f
 #endif
 #if (__CUDA_ARCH__ == 100 )
 #define NUMREG 15
@@ -26,6 +27,11 @@
 #define DIVINDM 20
 #endif
 #endif
+
+#define NUMREG 12
+#define DIVINT 6
+#define DIVINDM 80
+#define FDIVINDM 80.0f
 
 #define ARRAYSIZE DIVINT * DIVINDM
 

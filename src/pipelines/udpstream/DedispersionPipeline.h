@@ -68,10 +68,11 @@ class DedispersionPipeline : public AbstractPipeline
         DedispersionAnalyser* _dedispersionAnalyser;
 
         /// Local data blobs
-	//        SpectrumDataSetC32* _spectra;
+	SpectrumDataSetC32* _spectra;
         QList<SpectrumDataSetC32*> _spectraBuffer;
         TimeSeriesDataSetC32* timeSeries;
-	QList<SpectrumDataSetC32*> _spectra;
+        // Uncomment the following line for raw data buffer
+	//QList<SpectrumDataSetC32*> _spectra;
         QList<SpectrumDataSetStokes*> _stokesData;
         SpectrumDataSetStokes* _intStokes;
         LockingPtrContainer<SpectrumDataSetStokes>* _stokesBuffer;

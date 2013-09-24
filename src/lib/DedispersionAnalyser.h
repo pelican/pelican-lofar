@@ -33,6 +33,7 @@ class DedispersionAnalyser : public AbstractModule
     private:
         float _detectionThreshold; // self-explanatory
         unsigned _useStokesStats; // whether to use the noise values in the stokes blob or recompute
+        unsigned _binPow2;
 };
 
 PELICAN_DECLARE_MODULE(DedispersionAnalyser)
