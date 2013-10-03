@@ -115,7 +115,7 @@ EmbraceSubbandSplittingChunker::EmbraceSubbandSplittingChunker(const ConfigNode&
 
     // Check a number of data chunk types are registered to be written.
     // These are set in the XML.
-    if (type().isEmpty())
+    if (config.type().isEmpty())
         throw _err("EmbraceSubbandSplittingChunker(): Data type unspecified.");
 
     if (chunkTypes().size() != 2)

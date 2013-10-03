@@ -170,57 +170,57 @@ target_link_libraries(embraceBFPipelineStream2
     ${QT_QTCORE_LIBRARY}
 )
 # === Build the H5CV Beamforming pipeline binary.
-add_executable(h5CVPipeline src/h5CVmain.cpp)
-set_target_properties(h5CVPipeline PROPERTIES
-    COMPILE_FLAGS "${OpenMP_CXX_FLAGS}"
-    LINK_FLAGS "${OpenMP_CXX_FLAGS}"
-)
-target_link_libraries(h5CVPipeline
-    pelicanMdsm
-    pelican-lofar_static
-    ${PELICAN_LIBRARY}
-    ${FFTW3_FFTW_LIBRARY}
-    ${FFTW3_FFTWF_LIBRARY}
-    ${QT_QTNETWORK_LIBRARY}
-    ${QT_QTXML_LIBRARY}
-    ${QT_QTCORE_LIBRARY}
-)
-
+#add_executable(h5CVPipeline src/h5CVmain.cpp)
+#set_target_properties(h5CVPipeline PROPERTIES
+#    COMPILE_FLAGS "${OpenMP_CXX_FLAGS}"
+#    LINK_FLAGS "${OpenMP_CXX_FLAGS}"
+#)
+#target_link_libraries(h5CVPipeline
+#    pelicanMdsm
+#    pelican-lofar_static
+#    ${PELICAN_LIBRARY}
+#    ${FFTW3_FFTW_LIBRARY}
+#    ${FFTW3_FFTWF_LIBRARY}
+#    ${QT_QTNETWORK_LIBRARY}
+#    ${QT_QTXML_LIBRARY}
+#    ${QT_QTCORE_LIBRARY}
+#)
+#
 # === Build the H5CV Beamforming pipeline binary for stream 1.
-add_executable(h5CVPipelineStream1 src/h5CVmainStream1.cpp)
-set_target_properties(h5CVPipelineStream1 PROPERTIES
-    COMPILE_FLAGS "${OpenMP_CXX_FLAGS}"
-    LINK_FLAGS "${OpenMP_CXX_FLAGS}"
-)
-target_link_libraries(h5CVPipelineStream1
-    pelicanMdsm
-    pelican-lofar_static
-    ${PELICAN_LIBRARY}
-    ${FFTW3_FFTW_LIBRARY}
-    ${FFTW3_FFTWF_LIBRARY}
-    ${QT_QTNETWORK_LIBRARY}
-    ${QT_QTXML_LIBRARY}
-    ${QT_QTCORE_LIBRARY}
-)
-
+#add_executable(h5CVPipelineStream1 src/h5CVmainStream1.cpp)
+#set_target_properties(h5CVPipelineStream1 PROPERTIES
+#    COMPILE_FLAGS "${OpenMP_CXX_FLAGS}"
+#    LINK_FLAGS "${OpenMP_CXX_FLAGS}"
+#)
+#target_link_libraries(h5CVPipelineStream1
+#    pelicanMdsm
+#    pelican-lofar_static
+#    ${PELICAN_LIBRARY}
+#    ${FFTW3_FFTW_LIBRARY}
+#    ${FFTW3_FFTWF_LIBRARY}
+#    ${QT_QTNETWORK_LIBRARY}
+#    ${QT_QTXML_LIBRARY}
+#    ${QT_QTCORE_LIBRARY}
+#)
+#
 # === Build the H5CV Beamforming pipeline binary for stream 2.
-add_executable(h5CVPipelineStream2 src/h5CVmainStream2.cpp)
-set_target_properties(h5CVPipelineStream2 PROPERTIES
-    COMPILE_FLAGS "${OpenMP_CXX_FLAGS}"
-    LINK_FLAGS "${OpenMP_CXX_FLAGS}"
-)
-target_link_libraries(h5CVPipelineStream2
-    pelicanMdsm
-    pelican-lofar_static
-    ${PELICAN_LIBRARY}
-    ${FFTW3_FFTW_LIBRARY}
-    ${FFTW3_FFTWF_LIBRARY}
-    ${QT_QTNETWORK_LIBRARY}
-    ${QT_QTXML_LIBRARY}
-    ${QT_QTCORE_LIBRARY}
-)
-
-
+#add_executable(h5CVPipelineStream2 src/h5CVmainStream2.cpp)
+#set_target_properties(h5CVPipelineStream2 PROPERTIES
+#    COMPILE_FLAGS "${OpenMP_CXX_FLAGS}"
+#    LINK_FLAGS "${OpenMP_CXX_FLAGS}"
+#)
+#target_link_libraries(h5CVPipelineStream2
+#   pelicanMdsm
+#    pelican-lofar_static
+#    ${PELICAN_LIBRARY}
+#    ${FFTW3_FFTW_LIBRARY}
+#    ${FFTW3_FFTWF_LIBRARY}
+#    ${QT_QTNETWORK_LIBRARY}
+#    ${QT_QTXML_LIBRARY}
+#    ${QT_QTCORE_LIBRARY}
+#)
+#
+#
 # # === Build the sigprocPipeline
 # add_executable(sigprocPipeline src/sigprocPipelineMain.cpp)
 # set_target_properties(sigprocPipeline PROPERTIES
@@ -258,8 +258,8 @@ install(TARGETS emptyPipeline udpBFPipeline
                 udpBFPipelineStream1 udpBFPipelineStream2
 		embraceBFPipeline 
                 embraceBFPipelineStream1 embraceBFPipelineStream2 
-		h5CVPipeline h5CVPipelineStream1
-		h5CVPipelineStream2
+#		h5CVPipeline h5CVPipelineStream1
+#		h5CVPipelineStream2
                 DESTINATION ${BINARY_INSTALL_DIR})
 
 #install(TARGETS udpBFPipeline embraceBFPipeline DESTINATION ${BINARY_INSTALL_DIR})

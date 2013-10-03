@@ -91,7 +91,8 @@ void PlotWidget::plotCurve(unsigned nPoints, const double* xData,
     }
 
     // TODO: Use setData to make a internal copy of the input arrays.. needed?
-    _curve.setRawData(xData, yData, nPoints);
+//    _curve.setRawData(xData, yData, nPoints);
+    _curve.setRawSamples(xData, yData, nPoints);
 
     //setAxisAutoScale(QwtPlot::yLeft);
     //setAxisAutoScale(QwtPlot::xBottom);
@@ -235,7 +236,7 @@ void PlotWidget::savePNG(QString fileName, unsigned sizeX, unsigned sizeY)
 
     QPixmap pixmap(sizeX, sizeY);
     pixmap.fill();
-    print(pixmap);
+    //print(pixmap);
     int quality = -1; // -1 = default, [0..100] otherwise.
     if (!pixmap.save(fileName, "PNG", quality)) {
         throw QString("PlotWidget::exportPNG(): Error saving PNG");
@@ -273,7 +274,7 @@ void PlotWidget::savePDF(QString fileName, unsigned sizeX, unsigned sizeY)
     printer.setOutputFormat(QPrinter::PdfFormat);
     //printer.setPaperSize(QPrinter::A4);
     printer.setPaperSize(QSizeF(sizeX, sizeY), QPrinter::Point);
-    print(printer);
+    //print(printer);
 
 }
 

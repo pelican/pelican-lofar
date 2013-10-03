@@ -89,9 +89,9 @@ void DedispersionBuffer::dump( const QString& fileName ) const {
 }
 
   unsigned DedispersionBuffer::_addSamples( WeightedSpectrumDataSet* weightedData, QVector<float>& noiseTemplate, unsigned *sampleNumber, unsigned numSamples ) {
-    Q_ASSERT( streamData != 0 );
     SpectrumDataSetStokes* streamData =
       static_cast<SpectrumDataSetStokes*>(weightedData->dataSet());
+    Q_ASSERT( streamData != 0 );
     SpectrumDataSet<float>* weights = weightedData->weights();
 
     unsigned int nChannels = streamData->nChannels();

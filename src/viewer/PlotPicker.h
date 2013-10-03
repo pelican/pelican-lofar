@@ -7,6 +7,7 @@
 
 #include <qwt_plot_picker.h>
 #include <qwt_text.h>
+#include <qwt_compat.h>
 
 namespace pelican {
 namespace lofar {

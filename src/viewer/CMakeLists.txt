@@ -15,14 +15,14 @@ set(widget_lib_UI
 
 
 # --- widget library
-set(widget_lib_src
-    src/LofarDataViewer.cpp
-    src/PlotWidget.cpp
-    src/PlotPicker.cpp
-    src/FileDataViewer.cpp
-    src/ThreadedBlobClient.cpp
-    src/SpectrumDataSetWidget.cpp
-)
+#set(widget_lib_src
+#    src/LofarDataViewer.cpp
+#    src/PlotWidget.cpp
+#    src/PlotPicker.cpp
+#    src/FileDataViewer.cpp
+#    src/ThreadedBlobClient.cpp
+#    src/SpectrumDataSetWidget.cpp
+#)
 
 set(widget_moc_headers
     LofarDataViewer.h
@@ -57,12 +57,12 @@ target_link_libraries(lofarWidgets
 )
 
 # --- main executable
-add_executable(lofarDataViewer main.cpp)
-target_link_libraries(lofarDataViewer lofarWidgets ${externals})
-add_executable(fileviewer fileviewer.cpp)
-target_link_libraries(fileviewer lofarWidgets ${externals})
+#add_executable(lofarDataViewer main.cpp)
+#target_link_libraries(lofarDataViewer lofarWidgets ${externals})
+#add_executable(fileviewer fileviewer.cpp)
+#target_link_libraries(fileviewer lofarWidgets ${externals})
 
-add_subdirectory(test)
+#add_subdirectory(test)
 
 
 include(CopyFiles)
