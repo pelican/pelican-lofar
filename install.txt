@@ -1,6 +1,10 @@
 Build Instructions
 ------------------
 
+Make sure that you have specified environment variable:
+
+$PELICAN_INSTALL_DIR
+
 Dependencies
 ------------
   cmake
