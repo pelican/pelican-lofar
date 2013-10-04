@@ -1,10 +1,6 @@
 Build Instructions
 ------------------
 
-Make sure that you have specified environment variable:
-
-$PELICAN_INSTALL_DIR
-
 Dependencies
 ------------
   cmake
@@ -12,23 +8,47 @@ Dependencies
   pelican
   cuda toolkit (optional)
   boost (signals, smart pointers, and program options)
-  
+
+Before compiling the code
+-------------------------
+Make sure that you have specified environment variable $PELICAN_INSTALL_DIR in .mysetenv.bash
+
+PELICAN_INSTALL_DIR=/Code/ampp/pelican/build/install; export PELICAN_INSTALL_DIR
 
 Setup A Build Directory
 -----------------------
-e.g. for your src code at /path/to/pelican-lofar/src
+For src code at /Code/ampp/pelican-lofar
 
 mkdir build
 cd build
-cmake -DCMAKE_BUILD_TYPE=release /path/to/pelican-lofar/src
+cmake -DCMAKE_BUILD_TYPE=release ../src  -DCMAKE_CXX_FLAGS="-O3 -parallel -openmp -xSSE4.2 -fPIC" -DCMAKE_CXX_COMPILER=/opt/intel/bin/icpc -DCMAKE_C_COMPILER=/opt/intel/bin/icc -DCMAKE_INSTALL_PREFIX=/Code/ampp/pelican-lofar/build/install
 
-You may need to specify where the various dependencies are. This can be done 
-with more -D options to cmake. See the documentation at the top of
-the relevant FindXXX.cmake files in the /path/to/pelican-lofar/src/cmake
-directory to find the correct variables to set.
+In case of an error you may need to specify where the various dependencies are.
+This can be done with more -D options to cmake. See the documentation at the top
+of the relevant FindXXX.cmake files in the
+/Code/ampp/pelican-lofar/src/cmake directory to find the correct variables to set.
 
 If all has gone well CMake will of created you build directory and makefiles.
-To build the project you should now type your systems make command such as
-make on linux or nmake on windows.
+To build the project you should now type your systems make command
 
 make
+
+if everything compiles then install files by typing
+
+make install
+
+After compilation
+-----------------
+
+Add the following line to your .mysetenv.bash file
+
+PATH=$PATH:/Code/ampp/pelican-lofar/build/install/pelican-lofar/bin; export PATH
+
+to add pelican-lofar binaries to the PATH
+
+General remarks
+---------------
+
+Due to the compatibility issues between DAL 2.5.0 library and pelican-lofar code
+the HDF5 data pipeline building has been disabled and will not be functional. If
+you have expertise to correct this you are welcome to fiddle around.
