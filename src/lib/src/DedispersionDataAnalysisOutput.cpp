@@ -79,24 +79,32 @@ void DedispersionDataAnalysisOutput::addFile(const QString& filename)
 
 void DedispersionDataAnalysisOutput::sendStream(const QString& /*streamName*/, const DataBlob* dataBlob)
 {
-    if( dataBlob->type() == "DedispersionDataAnalysis" ) {
-        const DedispersionDataAnalysis* data = static_cast<const DedispersionDataAnalysis*>(dataBlob);
-        float rms = data->getRMS();
-        if (data->eventsFound() > 4){
-            foreach( QTextStream* out, _streams ) {
-                foreach( const DedispersionEvent& e, data->events() ) {
-                    double mjdStamp = (e.getTime()-_epoch)/86400 + 55562.0;
-                    //                    float SNR = e.amplitude()/rms;
-                    float SNR = e.mfValue()/(rms * sqrt(e.mfBinning()));
-                    int bf = (int)e.mfBinning();
-                    *out << left << mjdStamp << ",   " << e.dm() << ", " << SNR << ", " << bf << "\n";
-                }
-                ++_indexOfDump;
-                *out << "# Written buffer :" << _indexOfDump << "\n";
-                out->flush();
-            }
+  if( dataBlob->type() == "DedispersionDataAnalysis" ) {
+    const DedispersionDataAnalysis* data = static_cast<const DedispersionDataAnalysis*>(dataBlob);
+    float rms = data->getRMS();
+    if (data->eventsFound() > 4){
+      foreach( QTextStream* out, _streams ) {
+        float SNRmax, DMthis;
+        SNRmax = 0.0;
+        foreach( const DedispersionEvent& e, data->events() ) {
+          double mjdStamp = (e.getTime()-_epoch)/86400 + 55562.0;
+          //                    float SNR = e.amplitude()/rms;
+          float SNR = e.mfValue()/(rms * sqrt(e.mfBinning()));
+          if (SNR > SNRmax){
+            DMthis = e.dm();
+            SNRmax = SNR;
+          }
+          int bf = (int)e.mfBinning();
+          *out << left << mjdStamp << ",   " << e.dm() << ", " << SNR << ", " << bf << "\n";
         }
+        double mjdBlock = (data->events()[0].getTime()-_epoch)/86400 + 55562.0;
+        ++_indexOfDump;
+        *out << "# Written buffer :" << _indexOfDump << " | MJDstart: " << mjdBlock << 
+          " | Best DM: "<< DMthis << "  Done\n";
+        out->flush();
+      }
     }
+  }
 }
 
 } // namespace lofar
