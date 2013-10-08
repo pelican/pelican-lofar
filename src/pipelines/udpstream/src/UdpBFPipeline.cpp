@@ -35,10 +35,9 @@ UdpBFPipeline::~UdpBFPipeline()
  */
 void UdpBFPipeline::init()
 {
-    ConfigNode c = config( QString("H5Pipeline") );
-    _totalIterations= c.getOption("totalIterations", "value", "10000").toInt();    
+    ConfigNode c = config( QString("UdpPipeline") );
+    _totalIterations= c.getOption("totalIterations", "value", "0").toInt();    
     std::cout << _totalIterations << std::endl;
-// Create modules
     // Create modules
     ppfChanneliser = (PPFChanneliser *) createModule("PPFChanneliser");
     stokesGenerator = (StokesGenerator *) createModule("StokesGenerator");
@@ -101,7 +100,8 @@ void UdpBFPipeline::run(QHash<QString, DataBlob*>& remoteData)
      
      _iteration++;
 
-     if (_iteration == _totalIterations) stop();
+     if (_totalIterations != 0)
+       if (_iteration == _totalIterations) stop();
      #ifdef TIMING_ENABLED
      timerUpdate(&_totalTime);
      if( _iteration % 100 == 0 )
