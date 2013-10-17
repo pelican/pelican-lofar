@@ -100,7 +100,7 @@ void DedispersionDataAnalysisOutput::sendStream(const QString& /*streamName*/, c
         double mjdBlock = (data->events()[0].getTime()-_epoch)/86400 + 55562.0;
         ++_indexOfDump;
         *out << "# Written buffer :" << _indexOfDump << " | MJDstart: " << mjdBlock << 
-          " | Best DM: "<< DMthis << "  Done\n";
+          " | Best DM: "<< DMthis << " | Max SNR: " << SNRmax << "  Done\n";
         out->flush();
       }
     }
