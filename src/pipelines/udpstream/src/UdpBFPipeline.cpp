@@ -96,7 +96,7 @@ void UdpBFPipeline::run(QHash<QString, DataBlob*>& remoteData)
 
 //    stop();
      if (_iteration % 100 == 0)
-       cout << "Finished the CV beamforming pipeline, iteration " << _iteration << " out of " << _totalIterations << endl;
+       cout << "Finished the UDP beamforming pipeline, iteration " << _iteration << " out of " << _totalIterations << endl;
      
      _iteration++;
 
