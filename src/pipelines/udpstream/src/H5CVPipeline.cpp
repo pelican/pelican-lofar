@@ -36,18 +36,19 @@ H5CVPipeline::~H5CVPipeline()
 void H5CVPipeline::init()
 {
     ConfigNode c = config( QString("H5Pipeline") );
-    _totalIterations= c.getOption("totalIterations", "value", "10000").toInt();    // Create modules
+    _totalIterations= c.getOption("totalIterations", "value", "0").toInt();
+    // Create modules
     std::cout << _totalIterations << std::endl;
     ppfChanneliser = (PPFChanneliser *) createModule("PPFChanneliser");
-    //    stokesGenerator = (StokesGenerator *) createModule("StokesGenerator");
-    //    rfiClipper = (RFI_Clipper *) createModule("RFI_Clipper");
-    //    stokesIntegrator = (StokesIntegrator *) createModule("StokesIntegrator");
+    //stokesGenerator = (StokesGenerator *) createModule("StokesGenerator");
+    //rfiClipper = (RFI_Clipper *) createModule("RFI_Clipper");
+    //stokesIntegrator = (StokesIntegrator *) createModule("StokesIntegrator");
 
     // Create local datablobs
     spectra = (SpectrumDataSetC32*) createBlob("SpectrumDataSetC32");
-    //    stokes = (SpectrumDataSetStokes*) createBlob("SpectrumDataSetStokes");
-    //    intStokes = (SpectrumDataSetStokes*) createBlob("SpectrumDataSetStokes");
-    //    weightedIntStokes = (WeightedSpectrumDataSet*) createBlob("WeightedSpectrumDataSet");
+    //stokes = (SpectrumDataSetStokes*) createBlob("SpectrumDataSetStokes");
+    //intStokes = (SpectrumDataSetStokes*) createBlob("SpectrumDataSetStokes");
+    //weightedIntStokes = (WeightedSpectrumDataSet*) createBlob("WeightedSpectrumDataSet");
 
     // Request remote data
     requestRemoteData(_streamIdentifier);
@@ -74,29 +75,31 @@ void H5CVPipeline::run(QHash<QString, DataBlob*>& remoteData)
     // Generates spectra from a blocks of time series indexed by sub-band
     // and polarisation.
     ppfChanneliser->run(timeSeries, spectra);
-    dataOutput( spectra, "ComplexVoltageSpectra");
     // Convert spectra in X, Y polarisation into spectra with stokes parameters.
-    //    stokesGenerator->run(spectra, stokes);
+    //stokesGenerator->run(spectra, stokes);
     // Clips RFI and modifies blob in place
-    //    weightedIntStokes->reset(stokes);
+    //weightedIntStokes->reset(stokes);
 
-    //    rfiClipper->run(weightedIntStokes);
-    //    dataOutput(&(weightedIntStokes->stats()), "RFI_Stats");
+    //rfiClipper->run(weightedIntStokes);
+    //dataOutput(&(weightedIntStokes->stats()), "RFI_Stats");
 
-    //    stokesIntegrator->run(stokes, intStokes);
+    //stokesIntegrator->run(stokes, intStokes);
 
     // Calls output stream managed->send(data, stream) the output stream
     // manager is configured in the xml.
-    //     dataOutput(intStokes, "SpectrumDataSetStokes");
+    //dataOutput(intStokes, "SpectrumDataSetStokes");
+    dataOutput( spectra, "ComplexVoltageSpectra");
 
-//    stop();
+    //stop();
 
-    if (_iteration % 100 == 0)
-      cout << "Finished the CV beamforming pipeline, iteration " << _iteration << " out of " << _totalIterations << endl;
+     if (_iteration % 100 == 0)
+       cout << "Finished the CV beamforming pipeline, iteration " << _iteration << " out of " << _totalIterations << endl;
 
-    _iteration++;
+     _iteration++;
 
-    if (_iteration == _totalIterations) stop();
+     if (_totalIterations != 0)
+       if (_iteration == _totalIterations) stop();
+
 }
 
 } // namespace lofar

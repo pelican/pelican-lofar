@@ -36,9 +36,9 @@ UdpBFPipeline::~UdpBFPipeline()
 void UdpBFPipeline::init()
 {
     ConfigNode c = config( QString("UdpPipeline") );
-    _totalIterations= c.getOption("totalIterations", "value", "0").toInt();    
-    std::cout << _totalIterations << std::endl;
+    _totalIterations= c.getOption("totalIterations", "value", "0").toInt();
     // Create modules
+    std::cout << _totalIterations << std::endl;
     ppfChanneliser = (PPFChanneliser *) createModule("PPFChanneliser");
     stokesGenerator = (StokesGenerator *) createModule("StokesGenerator");
     rfiClipper = (RFI_Clipper *) createModule("RFI_Clipper");
@@ -65,8 +65,8 @@ void UdpBFPipeline::init()
  */
 void UdpBFPipeline::run(QHash<QString, DataBlob*>& remoteData)
 {
-  timerStart(&_totalTime);
-  
+    timerStart(&_totalTime);
+
     // Get pointer to the remote time series data blob.
     // This is a block of data containing a number of time series of length
     // N for each sub-band and polarisation.
@@ -92,9 +92,9 @@ void UdpBFPipeline::run(QHash<QString, DataBlob*>& remoteData)
 
     // Calls output stream managed->send(data, stream) the output stream
     // manager is configured in the xml.
-     dataOutput(intStokes, "SpectrumDataSetStokes");
+    dataOutput(intStokes, "SpectrumDataSetStokes");
 
-//    stop();
+    //stop();
      if (_iteration % 100 == 0)
        cout << "Finished the UDP beamforming pipeline, iteration " << _iteration << " out of " << _totalIterations << endl;
      
@@ -111,8 +111,6 @@ void UdpBFPipeline::run(QHash<QString, DataBlob*>& remoteData)
          std::cout << std::endl;
        }
 #endif
-
-
 }
 
 } // namespace lofar
