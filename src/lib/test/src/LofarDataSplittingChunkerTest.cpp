@@ -203,7 +203,7 @@ void LofarDataSplittingChunkerTest::test_normal_packets()
         cout << "- Checking chunk 1." << endl;
         LockedData d = dataManager.getNext(_chunkType1);
         char* data = (char*)reinterpret_cast<AbstractLockableData*>
-                                                (d.object())->dataChunk()->data();
+                                                (d.object())->data()->data();
         CPPUNIT_ASSERT(d.isValid());
 
         UDPPacket* packet;
@@ -234,7 +234,7 @@ void LofarDataSplittingChunkerTest::test_normal_packets()
         cout << "- Checking chunk 2." << endl;
         d = dataManager.getNext(_chunkType2);
         data = (char*)reinterpret_cast<AbstractLockableData*>
-                                    (d.object())->dataChunk()->data();
+                                    (d.object())->data()->data();
         CPPUNIT_ASSERT(d.isValid());
 
         packetSize = sizeof(struct UDPPacket::Header)
