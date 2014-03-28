@@ -37,27 +37,42 @@ SigprocStokesWriter::SigprocStokesWriter(const ConfigNode& configNode )
     _filepath = configNode.getOption("file", "filepath");
     _topsubband     = configNode.getOption("topSubbandIndex", "value", "150").toFloat();
     _lbahba     = configNode.getOption("LBA_0_or_HBA_1", "value", "1").toFloat();
-    if( configNode.getOption("fch1", "value" ) == "" ){ 
+    float subbandwidth =  _clock / (_nRawPols * _nTotalSubbands); // subband bandwidth in MHz
+    float channelwidth = subbandwidth / _nChannels;
+    if( configNode.getOption("fch1", "value" ) == "" ){
       if (_lbahba == 0) {
-        _fch1     = _clock / (_nRawPols * _nTotalSubbands) * _topsubband;
+    //          _fch1     = _clock / (_nRawPols * _nTotalSubbands) * _topsubband;
+  // if the line above gives you the centre frequency of the top
+  // subband, then the line below gives you the centre frequency
+  // of the top channel
+          _fch1     = subbandwidth * _topsubband + 0.5 * subbandwidth - 0.5 * channelwidth;
       }
       else{
         if (_clock == 200)
-          _fch1     = 100 + _clock / (_nRawPols * _nTotalSubbands) * _topsubband;
+    //          _fch1     = 100 + _clock / (_nRawPols * _nTotalSubbands) * _topsubband;
+  // if the line above gives you the centre frequency of the top
+  // subband, then the line below gives you the centre frequency
+  // of the top channel
+          _fch1     = 100 + subbandwidth * _topsubband + 0.5 * subbandwidth - 0.5 * channelwidth;
         if (_clock == 160)
-          _fch1     = 160 + _clock / (_nRawPols * _nTotalSubbands) * _topsubband;
+    //          _fch1     = 160 + _clock / (_nRawPols * _nTotalSubbands) * _topsubband;
+  // if the line above gives you the centre frequency of the top
+  // subband, then the line below gives you the centre frequency
+  // of the top channel
+          _fch1     = 160 + subbandwidth * _topsubband + 0.5 * subbandwidth - 0.5 * channelwidth;
       }
     }
     else{
       _fch1     = configNode.getOption("fch1", "value", "1400.0").toFloat();
     }
-    if( configNode.getOption("foff", "value" ) == "" ){ 
-      _foff     = -_clock / (_nRawPols * _nTotalSubbands) / float(_nChannels);
+    if( configNode.getOption("foff", "value" ) == "" ){
+      //      _foff     = -_clock / (_nRawPols * _nTotalSubbands) / float(_nChannels);
+      _foff     = -channelwidth;
     }
     else{
       _foff     = configNode.getOption("foff", "value", "1.0").toFloat();
     }
-    if( configNode.getOption("tsamp", "value" ) == "" ){ 
+    if( configNode.getOption("tsamp", "value" ) == "" ){
       _tsamp    = (_nRawPols * _nTotalSubbands) * _nChannels * _integrationFreq * _integration / _clock/ 1e6;
     }
     else{
