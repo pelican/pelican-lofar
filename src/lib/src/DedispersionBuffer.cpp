@@ -89,7 +89,6 @@ void DedispersionBuffer::dump( const QString& fileName ) const {
 }
 
   unsigned DedispersionBuffer::_addSamples( WeightedSpectrumDataSet* weightedData, QVector<float>& noiseTemplate, unsigned *sampleNumber, unsigned numSamples ) {
-    Q_ASSERT( streamData != 0 );
     SpectrumDataSetStokes* streamData =
       static_cast<SpectrumDataSetStokes*>(weightedData->dataSet());
     SpectrumDataSet<float>* weights = weightedData->weights();
@@ -97,6 +96,7 @@ void DedispersionBuffer::dump( const QString& fileName ) const {
     unsigned int nChannels = streamData->nChannels();
     unsigned int nSubbands = streamData->nSubbands();
     unsigned int nPolarisations = streamData->nPolarisations();
+    Q_ASSERT( streamData != 0 );
     nPolarisations = 1; // dedispersion on total power only
     if( nSubbands * nChannels * nPolarisations != _sampleSize ) {
         std::cerr  << "DedispersionBuffer: input data sample size(" <<  nSubbands * nChannels * nPolarisations
