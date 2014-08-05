@@ -4,7 +4,7 @@
 
 namespace pelican {
 
-namespace lofar {
+namespace ampp {
 
 
 /**
@@ -43,5 +43,5 @@ void SigProcPipeline::run(QHash<QString, DataBlob*>& remoteData)
     dataOutput(intStokes, "SpectrumDataSetStokes");
 }
 
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican

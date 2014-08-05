@@ -17,7 +17,7 @@
 
 namespace pelican {
 
-namespace lofar {
+namespace ampp {
 
 /**
  * @class BandPass
@@ -111,7 +111,7 @@ class BandPass : public DataBlob
 
 PELICAN_DECLARE_DATABLOB(BandPass)
 
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican
 
 

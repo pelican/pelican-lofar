@@ -8,7 +8,7 @@
 #include "TimerData.h"
 
 namespace pelican {
-namespace lofar {
+namespace ampp {
 
 #ifdef TIMING_ENABLED
 static inline void timerReport(TimerData* data, const char* message)

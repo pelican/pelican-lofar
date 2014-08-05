@@ -11,7 +11,7 @@
 namespace pelican {
     class ConfigNode;
 
-namespace lofar {
+namespace ampp {
 
 /**
  * @class OutputHDF5Lofar
@@ -40,6 +40,6 @@ class OutputHDF5Lofar : public AbstractOutputStream
 
 PELICAN_DECLARE(AbstractOutputStream, OutputHDF5Lofar )
 
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican
 #endif // HDF5OUTPUTLOFAR_H 

@@ -10,7 +10,7 @@
 namespace opts = boost::program_options;
 namespace pelican {
 
-namespace lofar {
+namespace ampp {
 
 
 /**
@@ -94,5 +94,5 @@ ConfigNode LofarPelicanClientApp::config(const Config::TreeAddress address) cons
     return _config.get(address);
 }
 
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican

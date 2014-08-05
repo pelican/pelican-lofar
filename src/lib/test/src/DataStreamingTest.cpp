@@ -12,7 +12,7 @@
 #include <QtCore/QString>
 
 namespace pelican {
-namespace lofar {
+namespace ampp {
 
 CPPUNIT_TEST_SUITE_REGISTRATION( DataStreamingTest );
 
@@ -145,5 +145,5 @@ void DataStreamingTest::_testLofarDataClient(AbstractDataClient* /*client*/)
     // client->getData();
 }
 
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican

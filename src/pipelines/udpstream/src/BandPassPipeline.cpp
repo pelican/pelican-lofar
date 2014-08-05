@@ -5,7 +5,7 @@
 
 
 namespace pelican {
-namespace lofar {
+namespace ampp {
 
 /**
  *@details BandPassPipeline 
@@ -46,5 +46,5 @@ void BandPassPipeline::run(QHash<QString, DataBlob*>& remoteData) {
     }
 }
 
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican

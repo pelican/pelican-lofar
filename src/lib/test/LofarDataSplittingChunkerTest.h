@@ -11,7 +11,7 @@
 #include "pelican/utility/ConfigNode.h"
 
 namespace pelican {
-namespace lofar {
+namespace ampp {
 
 /**
  * @class LofarDataSplittingChunkerTest
@@ -66,6 +66,6 @@ class LofarDataSplittingChunkerTest : public CppUnit::TestFixture
         unsigned _clock;
 };
 
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican
 #endif // LOFAR_DATA_SPLITTING_CHUNKER_TEST_H

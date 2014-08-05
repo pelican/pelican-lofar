@@ -11,7 +11,7 @@
 
 namespace pelican {
 
-namespace lofar {
+namespace ampp {
 
 /**
  * @class UdpBFApplication
@@ -34,6 +34,6 @@ class UdpBFApplication
     private:
 };
 
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican
 #endif // UDPBFAPPLICATION_H 

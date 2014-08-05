@@ -10,7 +10,7 @@
 
 namespace pelican {
 
-namespace lofar {
+namespace ampp {
 
 /**
  * @class FileWriter
@@ -49,6 +49,6 @@ class FileWriter
         QMutex _mutex;
 };
 
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican
 #endif // FILEWRITER_H 

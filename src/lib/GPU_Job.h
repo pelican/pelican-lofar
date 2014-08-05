@@ -14,7 +14,7 @@
 
 namespace pelican {
 
-namespace lofar {
+namespace ampp {
 class GPU_Kernel;
 
 
@@ -63,6 +63,6 @@ class GPU_Job
         JobStatus _status;
 };
 
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican
 #endif // GPU_JOB_H

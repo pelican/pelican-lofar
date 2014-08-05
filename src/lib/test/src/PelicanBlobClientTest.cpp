@@ -6,7 +6,7 @@
 
 namespace pelican {
 
-namespace lofar {
+namespace ampp {
 
 CPPUNIT_TEST_SUITE_REGISTRATION( PelicanBlobClientTest );
 /**
@@ -81,5 +81,5 @@ void PelicanBlobClientTest::test_method()
     }
 }
 
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican

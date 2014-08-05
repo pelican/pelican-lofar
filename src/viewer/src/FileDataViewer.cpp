@@ -11,7 +11,7 @@
 
 namespace pelican {
 
-namespace lofar {
+namespace ampp {
 
 
 /**
@@ -152,5 +152,5 @@ FactoryGeneric<DataBlob>* FileDataViewer::dataBlobFactory()
     return &factory;
 }
 
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican

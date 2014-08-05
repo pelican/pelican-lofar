@@ -12,7 +12,7 @@
 
 namespace pelican {
 
-namespace lofar {
+namespace ampp {
 
 /**
  * @class ProcessingChain1
@@ -92,6 +92,6 @@ class ProcessingChain1
         unsigned _taskId; // unique identifier for each call to exec()
 };
 
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican
 #endif // PROCESSINGCHAIN1_H 

@@ -10,7 +10,7 @@
 
 namespace pelican {
 
-namespace lofar {
+namespace ampp {
 class GPU_MemoryMap;
 
 /**
@@ -47,6 +47,6 @@ class GPU_Param
         void* _devicePtr;
 };
 
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican
 #endif // GPU_PARAM_H 

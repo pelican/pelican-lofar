@@ -9,7 +9,7 @@
 
 namespace pelican {
 
-namespace lofar {
+namespace ampp {
 
 /**
  * @class BinMapTest
@@ -43,6 +43,6 @@ class BinMapTest : public CppUnit::TestFixture
     private:
 };
 
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican
 #endif // BINMAPTEST_H 

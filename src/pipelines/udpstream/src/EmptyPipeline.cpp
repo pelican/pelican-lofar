@@ -5,7 +5,7 @@ using std::cout;
 using std::endl;
 
 namespace pelican {
-namespace lofar {
+namespace ampp {
 
 
 /**
@@ -44,5 +44,5 @@ void EmptyPipeline::run(QHash<QString, DataBlob*>& /*remoteData*/)
     _recorder.tick("run");
 }
 
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican

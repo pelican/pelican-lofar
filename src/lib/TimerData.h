@@ -10,7 +10,7 @@
 
 namespace pelican {
 
-namespace lofar {
+namespace ampp {
 
 /**
  * @class TimerData
@@ -79,6 +79,6 @@ double TimerData::_timerSec( clockid_t type )
     return _tp.tv_sec + (_tp.tv_nsec * 1.0e-9);
 }
 
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican
 #endif // TIMERDATA_H 

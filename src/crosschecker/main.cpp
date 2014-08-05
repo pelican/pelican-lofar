@@ -16,7 +16,7 @@
 
 namespace opts = boost::program_options;
 using namespace pelican;
-using namespace pelican::lofar;
+using namespace pelican::ampp;
 
 int main(int argc, char** argv)
 {

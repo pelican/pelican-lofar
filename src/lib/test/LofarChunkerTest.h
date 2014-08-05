@@ -10,7 +10,7 @@
  */
 
 namespace pelican {
-namespace lofar {
+namespace ampp {
 
 /**
  * @class LofarChunkerTest
@@ -57,7 +57,7 @@ class LofarChunkerTest : public CppUnit::TestFixture
         int _clock;
 };
 
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican
 
 #endif

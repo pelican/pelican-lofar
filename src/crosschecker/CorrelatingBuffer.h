@@ -14,7 +14,7 @@
 namespace pelican {
 class Stream;
 
-namespace lofar {
+namespace ampp {
 class CorrelatedBufferManager;
 
 /**
@@ -59,6 +59,6 @@ class CorrelatingBuffer : public QObject
     friend class CorrelatedBufferManager;
 };
 
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican
 #endif // CORRELATINGBUFFER_H

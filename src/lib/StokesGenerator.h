@@ -15,7 +15,7 @@ namespace pelican {
 
 class ConfigNode;
 
-namespace lofar {
+namespace ampp {
 
 class SpectrumDataSetC32;
 class SpectrumDataSetStokes;
@@ -54,7 +54,7 @@ class StokesGenerator : public AbstractModule
 // Declare this class as a pelican module.
 PELICAN_DECLARE_MODULE(StokesGenerator)
 
-}// namespace lofar
+}// namespace ampp
 }// namespace pelican
 
 #endif // PPF_CHANNELISER_H_

@@ -3,7 +3,7 @@
 
 namespace pelican {
 
-namespace lofar {
+namespace ampp {
 
 
 /**
@@ -26,5 +26,5 @@ void CorrelationCheckModule::run(const QMap<QString, RTMS_Data>& /*map*/)
     // TODO
 }
 
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican

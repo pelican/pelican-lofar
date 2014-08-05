@@ -27,7 +27,7 @@
 
 namespace pelican {
 
-namespace lofar {
+namespace ampp {
 
 /**
  * @class DedispersionPipeline
@@ -87,10 +87,13 @@ class DedispersionPipeline : public AbstractPipeline
         TimerData _dedispersionTime;
         TimerData _totalTime;
         TimerData _rfiClipperTime;
-        unsigned _iteration;
 #endif
+
+        unsigned _iteration;
+	unsigned int _minEventsFound;
+	unsigned int _maxEventsFound;
 };
 
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican
 #endif // DEDISPERSIONPIPELINE_H 

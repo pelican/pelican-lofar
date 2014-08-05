@@ -19,7 +19,7 @@ using std::endl;
 
 
 namespace pelican {
-namespace lofar {
+namespace ampp {
 
 TimerData AdapterTimeSeriesDataSet::adapterTime;
 
@@ -336,5 +336,5 @@ inline QString AdapterTimeSeriesDataSet::_err(const QString& message)
     return QString("AdapterTimeSeriesDataSet: ") + message;
 }
 
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican

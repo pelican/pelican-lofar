@@ -5,7 +5,7 @@
 
 namespace pelican {
 
-namespace lofar {
+namespace ampp {
 
 
 /**
@@ -48,5 +48,5 @@ uint qHash(const GPU_MemoryMap& map) {
     return map.qHash();
 }
 
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican

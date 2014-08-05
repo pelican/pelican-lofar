@@ -17,7 +17,7 @@
 
 namespace pelican {
 
-namespace lofar {
+namespace ampp {
 
 
 /**
@@ -181,5 +181,5 @@ bool DedispersionDataGenerator::equal(
     return true;
 }
 
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican

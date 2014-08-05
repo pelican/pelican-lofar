@@ -12,7 +12,7 @@
 
 namespace pelican {
 
-namespace lofar {
+namespace ampp {
 class GPU_Param;
 
 /**
@@ -65,6 +65,6 @@ class GPUConfigError
         ~GPUConfigError() {};
 };
 
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican
 #endif // GPU_NVIDIACONFIGURATION_H 

@@ -9,7 +9,7 @@
 
 namespace pelican {
 
-namespace lofar {
+namespace ampp {
 
 CPPUNIT_TEST_SUITE_REGISTRATION( RFI_ClipperTest );
 /**
@@ -275,5 +275,5 @@ ConfigNode RFI_ClipperTest::testConfig(const QString& file)
     return node;
 }
 
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican

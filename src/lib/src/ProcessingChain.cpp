@@ -4,7 +4,7 @@
 
 namespace pelican {
 
-namespace lofar {
+namespace ampp {
 
 
 /**
@@ -64,5 +64,5 @@ void ProcessingChain::_finished( const QList<CallBackT>& postProcessingTasks )
     }
 }
 
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican

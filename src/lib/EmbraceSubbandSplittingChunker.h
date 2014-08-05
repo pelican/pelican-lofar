@@ -15,7 +15,7 @@
 #include <QtCore/QMutex>
 
 namespace pelican {
-namespace lofar {
+namespace ampp {
 
 class DataManager;
 
@@ -98,6 +98,6 @@ class EmbraceSubbandSplittingChunker : public AbstractChunker
 
 PELICAN_DECLARE_CHUNKER(EmbraceSubbandSplittingChunker)
 
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican
 #endif // EMBRACE_SUBBAND_SPLITTING_CHUNKER_H_

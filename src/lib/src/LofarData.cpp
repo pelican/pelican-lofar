@@ -3,7 +3,7 @@
 
 namespace pelican {
 
-namespace lofar {
+namespace ampp {
 
 
 /**
@@ -26,5 +26,5 @@ const LofarStationConfiguration& LofarData::configuration() const
     return *_config;
 }
 
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican

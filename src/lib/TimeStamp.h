@@ -8,7 +8,7 @@
 
 namespace pelican {
 
-namespace lofar {
+namespace ampp {
 
 /**
  * @class TimeStamp
@@ -38,6 +38,6 @@ class TimeStamp
         static double _mjdEpoch;
 };
 
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican
 #endif // TIMESTAMP_H 

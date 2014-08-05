@@ -22,7 +22,7 @@
  */
 
 namespace pelican {
-namespace lofar {
+namespace ampp {
 
 /**
  * @class UdpBFPipeline
@@ -72,7 +72,7 @@ class UdpBFPipeline : public AbstractPipeline
 
 };
 
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican
 
 #endif // UDP_BF_PIPELINE_H

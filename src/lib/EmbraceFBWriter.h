@@ -14,7 +14,7 @@
 #include <fstream>
 
 namespace pelican {
-namespace lofar {
+namespace ampp {
 
 class SpectrumDataSetStokes;
 
@@ -76,7 +76,7 @@ class EmbraceFBWriter : public AbstractOutputStream
 
 PELICAN_DECLARE(AbstractOutputStream, EmbraceFBWriter)
 
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican
 
 #endif // EMBRACEFBWRITER_H

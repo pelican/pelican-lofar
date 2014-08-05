@@ -15,7 +15,7 @@
 
 namespace pelican {
 
-namespace lofar {
+namespace ampp {
 
 CPPUNIT_TEST_SUITE_REGISTRATION( UdpBFPipelineIntegrationTest );
 /**
@@ -43,8 +43,8 @@ void UdpBFPipelineIntegrationTest::tearDown() {
 
 void UdpBFPipelineIntegrationTest::startServer() {
     QList<QString> args;
-    args << "--config" << pelican::lofar::test::TEST_DATA_DIR + "/integrationServerConfig.xml";
-    _server->start( pelican::lofar::test::SERVER_EXECUTABLE , args );
+    args << "--config" << pelican::ampp::test::TEST_DATA_DIR + "/integrationServerConfig.xml";
+    _server->start( pelican::ampp::test::SERVER_EXECUTABLE , args );
     if (! _server->waitForStarted()) {
         CPPUNIT_FAIL("Cannot start server");
     }
@@ -82,7 +82,7 @@ void UdpBFPipelineIntegrationTest::test_topdownInit()
             );
     try {
         LofarEmulatorDataSim* emulator = new LofarEmulatorDataSim(emulatorConfig);
-        QFile config( pelican::lofar::test::TEST_DATA_DIR + "/integrationConfig.xml" );
+        QFile config( pelican::ampp::test::TEST_DATA_DIR + "/integrationConfig.xml" );
         LofarTestClient client1(emulator, config, stream1);
         LofarTestClient client2(emulator, config, stream2);
         EmulatorDriver data(emulator); // takes ownership of the emulator
@@ -154,5 +154,5 @@ void UdpBFPipelineIntegrationTest::test_topdownInit()
      stopServer();
 }
 
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican

@@ -9,7 +9,7 @@
 
 namespace pelican {
 
-namespace lofar {
+namespace ampp {
 
 /**
  * @class EmbraceChunkerTest
@@ -41,6 +41,6 @@ class EmbraceChunkerTest : public CppUnit::TestFixture
     private:
 };
 
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican
 #endif // EMBRACECHUNKERTEST_H 

@@ -8,7 +8,7 @@
 #include <complex>
 
 namespace pelican {
-namespace lofar {
+namespace ampp {
 
 
 ///
@@ -83,6 +83,6 @@ void EmbracePowerGenerator::run(const SpectrumDataSetC32* channeliserOutput,
     }
 }
 
-}// namespace lofar
+}// namespace ampp
 }// namespace pelican
 

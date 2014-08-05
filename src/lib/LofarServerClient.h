@@ -9,7 +9,7 @@
  */
 
 namespace pelican {
-namespace lofar {
+namespace ampp {
 
 /**
  * @class LofarServerClient
@@ -33,7 +33,7 @@ class LofarServerClient : public PelicanServerClient
     private:
 };
 
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican
 
 #endif // LOFARSERVERCLIENT_H

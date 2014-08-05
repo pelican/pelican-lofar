@@ -14,7 +14,7 @@
 #include <fstream>
 
 namespace pelican {
-namespace lofar {
+namespace ampp {
 
 class SpectrumDataSetStokes;
 
@@ -73,7 +73,7 @@ class SigprocStokesWriter : public AbstractOutputStream
 
 PELICAN_DECLARE(AbstractOutputStream, SigprocStokesWriter)
 
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican
 
 #endif // SIGPROCSTOKESWRITER_H

@@ -10,7 +10,7 @@
 
 namespace pelican {
 
-namespace lofar {
+namespace ampp {
 
 /**
  * @class RTMS_Data
@@ -34,6 +34,6 @@ class RTMS_Data : public DataBlob
         int _t2;
 };
 
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican
 #endif // RTMS_DATA_H 

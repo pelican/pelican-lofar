@@ -11,7 +11,7 @@
 #include <boost/shared_ptr.hpp>
 
 namespace pelican {
-namespace lofar {
+namespace ampp {
 
 CPPUNIT_TEST_SUITE_REGISTRATION( LofarChunkerTest );
 
@@ -286,5 +286,5 @@ void LofarChunkerTest::test_lostPackets()
 }
 
 
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican

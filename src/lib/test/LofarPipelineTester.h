@@ -17,7 +17,7 @@ namespace pelican {
 class PipelineApplication;
 class AbstractPipeline;
 
-namespace lofar {
+namespace ampp {
 class LofarDataBlobGenerator;
 
 /**
@@ -55,6 +55,6 @@ class LofarPipelineTester
         LofarDataBlobGenerator* _dataGenerator;
 };
 
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican
 #endif // LOFARPIPELINETESTER_H 

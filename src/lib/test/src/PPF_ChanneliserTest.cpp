@@ -19,7 +19,7 @@
 using namespace std;
 
 namespace pelican {
-namespace lofar {
+namespace ampp {
 
 CPPUNIT_TEST_SUITE_REGISTRATION(PPFChanneliserTest);
 
@@ -543,6 +543,6 @@ QString PPFChanneliserTest::_configXml(unsigned nChannels,
     return xml;
 }
 
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican
 

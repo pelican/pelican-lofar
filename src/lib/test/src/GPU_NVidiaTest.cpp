@@ -10,7 +10,7 @@
 
 namespace pelican {
 
-namespace lofar {
+namespace ampp {
 
 CPPUNIT_TEST_SUITE_REGISTRATION( GPU_NVidiaTest );
 /**
@@ -153,5 +153,5 @@ void GPU_NVidiaTest::test_multipleJobs()
 
 }
 
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican

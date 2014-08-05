@@ -21,7 +21,7 @@ namespace DAL {
   class BF_File;
 }
 namespace pelican {
-namespace lofar {
+namespace ampp {
 
 class SpectrumDataSetBase;
 
@@ -132,7 +132,7 @@ void H5_LofarBFDataWriter::_float2int(const float *f, int *i)
 }
 
 
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican
 
 #endif // H5_LOFARBFDATAWRITER_H

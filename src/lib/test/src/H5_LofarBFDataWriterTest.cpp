@@ -11,7 +11,7 @@
 
 namespace pelican {
 
-namespace lofar {
+namespace ampp {
 
 // Test class to enable provide a non-op version for testing
 class TestH5_LofarBFDataWriter : public H5_LofarBFDataWriter {
@@ -126,5 +126,5 @@ void H5_LofarBFDataWriterTest::test_method()
     stokesData.deleteData(spectrumData);
 }
 
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican

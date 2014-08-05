@@ -11,7 +11,7 @@
 
 namespace pelican {
 
-namespace lofar {
+namespace ampp {
 class RTMS_Data;
 
 /**
@@ -37,6 +37,6 @@ class CorrelationCheckModule : public QObject, public AbstractModule
     private:
 };
 
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican
 #endif // CORRELATIONCHECKMODULE_H 

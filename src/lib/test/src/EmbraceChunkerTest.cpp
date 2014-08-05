@@ -3,7 +3,7 @@
 
 namespace pelican {
 
-namespace lofar {
+namespace ampp {
 
 CPPUNIT_TEST_SUITE_REGISTRATION( EmbraceChunkerTest );
 /**
@@ -33,5 +33,5 @@ void EmbraceChunkerTest::test_method()
 {
 }
 
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican

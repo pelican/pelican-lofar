@@ -21,7 +21,7 @@ namespace pelican {
 
 class ConfigNode;
 
-namespace lofar {
+namespace ampp {
 class SpectrumDataSetStokes;
 
 /**
@@ -55,6 +55,6 @@ class SpectrumDataSetWidget : public DataBlobWidget, public Ui::SpectrumDataSetV
 
 PELICAN_DECLARE(DataBlobWidget, SpectrumDataSetWidget)
 
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican
 #endif // SPECTRUM_DATA_SET_WIDGET_H_

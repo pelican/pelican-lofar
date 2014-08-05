@@ -10,7 +10,7 @@
  */
 
 namespace pelican {
-namespace lofar {
+namespace ampp {
 
 class FilterBankAdapterTest : public CppUnit::TestFixture
 {
@@ -33,6 +33,6 @@ class FilterBankAdapterTest : public CppUnit::TestFixture
     private:
 };
 
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican
 #endif // FILTERBANKADAPTERTEST_H 

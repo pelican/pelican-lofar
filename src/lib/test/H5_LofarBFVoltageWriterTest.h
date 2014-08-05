@@ -9,7 +9,7 @@
 
 namespace pelican {
 
-namespace lofar {
+namespace ampp {
 namespace test {
     class TestDir;
 }
@@ -47,6 +47,6 @@ class H5_LofarBFVoltageWriterTest : public CppUnit::TestFixture
         test::TestDir* _testDir;
 };
 
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican
 #endif // H5_LOFARBFVOLTAGEWRITERTEST_H 

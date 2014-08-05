@@ -11,7 +11,7 @@
 
 
 namespace pelican {
-namespace lofar {
+namespace ampp {
 
 
 /**
@@ -50,5 +50,5 @@ H5CVApplication::~H5CVApplication()
 {
 }
 
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican

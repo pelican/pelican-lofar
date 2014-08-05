@@ -17,7 +17,7 @@
 #include <iostream>
 
 namespace pelican {
-namespace lofar {
+namespace ampp {
 
 
 /**
@@ -364,6 +364,6 @@ inline QString PPFChanneliser::_err(const QString& message)
 }
 
 
-}// namespace lofar
+}// namespace ampp
 }// namespace pelican
 

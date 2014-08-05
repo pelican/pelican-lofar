@@ -11,7 +11,7 @@ using std::cout;
 using std::endl;
 
 namespace pelican {
-namespace lofar {
+namespace ampp {
 
 /**
  * @details
@@ -227,5 +227,5 @@ int LofarChunker::writePacket(WritableData *writer, UDPPacket& packet, unsigned 
 }
 
 
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican

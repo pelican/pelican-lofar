@@ -4,7 +4,7 @@
 
 namespace pelican {
 
-namespace lofar {
+namespace ampp {
 
 
 /**
@@ -77,5 +77,5 @@ unsigned long LofarTestClient::count() const
      return 0;
 }
 
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican

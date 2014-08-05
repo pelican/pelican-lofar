@@ -8,7 +8,7 @@
 #include <cmath>
 
 namespace pelican {
-namespace lofar {
+namespace ampp {
 
 
 ///
@@ -120,6 +120,6 @@ void StokesIntegrator::run(const SpectrumDataSetStokes* stokesGeneratorOutput,
     //std::cout << ts << std::endl;
 }
 
-}// namespace lofar
+}// namespace ampp
 }// namespace pelican
 

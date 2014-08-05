@@ -13,7 +13,7 @@
 
 namespace pelican {
 
-namespace lofar {
+namespace ampp {
    class LofarEmulatorDataSim;
    class EmulatorPipeline;
 
@@ -53,6 +53,6 @@ class LofarTestClient : public QThread
         boost::shared_ptr<PipelineApplication> _pApp;
 };
 
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican
 #endif // LOFARTESTCLIENT_H 

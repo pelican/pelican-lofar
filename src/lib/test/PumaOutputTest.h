@@ -12,7 +12,7 @@ class QCoreApplication;
 
 namespace pelican {
 
-namespace lofar {
+namespace ampp {
 
 /**
  * @class PumaOutputTest
@@ -47,6 +47,6 @@ class PumaOutputTest : public CppUnit::TestFixture
       QCoreApplication* _app;
 };
 
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican
 #endif // PUMAOUTPUTTEST_H

@@ -3,7 +3,7 @@
 
 namespace pelican {
 
-namespace lofar {
+namespace ampp {
 
 
 /**
@@ -20,5 +20,5 @@ GPU_Kernel::~GPU_Kernel()
 {
 }
 
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican

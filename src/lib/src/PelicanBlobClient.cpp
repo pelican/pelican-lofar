@@ -23,7 +23,7 @@ using std::endl;
 using std::cerr;
 
 namespace pelican {
-namespace lofar {
+namespace ampp {
 
 // class PelicanBlobClient
 PelicanBlobClient::PelicanBlobClient(QString blobType, QString server, quint16 port)
@@ -119,5 +119,5 @@ void PelicanBlobClient::connectToLofarPelican()
     }
 }
 
-} //namespace lofar
+} //namespace ampp
 } // namespace pelican

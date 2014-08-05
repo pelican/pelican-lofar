@@ -15,7 +15,7 @@
  */
 
 namespace pelican {
-namespace lofar {
+namespace ampp {
 
 class PolyphaseCoefficientsTest : public CppUnit::TestFixture
 {
@@ -35,7 +35,7 @@ class PolyphaseCoefficientsTest : public CppUnit::TestFixture
         void test_generate();
 };
 
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican
 
 #endif // POLYPHASE_COEFFICIENTS_TEST_H

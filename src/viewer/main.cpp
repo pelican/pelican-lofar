@@ -20,7 +20,7 @@
 
 namespace opts = boost::program_options;
 using namespace pelican;
-using namespace pelican::lofar;
+using namespace pelican::ampp;
 using std::cout;
 using std::endl;
 

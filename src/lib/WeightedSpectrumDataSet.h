@@ -11,7 +11,7 @@
 
 namespace pelican {
 
-namespace lofar {
+namespace ampp {
 
 
 /**
@@ -47,6 +47,6 @@ class WeightedSpectrumDataSet : public DataBlob
 };
 PELICAN_DECLARE_DATABLOB(WeightedSpectrumDataSet)
 
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican
 #endif // WEIGHTEDSPECTRUMDATASET_H 

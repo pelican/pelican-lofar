@@ -9,7 +9,7 @@
 
 namespace pelican {
 
-namespace lofar {
+namespace ampp {
 
 /**
  * @class DedispersionAnalyserTest
@@ -43,6 +43,6 @@ class DedispersionAnalyserTest : public CppUnit::TestFixture
     private:
 };
 
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican
 #endif // DEDISPERSIONANALYSERTEST_H 

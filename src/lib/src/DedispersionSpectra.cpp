@@ -4,7 +4,7 @@
 
 namespace pelican {
 
-namespace lofar {
+namespace ampp {
 
 
 /**
@@ -66,5 +66,5 @@ double DedispersionSpectra::getTime( unsigned int sampleNumber ) const {
     return _inputBlobs[0]->getTime( sampleNumber + _firstSampleNumber );
 }
 
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican

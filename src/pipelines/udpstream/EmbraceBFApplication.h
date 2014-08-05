@@ -11,7 +11,7 @@
 
 namespace pelican {
 
-namespace lofar {
+namespace ampp {
 
 /**
  * @class EmbraceBFApplication
@@ -34,6 +34,6 @@ class EmbraceBFApplication
     private:
 };
 
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican
 #endif // EMBRACEBFAPPLICATION_H 

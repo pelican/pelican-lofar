@@ -8,7 +8,7 @@
 
 namespace pelican {
 
-namespace lofar {
+namespace ampp {
 namespace test {
 
 long TestDir::_id = 0;
@@ -86,5 +86,5 @@ QString TestDir::absolutePath() const {
 }
 
 } // namespace test
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican

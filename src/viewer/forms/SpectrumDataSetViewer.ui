@@ -194,7 +194,7 @@
     </widget>
    </item>
    <item>
-    <widget class="pelican::lofar::PlotWidget" name="plot" native="true">
+    <widget class="pelican::ampp::PlotWidget" name="plot" native="true">
      <property name="sizePolicy">
       <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
        <horstretch>100</horstretch>
@@ -207,7 +207,7 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>pelican::lofar::PlotWidget</class>
+   <class>pelican::ampp::PlotWidget</class>
    <extends>QWidget</extends>
    <header>viewer/PlotWidget.h</header>
    <container>1</container>

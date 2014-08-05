@@ -14,7 +14,7 @@
  */
 
 namespace pelican {
-namespace lofar {
+namespace ampp {
 
 class DataManager;
 
@@ -73,7 +73,7 @@ class LofarChunker : public AbstractChunker
 
 PELICAN_DECLARE_CHUNKER(LofarChunker)
 
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican
 
 #endif // LOFARCHUNKER_H

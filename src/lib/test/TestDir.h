@@ -11,7 +11,7 @@
  */
 
 namespace pelican {
-namespace lofar {
+namespace ampp {
 namespace test {
 
 /**
@@ -53,6 +53,6 @@ class TestDir
 };
 
 } // namespace test
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican
 #endif // TESTDIR_H 

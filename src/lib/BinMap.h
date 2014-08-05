@@ -10,7 +10,7 @@
 
 namespace pelican {
 
-namespace lofar {
+namespace ampp {
 
 /**
  * @class BinMap
@@ -78,6 +78,6 @@ class BinMap
 };
 
 unsigned int qHash(const BinMap& key);
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican
 #endif // BINMAP_H

@@ -4,7 +4,7 @@
 
 namespace pelican {
 
-namespace lofar {
+namespace ampp {
 
 
 /**
@@ -77,5 +77,5 @@ void GPU_Job::emitFinished() {
     }
 }
 
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican

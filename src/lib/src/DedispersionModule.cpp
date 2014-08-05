@@ -25,7 +25,7 @@ extern "C" void cacheDedisperseLoop( float *outbuff, long outbufSize, float *buf
 
 namespace pelican {
 
-namespace lofar {
+namespace ampp {
 
 /**
  *@details DedispersionModule 
@@ -361,5 +361,5 @@ void DedispersionModule::DedispersionKernel::run( GPU_NVidia& gpu ) {
                         );
 }
 
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican

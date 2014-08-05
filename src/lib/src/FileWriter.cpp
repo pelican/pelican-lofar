@@ -9,7 +9,7 @@
 
 namespace pelican {
 
-namespace lofar {
+namespace ampp {
 
 
 /**
@@ -82,5 +82,5 @@ void FileWriter::_flush( char* buffer, size_t size ) {
    ::write( _fileHandle, buffer, size );
 }
 
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican

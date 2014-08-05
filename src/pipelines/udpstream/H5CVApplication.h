@@ -11,7 +11,7 @@
 
 namespace pelican {
 
-namespace lofar {
+namespace ampp {
 
 /**
  * @class H5CVApplication
@@ -34,6 +34,6 @@ class H5CVApplication
     private:
 };
 
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican
 #endif // H5CVAPPLICATION_H 

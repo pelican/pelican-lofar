@@ -8,7 +8,7 @@
 #include <QString>
 
 namespace pelican {
-namespace lofar {
+namespace ampp {
 namespace test {
 
 QString SERVER_EXECUTABLE( "${CMAKE_BINARY_DIR}/serverMain");

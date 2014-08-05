@@ -24,7 +24,7 @@
 
 namespace pelican {
   
-namespace lofar {
+namespace ampp {
 
 
 /**
@@ -203,5 +203,5 @@ void TriggerOutput::_send(QString message)
     }
 }
   
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican

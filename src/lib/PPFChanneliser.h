@@ -19,7 +19,7 @@ namespace pelican {
 
 class ConfigNode;
 
-namespace lofar {
+namespace ampp {
 
 class TimeSeriesDataSetC32;
 class SpectrumDataSetC32;
@@ -138,7 +138,7 @@ inline void PPFChanneliser::_fft(const Complex* samples, Complex* spectrum)
 // Declare this class as a pelican module.
 PELICAN_DECLARE_MODULE(PPFChanneliser)
 
-}// namespace lofar
+}// namespace ampp
 }// namespace pelican
 
 #endif // PPF_CHANNELISER_H_

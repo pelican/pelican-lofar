@@ -1,7 +1,7 @@
 #include "LofarServerClient.h"
 
 namespace pelican {
-namespace lofar {
+namespace ampp {
 
 /**
  *@details LofarServerClient
@@ -19,5 +19,5 @@ LofarServerClient::~LofarServerClient()
 {
 }
 
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican

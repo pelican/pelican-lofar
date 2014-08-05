@@ -8,7 +8,7 @@
  */
 
 namespace pelican {
-namespace lofar {
+namespace ampp {
 
 /**
  * @struct UDPPacket.
@@ -37,7 +37,7 @@ struct UDPPacket {
     char data[8130];
 };
 
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican
 
 #endif // LOFARUDPHEADER_H_

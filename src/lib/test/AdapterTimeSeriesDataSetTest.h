@@ -12,7 +12,7 @@
 #include <QtCore/QString>
 
 namespace pelican {
-namespace lofar {
+namespace ampp {
 
 /**
  * @class AdapterTimeSeriesDataSetTest
@@ -78,6 +78,6 @@ class AdapterTimeSeriesDataSetTest : public CppUnit::TestFixture
 };
 
 
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican
 #endif // ADAPTER_SUBBAND_TIME_SERIES_TEST_H

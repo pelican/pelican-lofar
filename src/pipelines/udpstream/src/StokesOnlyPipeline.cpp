@@ -4,7 +4,7 @@
 
 namespace pelican {
 
-namespace lofar {
+namespace ampp {
 
 
 /**
@@ -52,5 +52,5 @@ void StokesOnlyPipeline::run(QHash<QString, DataBlob*>& remoteData)
 
 }
 
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican

@@ -10,7 +10,7 @@
 
 namespace pelican {
 
-namespace lofar {
+namespace ampp {
 
 CPPUNIT_TEST_SUITE_REGISTRATION( DedispersionPipelineTest );
 /**
@@ -170,5 +170,5 @@ QString DedispersionPipelineTest::config( const QString& pipelineConf ) const {
                           );
 }
 
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican

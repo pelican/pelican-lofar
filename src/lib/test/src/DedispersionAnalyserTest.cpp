@@ -7,7 +7,7 @@
 
 namespace pelican {
 
-namespace lofar {
+namespace ampp {
 
 CPPUNIT_TEST_SUITE_REGISTRATION( DedispersionAnalyserTest );
 /**
@@ -76,5 +76,5 @@ void DedispersionAnalyserTest::test_singleEvent()
     }
 }
 
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican

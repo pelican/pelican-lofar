@@ -12,7 +12,7 @@
 
 namespace pelican {
 
-namespace lofar {
+namespace ampp {
 
 /**
  * @class LockingContainer
@@ -69,6 +69,6 @@ class LockingContainer
         QList<T*> _available; // array of available objects
 };
 
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican
 #endif // LOCKINGCONTAINER_H 

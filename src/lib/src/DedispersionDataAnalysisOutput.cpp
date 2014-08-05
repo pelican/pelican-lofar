@@ -9,7 +9,7 @@
 #include <time.h>
 namespace pelican {
 
-namespace lofar {
+namespace ampp {
 
 
 /**
@@ -82,30 +82,31 @@ void DedispersionDataAnalysisOutput::sendStream(const QString& /*streamName*/, c
   if( dataBlob->type() == "DedispersionDataAnalysis" ) {
     const DedispersionDataAnalysis* data = static_cast<const DedispersionDataAnalysis*>(dataBlob);
     float rms = data->getRMS();
-    if (data->eventsFound() > 4){
-      foreach( QTextStream* out, _streams ) {
-        float SNRmax, DMthis;
-        SNRmax = 0.0;
-        foreach( const DedispersionEvent& e, data->events() ) {
-          double mjdStamp = (e.getTime()-_epoch)/86400 + 55562.0;
-          //                    float SNR = e.amplitude()/rms;
-          float SNR = e.mfValue()/(rms * sqrt(e.mfBinning()));
-          if (SNR > SNRmax){
-            DMthis = e.dm();
-            SNRmax = SNR;
-          }
-          int bf = (int)e.mfBinning();
-          *out << left << mjdStamp << ",   " << e.dm() << ", " << SNR << ", " << bf << "\n";
-        }
-        double mjdBlock = (data->events()[0].getTime()-_epoch)/86400 + 55562.0;
-        ++_indexOfDump;
-        *out << "# Written buffer :" << _indexOfDump << " | MJDstart: " << mjdBlock << 
-          " | Best DM: "<< DMthis << " | Max SNR: " << SNRmax << "  Done\n";
-        out->flush();
+    foreach( QTextStream* out, _streams ) {
+      float SNRmax, DMthis;
+      SNRmax = 0.0;
+      //        foreach( const DedispersionEvent& e, data->events() ) {
+      // Avoid printing the first event, which is only used for the timestamp
+      for (unsigned i=1; i<data->eventsFound(); ++i){
+	const DedispersionEvent& e = data->events()[i];
+	double mjdStamp = (e.getTime()-_epoch)/86400 + 55562.0;
+	//                    float SNR = e.amplitude()/rms;
+	float SNR = e.mfValue()/(rms * sqrt(e.mfBinning()));
+	if (SNR > SNRmax){
+	  DMthis = e.dm();
+	  SNRmax = SNR;
+	}
+	int bf = (int)e.mfBinning();
+	*out << left << mjdStamp << ",   " << e.dm() << ", " << SNR << ", " << bf << "\n";
       }
+      double mjdBlock = (data->events()[0].getTime()-_epoch)/86400 + 55562.0;
+      ++_indexOfDump;
+      *out << "# Written buffer :" << _indexOfDump << " | MJDstart: " << mjdBlock << 
+	" | Best DM: "<< DMthis << " | Max SNR: " << SNRmax << "  Done\n";
+      out->flush();
     }
   }
 }
-
-} // namespace lofar
+  
+} // namespace ampp
 } // namespace pelican

@@ -9,7 +9,7 @@
 #include <iostream>
 
 namespace pelican {
-namespace lofar {
+namespace ampp {
 
 void TimeSeriesDataSetC32::serialise(QIODevice& device) const
 {
@@ -89,6 +89,6 @@ void TimeSeriesDataSetC32::write(const QString& fileName,
 }
 
 
-}// namespace lofar
+}// namespace ampp
 }// namespace pelican
 

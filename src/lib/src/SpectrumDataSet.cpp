@@ -8,7 +8,7 @@
 #include <iostream>
 
 namespace pelican {
-namespace lofar {
+namespace ampp {
 
 SpectrumDataSetBase::SpectrumDataSetBase(const QString& type) 
     : DataBlob(type), _nSubbands(0), _nPolarisations(0), _nTimeBlocks(0),
@@ -212,6 +212,6 @@ void SpectrumDataSetStokes::deserialise(QIODevice& in, QSysInfo::Endian /*endian
 }
 
 
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican
 

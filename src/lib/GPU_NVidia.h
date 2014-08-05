@@ -14,7 +14,7 @@
 
 namespace pelican {
 
-namespace lofar {
+namespace ampp {
 class GPU_Manager;
 
 /**
@@ -47,7 +47,7 @@ class GPU_NVidia : public GPU_Resource
         GPU_NVidiaConfiguration* _currentConfig;
 };
 
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican
 #endif // CUDA_FOUND
 #endif // GPU_NVIDIA_H 

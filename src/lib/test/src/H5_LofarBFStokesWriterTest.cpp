@@ -8,7 +8,7 @@
 
 namespace pelican {
 
-namespace lofar {
+namespace ampp {
 
 CPPUNIT_TEST_SUITE_REGISTRATION( H5_LofarBFStokesWriterTest );
 /**
@@ -82,5 +82,5 @@ void H5_LofarBFStokesWriterTest::test_method()
     stokesData.deleteData(spectrumData);
 }
 
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican

@@ -11,7 +11,7 @@
 
 namespace pelican {
 
-namespace lofar {
+namespace ampp {
 class SpectrumDataSetStokes;
 
 /**
@@ -47,6 +47,6 @@ class FilterBankAdapter : public AbstractStreamAdapter
 
 PELICAN_DECLARE_ADAPTER(FilterBankAdapter)
 
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican
 #endif // FILTERBANKADAPTER_H 

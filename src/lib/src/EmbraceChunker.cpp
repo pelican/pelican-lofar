@@ -13,7 +13,7 @@
 
 namespace pelican {
 
-namespace lofar {
+namespace ampp {
 
 
 /**
@@ -69,5 +69,5 @@ void EmbraceChunker::next(QIODevice* device)
                 "WritableData is not valid!" << std::endl;
     }
 }
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican

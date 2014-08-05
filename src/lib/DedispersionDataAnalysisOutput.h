@@ -13,7 +13,7 @@
 namespace pelican {
 class ConfigNode;
 
-namespace lofar {
+namespace ampp {
 
 /**
  * @class DedispersionDataAnalysisOutput
@@ -43,6 +43,6 @@ class DedispersionDataAnalysisOutput : public AbstractOutputStream
 };
 
 PELICAN_DECLARE(AbstractOutputStream, DedispersionDataAnalysisOutput)
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican
 #endif // DEDISPERSIONDATAANALYSISOUTPUT_H 

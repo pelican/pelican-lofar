@@ -7,7 +7,7 @@
 #include <iomanip>
 
 namespace pelican {
-namespace lofar {
+namespace ampp {
 
 CPPUNIT_TEST_SUITE_REGISTRATION(PolyphaseCoefficientsTest);
 
@@ -97,5 +97,5 @@ void PolyphaseCoefficientsTest::test_loadCoeffFile()
     QFile::remove(fileName);
 }
 
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican

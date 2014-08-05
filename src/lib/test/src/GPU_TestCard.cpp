@@ -4,7 +4,7 @@
 
 namespace pelican {
 
-namespace lofar {
+namespace ampp {
 
 
 /**
@@ -48,5 +48,5 @@ GPU_Job* GPU_TestCard::currentJob() const {
     return _current;
 }
 
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican

@@ -9,7 +9,7 @@
 
 namespace pelican {
 
-namespace lofar {
+namespace ampp {
 
 /**
  * @class GPU_MemoryMapTest
@@ -41,6 +41,6 @@ class GPU_MemoryMapTest : public CppUnit::TestFixture
     private:
 };
 
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican
 #endif // GPU_MEMORYMAPTEST_H 

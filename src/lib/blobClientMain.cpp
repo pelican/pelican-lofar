@@ -4,7 +4,7 @@
 #include <QtCore/QHash>
 
 using namespace pelican;
-using namespace pelican::lofar;
+using namespace pelican::ampp;
 
 int main()
 {

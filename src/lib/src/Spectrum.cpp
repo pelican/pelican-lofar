@@ -1,9 +1,9 @@
 #include "Spectrum.h"
 
 namespace pelican {
-namespace lofar {
+namespace ampp {
 
 
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican
 

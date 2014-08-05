@@ -17,7 +17,7 @@ class QUdpSocket;
 namespace pelican {
 class DataBlob;
 
-namespace lofar {
+namespace ampp {
 class DedispersionDataAnalysis;
 // class DedispersedTimeSeriesF32;
 
@@ -74,6 +74,6 @@ class TriggerOutput : public AbstractOutputStream
 
 PELICAN_DECLARE(AbstractOutputStream, TriggerOutput )
 
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican
 #endif // TRIGGEROUTPUT_H 

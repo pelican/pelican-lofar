@@ -15,7 +15,7 @@ namespace pelican {
 class ConfigNode;
 class DataBlob;
 
-namespace lofar {
+namespace ampp {
 class SpectrumDataSetStokes;
 
 /**
@@ -70,6 +70,6 @@ class DedispersionModuleTest : public CppUnit::TestFixture
         QList<DataBlob*> _unlocked;
 };
 
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican
 #endif // DEDISPERSIONMODULETEST_H 

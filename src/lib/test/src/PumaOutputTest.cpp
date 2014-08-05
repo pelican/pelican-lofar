@@ -9,7 +9,7 @@
 
 namespace pelican {
 
-namespace lofar {
+namespace ampp {
 
 CPPUNIT_TEST_SUITE_REGISTRATION( PumaOutputTest );
 /**
@@ -92,5 +92,5 @@ void PumaOutputTest::test_configuration()
     }
 }
 
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican

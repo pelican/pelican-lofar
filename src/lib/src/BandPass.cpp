@@ -8,7 +8,7 @@
 
 namespace pelican {
 
-namespace lofar {
+namespace ampp {
 
 
 /**
@@ -152,5 +152,5 @@ float BandPass::_evaluate(float v) const
    return tot;
 }
 
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican

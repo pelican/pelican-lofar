@@ -17,7 +17,7 @@ namespace pelican {
 
 class ConfigNode;
 
-namespace lofar {
+namespace ampp {
 
 class TimeSeriesDataSetC32;
 
@@ -120,6 +120,6 @@ class AdapterTimeSeriesDataSet : public AbstractStreamAdapter
 
 PELICAN_DECLARE_ADAPTER(AdapterTimeSeriesDataSet)
 
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican
 #endif // ADAPTER_TIME_SERIES_DATA_SET

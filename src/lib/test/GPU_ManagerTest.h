@@ -9,7 +9,7 @@
 
 namespace pelican {
 
-namespace lofar {
+namespace ampp {
 
 /**
  * @class GPU_ManagerTest
@@ -49,6 +49,6 @@ class GPU_ManagerTest : public CppUnit::TestFixture
         int _callbackCount;
 };
 
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican
 #endif // GPU_MANAGERTEST_H 

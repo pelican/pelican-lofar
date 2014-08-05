@@ -11,7 +11,7 @@
 
 namespace pelican {
 
-namespace lofar {
+namespace ampp {
 
 /**
  * @class GPU_MemoryMap
@@ -109,6 +109,6 @@ class GPU_MemoryMapInputOutput : public GPU_MemoryMapOutput
 };
 
 unsigned int qHash(const GPU_MemoryMap& key);
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican
 #endif // GPU_MEMORYMAP_H 

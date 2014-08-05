@@ -8,7 +8,7 @@
  */
 
 namespace pelican {
-namespace lofar {
+namespace ampp {
 
 /**
  * @class LofarStreamDataClient
@@ -35,7 +35,7 @@ class LofarStreamDataClient : public DirectStreamDataClient
 
 PELICAN_DECLARE_CLIENT(LofarStreamDataClient)
 
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican
 
 #endif // LOFARSTREAMDATACLIENT_H

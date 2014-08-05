@@ -16,7 +16,7 @@ using std::cerr;
 using std::endl;
 
 namespace pelican {
-namespace lofar {
+namespace ampp {
 
 CPPUNIT_TEST_SUITE_REGISTRATION(LofarDataSplittingChunkerTest);
 
@@ -270,5 +270,5 @@ void LofarDataSplittingChunkerTest::test_normal_packets()
     }
 }
 
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican

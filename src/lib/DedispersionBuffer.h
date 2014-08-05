@@ -10,7 +10,7 @@
 
 namespace pelican {
 
-namespace lofar {
+namespace ampp {
 class WeightedSpectrumDataSet;
 class SpectrumDataSetStokes;
 
@@ -95,6 +95,6 @@ class DedispersionBuffer
         DEFINE_TIMER(_addSampleTimer)
 };
 
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican
 #endif // DEDISPERSIONBUFFER_H 

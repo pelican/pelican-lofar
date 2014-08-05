@@ -8,7 +8,7 @@
 
 namespace pelican {
 
-namespace lofar {
+namespace ampp {
 
 
 /**
@@ -101,5 +101,5 @@ TimeSeriesDataSetC32* LofarDataBlobGenerator::generateTimeSeriesData( TimeSeries
     return timeSeries;
 }
 
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican

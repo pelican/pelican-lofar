@@ -11,7 +11,7 @@
 
 namespace pelican {
 
-namespace lofar {
+namespace ampp {
 
 CPPUNIT_TEST_SUITE_REGISTRATION( DedispersionDataAnalysisOutputTest );
 /**
@@ -62,5 +62,5 @@ void DedispersionDataAnalysisOutputTest::test_method()
     CPPUNIT_ASSERT( f.size() > 0 );
 }
 
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican

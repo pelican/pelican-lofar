@@ -11,7 +11,7 @@
 #include <complex>
 
 namespace pelican {
-namespace lofar {
+namespace ampp {
 
 
 /**
@@ -158,7 +158,7 @@ class PolyphaseCoefficients : public T_PolyphaseCoefficients<double>
 
 PELICAN_DECLARE_DATABLOB(PolyphaseCoefficients)
 
-}// namespace lofar
+}// namespace ampp
 }// namespace pelican
 
 #endif // POLYPHASE_COEFFICIENTS_H_

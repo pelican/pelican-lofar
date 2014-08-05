@@ -11,7 +11,7 @@
 
 namespace pelican {
 
-namespace lofar {
+namespace ampp {
 class GPU_Param;
 
 /**
@@ -39,6 +39,6 @@ class TestCudaVectorAdd : public GPU_Kernel
         GPU_MemoryMapOutput _vecOut;
 };
 
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican
 #endif // TESTCUDAVECTORADD_H 

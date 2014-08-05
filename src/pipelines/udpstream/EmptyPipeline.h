@@ -14,7 +14,7 @@
  */
 
 namespace pelican {
-namespace lofar {
+namespace ampp {
 
 /**
  * @class EmptyPipeline
@@ -41,7 +41,7 @@ class EmptyPipeline : public AbstractPipeline
         unsigned _iteration;
 };
 
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican
 
 #endif // EMPTY_PIPELINE_H

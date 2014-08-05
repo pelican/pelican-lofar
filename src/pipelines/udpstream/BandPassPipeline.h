@@ -12,7 +12,7 @@
 
 namespace pelican {
 class DataBlob;
-namespace lofar {
+namespace ampp {
 class BandPassRecorder;
 class PPFChanneliser;
 class StokesGenerator;
@@ -53,6 +53,6 @@ class BandPassPipeline : public AbstractPipeline
         BandPass _bandPass;
 };
 
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican
 #endif // BANDPASSPIPELINE_H 

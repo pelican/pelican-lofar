@@ -12,7 +12,7 @@ namespace pelican {
 
     class ConfigNode;
 
-namespace lofar {
+namespace ampp {
 
 /**
  * @class LofarStationConfigurationAdapter
@@ -35,6 +35,6 @@ class LofarStationConfigurationAdapter : public AbstractServiceAdapter
     private:
 };
 
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican
 #endif // LOFARSTATIONCONFIGURATIONADAPTER_H

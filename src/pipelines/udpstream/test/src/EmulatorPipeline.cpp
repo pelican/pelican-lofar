@@ -4,7 +4,7 @@
 
 namespace pelican {
 
-namespace lofar {
+namespace ampp {
 
 
 /**
@@ -44,5 +44,5 @@ unsigned long EmulatorPipeline::count() const
 //    std::cout << "runCount=" << _runCount <<std::endl;
     return _runCount;
 }
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican

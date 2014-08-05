@@ -12,7 +12,7 @@
 
 namespace pelican {
 
-namespace lofar {
+namespace ampp {
 class TimeSeriesDataSetC32;
 
 /**
@@ -64,6 +64,6 @@ class LofarDataBlobGenerator : public AbstractDataClient
 };
 PELICAN_DECLARE_CLIENT(LofarDataBlobGenerator)
 
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican
 #endif // LOFARDATABLOBGENERATOR_H 

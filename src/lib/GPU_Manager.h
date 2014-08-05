@@ -12,7 +12,7 @@
  */
 
 namespace pelican {
-namespace lofar {
+namespace ampp {
 class GPU_Resource;
 class GPU_Job;
 
@@ -73,6 +73,6 @@ class GPU_Manager
 
 };
 
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican
 #endif // GPU_MANAGER_H 

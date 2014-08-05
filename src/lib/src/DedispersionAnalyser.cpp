@@ -7,7 +7,7 @@
 
 namespace pelican {
 
-namespace lofar {
+namespace ampp {
 
 
 /**
@@ -203,5 +203,5 @@ int DedispersionAnalyser::analyse( DedispersionSpectra* data,
 }
 
 
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican

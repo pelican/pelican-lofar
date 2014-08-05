@@ -8,7 +8,7 @@
 
 namespace pelican {
 
-namespace lofar {
+namespace ampp {
 
 
 /**
@@ -57,5 +57,5 @@ void ThreadedBlobClient::run()
     delete _client;
 }
 
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican

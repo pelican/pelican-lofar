@@ -12,7 +12,7 @@ namespace pelican {
 
 class ConfigNode;
 
-namespace lofar {
+namespace ampp {
 
 /**
  * @class LofarUdpEmulator
@@ -77,6 +77,6 @@ class LofarUdpEmulator : public AbstractUdpEmulator
         unsigned int _blockid;          ///< The blockSequenceNumber of the preceeding packet
 };
 
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican
 #endif // LOFARUDPEMULATOR_H

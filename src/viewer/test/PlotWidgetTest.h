@@ -12,7 +12,7 @@
 #include <vector>
 
 namespace pelican {
-namespace lofar {
+namespace ampp {
 
 class PlotWidgetTest : public QObject
 {
@@ -66,14 +66,14 @@ class PlotWidgetTest : public QObject
 
 
 
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican
 
-//QTEST_MAIN(pelican::lofar::PlotWidgetTest)
+//QTEST_MAIN(pelican::ampp::PlotWidgetTest)
 int main(int argc, char** argv)
 {
     QApplication app(argc, argv);
-    pelican::lofar::PlotWidgetTest test;
+    pelican::ampp::PlotWidgetTest test;
     QTest::qExec(&test, argc, argv);
     return app.exec();
 }

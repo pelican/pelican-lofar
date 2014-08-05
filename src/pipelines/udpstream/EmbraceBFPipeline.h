@@ -22,7 +22,7 @@
  */
 
 namespace pelican {
-namespace lofar {
+namespace ampp {
 
 /**
  * @class EmbraceBFPipeline
@@ -66,7 +66,7 @@ class EmbraceBFPipeline : public AbstractPipeline
         unsigned _iteration;
 };
 
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican
 
 #endif // EMBRACE_BF_PIPELINE_H

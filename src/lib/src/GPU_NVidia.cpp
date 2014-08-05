@@ -12,7 +12,7 @@
 
 namespace pelican {
 
-namespace lofar {
+namespace ampp {
 
 /**
  *@details GPU_NVidia 
@@ -76,5 +76,5 @@ void GPU_NVidia::initialiseResources(GPU_Manager* manager) {
      }
 }
 
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican

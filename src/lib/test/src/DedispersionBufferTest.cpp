@@ -6,7 +6,7 @@
 
 namespace pelican {
 
-namespace lofar {
+namespace ampp {
 
 CPPUNIT_TEST_SUITE_REGISTRATION( DedispersionBufferTest );
 /**
@@ -204,5 +204,5 @@ void DedispersionBufferTest::_fillData( SpectrumDataSetStokes* spectrumData, flo
     }
 }
 
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican

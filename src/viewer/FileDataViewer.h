@@ -21,7 +21,7 @@ class DataBlobWidget;
 class DataBlobWidgetFactory;
 class Config;
 
-namespace lofar {
+namespace ampp {
 
 /**
  * @class FileDataViewer
@@ -65,6 +65,6 @@ class FileDataViewer : public QWidget
         QMap<QString,QString> _viewerMap;
 };
 
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican
 #endif // FILEDATAVIEWER_H 

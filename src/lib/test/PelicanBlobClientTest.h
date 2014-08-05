@@ -9,7 +9,7 @@
 
 namespace pelican {
 
-namespace lofar {
+namespace ampp {
 
 /**
  * @class PelicanBlobClientTest
@@ -39,6 +39,6 @@ class PelicanBlobClientTest : public CppUnit::TestFixture
         ~PelicanBlobClientTest();
 };
 
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican
 #endif // PELICANBLOBCLIENTTEST_H 

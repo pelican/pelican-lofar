@@ -13,7 +13,7 @@
 
 namespace pelican {
 
-namespace lofar {
+namespace ampp {
 class GPU_Job;
 class GPU_Manager;
 
@@ -123,6 +123,6 @@ class AsyncronousModule : public AbstractModule
         QList<DataBlob*> _recentUnlocked;
 };
 
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican
 #endif // ASYNCRONOUSMODULE_H 

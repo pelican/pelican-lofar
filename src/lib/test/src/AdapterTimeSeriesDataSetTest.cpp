@@ -22,7 +22,7 @@ using std::cout;
 using std::endl;
 
 namespace pelican {
-namespace lofar {
+namespace ampp {
 
 CPPUNIT_TEST_SUITE_REGISTRATION(AdapterTimeSeriesDataSetTest);
 
@@ -373,5 +373,5 @@ ConfigNode AdapterTimeSeriesDataSetTest::_configXml(
 }
 
 
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican

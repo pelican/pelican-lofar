@@ -11,7 +11,7 @@
 
 
 namespace pelican {
-namespace lofar {
+namespace ampp {
 
 
 /**
@@ -50,5 +50,5 @@ UdpBFApplication::~UdpBFApplication()
 {
 }
 
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican

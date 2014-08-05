@@ -15,7 +15,7 @@
 #include <QtCore/QMutex>
 
 namespace pelican {
-namespace lofar {
+namespace ampp {
 
 class DataManager;
 
@@ -98,6 +98,6 @@ class LofarDataSplittingChunker : public AbstractChunker
 
 PELICAN_DECLARE_CHUNKER(LofarDataSplittingChunker)
 
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican
 #endif // LOFAR_DATA_SPLITTING_CHUNKER_H_

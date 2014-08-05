@@ -37,7 +37,7 @@
  */
 
 namespace pelican {
-namespace lofar {
+namespace ampp {
 
 /**
  * @class Range
@@ -144,7 +144,7 @@ class Range
 
 
 
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican 
 
 #endif // HICRANGE_H 

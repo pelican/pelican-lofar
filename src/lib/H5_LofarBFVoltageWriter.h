@@ -11,7 +11,7 @@
 
 namespace pelican {
 
-namespace lofar {
+namespace ampp {
 class SpectrumDataSetC32;
 
 /**
@@ -38,7 +38,7 @@ class H5_LofarBFVoltageWriter : public H5_LofarBFDataWriter
 PELICAN_DECLARE(AbstractOutputStream, H5_LofarBFVoltageWriter)
 
 
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican
 
 #endif // HDF5_FOUND

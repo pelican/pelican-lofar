@@ -15,7 +15,7 @@ class QIODevice;
 namespace pelican {
 class ConfigNode;
 
-namespace lofar {
+namespace ampp {
 
 /**
  * @class BandPassOutput
@@ -55,6 +55,6 @@ class BandPassOutput : public AbstractOutputStream
 
 PELICAN_DECLARE(AbstractOutputStream, BandPassOutput )
 
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican
 #endif // BANDPASSOUTPUT_H

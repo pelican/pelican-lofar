@@ -12,7 +12,7 @@ class QWaitCondition;
 namespace pelican {
 class DataBlob;
 
-namespace lofar {
+namespace ampp {
 class SpectrumDataSetStokes;
 class DedispersionSpectra;
 
@@ -90,6 +90,6 @@ class DedispersionDataGenerator
         double tsamp; // time sample length (seconds)
 };
 
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican
 #endif // DEDISPERSIONDATAGENERATOR_H 

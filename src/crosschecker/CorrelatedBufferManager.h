@@ -11,7 +11,7 @@
 
 namespace pelican {
 
-namespace lofar {
+namespace ampp {
 class CorrelatingBuffer;
 
 /**
@@ -48,6 +48,6 @@ class CorrelatedBufferManager : public QObject
         int _delta;
 };
 
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican
 #endif // CORRELATEDBUFFERMANAGER_H 

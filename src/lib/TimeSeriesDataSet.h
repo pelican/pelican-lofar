@@ -11,7 +11,7 @@
 #include <complex>
 
 namespace pelican {
-namespace lofar {
+namespace ampp {
 
 /**
  * @class TimeSeriesDataSet
@@ -201,6 +201,6 @@ PELICAN_DECLARE_DATABLOB(TimeSeriesDataSetC32)
 PELICAN_DECLARE_DATABLOB(LofarTimeStream1)
 PELICAN_DECLARE_DATABLOB(LofarTimeStream2)
 
-}// namespace lofar
+}// namespace ampp
 }// namespace pelican
 #endif // TIME_SERIES_DATA_SET_H_

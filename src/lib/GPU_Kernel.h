@@ -9,7 +9,7 @@
 
 namespace pelican {
 
-namespace lofar {
+namespace ampp {
 class GPU_NVidia;
 
 /**
@@ -37,6 +37,6 @@ class GPU_Kernel
     private:
 };
 
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican
 #endif // GPU_KERNEL_H 

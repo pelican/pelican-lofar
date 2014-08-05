@@ -10,7 +10,7 @@
 
 namespace pelican {
 
-namespace lofar {
+namespace ampp {
 
 /**
  * @class DedispersedTimeSeries
@@ -118,6 +118,6 @@ class DedispersedTimeSeriesF32 : public DedispersedTimeSeries<float>
 PELICAN_DECLARE_DATABLOB(DedispersedTimeSeriesF32)
 
 
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican
 #endif // DEDISPERSED_TIME_SERIES_H_

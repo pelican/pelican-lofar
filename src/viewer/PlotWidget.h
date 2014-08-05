@@ -11,7 +11,7 @@ class QwtPlotZoomer;
 class QwtPlotGrid;
 
 namespace pelican {
-namespace lofar {
+namespace ampp {
 
 class PlotPicker;
 
@@ -109,5 +109,5 @@ class PlotWidget : public  QwtPlot
 
 
 } // namespace pelican
-} // namespace lofar
+} // namespace ampp
 #endif // PLOTWIDGET_H_

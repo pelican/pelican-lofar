@@ -9,7 +9,7 @@
 
 namespace pelican {
 
-namespace lofar {
+namespace ampp {
 
 /**
  * @class LockingContainerTest
@@ -41,6 +41,6 @@ class LockingContainerTest : public CppUnit::TestFixture
     private:
 };
 
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican
 #endif // LOCKINGCONTAINERTEST_H 

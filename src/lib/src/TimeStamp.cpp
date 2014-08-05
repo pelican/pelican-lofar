@@ -3,7 +3,7 @@
 
 namespace pelican {
 
-namespace lofar {
+namespace ampp {
 
 
 /**
@@ -35,5 +35,5 @@ double TimeStamp::mjdEpoch() {
     return _mjdEpoch;
 }
 
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican

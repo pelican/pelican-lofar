@@ -11,7 +11,7 @@
 
 namespace pelican {
 class DataBlob;
-namespace lofar {
+namespace ampp {
 class DedispersionDataAnalysis;
 
 /**
@@ -37,6 +37,6 @@ class DedispersionAnalyser : public AbstractModule
 };
 
 PELICAN_DECLARE_MODULE(DedispersionAnalyser)
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican
 #endif // DEDISPERSIONANALYSER_H 

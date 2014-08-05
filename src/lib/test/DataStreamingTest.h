@@ -14,7 +14,7 @@ namespace pelican {
 
 class AbstractDataClient;
 
-namespace lofar {
+namespace ampp {
 
 /**
  * @class DataStreamingTest
@@ -59,7 +59,7 @@ class DataStreamingTest : public CppUnit::TestFixture
         pelican::DataTypes _dataTypes;
 };
 
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican
 
 #endif // DATASTREAMINGTEST_H

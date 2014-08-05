@@ -9,7 +9,7 @@
 
 
 namespace pelican {
-namespace lofar {
+namespace ampp {
 
 
 /**
@@ -105,5 +105,5 @@ void BandPassAdapter::deserialise(QIODevice* device)
     }
 }
 
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican

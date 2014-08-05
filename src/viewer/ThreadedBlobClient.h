@@ -11,7 +11,7 @@
 namespace pelican {
     class DataBlob;
 
-namespace lofar {
+namespace ampp {
     class PelicanBlobClient;
 
 /**
@@ -45,6 +45,6 @@ class ThreadedBlobClient : public QThread
         bool _isRunning;
 };
 
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican
 #endif // THREADEDBLOBCLIENT_H

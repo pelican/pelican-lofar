@@ -9,7 +9,7 @@
 #include <iostream>
 
 namespace pelican {
-namespace lofar {
+namespace ampp {
 
 
 /**
@@ -50,5 +50,5 @@ LofarDataViewer::~LofarDataViewer()
     delete _client;
 }
 
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican

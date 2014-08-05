@@ -14,7 +14,7 @@
 #include <cmath>
 
 using namespace pelican;
-using namespace pelican::lofar;
+using namespace pelican::ampp;
 using namespace std;
 
 // Prototypes

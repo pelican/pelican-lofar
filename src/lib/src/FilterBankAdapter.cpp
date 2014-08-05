@@ -7,7 +7,7 @@
 
 namespace pelican {
 
-namespace lofar {
+namespace ampp {
 
 
 /**
@@ -168,5 +168,5 @@ void FilterBankAdapter::char4ints (unsigned char c, int *i, int *j, int *k, int 
 }
 
 
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican

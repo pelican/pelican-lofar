@@ -9,7 +9,7 @@
 #include <qwt_text.h>
 
 namespace pelican {
-namespace lofar {
+namespace ampp {
 
 /**
  * @class PlotPicker
@@ -41,6 +41,6 @@ class PlotPicker : public QwtPlotPicker
         virtual QwtText trackerText(const QwtDoublePoint& pos) const;
 };
 
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican
 #endif // PLOT_PICKER_H_

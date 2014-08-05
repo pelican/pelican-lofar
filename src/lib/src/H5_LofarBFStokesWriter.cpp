@@ -4,7 +4,7 @@
 
 namespace pelican {
 
-namespace lofar {
+namespace ampp {
 
 
 /**
@@ -81,5 +81,5 @@ void H5_LofarBFStokesWriter::_writeData( const SpectrumDataSetBase* d )
 }
 
 
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican

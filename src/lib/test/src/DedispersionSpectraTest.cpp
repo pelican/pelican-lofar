@@ -4,7 +4,7 @@
 
 namespace pelican {
 
-namespace lofar {
+namespace ampp {
 
 CPPUNIT_TEST_SUITE_REGISTRATION( DedispersionSpectraTest );
 /**
@@ -55,5 +55,5 @@ void DedispersionSpectraTest::test_dmIndex()
     CPPUNIT_ASSERT_EQUAL( maxDmAmplitude, spectra.dmAmplitude( timebins-1 , (int)dedispersionBins - 1 ) );
 }
 
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican

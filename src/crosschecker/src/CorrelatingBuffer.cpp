@@ -4,7 +4,7 @@
 
 namespace pelican {
 
-namespace lofar {
+namespace ampp {
 
 
 /**
@@ -46,5 +46,5 @@ void CorrelatingBuffer::newData(const Stream& stream)
     Q_ASSERT( stream.type() == "RTMS_Data" );
     add(*(static_cast<RTMS_Data*>(stream.data().get())));
 }
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican

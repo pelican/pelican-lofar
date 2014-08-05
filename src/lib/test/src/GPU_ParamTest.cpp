@@ -5,7 +5,7 @@
 
 namespace pelican {
 
-namespace lofar {
+namespace ampp {
 
 CPPUNIT_TEST_SUITE_REGISTRATION( GPU_ParamTest );
 /**
@@ -38,5 +38,5 @@ void GPU_ParamTest::test_memoryLeak()
      GPU_Param param( map );
 }
 
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican

@@ -4,7 +4,7 @@
 
 namespace pelican {
 
-namespace lofar {
+namespace ampp {
 
 
 /**
@@ -31,5 +31,5 @@ void TimerData::reset() {
     timeAverage = 0.0;
 }
 
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican

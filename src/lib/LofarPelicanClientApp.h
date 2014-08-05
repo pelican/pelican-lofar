@@ -12,7 +12,7 @@ namespace pelican {
 class AbstractBlobClient;
 class ThreadedDataBlobClient;
 
-namespace lofar {
+namespace ampp {
 
 /**
  * @class LofarPelicanClientApp
@@ -44,6 +44,6 @@ class LofarPelicanClientApp
         ClientMapContainer_T _clients;
 };
 
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican
 #endif // LOFARPELICANCLIENTAPP_H 

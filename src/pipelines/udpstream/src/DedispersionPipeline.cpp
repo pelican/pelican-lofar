@@ -9,7 +9,7 @@
 
 namespace pelican {
 
-namespace lofar {
+namespace ampp {
 
 
 /**
@@ -65,6 +65,9 @@ void DedispersionPipeline::init()
     // history indicates the number of datablobs to keep (iterations of run())
     // it should be Dedidpersion Buffer size (in Blobs)*number of Dedispersion Buffers
     unsigned int history= c.getOption("history", "value", "10").toUInt();
+    _minEventsFound = c.getOption("events", "min", "5").toUInt();
+    _maxEventsFound = c.getOption("events", "max", "0").toUInt();
+
 
     // Create modules
     _ppfChanneliser = (PPFChanneliser *) createModule("PPFChanneliser");
@@ -176,18 +179,33 @@ void DedispersionPipeline::dedispersionAnalysis( DataBlob* blob ) {
     DedispersionDataAnalysis result;
     DedispersionSpectra* data = static_cast<DedispersionSpectra*>(blob);
     if ( _dedispersionAnalyser->analyse(data, &result) )
-    {
-        dataOutput( &result, "DedispersionDataAnalysis" );
+      {
+        std::cout << "Found " << result.eventsFound() << " events" << std::endl;
+        std::cout << "Limits: " << _minEventsFound << " " << _maxEventsFound << " events" << std::endl;
         dataOutput( &result, "TriggerInput" );
-        if (result.eventsFound() > 4){
-            foreach( const SpectrumDataSetStokes* d, result.data()->inputDataBlobs()) {
-                    dataOutput( d, "SignalFoundSpectrum" );
-                    //		    dataOutput( d->getRawData(), "RawDataFoundSpectrum" );
-            }
-        }
-    }
+	if (_minEventsFound >= _maxEventsFound){
+            std::cout << "Writing out..." << std::endl;
+	    if (result.eventsFound() >= _minEventsFound){
+	      dataOutput( &result, "DedispersionDataAnalysis" );
+	      foreach( const SpectrumDataSetStokes* d, result.data()->inputDataBlobs()) {
+		dataOutput( d, "SignalFoundSpectrum" );
+		//		    dataOutput( d->getRawData(), "RawDataFoundSpectrum" );
+	      }
+	    }
+	}
+	else{
+	  if (result.eventsFound() >= _minEventsFound && result.eventsFound() <= _maxEventsFound){
+	    std::cout << "Writing out..." << std::endl;
+	    dataOutput( &result, "DedispersionDataAnalysis" );
+	    foreach( const SpectrumDataSetStokes* d, result.data()->inputDataBlobs()) {
+	      dataOutput( d, "SignalFoundSpectrum" );
+	      //		    dataOutput( d->getRawData(), "RawDataFoundSpectrum" );
+	    }
+	  }
+	}
+      }
 }
-
+  
 void DedispersionPipeline::updateBufferLock( const QList<DataBlob*>& freeData ) {
      // find WeightedDataBlobs that can be unlocked
      foreach( DataBlob* blob, freeData ) {
@@ -198,5 +216,5 @@ void DedispersionPipeline::updateBufferLock( const QList<DataBlob*>& freeData ) 
      }
 }
 
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican

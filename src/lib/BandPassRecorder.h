@@ -11,7 +11,7 @@
 
 namespace pelican {
 
-namespace lofar {
+namespace ampp {
 class SpectrumDataSetStokes;
 class BandPass;
 class BinMap;
@@ -62,6 +62,6 @@ class BandPassRecorder : public AbstractModule
 
 PELICAN_DECLARE_MODULE(BandPassRecorder)
 
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican
 #endif // BANDPASSRECORDER_H 

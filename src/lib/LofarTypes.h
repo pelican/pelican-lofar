@@ -11,7 +11,7 @@
  */
 
 namespace pelican {
-namespace lofar {
+namespace ampp {
 
 namespace TYPES {
 
@@ -312,7 +312,7 @@ inline bool TimeStamp::operator != (const TimeStamp &other) const
         {   return itsTime != other.itsTime;    }
 
 } // namespace TYPES
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican
 
 #endif /* LOFARTYPES_H_ */

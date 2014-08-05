@@ -16,7 +16,7 @@ using std::vector;
 typedef std::complex<float> Complex;
 
 namespace pelican {
-namespace lofar {
+namespace ampp {
 
 CPPUNIT_TEST_SUITE_REGISTRATION(SpectrumDataSetTest);
 
@@ -224,5 +224,5 @@ void SpectrumDataSetTest::test_access_performance()
 }
 
 
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican

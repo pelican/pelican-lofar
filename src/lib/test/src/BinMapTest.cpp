@@ -4,7 +4,7 @@
 
 namespace pelican {
 
-namespace lofar {
+namespace ampp {
 
 CPPUNIT_TEST_SUITE_REGISTRATION( BinMapTest );
 /**
@@ -61,5 +61,5 @@ void BinMapTest::test_bin()
      CPPUNIT_ASSERT_EQUAL( 1 , map.binIndex(start + width) );
 }
 
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican

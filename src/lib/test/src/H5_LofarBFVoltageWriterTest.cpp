@@ -9,7 +9,7 @@
 
 namespace pelican {
 
-namespace lofar {
+namespace ampp {
 
 CPPUNIT_TEST_SUITE_REGISTRATION( H5_LofarBFVoltageWriterTest );
 /**
@@ -116,5 +116,5 @@ void H5_LofarBFVoltageWriterTest::test_performance()
     }
 }
 
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican

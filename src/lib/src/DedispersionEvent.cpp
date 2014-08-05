@@ -4,7 +4,7 @@
 
 namespace pelican {
 
-namespace lofar {
+namespace ampp {
 
 
 /**
@@ -51,5 +51,5 @@ float DedispersionEvent::amplitude() const
     return _data->dmAmplitude( _time, _dm );
 }
 
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican

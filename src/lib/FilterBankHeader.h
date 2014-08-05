@@ -10,7 +10,7 @@ class QIODevice;
 
 namespace pelican {
 
-namespace lofar {
+namespace ampp {
 
 /**
  * @class FilterBankHeader
@@ -63,6 +63,6 @@ class FilterBankHeader
 
 };
 
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican
 #endif // FILTERBANKHEADER_H

@@ -18,7 +18,7 @@
 
 namespace pelican {
 
-namespace lofar {
+namespace ampp {
 
 
 /**
@@ -174,5 +174,5 @@ void PumaOutput::_send(const char* puma, size_t size)
     }
 }
 
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican

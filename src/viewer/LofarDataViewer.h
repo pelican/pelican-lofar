@@ -11,7 +11,7 @@
 
 namespace pelican {
 
-namespace lofar {
+namespace ampp {
 
 class ThreadedBlobClient;
 
@@ -41,6 +41,6 @@ class LofarDataViewer : public DataViewer
         QString _address;
 };
 
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican
 #endif // LOFARDATAVIEWER_H

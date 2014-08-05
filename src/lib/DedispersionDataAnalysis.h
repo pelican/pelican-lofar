@@ -13,7 +13,7 @@
 
 namespace pelican {
 
-namespace lofar {
+namespace ampp {
 class DedispersionSpectra;
 
 /**
@@ -63,6 +63,6 @@ class DedispersionDataAnalysis : public DataBlob
 
 PELICAN_DECLARE_DATABLOB(DedispersionDataAnalysis)
 
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican
 #endif // DEDISPERSIONDATAANALYSIS_H 

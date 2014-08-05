@@ -8,7 +8,7 @@
 #include <cmath>
 
 namespace pelican {
-namespace lofar {
+namespace ampp {
 
 /**
  * @details
@@ -190,5 +190,5 @@ void LofarUdpEmulator::looseEvenPackets(bool loose)
     _looseEvenPackets = loose;
 }
 
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican

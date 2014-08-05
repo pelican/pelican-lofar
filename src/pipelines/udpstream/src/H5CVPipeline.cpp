@@ -6,7 +6,7 @@ using std::cout;
 using std::endl;
 
 namespace pelican {
-namespace lofar {
+namespace ampp {
 
 
 /**
@@ -99,5 +99,5 @@ void H5CVPipeline::run(QHash<QString, DataBlob*>& remoteData)
     if (_iteration == _totalIterations) stop();
 }
 
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican

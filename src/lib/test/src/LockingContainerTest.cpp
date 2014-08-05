@@ -4,7 +4,7 @@
 
 namespace pelican {
 
-namespace lofar {
+namespace ampp {
 
 CPPUNIT_TEST_SUITE_REGISTRATION( LockingContainerTest );
 /**
@@ -52,5 +52,5 @@ void LockingContainerTest::test_method()
     CPPUNIT_ASSERT_EQUAL(3, *b3 );
 }
 
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican

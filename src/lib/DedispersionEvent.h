@@ -8,7 +8,7 @@
 
 namespace pelican {
 
-namespace lofar {
+namespace ampp {
 class DedispersionSpectra;
 
 /**
@@ -39,6 +39,6 @@ class DedispersionEvent
         float _mfBinValue, _mfBinFactor;
 };
 
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican
 #endif // DEDISPERSIONEVENT_H 

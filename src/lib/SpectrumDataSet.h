@@ -16,7 +16,7 @@
 #include <iostream>
 
 namespace pelican {
-namespace lofar {
+namespace ampp {
 
 /**
  * @class SpectrumDataSet
@@ -322,7 +322,7 @@ PELICAN_DECLARE_DATABLOB(SpectrumDataSetC32)
 PELICAN_DECLARE_DATABLOB(SpectrumDataSetStokes)
 
 
-}// namespace lofar
+}// namespace ampp
 }// namespace pelican
 
 #endif // SPECTRUM_DATA_SET_H_

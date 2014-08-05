@@ -9,7 +9,7 @@
 
 namespace pelican {
 
-namespace lofar {
+namespace ampp {
 class SpectrumDataSetStokes;
 
 /**
@@ -45,6 +45,6 @@ class DedispersionBufferTest : public CppUnit::TestFixture
         void _fillData( SpectrumDataSetStokes* data, float start );
 };
 
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican
 #endif // DEDISPERSIONBUFFERTEST_H 

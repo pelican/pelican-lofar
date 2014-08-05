@@ -8,7 +8,7 @@
 extern "C" void sgels_(const char*, const int*, const int*,const int*, float*,const int*, float*, int*, float*, int*, int*);
 
 namespace pelican {
-namespace lofar {
+namespace ampp {
 
 int BandPassRecorder::sgels(int n, int m, int nrhs,
                         float *A, int lda, float *B, int ldb,
@@ -186,5 +186,5 @@ void BandPassRecorder::_polyFit( float* y, int nDataPoints )
     _fit.assign(&_valueMatrix[0],&_valueMatrix[0]+_polyDegree);
 }
 
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican

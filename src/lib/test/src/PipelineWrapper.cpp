@@ -6,7 +6,7 @@
 
 namespace pelican {
 
-namespace lofar {
+namespace ampp {
 
 
 /**
@@ -25,5 +25,5 @@ void PipelineWrapper::setIterations( unsigned i ) {
     _pipelineWrapperIterationCount = i;
 }
 
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican

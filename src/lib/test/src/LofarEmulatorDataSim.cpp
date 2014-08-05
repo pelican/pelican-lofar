@@ -10,7 +10,7 @@ using std::endl;
 #include <cmath>
 
 namespace pelican {
-namespace lofar {
+namespace ampp {
 
 /**
  * @details Constructs the LOFAR UDP emulator.
@@ -172,5 +172,5 @@ void LofarEmulatorDataSim::_setPacketData()
 
 
 
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican

@@ -10,7 +10,7 @@
 #include <omp.h>
 
 namespace pelican {
-namespace lofar {
+namespace ampp {
 
 
 ///
@@ -163,6 +163,6 @@ void StokesGenerator::run(const TimeSeriesDataSetC32* streamData,
 }
 
 
-}// namespace lofar
+}// namespace ampp
 }// namespace pelican
 

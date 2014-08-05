@@ -4,7 +4,7 @@
 
 namespace pelican {
 
-namespace lofar {
+namespace ampp {
 
 CPPUNIT_TEST_SUITE_REGISTRATION( GPU_MemoryMapTest );
 /**
@@ -37,5 +37,5 @@ void GPU_MemoryMapTest::test_method()
      CPPUNIT_ASSERT_EQUAL( testVar, m.value<int>() );
 }
 
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican

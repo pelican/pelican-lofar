@@ -7,7 +7,7 @@ using std::cout;
 using std::endl;
 
 namespace pelican {
-namespace lofar {
+namespace ampp {
 
 
 /**
@@ -134,5 +134,5 @@ void TimingPipeline::run(QHash<QString, DataBlob*>& remoteData)
     }
 }
 
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican

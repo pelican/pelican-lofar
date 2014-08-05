@@ -7,7 +7,7 @@
 
 namespace pelican {
 
-namespace lofar {
+namespace ampp {
 
 
 /**
@@ -58,5 +58,5 @@ void* GPU_Param::host() const {
     return _map.hostPtr();
 }
 
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican

@@ -12,7 +12,7 @@
 
 namespace pelican {
 
-namespace lofar {
+namespace ampp {
     class SpectrumDataSetStokes;
     class WeightedSpectrumDataSet;
 /**
@@ -57,6 +57,6 @@ class RFI_Clipper : public AbstractModule
 };
 
 PELICAN_DECLARE_MODULE(RFI_Clipper)
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican
 #endif // RFI_CLIPPER_H 

@@ -5,7 +5,7 @@ extern "C" void vecAdd( const float*, const float*, float*, int );
 
 namespace pelican {
 
-namespace lofar {
+namespace ampp {
 
 
 /**
@@ -28,5 +28,5 @@ void TestCudaVectorAdd::run( GPU_NVidia& gpu ) {
               , (float*)gpu.devicePtr(_vecOut), 2 );
 }
 
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican

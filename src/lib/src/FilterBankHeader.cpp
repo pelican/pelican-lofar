@@ -6,7 +6,7 @@
 
 namespace pelican {
 
-namespace lofar {
+namespace ampp {
 
 
 /**
@@ -161,5 +161,5 @@ unsigned int FilterBankHeader::deserialise(QIODevice* device)
      return totalBytes;
 }
 
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican

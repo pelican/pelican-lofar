@@ -4,7 +4,7 @@
 
 namespace pelican {
 
-namespace lofar {
+namespace ampp {
 
 
 /**
@@ -66,5 +66,5 @@ QMap<QString, RTMS_Data> CorrelatedBufferManager::_findCorrelated(
      return data;
 }
 
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican

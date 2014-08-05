@@ -12,7 +12,7 @@
 namespace pelican {
     class ConfigNode;
 
-namespace lofar {
+namespace ampp {
     class SpectrumDataSetStokes;
     class BandPass;
 
@@ -69,6 +69,6 @@ class RFI_ClipperTest : public CppUnit::TestFixture
         ConfigNode testConfig(const QString& = "t191_BAND.bp");
 };
 
-} // namespace lofar
+} // namespace ampp
 } // namespace pelicanND.bp
 #endif // RFI_CLIPPERTEST_H

@@ -3,7 +3,7 @@
 
 namespace pelican {
 
-namespace lofar {
+namespace ampp {
 
 
 /**
@@ -76,5 +76,5 @@ void BlobStatistics::deserialise(QIODevice& device)
     in >> _median;
 }
 
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican

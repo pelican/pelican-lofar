@@ -10,7 +10,7 @@
 #include <QtCore/QString>
 
 namespace pelican {
-namespace lofar {
+namespace ampp {
 
 /**
  * @class PPFChanneliserTest
@@ -79,7 +79,7 @@ class PPFChanneliserTest : public CppUnit::TestFixture
         unsigned _nTaps;
 };
 
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican
 
 #endif // PPF_CHANNELISER_TEST_H_

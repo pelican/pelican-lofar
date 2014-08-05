@@ -3,7 +3,7 @@
 
 namespace pelican {
 
-namespace lofar {
+namespace ampp {
 
 /**
  *@details LofarStreamDataClient
@@ -24,5 +24,5 @@ LofarStreamDataClient::~LofarStreamDataClient()
 }
 
 
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican

@@ -5,7 +5,7 @@
 #include "FilterBankAdapter.h"
 
 namespace pelican {
-namespace lofar {
+namespace ampp {
 
 CPPUNIT_TEST_SUITE_REGISTRATION( FilterBankAdapterTest );
 // class FilterBankAdapterTest 
@@ -53,5 +53,5 @@ void FilterBankAdapterTest::test_readFile()
      }
 }
 
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican

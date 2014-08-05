@@ -14,7 +14,7 @@
 
 namespace pelican {
 
-namespace lofar {
+namespace ampp {
 
 /**
  * @class SigProcPipeline
@@ -45,6 +45,6 @@ class SigProcPipeline : public AbstractPipeline
         WeightedSpectrumDataSet* weightedIntStokes;
 };
 
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican
 #endif // SIGPROCPIPELINE_H 

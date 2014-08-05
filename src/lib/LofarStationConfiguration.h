@@ -10,7 +10,7 @@
 
 namespace pelican {
 
-namespace lofar {
+namespace ampp {
 
 /**
  * @class LofarStationConfiguration
@@ -32,6 +32,6 @@ class LofarStationConfiguration : public DataBlob
     private:
 };
 
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican
 #endif // LOFARSTATIONCONFIGURATION_H 

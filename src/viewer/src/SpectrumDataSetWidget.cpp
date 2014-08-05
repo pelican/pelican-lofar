@@ -7,7 +7,7 @@
 using namespace std;
 
 namespace pelican {
-namespace lofar {
+namespace ampp {
 
 
 SpectrumDataSetWidget::SpectrumDataSetWidget(const ConfigNode& config,
@@ -120,5 +120,5 @@ void SpectrumDataSetWidget::_plot(const vector<double>& vec)
 }
 
 
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican

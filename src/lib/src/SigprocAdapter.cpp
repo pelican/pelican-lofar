@@ -3,7 +3,7 @@
 #include <QtCore/QFile>
 
 namespace pelican {
-namespace lofar {
+namespace ampp {
 /// Constructs a new SigprocAdapter.
 SigprocAdapter::SigprocAdapter(const ConfigNode& config)
     : AbstractStreamAdapter(config)
@@ -86,6 +86,6 @@ void SigprocAdapter::_checkData()
     _stokesData->resize(_nSamples, _nSubbands, 1, 1); // 1 Channel per subband in this case (and only total power)
 }
 
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican
 

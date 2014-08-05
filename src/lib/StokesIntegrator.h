@@ -16,7 +16,7 @@ namespace pelican {
 
 class ConfigNode;
 
-namespace lofar {
+namespace ampp {
 
 //class SubbandSpectraC32;
 class SpectrumDataSetStokes;
@@ -57,6 +57,6 @@ class StokesIntegrator : public AbstractModule
 // Declare this class as a pelican module.
 PELICAN_DECLARE_MODULE(StokesIntegrator)
 
-}// namespace lofar
+}// namespace ampp
 }// namespace pelican
 #endif // STOKES_INTEGRATOR_H

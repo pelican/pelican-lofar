@@ -10,7 +10,7 @@
 
 namespace pelican {
 
-namespace lofar {
+namespace ampp {
 
 /**
  * @class EmbraceChunker
@@ -40,6 +40,6 @@ class EmbraceChunker : public AbstractChunker
 
 PELICAN_DECLARE_CHUNKER(EmbraceChunker)
 
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican
 #endif // EMBRACECHUNKER_H 

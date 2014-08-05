@@ -11,7 +11,7 @@
 
 namespace pelican {
 
-namespace lofar {
+namespace ampp {
 
 /**
  * @class BandPassAdapter
@@ -37,6 +37,6 @@ class BandPassAdapter : public AbstractServiceAdapter
 
 PELICAN_DECLARE_ADAPTER(BandPassAdapter)
 
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican
 #endif // BANDPASSADAPTER_H 

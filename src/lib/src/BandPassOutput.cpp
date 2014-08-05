@@ -9,7 +9,7 @@
 #include "BinMap.h"
 
 namespace pelican {
-namespace lofar {
+namespace ampp {
 
 
 /**
@@ -72,5 +72,5 @@ BandPassOutput::~BandPassOutput()
 {
 }
 
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican

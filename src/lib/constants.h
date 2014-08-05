@@ -6,7 +6,7 @@
  */
 
 namespace pelican {
-namespace lofar {
+namespace ampp {
 
 /**
  * @brief
@@ -38,6 +38,6 @@ const double c = 299792458; // speed of light
 } // namespace phy
 
 
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican
 #endif // CONSTANTS_H__

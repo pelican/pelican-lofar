@@ -15,7 +15,7 @@
  */
 
 namespace pelican {
-namespace lofar {
+namespace ampp {
 
 class SpectrumDataSetTest : public CppUnit::TestFixture
 {
@@ -40,6 +40,6 @@ class SpectrumDataSetTest : public CppUnit::TestFixture
 };
 
 
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican
 #endif // SPECTRUM_DATA_SET_TEST_H_

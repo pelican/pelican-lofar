@@ -14,7 +14,7 @@
 #include <boost/random/variate_generator.hpp>
 //#include "openmp.h"
 namespace pelican {
-namespace lofar {
+namespace ampp {
 
 /**
  *@details RFI_Clipper
@@ -470,5 +470,5 @@ void RFI_Clipper::run( WeightedSpectrumDataSet* weightedStokes )
     }      
   }
 }
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican

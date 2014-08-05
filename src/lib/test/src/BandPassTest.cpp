@@ -6,7 +6,7 @@
 
 namespace pelican {
 
-namespace lofar {
+namespace ampp {
 
 CPPUNIT_TEST_SUITE_REGISTRATION( BandPassTest );
 /**
@@ -105,5 +105,5 @@ void BandPassTest::test_setMedian()
      }
 }
 
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican

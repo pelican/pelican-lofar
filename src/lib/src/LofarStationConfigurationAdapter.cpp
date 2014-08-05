@@ -3,7 +3,7 @@
 
 namespace pelican {
 
-namespace lofar {
+namespace ampp {
 
 
 /**
@@ -28,5 +28,5 @@ void LofarStationConfigurationAdapter::deserialise(QIODevice*)
 {
 }
 
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican

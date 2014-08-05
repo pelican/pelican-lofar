@@ -16,7 +16,7 @@ class QIODevice;
 namespace pelican {
 class DataBlob;
 
-namespace lofar {
+namespace ampp {
 class SpectrumDataSetStokes;
 class DedispersedTimeSeriesF32;
 
@@ -66,6 +66,6 @@ class PumaOutput : public AbstractOutputStream
 
 PELICAN_DECLARE(AbstractOutputStream, PumaOutput )
 
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican
 #endif // PUMAOUTPUT_H 

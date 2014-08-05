@@ -24,7 +24,7 @@
 namespace pelican {
 class DataBlob;
 
-namespace lofar {
+namespace ampp {
 class WeightedSpectrumDataSet;
 class GPU_DataMapping;
 class GPU_Job;
@@ -145,7 +145,7 @@ class DedispersionModule : public AsyncronousModule
 };
 
 PELICAN_DECLARE_MODULE(DedispersionModule)
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican
 #endif // CUDA_FOUND
 #endif // DEDISPERSIONMODULE_H 

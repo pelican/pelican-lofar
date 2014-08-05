@@ -4,7 +4,7 @@
 
 
 namespace pelican {
-namespace lofar {
+namespace ampp {
 
 QMap< unsigned int, QMap< double, QMap<double, unsigned int> > > BinMap::_unique;
 unsigned int BinMap::_uniqueCount = 0;
@@ -110,5 +110,5 @@ unsigned int qHash(const BinMap& key)
 }
 
 
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican

@@ -2,7 +2,7 @@
 #include <QtCore/QString>
 
 namespace pelican {
-namespace lofar {
+namespace ampp {
 
 
 /**
@@ -64,5 +64,5 @@ QwtText PlotPicker::trackerText(const QwtDoublePoint& pos) const
 }
 
 
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican

@@ -10,7 +10,7 @@
 #include <cmath>
 
 namespace pelican {
-namespace lofar {
+namespace ampp {
 
 /**
  * @details
@@ -366,6 +366,6 @@ void PolyphaseCoefficients::genereateFilter(unsigned nTaps,
 
 
 
-}// namespace lofar
+}// namespace ampp
 }// namespace pelican
 

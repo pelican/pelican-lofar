@@ -10,7 +10,7 @@ class QProcess;
 
 namespace pelican {
 
-namespace lofar {
+namespace ampp {
 
 /**
  * @class UdpBFPipelineIntegrationTest
@@ -46,6 +46,6 @@ class UdpBFPipelineIntegrationTest : public CppUnit::TestFixture
 
 };
 
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican
 #endif // UDPBFPIPELINEINTEGRATIONTEST_H 

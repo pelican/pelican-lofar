@@ -6,7 +6,7 @@
 
 namespace pelican {
 
-namespace lofar {
+namespace ampp {
 
 
 /**
@@ -39,5 +39,5 @@ void LofarPipelineTester::run( unsigned iterations )
      _app->start(); // pipeline wrapper will stop()
 }
 
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican

@@ -14,7 +14,7 @@
 #include <QtGui/QPrinter>
 
 namespace pelican {
-namespace lofar {
+namespace ampp {
 
 /**
  * @details
@@ -313,4 +313,4 @@ void PlotWidget::_connectSignalsAndSlots()
 
 
 } // namespace pelican
-} // namespace lofar
+} // namespace ampp

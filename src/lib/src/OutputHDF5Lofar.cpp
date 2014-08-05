@@ -7,7 +7,7 @@
 
 namespace pelican {
 
-namespace lofar {
+namespace ampp {
 
 
 /**
@@ -34,5 +34,5 @@ void OutputHDF5Lofar::sendStream(const QString& /*streamName*/, const DataBlob* 
     }
 }
 
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican

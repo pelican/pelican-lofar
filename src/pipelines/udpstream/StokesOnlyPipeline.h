@@ -16,7 +16,7 @@
 
 namespace pelican {
 
-namespace lofar {
+namespace ampp {
 class WeightedSpectrumDataSet;
 
 /**
@@ -48,6 +48,6 @@ class StokesOnlyPipeline : public AbstractPipeline
         RFI_Clipper* rfiClipper;
 };
 
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican
 #endif // STOKESONLYPIPELINE_H 

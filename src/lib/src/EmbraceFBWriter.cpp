@@ -7,7 +7,7 @@
 #include <fstream>
 
 namespace pelican {
-namespace lofar {
+namespace ampp {
 
 
 // Constructor

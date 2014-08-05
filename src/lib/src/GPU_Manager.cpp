@@ -8,7 +8,7 @@
 #include <iostream>
 
 namespace pelican {
-namespace lofar {
+namespace ampp {
 
 /**
  *@details GPU_Manager 
@@ -112,5 +112,5 @@ void GPU_Manager::_resourceFree( GPU_Resource* res) {
     }
 }
 
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican

@@ -12,7 +12,7 @@
 
 namespace pelican {
 
-namespace lofar {
+namespace ampp {
 
 /**
  * @class LockingPtrContainer
@@ -80,6 +80,6 @@ class LockingPtrContainer
         QList<const T*> _available; // array of available pointers
 };
 
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican
 #endif // LOCKINGPTRCONTAINER_H 

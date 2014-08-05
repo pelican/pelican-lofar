@@ -8,7 +8,7 @@
 
 namespace pelican {
 
-namespace lofar {
+namespace ampp {
 
 
 /**
@@ -106,5 +106,5 @@ int AsyncronousModule::unlock( DataBlob* data ) {
     return _dataLocker[data];
 }
 
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican

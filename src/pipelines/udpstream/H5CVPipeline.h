@@ -21,7 +21,7 @@
  */
 
 namespace pelican {
-namespace lofar {
+namespace ampp {
 
 /**
  * @class H5CVPipeline
@@ -66,7 +66,7 @@ class H5CVPipeline : public AbstractPipeline
         unsigned _iteration;
 };
 
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican
 
 #endif // H5_CV_PIPELINE_H

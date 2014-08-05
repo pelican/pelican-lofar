@@ -13,7 +13,7 @@ namespace pelican {
 
 class ConfigNode;
 
-namespace lofar {
+namespace ampp {
 
 /**
  * @class LofarEmulatorDataSim
@@ -77,6 +77,6 @@ class LofarEmulatorDataSim : public AbstractUdpEmulator
 };
 
 
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican
 #endif // LOFAR_EMULATOR_DATA_SIM_H

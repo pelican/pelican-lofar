@@ -12,7 +12,7 @@
 
 namespace pelican {
 
-namespace lofar {
+namespace ampp {
 class LofarEmulatorDataSim;
 
 /**
@@ -43,6 +43,6 @@ class EmulatorPipeline : public AbstractPipeline
 
 };
 
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican
 #endif // EMULATORPIPELINE_H 

@@ -22,7 +22,7 @@
  */
 
 namespace pelican {
-namespace lofar {
+namespace ampp {
 class WeightedSpectrumDataSet;
 
 /**
@@ -71,7 +71,7 @@ class TimingPipeline : public AbstractPipeline
         TimerData _rfiClipper;
 };
 
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican
 
 #endif // UDP_BF_PIPELINE_H

@@ -6,7 +6,7 @@ using std::cout;
 using std::endl;
 
 namespace pelican {
-namespace lofar {
+namespace ampp {
 
 
 /**
@@ -115,5 +115,5 @@ void UdpBFPipeline::run(QHash<QString, DataBlob*>& remoteData)
 
 }
 
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican

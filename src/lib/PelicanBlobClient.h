@@ -13,7 +13,7 @@
  */
 
 namespace pelican {
-namespace lofar {
+namespace ampp {
 
 /**
  * @class PelicanBlobClient
@@ -47,7 +47,7 @@ class PelicanBlobClient
         unsigned _port;
 };
 
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican
 
 #endif // PELICANBLOBCLIENT_H

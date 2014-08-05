@@ -11,7 +11,7 @@
 
 namespace pelican {
 
-namespace lofar {
+namespace ampp {
 
 /**
  * @class H5_LofarBFStokesWriter
@@ -45,7 +45,7 @@ class H5_LofarBFStokesWriter : public H5_LofarBFDataWriter
 PELICAN_DECLARE(AbstractOutputStream, H5_LofarBFStokesWriter)
 
 
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican
 
 #endif // HDF5_FOUND

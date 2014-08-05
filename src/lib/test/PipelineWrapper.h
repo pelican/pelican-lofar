@@ -15,7 +15,7 @@ namespace pelican {
 class AbstractPipeline;
 class PipelineApplication;
 
-namespace lofar {
+namespace ampp {
 
 /**
  * @class PipelineWrapper
@@ -67,6 +67,6 @@ class PipelineWrapperSpecialisation : public AbstractPipelineType,
 
 };
 
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican
 #endif // PIPELINEWRAPPER_H 

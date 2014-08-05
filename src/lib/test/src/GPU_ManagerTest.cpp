@@ -7,7 +7,7 @@
 
 namespace pelican {
 
-namespace lofar {
+namespace ampp {
 
 CPPUNIT_TEST_SUITE_REGISTRATION( GPU_ManagerTest );
 /**
@@ -133,5 +133,5 @@ void GPU_ManagerTest::test_submitMultiCards()
      CPPUNIT_ASSERT_EQUAL( 0, m.jobsQueued() );
 
 }
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican

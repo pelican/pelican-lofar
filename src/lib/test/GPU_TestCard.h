@@ -14,7 +14,7 @@
 
 namespace pelican {
 
-namespace lofar {
+namespace ampp {
 
 /**
  * @class GPU_TestCard
@@ -60,6 +60,6 @@ class GPU_TestCard : public GPU_Resource
         bool _doThrow;
 };
 
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican
 #endif // GPU_TESTCARD_H 

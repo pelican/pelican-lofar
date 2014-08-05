@@ -4,7 +4,7 @@
 
 namespace pelican {
 
-namespace lofar {
+namespace ampp {
 
 
 /**
@@ -38,5 +38,5 @@ const QList<DedispersionEvent>& DedispersionDataAnalysis::events() const {
     _eventIndex.append( DedispersionEvent(dmIndex, timeIndex, _data, mfBinFactor, mfBinValue ) ); //mf=matched filtering
 }
 
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican

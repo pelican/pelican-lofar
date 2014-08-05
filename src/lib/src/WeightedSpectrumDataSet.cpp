@@ -4,7 +4,7 @@
 
 namespace pelican {
 
-namespace lofar {
+namespace ampp {
 
 
 /**
@@ -77,5 +77,5 @@ const BlobStatistics& WeightedSpectrumDataSet::stats() const
     return _stats;
 }
 
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican
