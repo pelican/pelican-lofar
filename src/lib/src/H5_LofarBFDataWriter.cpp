@@ -189,7 +189,7 @@ void H5_LofarBFDataWriter::_writeHeader(SpectrumDataSetBase* stokes){
       _h5Filename[i] = tmp;
 
       //-------------- File  -----------------
-      DAL::BF_File* bfFile =  new DAL::BF_File( _h5Filename[i].toStdString(), DAL::BF_File::CREATE);
+      dal::BF_File* bfFile =  new dal::BF_File( _h5Filename[i].toStdString(), dal::BF_File::CREATE);
       _bfFiles[i] = bfFile;
 
       // Common Attributes
@@ -198,19 +198,18 @@ void H5_LofarBFDataWriter::_writeHeader(SpectrumDataSetBase* stokes){
       bfFile->fileName().value = h5Basename.toStdString();
       bfFile->fileType().value = "bf";
       bfFile->telescope().value = _telescope.toStdString();
-      bfFile->observer().value = "unknown";
       bfFile->observationNofStations().value = 1;
       bfFile->observationStationsList().value = stationList;
       // TODO bfFile->pipelineName().value = _currentPipelineName;
       bfFile->pipelineVersion().value = ""; // TODO
       bfFile->docName() .value   = "ICD 3: Beam-Formed Data";
-      bfFile->docVersion().value = "2.04.27";
+      bfFile->docVersion().value = std::string("2.04.27");
       bfFile->notes().value      = "";
       bfFile->createOfflineOnline().value = "Online";
       bfFile->BFFormat().value   = "TAB";
       bfFile->BFVersion().value  = QString("Artemis H5_LofarBFDataWriter using DAL %1 and HDF5 %2")
-                                      .arg(DAL::get_lib_version().c_str())
-                                      .arg(DAL::get_dal_hdf5_version().c_str())
+                                      .arg(dal::version().to_string().c_str())
+                                      .arg(dal::version_hdf5().to_string().c_str())
                                       .toStdString();
 
       // Observation Times
@@ -228,7 +227,7 @@ void H5_LofarBFDataWriter::_writeHeader(SpectrumDataSetBase* stokes){
       
       //-------------- subarray pointing  -----------------
       bfFile->nofSubArrayPointings().value = 1;
-      DAL::BF_SubArrayPointing sap = bfFile->subArrayPointing(_sapNr);
+      dal::BF_SubArrayPointing sap = bfFile->subArrayPointing(_sapNr);
       sap.create();
       sap.groupType().value = "SubArrayPointing";
       //sap.expTimeStartUTC().value = toUTC(_startTime);
@@ -242,7 +241,7 @@ void H5_LofarBFDataWriter::_writeHeader(SpectrumDataSetBase* stokes){
       sap.nofBeams().value = 1;
 
       //-------------- Beam -----------------
-      DAL::BF_BeamGroup beam = sap.beam(_beamNr);
+      dal::BF_BeamGroup beam = sap.beam(_beamNr);
       beam.create();
       beam.groupType().value = "Beam";
       beam.nofStations().value = 1;
@@ -292,7 +291,7 @@ void H5_LofarBFDataWriter::_writeHeader(SpectrumDataSetBase* stokes){
       //      std::vector<std::string> stokesComponents(1, stokesVars[stokesNr]);
 
       // Coordinates within Beam
-      DAL::CoordinatesGroup coord = beam.coordinates();
+      dal::CoordinatesGroup coord = beam.coordinates();
       coord.create();
       coord.groupType().value = "Coordinates";
       coord.nofCoordinates().value = 2;
@@ -303,7 +302,7 @@ void H5_LofarBFDataWriter::_writeHeader(SpectrumDataSetBase* stokes){
       coord.coordinateTypes().value = coordinateTypes;
 
       std::vector<double> unitvector(1,1.0);
-      DAL::TimeCoordinate* timeCoordinate = dynamic_cast<DAL::TimeCoordinate*>(coord.coordinate(0));
+      dal::TimeCoordinate* timeCoordinate = dynamic_cast<dal::TimeCoordinate*>(coord.coordinate(0));
       timeCoordinate->create();
       timeCoordinate->groupType()     .value = "TimeCoord";
 
@@ -325,8 +324,8 @@ void H5_LofarBFDataWriter::_writeHeader(SpectrumDataSetBase* stokes){
       timeCoordinate->axisValuesPixel().value = std::vector<unsigned>(1, 0); // not used
       timeCoordinate->axisValuesWorld().value = std::vector<double>(1, 0.0); // not used
 
-      DAL::SpectralCoordinate* spectralCoordinate = 
-                    dynamic_cast<DAL::SpectralCoordinate*>(coord.coordinate(1));
+      dal::SpectralCoordinate* spectralCoordinate = 
+                    dynamic_cast<dal::SpectralCoordinate*>(coord.coordinate(1));
       spectralCoordinate->create();
       spectralCoordinate->groupType()     .value = "SpectralCoord";
       spectralCoordinate->coordinateType().value = "Spectral";
@@ -360,8 +359,8 @@ void H5_LofarBFDataWriter::_writeHeader(SpectrumDataSetBase* stokes){
 
 
       // =============== Stokes Data ================
-      //      DAL::BF_StokesDataset stokesDS = beam.stokes(stokesNr);
-      DAL::BF_StokesDataset stokesDS = beam.stokes(i);
+      //      dal::BF_StokesDataset stokesDS = beam.stokes(stokesNr);
+      dal::BF_StokesDataset stokesDS = beam.stokes(i);
       std::vector<ssize_t> dims(2);
 
       dims[0] = 0; //stokes->nTimeBlocks(); // no data yet
@@ -380,8 +379,8 @@ void H5_LofarBFDataWriter::_writeHeader(SpectrumDataSetBase* stokes){
                                   // be accurate to the nearest disk block/sector
       stokesDS.create(dims, _maxdims, rawBasename.toStdString(),
                       (QSysInfo::ByteOrder == QSysInfo::BigEndian) ? 
-                                DAL::BF_StokesDataset::BIG 
-                                : DAL::BF_StokesDataset::LITTLE);
+                                dal::BF_StokesDataset::BIG 
+                                : dal::BF_StokesDataset::LITTLE);
       stokesDS.groupType().value = "bfData";
       stokesDS.dataType() .value = "float";
 
@@ -402,10 +401,10 @@ void H5_LofarBFDataWriter::_updateHeaders() {
 }
 void H5_LofarBFDataWriter::_updateHeader( int pol ) {
     if( _bfFiles[pol] && _file[pol] ) {
-        DAL::BF_SubArrayPointing sap = _bfFiles[pol]->subArrayPointing(_sapNr);
-        DAL::BF_BeamGroup beam = sap.beam(_beamNr);
-        //        DAL::BF_StokesDataset stokesDS = beam.stokes(0);
-        DAL::BF_StokesDataset stokesDS = beam.stokes(pol);
+        dal::BF_SubArrayPointing sap = _bfFiles[pol]->subArrayPointing(_sapNr);
+        dal::BF_BeamGroup beam = sap.beam(_beamNr);
+        //        dal::BF_StokesDataset stokesDS = beam.stokes(0);
+        dal::BF_StokesDataset stokesDS = beam.stokes(pol);
         // update the data dimensions according to the file size
         _maxdims[0] = (_file[pol]->tellp() - _fileBegin[pol])/(_maxdims[1] * _nBits/8);
         stokesDS.resize( _maxdims );

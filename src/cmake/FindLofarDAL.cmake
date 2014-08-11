@@ -12,13 +12,13 @@ IF (LOFAR_DAL_INCLUDE_DIR)
     SET(LOFAR_DAL_FIND_QUIETLY TRUE)
 ENDIF (LOFAR_DAL_INCLUDE_DIR)
 
-FIND_PATH(LOFAR_DAL_INCLUDE_DIR dal_config.h 
+FIND_PATH(LOFAR_DAL_INCLUDE_DIR dal/dal_config.h 
     PATHS ${LOFAR_DAL_INCLUDE_DIR}
-	  ${LOFAR_DAL_INSTALL_DIR}/include/dal
-	  /usr/local/include/dal 
-	  /usr/include/dal )
+	  ${LOFAR_DAL_INSTALL_DIR}/include
+	  /usr/local/include 
+	  /usr/include )
 
-SET(LOFAR_DAL_NAMES dal)
+SET(LOFAR_DAL_NAMES lofardal)
 FOREACH( lib ${LOFAR_DAL_NAMES} )
     FIND_LIBRARY(LOFAR_DAL_LIBRARY_${lib} 
 	NAMES ${lib}

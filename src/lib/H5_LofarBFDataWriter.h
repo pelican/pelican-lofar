@@ -17,7 +17,7 @@
 #include "FileWriter.h"
 #include "timer.h"
 
-namespace DAL {
+namespace dal {
   class BF_File;
 }
 namespace pelican {
@@ -108,7 +108,7 @@ class H5_LofarBFDataWriter : public AbstractOutputStream
         QString           _label;
         QString           _observationID;
         QVector<long>              _fileBegin;
-        QVector<DAL::BF_File*>     _bfFiles;
+        QVector<dal::BF_File*>     _bfFiles;
         QVector<QString>           _rawFilename;
         QVector<QString>           _h5Filename;
         int _beamNr;
