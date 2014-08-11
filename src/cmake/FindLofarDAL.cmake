@@ -2,6 +2,8 @@
 # Find the native LOFAR_DAL includes and library
 #
 #  LOFAR_DAL_INCLUDE_DIR - where to find dal.h.
+#  LOFAR_DAL_LIBRARY_DIR - where to find dal.h.
+#  LOFAR_DAL_INSTALL_DIR - top where lofar dal has been installed (lib and include dirs included)
 #  LOFAR_DAL_LIBRARIES   - List of libraries when using cppunit.
 #  LOFAR_DAL_FOUND       - True if cppunit found.
 
@@ -10,11 +12,18 @@ IF (LOFAR_DAL_INCLUDE_DIR)
     SET(LOFAR_DAL_FIND_QUIETLY TRUE)
 ENDIF (LOFAR_DAL_INCLUDE_DIR)
 
-FIND_PATH(LOFAR_DAL_INCLUDE_DIR dal_config.h PATHS /usr/local/include/dal /usr/include/dal )
+FIND_PATH(LOFAR_DAL_INCLUDE_DIR dal_config.h 
+    PATHS ${LOFAR_DAL_INCLUDE_DIR}
+	  ${LOFAR_DAL_INSTALL_DIR}/include/dal
+	  /usr/local/include/dal 
+	  /usr/include/dal )
 
 SET(LOFAR_DAL_NAMES dal)
 FOREACH( lib ${LOFAR_DAL_NAMES} )
-    FIND_LIBRARY(LOFAR_DAL_LIBRARY_${lib} NAMES ${lib} )
+    FIND_LIBRARY(LOFAR_DAL_LIBRARY_${lib} 
+	NAMES ${lib}
+	PATHS ${LOFAR_DAL_LIBRARY_DIR} ${LOFAR_DAL_INSTALL_DIR}/lib /usr/local/lib /usr/lib
+    )
     LIST(APPEND LOFAR_DAL_LIBRARIES ${LOFAR_DAL_LIBRARY_${lib}})
 ENDFOREACH(lib)
 
