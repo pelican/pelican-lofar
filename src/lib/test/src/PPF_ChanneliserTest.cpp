@@ -45,7 +45,6 @@ void PPFChanneliserTest::setUp()
 void PPFChanneliserTest::test_run()
 {
     cout << endl << "***** PPFChanneliserTest::test_run() ***** " << endl;
-    typedef PPFChanneliser::Complex Complex;
 
     // Setup the channeliser.
     unsigned nThreads = 2;

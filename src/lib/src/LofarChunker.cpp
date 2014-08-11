@@ -38,7 +38,7 @@ LofarChunker::LofarChunker(const ConfigNode& config) : AbstractChunker(config)
     _nPackets = config.getOption("udpPacketsPerIteration", "value").toUInt();
 
     // Some sanity checking.
-    if (type().isEmpty())
+    if (chunkTypes().isEmpty())
         throw QString("LofarChunker::LofarChunker(): Data type unspecified.");
 
     _packetSize = _subbandsPerPacket * _samplesPerPacket * _nrPolarisations;
