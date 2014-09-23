@@ -14,6 +14,7 @@ set(lofarTestLib_src
     src/PipelineWrapper.cpp
     src/DedispersionDataGenerator.cpp
     src/TestDir.cpp
+    src/JTestEmulator.cpp
 )
 
 # CUDA routines
@@ -113,6 +114,18 @@ target_link_libraries(lofarEmulatorDataSim
     lofarTestLib
 )
 install(TARGETS "lofarEmulatorDataSim" DESTINATION ${BINARY_INSTALL_DIR})
+
+# ==== Create the JTest binary which sends simulated data.
+add_executable(JTestEmulator src/JTestEmulatorMain.cpp)
+target_link_libraries(JTestEmulator
+    ${PELICAN_LIBRARY}
+    pelican-lofar_static
+    ${QT_QTCORE_LIBRARY}
+    ${QT_QTNETWORK_LIBRARY}
+    ${QT_QTXML_LIBRARY}
+    lofarTestLib
+)
+install(TARGETS "JTestEmulator" DESTINATION ${BINARY_INSTALL_DIR})
 
 # ==== Create a non cppunit PPF test binary
 add_executable(ppf_performance_test src/PPF_PerformanceTest.cpp)
