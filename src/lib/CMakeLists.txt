@@ -51,6 +51,11 @@ set(lib_src
     src/LofarDataSplittingChunker.cpp
     src/WeightedSpectrumDataSet.cpp
     src/GPU_MemoryMap.cpp
+    src/JTestChunker.cpp
+    src/JTestDataClient.cpp
+    src/JTestDataAdapter.cpp
+    src/JTestProc.cpp
+    src/JTestOutputStream.cpp
 )
 # Lofar DAL enables the H5_LofarBFDataWriter
 if(LOFAR_DAL_FOUND)

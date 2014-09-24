@@ -50,6 +50,8 @@ void JTestChunker::next(QIODevice* device)
             qint64 length = udpSocket->readDatagram(ptr + _bytesRead, maxlen);
             if (length > 0)
                 _bytesRead += length;
+            //jjj
+            printf("%ld\n", _bytesRead);
         }
     }
 

@@ -18,6 +18,7 @@ int main(int argc, char* argv[])
                                   "<connection host=\"127.0.0.1\" port=\"2001\" />"
                                   "</JTestEmulator>");
         EmulatorDriver emulator(new JTestEmulator(emulatorConfig));
+        return app.exec();
     }
 
     // Catch any error messages from Pelican

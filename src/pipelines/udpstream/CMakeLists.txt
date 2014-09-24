@@ -13,6 +13,7 @@ set(pipeline_lib_src
     src/StokesOnlyPipeline.cpp
     src/SigProcPipeline.cpp
     src/BandPassPipeline.cpp
+    src/JTestPipeline.cpp
 )
 if(CUDA_FOUND)
     list(APPEND pipeline_lib_src
@@ -210,6 +211,24 @@ set_target_properties(h5CVPipelineStream2 PROPERTIES
     LINK_FLAGS "${OpenMP_CXX_FLAGS}"
 )
 target_link_libraries(h5CVPipelineStream2
+    pelicanMdsm
+    pelican-lofar_static
+    ${PELICAN_LIBRARY}
+    ${FFTW3_FFTW_LIBRARY}
+    ${FFTW3_FFTWF_LIBRARY}
+    ${QT_QTNETWORK_LIBRARY}
+    ${QT_QTXML_LIBRARY}
+    ${QT_QTCORE_LIBRARY}
+)
+
+
+# === Build the JTest pipeline binary
+add_executable(JTestPipelineStream src/JTestPipelineMain.cpp)
+set_target_properties(JTestPipelineStream PROPERTIES
+    COMPILE_FLAGS "${OpenMP_CXX_FLAGS}"
+    LINK_FLAGS "${OpenMP_CXX_FLAGS}"
+)
+target_link_libraries(JTestPipelineStream
     pelicanMdsm
     pelican-lofar_static
     ${PELICAN_LIBRARY}
