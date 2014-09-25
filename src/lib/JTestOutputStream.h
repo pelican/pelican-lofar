@@ -20,7 +20,7 @@ namespace ampp {
  * @class JTestOutputStream
  *
  * @brief
- * Writes a SignalData data blob to a CSV file.
+ * Writes a JTestData data blob to a CSV file.
  *
  * @details
  * Specify one or more files in the configuration XML with

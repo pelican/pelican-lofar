@@ -4,11 +4,17 @@
 <configuration version="1.0">
     <pipeline>
         <clients>
-            <PelicanServerClient>
-                <server host="127.0.0.1" port="2000" />
+            <JTestDataClient>
                 <data type="JTestData" adapter="JTestDataAdapter" />
-            </PelicanServerClient>
+            </JTestDataClient>
         </clients>
+
+        <chunkers>
+            <JTestChunker>
+                <data type="JTestData" chunkSize="33792" />
+                <connection host="127.0.0.1" port="2001" />
+            </JTestChunker>
+        </chunkers>
 
         <adapters>
             <JTestDataAdapter>

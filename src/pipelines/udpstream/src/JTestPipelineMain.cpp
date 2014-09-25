@@ -5,6 +5,7 @@
 // Include any headers that are referenced by name.
 #include "JTestOutputStream.h"
 #include "JTestDataAdapter.h"
+#include "JTestDataClient.h"
 
 using namespace pelican;
 using namespace ampp;
@@ -21,7 +22,7 @@ int main(int argc, char* argv[])
         pApp.registerPipeline(new JTestPipeline);
 
         // Set the data client.
-        pApp.setDataClient("PelicanServerClient");
+        pApp.setDataClient("JTestDataClient");
 
         // Start the pipeline driver.
         pApp.start();

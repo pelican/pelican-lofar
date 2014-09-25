@@ -8,7 +8,7 @@ JTestDataClient::JTestDataClient(const ConfigNode& configNode,
                 const DataTypes& types, const Config* config)
     : DirectStreamDataClient(configNode, types, config)
 {
-    addChunker("JTestDataStream", "JTestChunker");
+    addStreamChunker("JTestChunker");
 }
 
 JTestDataClient::~JTestDataClient()
