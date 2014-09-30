@@ -15,6 +15,7 @@ set(lofarTestLib_src
     src/DedispersionDataGenerator.cpp
     src/TestDir.cpp
     src/JTestEmulator.cpp
+    src/ABEmulator.cpp
 )
 
 # CUDA routines
@@ -126,6 +127,18 @@ target_link_libraries(JTestEmulator
     lofarTestLib
 )
 install(TARGETS "JTestEmulator" DESTINATION ${BINARY_INSTALL_DIR})
+
+# ==== Create the ALFABURST binary which sends simulated data.
+add_executable(ABEmulator src/ABEmulatorMain.cpp)
+target_link_libraries(ABEmulator
+    ${PELICAN_LIBRARY}
+    pelican-lofar_static
+    ${QT_QTCORE_LIBRARY}
+    ${QT_QTNETWORK_LIBRARY}
+    ${QT_QTXML_LIBRARY}
+    lofarTestLib
+)
+install(TARGETS "ABEmulator" DESTINATION ${BINARY_INSTALL_DIR})
 
 # ==== Create a non cppunit PPF test binary
 add_executable(ppf_performance_test src/PPF_PerformanceTest.cpp)

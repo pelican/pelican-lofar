@@ -56,6 +56,11 @@ set(lib_src
     src/JTestDataAdapter.cpp
     src/JTestProc.cpp
     src/JTestOutputStream.cpp
+    src/ABChunker.cpp
+    src/ABDataClient.cpp
+    src/ABDataAdapter.cpp
+    src/ABProc.cpp
+    src/ABOutputStream.cpp
 )
 # Lofar DAL enables the H5_LofarBFDataWriter
 if(LOFAR_DAL_FOUND)

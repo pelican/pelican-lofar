@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE pelican>
+
+<configuration version="1.0">
+    <pipeline>
+        <clients>
+            <ABDataClient>
+                <data type="ABData" adapter="ABDataAdapter" />
+            </ABDataClient>
+        </clients>
+
+        <buffers>
+            <ABData>
+                <buffer maxSize="50000000" maxChunkSize="50000000" />
+            </ABData>
+        </buffers>
+
+        <chunkers>
+            <ABChunker>
+                <data type="ABData" chunkSize="33792" />
+                <connection host="127.0.0.1" port="2001" />
+            </ABChunker>
+        </chunkers>
+
+        <adapters>
+            <ABDataAdapter>
+                <packet samples="256" />
+            </ABDataAdapter>
+        </adapters>
+
+        <modules>
+            <ABProc>
+                <gain value="2.5"/>
+            </ABProc>
+        </modules>
+
+        <output>
+            <streamers>
+                <PelicanTCPBlobServer active="false">
+                     <connection port="1234" />
+                </PelicanTCPBlobServer>
+                <ABOutputStream name="precsv" active="true">
+                     <file name="pre.csv" />
+                </ABOutputStream>
+                <ABOutputStream name="postcsv" active="true">
+                     <file name="post.csv" />
+                </ABOutputStream>
+            </streamers>
+            <dataStreams>
+                <stream name="all" listeners="PelicanTCPBlobServer" />
+                <stream name="post" listeners="postcsv" />
+                <stream name="pre" listeners="precsv" />
+            </dataStreams>
+        </output>
+
+    </pipeline>
+</configuration>
+
