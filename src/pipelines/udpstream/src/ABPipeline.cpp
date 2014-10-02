@@ -11,14 +11,18 @@ using namespace ampp;
 ABPipeline::ABPipeline()
     : AbstractPipeline(), amplifier(0), outputData(0), counter(0)
 {
+    _dedispersionModule = 0;
+    _dedispersionAnalyser = 0;
+    _rfiClipper = 0;
 }
 
 // The destructor must clean up and created modules and
 // any local DataBlob's created.
 ABPipeline::~ABPipeline()
 {
-    delete amplifier;
-    delete outputData;
+    delete _dedispersionModule;
+    delete _dedispersionAnalyser;
+    delete _rfiClipper;
 }
 
 // Initialises the pipeline, creating required modules and data blobs,
@@ -26,8 +30,13 @@ ABPipeline::~ABPipeline()
 void ABPipeline::init()
 {
     // Create the pipeline modules and any local data blobs.
-    amplifier = (ABProc*) createModule("ABProc");
-    outputData = (ABData*) createBlob("ABData");
+    _rfiClipper = (RFI_Clipper *) createModule("RFI_Clipper");
+    _dedispersionModule = (DedispersionModule*) createModule("DedispersionModule");
+    _dedispersionAnalyser = (DedispersionAnalyser*) createModule("DedispersionAnalyser");
+    _dedispersionModule->connect( boost::bind( &DedispersionPipeline::dedispersionAnalysis, this, _1 ) );
+    _dedispersionModule->unlockCallback( boost::bind( &DedispersionPipeline::updateBufferLock, this, _1 ) );
+
+    _weightedIntStokes = (WeightedSpectrumDataSet*) createBlob("WeightedSpectrumDataSet");
 
     // Request remote data.
     requestRemoteData("ABData");
@@ -37,16 +46,12 @@ void ABPipeline::init()
 void ABPipeline::run(QHash<QString, DataBlob*>& remoteData)
 {
     // Get pointers to the remote data blob(s) from the supplied hash.
-    ABData* inputData = (ABData*) remoteData["ABData"];
+    SpectrumDataSetStokes* stokes = (SpectrumDataSetStokes*) remoteData["ABData"];
 
-    // Output the input data.
-    dataOutput(inputData, "pre");
+    _weightedIntStokes->reset(stokes);
+    _rfiClipper_>run(_weightedIntStokes);
+    _dedispersionModule->dedisperse(_weightedIntStokes);
 
-    // Run each module as required.
-    amplifier->run(inputData, outputData);
-
-    // Output the processed data.
-    dataOutput(outputData, "post");
     if (counter%10 == 0)
         std::cout << counter << " Chunks processed." << std::endl;
 

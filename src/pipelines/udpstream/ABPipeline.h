@@ -6,8 +6,6 @@
 namespace pelican {
 namespace ampp {
 
-class ABData;
-class ABProc;
 class ABPipeline : public AbstractPipeline
 {
     public:
@@ -25,11 +23,17 @@ class ABPipeline : public AbstractPipeline
 
     private:
         // Module pointers.
-        ABProc* amplifier;
+        RFI_Clipper* _rfiClipper;
+        DedispersionModule* _dedispersionModule;
+        DedispersionAnalyser* _dedispersionAnalyser;
 
         // Local data blob pointers.
-        ABData* outputData;
+        WeightedSpectrumDataSet* _weightedIntStokes;
+
         unsigned long counter;
+        unsigned _iteration;
+	unsigned int _minEventsFound;
+	unsigned int _maxEventsFound;
 };
 
 } // namespace ampp

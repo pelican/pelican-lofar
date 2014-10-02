@@ -1,5 +1,5 @@
 #include "ABDataAdapter.h"
-#include "ABData.h"
+#include "SpectrumDataSet.h"
 
 using namespace pelican;
 using namespace pelican::ampp;
@@ -21,7 +21,7 @@ void ABDataAdapter::deserialise(QIODevice* device)
     // A pointer to the data blob to fill should be obtained by calling the
     // dataBlob() inherited method. This returns a pointer to an
     // abstract DataBlob, which should be cast to the appropriate type.
-    ABData* blob = (ABData*) dataBlob();
+    SpectrumDataSetStokes* blob = (SpectrumDataSetStokes*) dataBlob();
 
     // Set the size of the data blob to fill.
     // The chunk size is obtained by calling the chunkSize() inherited method.

@@ -11,9 +11,8 @@ class ConfigNode;
 namespace ampp {
 
 /*
- * This emulator outputs simple packets of real-valued, floating-point,
- * time-series data using a UDP socket. A sine wave is put into the time
- * stream.
+ * This emulator outputs ALFABURST packets using a UDP socket. A sine wave is
+ * FFT'd and psuedo-Stokes is put into the data stream.
  * It should be constructed with a configuration node that contains
  * the number of samples in the packet, the interval between packets in
  * microseconds, and the connection settings.
@@ -21,7 +20,7 @@ namespace ampp {
  * The default values are:
  *
  * <ABEmulator>
- *     <packet samples="256" interval="2560" />
+ *     <packet samples="1024" interval="2560" />
  *     <signal period="20" />
  *     <connection host="127.0.0.1" port="2001" />
  * </ABEmulator>
@@ -41,7 +40,9 @@ class ABEmulator : public AbstractUdpEmulator
         // Returns the interval between packets in microseconds.
         unsigned long interval() {return _interval;}
     private:
-        unsigned long _counter;  // Packet counter.
+        unsigned long _counter;  // (6-Byte) packet counter.
+        char _specQuart; // Spectral quarter (0 <= _specQuart < 4)
+        char _beam; // Beam number (0 <= _beam < 8)
         unsigned long long _totalSamples; // The total number of samples sent.
         unsigned long _samples; // The number of samples in the packet.
         unsigned long _interval; // The interval between packets in microsec.

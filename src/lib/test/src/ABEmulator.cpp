@@ -1,4 +1,4 @@
-#include "JTestEmulator.h"
+#include "ABEmulator.h"
 #include "pelican/utility/ConfigNode.h"
 #include <cmath>
 
@@ -6,50 +6,61 @@ namespace pelican {
 namespace ampp {
 
 /*
- * Constructs the JTestEmulator.
+ * Constructs the ABEmulator.
  * This obtains the relevant configuration parameters.
  */
-JTestEmulator::JTestEmulator(const ConfigNode& configNode)
+ABEmulator::ABEmulator(const ConfigNode& configNode)
     : AbstractUdpEmulator(configNode)
 {
     // Initialise defaults.
     _counter = 0;
     _totalSamples = 0;
-    _samples = configNode.getOption("packet", "samples", "256").toULong();
+    _samples = configNode.getOption("packet", "samples", "1024").toULong();
     _interval = configNode.getOption("packet", "interval",
             QString::number(_samples * 10)).toULong(); // Interval in micro-sec.
     _period = configNode.getOption("signal", "period", "20").toULong();
     _omega = (2.0 * 3.14159265) / _period; // Angular frequency.
 
-    // Set the packet size in bytes (+32 for header).
-    _packet.resize(_samples * sizeof(float) + 32);
+    // Set the packet size in bytes (each sample is 8 bytes + 8 for header
+    // + 8 for (ignored) footer).
+    _packet.resize(_samples * 8 + 8 + 8);
 
     // Set constant parts of packet header data.
     char* ptr = _packet.data();
-    *reinterpret_cast<int*>(ptr + 0) = _packet.size(); // Total bytes in packet.
-    *reinterpret_cast<int*>(ptr + 4) = 32; // Size of the header in bytes.
-    *reinterpret_cast<int*>(ptr + 8) = _samples; // Samples in the packet.
-    *reinterpret_cast<int*>(ptr + 12) = sizeof(float); // Bytes per sample.
+    // Packet counter.
+    *reinterpret_cast<short int*>(ptr + 0) = (short int) ((_counter & 0x00FF0000) >> 32);
+    *reinterpret_cast<int*>(reinterpret_cast<short int*>(ptr + 1)) = (int) (_counter & 0x0000FFFF);
+    *(ptr + 6) = _specQuart; // Spectral quarter.
+    *(ptr + 7) = _beam; // Beam number.
 }
 
 /*
- * Creates a packet of UDP signal data containing a sine wave, setting the
- * pointer to the start of the packet, and the size of the packet.
+ * Creates a packet of UDP signal data containing the psuedo-Stokes of the FFT
+ * of a sine wave, setting the pointer to the start of the packet, and the size
+ * of the packet.
  */
-void JTestEmulator::getPacketData(char*& ptr, unsigned long& size)
+void ABEmulator::getPacketData(char*& ptr, unsigned long& size)
 {
     // Set pointer to the output data.
     ptr = _packet.data();
     size = _packet.size();
 
     // Set the packet header.
-    *reinterpret_cast<long int*>(ptr + 16) = _counter;
+    *reinterpret_cast<short int*>(ptr + 0) = (short int) ((_counter & 0x00FF0000) >> 32);
+    *reinterpret_cast<int*>(reinterpret_cast<short int*>(ptr + 1)) = (int) (_counter & 0x0000FFFF);
 
     // Fill the packet data.
-    char* data = ptr + 32; // Add offset for header.
+    char* data = ptr + 8; // Add offset for header.
     for (unsigned i = 0; i < _samples; ++i) {
-        float value = sin(((_totalSamples + i) % _period) * _omega);
-        reinterpret_cast<float*>(data)[i] = value;
+        //float value = sin(((_totalSamples + i) % _period) * _omega);
+        short int XXre = i * 4 + 0;
+        short int YYre = i * 4 + 1;
+        short int XYre = i * 4 + 2;
+        short int XYim = i * 4 + 3;
+        reinterpret_cast<short int*>(data)[i * 4 + 0] = XXre;
+        reinterpret_cast<short int*>(data)[i * 4 + 1] = YYre;
+        reinterpret_cast<short int*>(data)[i * 4 + 2] = XYre;
+        reinterpret_cast<short int*>(data)[i * 4 + 3] = XYim;
     }
 
     // Increment counters for next time.

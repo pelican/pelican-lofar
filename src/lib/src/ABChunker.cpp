@@ -32,16 +32,12 @@ void ABChunker::next(QIODevice* device)
     QUdpSocket* udpSocket = static_cast<QUdpSocket*>(device);
     _bytesRead = 0;
 
-    ///jjj
-    printf("next\n");
     // Get writable buffer space for the chunk.
     WritableData writableData = getDataStorage(_chunkSize);
     if (writableData.isValid()) {
         // Get pointer to start of writable memory.
         char* ptr = (char*) (writableData.ptr());
 
-	///jjj
-	printf("writable data is valid\n");
         // Read datagrams for chunk from the UDP socket.
         while (isActive() && _bytesRead < _chunkSize) {
             // Read the datagram, but avoid using pendingDatagramSize().
@@ -54,15 +50,11 @@ void ABChunker::next(QIODevice* device)
             qint64 length = udpSocket->readDatagram(ptr + _bytesRead, maxlen);
             if (length > 0)
                 _bytesRead += length;
-            //jjj
-            printf("bytesread = %ld\n", _bytesRead);
         }
     }
 
     // Must discard the datagram if there is no available space.
     else {
-        //jjjj
-        printf("writable data is not valid\n");
         udpSocket->readDatagram(0, 0);
     }
 }

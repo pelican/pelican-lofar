@@ -5,7 +5,7 @@
     <pipeline>
         <clients>
             <ABDataClient>
-                <data type="ABData" adapter="ABDataAdapter" />
+                <data type="SpectrumDataSetStokes" adapter="ABDataAdapter" />
             </ABDataClient>
         </clients>
 
@@ -17,7 +17,7 @@
 
         <chunkers>
             <ABChunker>
-                <data type="ABData" chunkSize="33792" />
+                <data type="SpectrumDataSetStokes" chunkSize="33792" />
                 <connection host="127.0.0.1" port="2001" />
             </ABChunker>
         </chunkers>
@@ -39,17 +39,9 @@
                 <PelicanTCPBlobServer active="false">
                      <connection port="1234" />
                 </PelicanTCPBlobServer>
-                <ABOutputStream name="precsv" active="true">
-                     <file name="pre.csv" />
-                </ABOutputStream>
-                <ABOutputStream name="postcsv" active="true">
-                     <file name="post.csv" />
-                </ABOutputStream>
             </streamers>
             <dataStreams>
                 <stream name="all" listeners="PelicanTCPBlobServer" />
-                <stream name="post" listeners="postcsv" />
-                <stream name="pre" listeners="precsv" />
             </dataStreams>
         </output>
 
