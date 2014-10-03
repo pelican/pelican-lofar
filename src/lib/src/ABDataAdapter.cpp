@@ -23,6 +23,15 @@ void ABDataAdapter::deserialise(QIODevice* device)
     // abstract DataBlob, which should be cast to the appropriate type.
     SpectrumDataSetStokes* blob = (SpectrumDataSetStokes*) dataBlob();
 
+
+    //jjj
+    char header[_headerSize];
+    device->read(header, _headerSize);
+    for (unsigned p = 0; p < _headerSize; ++p)
+    {
+        std::cout << header[p] << std::endl;
+    }
+#if 0
     // Set the size of the data blob to fill.
     // The chunk size is obtained by calling the chunkSize() inherited method.
     unsigned packets = chunkSize() / _packetSize;
@@ -47,5 +56,6 @@ void ABDataAdapter::deserialise(QIODevice* device)
         // Read the packet data from the input device into the data blob.
         bytesRead += device->read(data + bytesRead, _packetSize - _headerSize);
     }
+#endif
 }
 

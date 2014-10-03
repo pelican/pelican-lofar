@@ -59,8 +59,6 @@ set(lib_src
     src/ABChunker.cpp
     src/ABDataClient.cpp
     src/ABDataAdapter.cpp
-    src/ABProc.cpp
-    src/ABOutputStream.cpp
 )
 # Lofar DAL enables the H5_LofarBFDataWriter
 if(LOFAR_DAL_FOUND)

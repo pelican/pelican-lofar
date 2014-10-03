@@ -3,14 +3,13 @@
 #include <QtCore/QCoreApplication>
 
 // Include any headers that are referenced by name.
-#include "ABOutputStream.h"
 #include "ABDataAdapter.h"
 #include "ABDataClient.h"
 
 using namespace pelican;
 using namespace ampp;
 
-int main(int argc, char* argv[])
+int main(int argc, char* argv[], const QString& stream)
 {
     // Create a QCoreApplication.
     QCoreApplication app(argc, argv);
@@ -19,7 +18,7 @@ int main(int argc, char* argv[])
         PipelineApplication pApp(argc, argv);
 
         // Register the pipelines that can run.
-        pApp.registerPipeline(new ABPipeline);
+        pApp.registerPipeline(new ABPipeline(stream));
 
         // Set the data client.
         pApp.setDataClient("ABDataClient");
