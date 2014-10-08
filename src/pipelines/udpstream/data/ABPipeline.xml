@@ -18,12 +18,14 @@
         <chunkers>
             <ABChunker>
                 <connection host="127.0.0.1" port="2001" />
+                <data type="SpectrumDataSetStokes" chunkSize="8404992" />
             </ABChunker>
         </chunkers>
 
         <adapters>
             <ABDataAdapter>
-                <packet samples="256" />
+                <spectrum packets="4" />
+                <packet channels="1024" />
             </ABDataAdapter>
         </adapters>
 
@@ -37,7 +39,7 @@
         <modules>
             <RFI_Clipper active="true" channelRejectionRMS="3.5" spectrumRejectionRMS="6.0">
                 <zeroDMing active="true" />
-                <BandPassData file="/data/Commissioning/Brenda/band220-250.bp" />
+                <BandPassData file="/home/vagrant/development/pelican-lofar/build/band220-250.bp" />
                 <Band matching="true" />
                 <History maximum="50000" />
             </RFI_Clipper>

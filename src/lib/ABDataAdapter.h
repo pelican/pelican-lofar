@@ -19,9 +19,14 @@ class ABDataAdapter : public AbstractStreamAdapter
         void deserialise(QIODevice* device);
 
     private:
-        static const unsigned _headerSize = 32;
-        unsigned _samplesPerPacket;
+        static const unsigned _headerSize = 8;
+        static const unsigned _footerSize = 8;
+        unsigned _packetsPerSpectrum;
+        unsigned _channelsPerPacket;
         unsigned _packetSize;
+        unsigned int _nPolarisations = 2;
+        unsigned int _nSubbands = 1;
+        unsigned int _nChannels;
 };
 
 PELICAN_DECLARE_ADAPTER(ABDataAdapter)

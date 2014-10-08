@@ -14,6 +14,8 @@ ABEmulator::ABEmulator(const ConfigNode& configNode)
 {
     // Initialise defaults.
     _counter = 0;
+    _specQuart = 0;
+    _beam = 0;
     _totalSamples = 0;
     _samples = configNode.getOption("packet", "samples", "1024").toULong();
     _interval = configNode.getOption("packet", "interval",
@@ -48,6 +50,8 @@ void ABEmulator::getPacketData(char*& ptr, unsigned long& size)
     // Set the packet header.
     *reinterpret_cast<short int*>(ptr + 0) = (short int) ((_counter & 0x00FF0000) >> 32);
     *reinterpret_cast<int*>(reinterpret_cast<short int*>(ptr + 1)) = (int) (_counter & 0x0000FFFF);
+    *(ptr + 6) = _specQuart; // Spectral quarter.
+    *(ptr + 7) = _beam; // Beam number.
 
     // Fill the packet data.
     char* data = ptr + 8; // Add offset for header.
@@ -66,6 +70,7 @@ void ABEmulator::getPacketData(char*& ptr, unsigned long& size)
     // Increment counters for next time.
     _counter++;
     _totalSamples += _samples;
+    _specQuart = (_specQuart + 1) % 4;
 }
 
 } // namespace ampp

@@ -41,14 +41,14 @@ void ABPipeline::init()
     _weightedIntStokes = (WeightedSpectrumDataSet*) createBlob("WeightedSpectrumDataSet");
 
     // Request remote data.
-    requestRemoteData("ABData");
+    requestRemoteData("SpectrumDataSetStokes");
 }
 
 // Defines a single iteration of the pipeline.
 void ABPipeline::run(QHash<QString, DataBlob*>& remoteData)
 {
     // Get pointers to the remote data blob(s) from the supplied hash.
-    SpectrumDataSetStokes* stokes = (SpectrumDataSetStokes*) remoteData["ABData"];
+    SpectrumDataSetStokes* stokes = (SpectrumDataSetStokes*) remoteData["SpectrumDataSetStokes"];
 
     _weightedIntStokes->reset(stokes);
     _rfiClipper->run(_weightedIntStokes);
