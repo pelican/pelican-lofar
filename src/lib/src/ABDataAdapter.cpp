@@ -35,57 +35,56 @@ void ABDataAdapter::deserialise(QIODevice* device)
     // Number of time samples; Each channel contains 4 psuedo-Stokes values,
     // each of size sizeof(short int)
     unsigned nBlocks = packets / _packetsPerSpectrum;
-    // set _nPol to 4?
     _nPolarisations = 4;
     blob->resize(nBlocks, 1, _nPolarisations, _nChannels);
-    printf("size: %d\n", blob->size());
+    printf("deserialize\n");
 
     // Create a temporary buffer to read out the packet headers, and
     // get the pointer to the data array in the data blob being filled.
     char headerData[_headerSize];
+    char d[_packetsPerSpectrum * (_packetSize - _headerSize - _footerSize)];
     char footerData[_footerSize];
 
     // Loop over the UDP packets in the chunk.
     char* data = NULL;
+    unsigned bytesRead = 0;
+    unsigned block = 0;
     for (unsigned p = 0; p < packets; ++p)
     {
         // Ensure there is enough data to read from the device.
-        printf("a, %d\n", device->bytesAvailable());
         while (device->bytesAvailable() < _packetSize)
         {
             device->waitForReadyRead(-1);
         }
-        printf("c\n");
         // Read the packet header from the input device and dump it.
         device->read(headerData, _headerSize);
-        printf("d\n");
 
-        // Build the spectrum from _packetsPerSpectrum packets.
+        // Build the spectrum from _packetsPerSpectrum packets, performa a
+        // corner-turn and write the data out to the blob.
         // Get the spectral quarter number
-        unsigned int specQuart = (int) headerData[6];
-        unsigned long int counter = 0;
-        unsigned j = 0;
-        for (signed i = 5; i >= 0; --i)
-        {
-            counter += ((unsigned int) headerData[i] * pow(10, j));
-            ++j;
-        }
-        printf("e\n");
-        printf("%d: %ld\n", specQuart, counter);
-        unsigned bytesRead = 0;
-        for (unsigned block = 0; block < nBlocks; ++block)
+        unsigned int specQuart = (unsigned char) headerData[6];
+        unsigned long int counter = (*(unsigned long int *) headerData)
+                                    & 0x0000FFFFFFFFFFFF;
+        //printf("%lu\n", counter);
+        bytesRead += device->read(d + bytesRead,
+                                  _packetSize - _headerSize - _footerSize);
+        if (_packetsPerSpectrum - 1 == specQuart)
         {
             for (unsigned polar = 0; polar < _nPolarisations; ++polar)
             {
                 data = (char*) blob->spectrumData(block, 0, polar);
-                // Read the packet data from the input device into the data blob.
-                bytesRead += device->read(data + bytesRead, _packetSize - _headerSize - _footerSize);
-
-                // Read the footer and ignore it
-                device->read(footerData, _footerSize);
+                for (unsigned chan = 0; chan < _nChannels; ++chan)
+                {
+                    ((float *) data)[chan] = (float) ((short int *) d)[chan * 4 + polar];
+                    //((float *) data)[chan] = (float) ((short int *) d)[0];//[chan * 4 + polar];
+                    printf("%g, %g\n", (float) ((short int*) d)[chan * 4 + polar], ((float *) data)[chan]);
+                }
             }
+            bytesRead = 0;
+            ++block;
         }
-        printf("done! bytesread = %d\n", bytesRead);
+        // Read the packet footer from the input device and dump it.
+        device->read(footerData, _footerSize);
     }
 }
 

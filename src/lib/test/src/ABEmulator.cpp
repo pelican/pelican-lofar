@@ -30,8 +30,8 @@ ABEmulator::ABEmulator(const ConfigNode& configNode)
     // Set constant parts of packet header data.
     char* ptr = _packet.data();
     // Packet counter.
-    *reinterpret_cast<short int*>(ptr + 0) = (short int) ((_counter & 0x00FF0000) >> 32);
-    *reinterpret_cast<int*>(reinterpret_cast<short int*>(ptr + 1)) = (int) (_counter & 0x0000FFFF);
+    *(((unsigned int *) ptr) + 0) = (unsigned int) (_counter & 0x00000000FFFFFFFF);
+    *(((short int *) ptr) + 2) = (unsigned short int) ((_counter & 0x0000FFFF00000000) >> 32);
     *(ptr + 6) = _specQuart; // Spectral quarter.
     *(ptr + 7) = _beam; // Beam number.
 }
@@ -48,16 +48,17 @@ void ABEmulator::getPacketData(char*& ptr, unsigned long& size)
     size = _packet.size();
 
     // Set the packet header.
-    *reinterpret_cast<short int*>(ptr + 0) = (short int) ((_counter & 0x00FF0000) >> 32);
-    *reinterpret_cast<int*>(reinterpret_cast<short int*>(ptr + 1)) = (int) (_counter & 0x0000FFFF);
+    *(((unsigned int *) ptr) + 0) = (unsigned int) (_counter & 0x00000000FFFFFFFF);
+    *(((short int *) ptr) + 2) = (unsigned short int) ((_counter & 0x0000FFFF00000000) >> 32);
     *(ptr + 6) = _specQuart; // Spectral quarter.
     *(ptr + 7) = _beam; // Beam number.
 
     // Fill the packet data.
     char* data = ptr + 8; // Add offset for header.
     for (unsigned i = 0; i < _samples; ++i) {
-        //float value = sin(((_totalSamples + i) % _period) * _omega);
-        short int XXre = i * 4 + 0;
+        float value = sin(((_totalSamples + i) % _period) * _omega);
+        value *= 10.0;
+        short int XXre = (short int) value;
         short int YYre = i * 4 + 1;
         short int XYre = i * 4 + 2;
         short int XYim = i * 4 + 3;
