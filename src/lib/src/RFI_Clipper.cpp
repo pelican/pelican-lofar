@@ -209,8 +209,10 @@ void RFI_Clipper::run( WeightedSpectrumDataSet* weightedStokes )
         for (unsigned c = 0; c < nChannels ; ++c) {
           int binLocal = s*nChannels +c; 
           copyI[binLocal]=I[index + c] - bandPass[binLocal];
+          #if 0
           //jtest
-          //printf("%g\n", I[index+c]);
+          printf("%g\n", I[index+c]);
+          #endif
         }
       }
 
