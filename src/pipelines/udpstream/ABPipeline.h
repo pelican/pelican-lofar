@@ -38,7 +38,7 @@ class ABPipeline : public AbstractPipeline
 
         // Module pointers.
         RFI_Clipper* _rfiClipper;
-        //DedispersionModule* _dedispersionModule;
+        DedispersionModule* _dedispersionModule;
         DedispersionAnalyser* _dedispersionAnalyser;
 
         // Local data blob pointers.

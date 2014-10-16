@@ -13,7 +13,7 @@ using namespace ampp;
 ABPipeline::ABPipeline(const QString& streamIdentifier)
     : AbstractPipeline(), _streamIdentifier(streamIdentifier)
 {
-    //_dedispersionModule = 0;
+    _dedispersionModule = 0;
     _dedispersionAnalyser = 0;
     _rfiClipper = 0;
 }
@@ -33,10 +33,10 @@ void ABPipeline::init()
 {
     // Create the pipeline modules and any local data blobs.
     _rfiClipper = (RFI_Clipper *) createModule("RFI_Clipper");
-    //_dedispersionModule = (DedispersionModule*) createModule("DedispersionModule");
+    _dedispersionModule = (DedispersionModule*) createModule("DedispersionModule");
     _dedispersionAnalyser = (DedispersionAnalyser*) createModule("DedispersionAnalyser");
-    //_dedispersionModule->connect( boost::bind( &ABPipeline::dedispersionAnalysis, this, _1 ) );
-    //_dedispersionModule->unlockCallback( boost::bind( &ABPipeline::updateBufferLock, this, _1 ) );
+    _dedispersionModule->connect( boost::bind( &ABPipeline::dedispersionAnalysis, this, _1 ) );
+    _dedispersionModule->unlockCallback( boost::bind( &ABPipeline::updateBufferLock, this, _1 ) );
 
     _weightedIntStokes = (WeightedSpectrumDataSet*) createBlob("WeightedSpectrumDataSet");
 
@@ -52,7 +52,7 @@ void ABPipeline::run(QHash<QString, DataBlob*>& remoteData)
 
     _weightedIntStokes->reset(stokes);
     _rfiClipper->run(_weightedIntStokes);
-    //_dedispersionModule->dedisperse(_weightedIntStokes);
+    _dedispersionModule->dedisperse(_weightedIntStokes);
 
     if (counter%10 == 0)
         std::cout << counter << " Chunks processed." << std::endl;

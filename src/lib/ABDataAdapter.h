@@ -24,8 +24,8 @@ class ABDataAdapter : public AbstractStreamAdapter
         unsigned _packetsPerSpectrum;
         unsigned _channelsPerPacket;
         unsigned _packetSize;
-        unsigned int _nPolarisations = 2;
-        unsigned int _nSubbands = 1;
+        unsigned int _nPolarisations;
+        unsigned int _nSubbands;
         unsigned int _nChannels;
 };
 
