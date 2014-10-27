@@ -1,6 +1,8 @@
 #ifndef H5_LOFARBFDATAWRITER_H
 #define H5_LOFARBFDATAWRITER_H
 
+#ifdef LOFAR_DAL_FOUND
+
 /**
  * @file H5_LofarBFDataWriter.h
  */
@@ -135,4 +137,5 @@ void H5_LofarBFDataWriter::_float2int(const float *f, int *i)
 } // namespace ampp
 } // namespace pelican
 
+#endif // LOFAR_DAL_FOUND
 #endif // H5_LOFARBFDATAWRITER_H

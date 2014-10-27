@@ -117,7 +117,7 @@ set_target_properties(pelican-lofar_static PROPERTIES CLEAN_DIRECT_OUTPUT 1)
 set_target_properties(pelican-lofar_static PROPERTIES OUTPUT_NAME pelican-lofar)
 set_target_properties(pelican-lofar_static PROPERTIES PREFIX lib)
 set_target_properties(pelican-lofar_static PROPERTIES
-    COMPILE_FLAGS "${OpenMP_CXX_FLAGS}"
+    COMPILE_FLAGS "${OpenMP_CXX_FLAGS} -fPIC"
     LINK_FLAGS "${OpenMP_CXX_FLAGS}"
 )
 install(TARGETS pelican-lofar_static DESTINATION ${LIBRARY_INSTALL_DIR})

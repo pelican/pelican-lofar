@@ -69,11 +69,13 @@ if(CUDA_FOUND)
         )
 endif(CUDA_FOUND)
 if(HDF5_FOUND)
+if(LOFAR_DAL_FOUND)
     list(APPEND lofarTest_src
          src/H5_LofarBFDataWriterTest.cpp
          src/H5_LofarBFStokesWriterTest.cpp
          src/H5_LofarBFVoltageWriterTest.cpp
         )
+endif(LOFAR_DAL_FOUND)
 endif(HDF5_FOUND)
 add_executable(lofarTest ${lofarTest_src})
 set_target_properties(lofarTest PROPERTIES 
