@@ -50,8 +50,9 @@ void ABDataAdapter::deserialise(QIODevice* device)
     unsigned bytesRead = 0;
     unsigned block = 0;
     signed int specQuart = 0;
-    signed int prevSpecQuart = -1;
+    static signed int prevSpecQuart = -1;
     unsigned long int counter = 0;
+    static unsigned long int prevCounter = -1;
     for (unsigned p = 0; p < packets; ++p)
     {
         // Ensure there is enough data to read from the device.
@@ -64,26 +65,37 @@ void ABDataAdapter::deserialise(QIODevice* device)
 
         // Build the spectrum from _packetsPerSpectrum packets and write the
         // data out to the blob.
+        // Get the packet counter
+        counter = (*(unsigned long int *) headerData) & 0x0000FFFFFFFFFFFF;
         // Get the spectral quarter number
         specQuart = (signed char) headerData[6];
-        if (specQuart - prevSpecQuart != 1)
+        if (counter - prevCounter != 1)
         {
             fprintf(stderr,
-                    "# Missing packet! specQuart = %d, prevSpecQuart = %d\n",
-                    specQuart,
-                    prevSpecQuart);
-        }
-        if (_packetsPerSpectrum - 1 == specQuart)
-        {
-            prevSpecQuart = -1;
+                    "# Missing packet! counter = %ld, prevCounter = %d\n",
+                    counter,
+                    prevCounter);
         }
         else
         {
-            prevSpecQuart = specQuart;
+            if (specQuart - prevSpecQuart != 1)
+            {
+                fprintf(stderr,
+                       "# Missing packet! specQuart = %d, prevSpecQuart = %d\n",
+                        specQuart,
+                        prevSpecQuart);
+            }
+            if (_packetsPerSpectrum - 1 == specQuart)
+            {
+                prevSpecQuart = -1;
+            }
+            else
+            {
+                prevSpecQuart = specQuart;
+            }
+            // TODO: do this correctly:
         }
-        counter = (*(unsigned long int *) headerData)
-                                    & 0x0000FFFFFFFFFFFF;
-        //printf("%lu\n", counter);
+        prevCounter = counter;
         bytesRead += device->read(d + bytesRead,
                                   _packetSize - _headerSize - _footerSize);
         //printf("%d\n", bytesRead);
@@ -120,5 +132,6 @@ void ABDataAdapter::deserialise(QIODevice* device)
         // Read the packet footer from the input device and dump it.
         device->read(footerData, _footerSize);
     }
+    printf("#done!\n");
 }
 

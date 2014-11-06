@@ -44,7 +44,7 @@ class ABEmulator : public AbstractUdpEmulator
         char _specQuart; // Spectral quarter (0 <= _specQuart < 4)
         char _beam; // Beam number (0 <= _beam < 8)
         unsigned long long _totalSamples; // The total number of samples sent.
-        unsigned long _samples; // The number of samples in the packet.
+        unsigned long _samples; // The number of (frequency) samples in the packet.
         unsigned long _interval; // The interval between packets in microsec.
         unsigned long _period; // The number of samples in one period.
         float _omega; // The angular frequency of the signal (from _period).

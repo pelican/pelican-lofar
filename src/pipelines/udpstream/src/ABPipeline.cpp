@@ -70,35 +70,35 @@ void ABPipeline::dedispersionAnalysis( DataBlob* blob ) {
         std::cout << "Found " << result.eventsFound() << " events" << std::endl;
         std::cout << "Limits: " << _minEventsFound << " " << _maxEventsFound << " events" << std::endl;
         dataOutput( &result, "TriggerInput" );
-	if (_minEventsFound >= _maxEventsFound){
+        if (_minEventsFound >= _maxEventsFound){
             std::cout << "Writing out..." << std::endl;
-	    if (result.eventsFound() >= _minEventsFound){
-	      dataOutput( &result, "DedispersionDataAnalysis" );
-	      foreach( const SpectrumDataSetStokes* d, result.data()->inputDataBlobs()) {
-		dataOutput( d, "SignalFoundSpectrum" );
-		//		    dataOutput( d->getRawData(), "RawDataFoundSpectrum" );
-	      }
-	    }
-	}
-	else{
-	  if (result.eventsFound() >= _minEventsFound && result.eventsFound() <= _maxEventsFound){
-	    std::cout << "Writing out..." << std::endl;
-	    dataOutput( &result, "DedispersionDataAnalysis" );
-	    foreach( const SpectrumDataSetStokes* d, result.data()->inputDataBlobs()) {
-	      dataOutput( d, "SignalFoundSpectrum" );
-	      //		    dataOutput( d->getRawData(), "RawDataFoundSpectrum" );
-	    }
-	  }
-	}
+            if (result.eventsFound() >= _minEventsFound){
+              dataOutput( &result, "DedispersionDataAnalysis" );
+              foreach( const SpectrumDataSetStokes* d, result.data()->inputDataBlobs()) {
+                dataOutput( d, "SignalFoundSpectrum" );
+                //                    dataOutput( d->getRawData(), "RawDataFoundSpectrum" );
+              }
+            }
+        }
+        else{
+          if (result.eventsFound() >= _minEventsFound && result.eventsFound() <= _maxEventsFound){
+            std::cout << "Writing out..." << std::endl;
+            dataOutput( &result, "DedispersionDataAnalysis" );
+            foreach( const SpectrumDataSetStokes* d, result.data()->inputDataBlobs()) {
+              dataOutput( d, "SignalFoundSpectrum" );
+              //                    dataOutput( d->getRawData(), "RawDataFoundSpectrum" );
+            }
+          }
+        }
       }
 }
-  
+
 void ABPipeline::updateBufferLock( const QList<DataBlob*>& freeData ) {
 #if 0
      // find WeightedDataBlobs that can be unlocked
      foreach( DataBlob* blob, freeData ) {
         Q_ASSERT( blob->type() == "SpectrumDataSetStokes" );
-	// unlock the pointers to the raw buffer
+        // unlock the pointers to the raw buffer
         // _rawBuffer->unlock( static_cast<SpectrumDataSetStokes*>(blob)->getRawData() );
         _stokesBuffer->unlock( static_cast<SpectrumDataSetStokes*>(blob) );
      }
