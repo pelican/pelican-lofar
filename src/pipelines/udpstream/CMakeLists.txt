@@ -259,22 +259,22 @@ target_link_libraries(ABPipelineStream
 )
 
 
-# # === Build the sigprocPipeline
-# add_executable(sigprocPipeline src/sigprocPipelineMain.cpp)
-# set_target_properties(sigprocPipeline PROPERTIES
-#     COMPILE_FLAGS "${OpenMP_CXX_FLAGS}"
-#     LINK_FLAGS "${OpenMP_CXX_FLAGS}"
-# )
-# target_link_libraries(sigprocPipeline
-#     pelicanMdsm
-#     pelican-lofar_static
-#     ${PELICAN_LIBRARY}
-#     ${FFTW3_FFTW_LIBRARY}
-#     ${FFTW3_FFTWF_LIBRARY}
-#     ${QT_QTNETWORK_LIBRARY}
-#     ${QT_QTXML_LIBRARY}
-#     ${QT_QTCORE_LIBRARY}
-# )
+# === Build the sigprocPipeline
+add_executable(sigprocPipeline src/sigprocPipelineMain.cpp)
+set_target_properties(sigprocPipeline PROPERTIES
+    COMPILE_FLAGS "${OpenMP_CXX_FLAGS}"
+    LINK_FLAGS "${OpenMP_CXX_FLAGS}"
+)
+target_link_libraries(sigprocPipeline
+    pelicanMdsm
+    pelican-lofar_static
+    ${PELICAN_LIBRARY}
+    ${FFTW3_FFTW_LIBRARY}
+    ${FFTW3_FFTWF_LIBRARY}
+    ${QT_QTNETWORK_LIBRARY}
+    ${QT_QTXML_LIBRARY}
+    ${QT_QTCORE_LIBRARY}
+)
 
 # === Build the Timing pipeline binary.
 add_executable(timingPipeline src/timingPipelineMain.cpp)
