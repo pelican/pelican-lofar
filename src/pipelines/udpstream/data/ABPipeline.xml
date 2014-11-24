@@ -39,7 +39,7 @@
         <modules>
             <RFI_Clipper active="true" channelRejectionRMS="3.5" spectrumRejectionRMS="6.0">
                 <zeroDMing active="true" />
-                <BandPassData file="/home/vagrant/development/pelican-lofar/build/band220-250.bp" />
+                <BandPassData file="/data/Commissioning/Useful/BandPass/band220-250.bp" />
                 <Band matching="true" />
                 <History maximum="50000" />
             </RFI_Clipper>

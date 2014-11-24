@@ -1,4 +1,5 @@
 #include "SigProcPipeline.h"
+#include "SpectrumDataSet.h"
 #include "WeightedSpectrumDataSet.h"
 
 
@@ -34,7 +35,7 @@ void SigProcPipeline::init() {
 
 void SigProcPipeline::run(QHash<QString, DataBlob*>& remoteData)
 {
-    SpectrumDataSetStokes* stokes = (SpectrumDataSetStokes*)remoteData["SigProcData"];
+    SpectrumDataSetStokes* stokes = (SpectrumDataSetStokes*)remoteData["SpectrumDataSetStokes"];
     if( ! stokes ) throw(QString("no STOKES!"));
     weightedIntStokes->reset(stokes);
     rfiClipper->run(weightedIntStokes);
