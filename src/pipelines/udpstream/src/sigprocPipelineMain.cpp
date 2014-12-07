@@ -1,6 +1,7 @@
 #include "pelican/core/PipelineApplication.h"
 #include "pelican/core/FileDataClient.h"
-#include "SigProcPipeline.h"
+#include "SigprocPipeline.h"
+#include "SigprocAdapter.h"
 #include "SpectrumDataSet.h"
 #include "FilterBankAdapter.h"
 #include <QtCore/QCoreApplication>
@@ -20,7 +21,7 @@ int main(int argc, char* argv[])
         PipelineApplication pApp(argc, argv);
 
         // Register the pipelines that can run.
-        pApp.registerPipeline(new SigProcPipeline);
+        pApp.registerPipeline(new SigprocPipeline);
 
         // Set the data client.
         pApp.setDataClient("FileDataClient");

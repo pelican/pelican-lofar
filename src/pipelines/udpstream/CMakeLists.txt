@@ -11,7 +11,7 @@ set(pipeline_lib_src
     src/TimingPipeline.cpp
     src/EmptyPipeline.cpp
     src/StokesOnlyPipeline.cpp
-    src/SigProcPipeline.cpp
+    src/SigprocPipeline.cpp
     src/BandPassPipeline.cpp
     src/JTestPipeline.cpp
     src/ABPipeline.cpp

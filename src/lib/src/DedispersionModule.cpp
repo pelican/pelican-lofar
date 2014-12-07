@@ -57,6 +57,10 @@ DedispersionModule::DedispersionModule( const ConfigNode& config )
     _fch1 = config.getOption("frequencyChannel1", "MHz", "0.0").toDouble();
     _foff = config.getOption("channelBandwidth", "MHz", "1.0").toDouble();
     _invert = ( _foff >= 0 )?1:0;
+    std::cout << "ch1: " << _fch1 << std::endl;
+    std::cout << "off: " << _foff << std::endl;
+    std::cout << "dmstep: " << _dmStep << std::endl;
+    std::cout << "dmlow: " << _dmLow << std::endl;
     if( _fch1 == 0 ) { throw QString("DedispersionModule: frequencyChannel1 must be a positve number"); }
 
     unsigned int maxBuffers = config.getOption("numberOfBuffers", "value", "2").toUInt();

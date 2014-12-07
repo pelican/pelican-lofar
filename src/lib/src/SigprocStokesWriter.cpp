@@ -107,7 +107,7 @@ SigprocStokesWriter::SigprocStokesWriter(const ConfigNode& configNode )
     tstruct = *localtime(&now);
     strftime(timestr, sizeof timestr, "D%Y%m%dT%H%M%S", &tstruct );
     QString fileName;
-    fileName = _filepath + QString("_") + timestr + QString(".dat");
+    fileName = _filepath + QString("_") + timestr + QString(".fil");
     //    _file.open(_filepath.toUtf8().data(), std::ios::out | std::ios::binary);
     _file.open(fileName.toUtf8().data(), std::ios::out | std::ios::binary);
 }
@@ -124,7 +124,6 @@ void SigprocStokesWriter::writeHeader(SpectrumDataSetStokes* stokes){
         throw( QString("SigprocStokesWriter: unable to set epoch.") );
     }
     double _mjdStamp = (_timeStamp-_epoch)/86400 + 55562.0;
-    std::cout << "MJD timestamp:" << std::fixed << _mjdStamp << std::endl;
 
     // Write header
     WriteString("HEADER_START");

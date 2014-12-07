@@ -45,6 +45,8 @@ set(lib_src
     src/PPFChanneliser.cpp
     src/StokesGenerator.cpp
     src/StokesIntegrator.cpp
+    src/file_handler.cpp
+    src/SigprocAdapter.cpp
     src/SigprocStokesWriter.cpp
     src/TriggerOutput.cpp
     src/TimerData.cpp
