@@ -10,7 +10,7 @@ SigprocAdapter::SigprocAdapter(const ConfigNode& config)
 {
     _nBits = config.getOption("sampleSize", "bits", "0").toUInt();
     _nSamples= config.getOption("samplesPerRead", "number", "1024").toUInt();
-    _nSubbands = config.getOption("subbands", "number", "1").toUInt();
+    _nChannels = config.getOption("channels", "number", "1").toUInt();
     _iteration = 0;
 }
 
@@ -32,16 +32,17 @@ void SigprocAdapter::deserialise(QIODevice* in)
         _tsamp = _header -> tsamp;
     }
 
-    float *dataTemp = (float *) malloc(_nSamples * _nSubbands * _nBits / 8 * sizeof(float));
-    unsigned amountRead = read_block(_fp, _nBits, dataTemp, _nSamples * _nSubbands);
+    float *dataTemp = (float *) malloc(_nSamples * _nChannels * _nBits / 8 * sizeof(float));
+    unsigned amountRead = read_block(_fp, _nBits, dataTemp, _nSamples * _nChannels);
 
     // If chunk size is 0, return empty blob (end of file)
     if (amountRead == 0) {
         // Reached end of file
         _stokesData -> resize(0, 0, 0, 0);
+        throw QString("End of file!");
         return;
     }
-    else if (amountRead < _nSamples * _nSubbands) {
+    else if (amountRead < _nSamples * _nChannels) {
         // Last chunk in file (ignore?)
         _stokesData -> resize(0, 0, 0, 0);
         return;
@@ -51,10 +52,11 @@ void SigprocAdapter::deserialise(QIODevice* in)
     _stokesData -> setLofarTimestamp(_tsamp * _iteration * _nSamples);
     _stokesData -> setBlockRate(_tsamp);
 
+    std::cout << "aasfasfasdfasd" << std::endl;
     // Put all the samples in one time block, converting them to complex
     unsigned dataPtr = 0;
     for(unsigned s = 0; s < _nSamples; s++)
-        for(unsigned c = 0; c < _nSubbands; c++) {
+        for(unsigned c = 0; c < _nChannels; c++) {
             float* data = _stokesData -> spectrumData(s, c, 0);
                 data[0] = dataTemp[dataPtr];
                 dataPtr++;
@@ -83,7 +85,7 @@ void SigprocAdapter::_checkData()
     // Resize the time stream data blob being read into to match the adapter
     // dimensions.
     _stokesData = static_cast<SpectrumDataSetStokes*>(_data);
-    _stokesData->resize(_nSamples, _nSubbands, 1, 1); // 1 Channel per subband in this case (and only total power)
+    _stokesData->resize(_nSamples, _nChannels, 1, 1); // 1 Channel per subband in this case (and only total power)
 }
 
 } // namespace ampp

@@ -88,6 +88,14 @@ class SpectrumDataSetBase : public DataBlob
 template <class T>
 class SpectrumDataSet : public SpectrumDataSetBase
 {
+    private:
+        // Copy constructor
+        SpectrumDataSet(const SpectrumDataSet& spec)
+        : SpectrumDataSetBase(static_cast<const SpectrumDataSetBase&>(spec))
+        {
+            std::copy(spec.begin(), spec.end(), _data.begin());
+        }
+
     public:
         /// Constructs an empty sub-band spectra data blob.
         SpectrumDataSet(const QString& type = "SpectrumDataSet")

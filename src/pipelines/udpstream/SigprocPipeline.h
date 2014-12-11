@@ -4,10 +4,10 @@
 
 #include "pelican/core/AbstractPipeline.h"
 #include "RFI_Clipper.h"
-//#include "StokesIntegrator.h"
 #include "DedispersionModule.h"
 #include "DedispersionAnalyser.h"
 #include "SigprocStokesWriter.h"
+#include "DedispersionDataAnalysisOutput.h"
 #include "WeightedSpectrumDataSet.h"
 
 /**
@@ -51,9 +51,12 @@ class SigprocPipeline : public AbstractPipeline
         DedispersionModule* _dedispersionModule;
         DedispersionAnalyser* _dedispersionAnalyser;
 
+        QList<SpectrumDataSetStokes*> _stokesData;
+        LockingPtrContainer<SpectrumDataSetStokes>* _stokesBuffer;
         //SpectrumDataSetStokes* _intStokes;
         WeightedSpectrumDataSet* _weightedIntStokes;
 
+    unsigned int _iter;
 	unsigned int _minEventsFound;
 	unsigned int _maxEventsFound;
 };

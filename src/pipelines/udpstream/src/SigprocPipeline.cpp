@@ -27,14 +27,23 @@ SigprocPipeline::~SigprocPipeline()
 }
 
 void SigprocPipeline::init() {
+    ConfigNode c = config(QString("SigprocPipeline"));
+    unsigned int history = c.getOption("history", "value", "10").toUInt();
+    _minEventsFound = c.getOption("events", "min", "5").toUInt();
+    _maxEventsFound = c.getOption("events", "max", "5").toUInt();
+
     _rfiClipper = (RFI_Clipper *) createModule("RFI_Clipper");
     _dedispersionModule = (DedispersionModule*) createModule("DedispersionModule");
     _dedispersionAnalyser = (DedispersionAnalyser*) createModule("DedispersionAnalyser");
     _dedispersionModule->connect( boost::bind( &SigprocPipeline::dedispersionAnalysis, this, _1 ) );
     _dedispersionModule->unlockCallback( boost::bind( &SigprocPipeline::updateBufferLock, this, _1 ) );
+    _stokesData = createBlobs<SpectrumDataSetStokes>("SpectrumDataSetStokes", history);
+    _stokesBuffer = new LockingPtrContainer<SpectrumDataSetStokes>(&_stokesData);
     //_stokesIntegrator = (StokesIntegrator *) createModule("StokesIntegrator");
     //_intStokes = (SpectrumDataSetStokes*) createBlob("SpectrumDataSetStokes");
     _weightedIntStokes = (WeightedSpectrumDataSet*) createBlob("WeightedSpectrumDataSet");
+
+    _iter = 0;
 
     // Request remote data
     requestRemoteData("SpectrumDataSetStokes");
@@ -44,12 +53,24 @@ void SigprocPipeline::run(QHash<QString, DataBlob*>& remoteData)
 {
     SpectrumDataSetStokes* stokes = (SpectrumDataSetStokes*)remoteData["SpectrumDataSetStokes"];
     if( ! stokes ) throw(QString("no STOKES!"));
-    _weightedIntStokes->reset(stokes);
+
+    std::cout << "iter = " << _iter << std::endl;
+
+    std::cout << stokes->nChannels() << "; " << stokes->nSubbands() << std::endl;
+    /* to make sure the dedispersion module reads data from a lockable ring
+       buffer, copy data to one */
+    SpectrumDataSetStokes* stokesBuf = _stokesBuffer->next();
+    *stokesBuf = *stokes;
+
+    std::cout << stokesBuf->nChannels() << "; " << stokesBuf->nSubbands() << std::endl;
+    _weightedIntStokes->reset(stokesBuf);
+    //_weightedIntStokes->reset(stokes);
     _rfiClipper->run(_weightedIntStokes);
+    std::cout << _weightedIntStokes->dataSet()->nChannels() << "; " << _weightedIntStokes->dataSet()->nSubbands() << std::endl;
     _dedispersionModule->dedisperse(_weightedIntStokes);
-    dedispersionAnalysis(stokes);
     //_stokesIntegrator->run(stokes, _intStokes);
     //dataOutput(_intStokes, "SpectrumDataSetStokes");
+    ++_iter;
 }
 
 void SigprocPipeline::dedispersionAnalysis( DataBlob* blob ) {
@@ -75,18 +96,19 @@ void SigprocPipeline::dedispersionAnalysis( DataBlob* blob ) {
         else{
           if (result.eventsFound() >= _minEventsFound && result.eventsFound() <= _maxEventsFound){
             std::cout << "Writing out..." << std::endl;
+            std::cout << "here!" << std::endl;
             dataOutput( &result, "DedispersionDataAnalysis" );
-            foreach( const SpectrumDataSetStokes* d, result.data()->inputDataBlobs()) {
-              dataOutput( d, "SignalFoundSpectrum" );
-              //                    dataOutput( d->getRawData(), "RawDataFoundSpectrum" );
-            }
+       //     foreach( const SpectrumDataSetStokes* d, result.data()->inputDataBlobs()) {
+       //       dataOutput( d, "SignalFoundSpectrum" );
+       //       //                    dataOutput( d->getRawData(), "RawDataFoundSpectrum" );
+       //     }
           }
         }
       }
 }
 
 void SigprocPipeline::updateBufferLock( const QList<DataBlob*>& freeData ) {
-#if 0
+#if 1
      // find WeightedDataBlobs that can be unlocked
      foreach( DataBlob* blob, freeData ) {
         Q_ASSERT( blob->type() == "SpectrumDataSetStokes" );

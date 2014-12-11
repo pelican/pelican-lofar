@@ -128,6 +128,7 @@ void DedispersionModule::resize( const SpectrumDataSet<float>* streamData ) {
         _buffers.reset( &_buffersList );
         _currentBuffer = _buffers.next();
 
+        std::cout << nChannels << nSubbands << std::endl;
         _nChannels = nChannels * nSubbands;
         // Generate the noise template to replace flagged data
         _noiseTemplate.resize( _numSamplesBuffer * _nChannels );
@@ -151,7 +152,9 @@ void DedispersionModule::resize( const SpectrumDataSet<float>* streamData ) {
           } while (_noiseTemplate[i]>3.5) ;
           //          _noiseTemplate[i] = (x1*x1 - 4.0)/2.828427; 
         }
+        std::cout << "((((((((((((((((((((" << std::endl;
         std::cout << "resize: nChannels = " << _nChannels << std::endl;
+        std::cout << "))))))))))))))))))))" << std::endl;
         // calculate dispersion measure shifts
         _dmshifts.clear();
         for ( int c = 0; c < _nChannels; ++c ) {
@@ -214,7 +217,9 @@ void DedispersionModule::dedisperse( WeightedSpectrumDataSet* weightedData )
     static_cast<SpectrumDataSetStokes*>(weightedData->dataSet());
   
   _blobs.push_back( streamData ); // keep a list of blobs to lock
+    std::cout << "abcdef" << std::endl;
   resize( streamData ); // ensure we have buffers scaled appropriately
+    std::cout << "ghijkl" << std::endl;
   
   unsigned int sampleNumber = 0; // marker to indicate the number of samples succesfully 
   // transferred to the buffer from the Datablob
@@ -256,6 +261,8 @@ void DedispersionModule::dedisperse( WeightedSpectrumDataSet* weightedData )
       timerReport(&_bufferTimer,"bufferTimer");
       timerReport(&_copyTimer,"copyTimer");
     }
+    //jayanth
+    std::cout << "========" << sampleNumber << std::endl;
   }
     while( sampleNumber != maxSamples );
 }
@@ -280,7 +287,9 @@ void DedispersionModule::dedisperse( DedispersionBuffer* buffer, DedispersionSpe
       dataOut << " " << 
       std::endl;
     */
+    std::cout << "foo" << std::endl;
     dataOut->resize( nsamp, _tdms, _dmLow, _dmStep );
+    std::cout << "bar" << std::endl;
     // Set up a job for the GPU processing kernel
     GPU_Job* job = _jobBuffer.next();
     DedispersionKernel* kernelPtr = _kernels.next();

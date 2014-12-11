@@ -32,7 +32,7 @@ class SigprocAdapter: public AbstractStreamAdapter
         FILE *_fp;
 
         unsigned _nSamples;
-        unsigned _nSubbands;
+        unsigned _nChannels;
         unsigned _nPolarisations;
         unsigned _nBits;
         double   _tsamp;
