@@ -39,8 +39,6 @@ void SigprocPipeline::init() {
     _dedispersionModule->unlockCallback( boost::bind( &SigprocPipeline::updateBufferLock, this, _1 ) );
     _stokesData = createBlobs<SpectrumDataSetStokes>("SpectrumDataSetStokes", history);
     _stokesBuffer = new LockingPtrContainer<SpectrumDataSetStokes>(&_stokesData);
-    //_stokesIntegrator = (StokesIntegrator *) createModule("StokesIntegrator");
-    //_intStokes = (SpectrumDataSetStokes*) createBlob("SpectrumDataSetStokes");
     _weightedIntStokes = (WeightedSpectrumDataSet*) createBlob("WeightedSpectrumDataSet");
 
     _iter = 0;
@@ -56,20 +54,16 @@ void SigprocPipeline::run(QHash<QString, DataBlob*>& remoteData)
 
     std::cout << "iter = " << _iter << std::endl;
 
-    std::cout << stokes->nChannels() << "; " << stokes->nSubbands() << std::endl;
     /* to make sure the dedispersion module reads data from a lockable ring
        buffer, copy data to one */
     SpectrumDataSetStokes* stokesBuf = _stokesBuffer->next();
     *stokesBuf = *stokes;
 
-    std::cout << stokesBuf->nChannels() << "; " << stokesBuf->nSubbands() << std::endl;
     _weightedIntStokes->reset(stokesBuf);
-    //_weightedIntStokes->reset(stokes);
     _rfiClipper->run(_weightedIntStokes);
-    std::cout << _weightedIntStokes->dataSet()->nChannels() << "; " << _weightedIntStokes->dataSet()->nSubbands() << std::endl;
+    dataOutput(stokesBuf, "SigprocStokesWriter");
+    std::cout << "Running dedisperse()..." << std::endl;
     _dedispersionModule->dedisperse(_weightedIntStokes);
-    //_stokesIntegrator->run(stokes, _intStokes);
-    //dataOutput(_intStokes, "SpectrumDataSetStokes");
     ++_iter;
 }
 
@@ -108,7 +102,6 @@ void SigprocPipeline::dedispersionAnalysis( DataBlob* blob ) {
 }
 
 void SigprocPipeline::updateBufferLock( const QList<DataBlob*>& freeData ) {
-#if 1
      // find WeightedDataBlobs that can be unlocked
      foreach( DataBlob* blob, freeData ) {
         Q_ASSERT( blob->type() == "SpectrumDataSetStokes" );
@@ -116,7 +109,6 @@ void SigprocPipeline::updateBufferLock( const QList<DataBlob*>& freeData ) {
         // _rawBuffer->unlock( static_cast<SpectrumDataSetStokes*>(blob)->getRawData() );
         _stokesBuffer->unlock( static_cast<SpectrumDataSetStokes*>(blob) );
      }
-#endif
 }
 
 } // namespace ampp

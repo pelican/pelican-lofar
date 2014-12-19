@@ -1,6 +1,7 @@
 #include "SigprocAdapter.h"
 #include "LofarTypes.h"
 #include <QtCore/QFile>
+#include <stdio.h>
 
 namespace pelican {
 namespace ampp {
@@ -33,6 +34,7 @@ void SigprocAdapter::deserialise(QIODevice* in)
     }
 
     float *dataTemp = (float *) malloc(_nSamples * _nChannels * _nBits / 8 * sizeof(float));
+    //std::cout << "nb = " << _nBits << "; s = " << _nSamples << "; c = " << _nChannels << std::endl;
     unsigned amountRead = read_block(_fp, _nBits, dataTemp, _nSamples * _nChannels);
 
     // If chunk size is 0, return empty blob (end of file)
@@ -55,12 +57,14 @@ void SigprocAdapter::deserialise(QIODevice* in)
     std::cout << "aasfasfasdfasd" << std::endl;
     // Put all the samples in one time block, converting them to complex
     unsigned dataPtr = 0;
-    for(unsigned s = 0; s < _nSamples; s++)
-        for(unsigned c = 0; c < _nChannels; c++) {
+    for(unsigned s = 0; s < _nSamples; s++) {
+        //for(unsigned c = 0; c < _nChannels; c++) {
+        for(signed c = _nChannels - 1; c >= 0; c--) { // this has to be signed as we are checking for >= 0!
             float* data = _stokesData -> spectrumData(s, c, 0);
-                data[0] = dataTemp[dataPtr];
-                dataPtr++;
+            data[0] = dataTemp[dataPtr];
+            dataPtr++;
         }
+    }
 
     _iteration++;
 
@@ -71,7 +75,7 @@ void SigprocAdapter::deserialise(QIODevice* in)
 void SigprocAdapter::_checkData()
 {
     // Check for supported sample bits.
-    if (_nBits != 8  && _nBits != 16 && _nBits != 32) {
+    if (_nBits != 4 && _nBits != 8  && _nBits != 16 && _nBits != 32) {
         throw QString("SigprocAdapter: Specified number of "
                 "sample bits (%1) not supported.").arg(_nBits);
     }

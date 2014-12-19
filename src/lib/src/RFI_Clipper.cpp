@@ -177,6 +177,7 @@ void RFI_Clipper::run( WeightedSpectrumDataSet* weightedStokes )
     unsigned nBins = nChannels * nSubbands;
     unsigned goodSamples = 0;
     
+    std::cout << nSamples << ", " << nSubbands << ", " << nChannels << ", " << nPolarisations << ", " << nBins << std::endl;
     //float modelRMS = _bandPass.rms();
     // This has all been tested..
     _map.reset( nBins );

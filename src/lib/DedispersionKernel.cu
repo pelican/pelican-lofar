@@ -28,8 +28,11 @@
 #endif
 #endif
 
+//jayanth
 #define NUMREG 12
 #define DIVINT 6
+//#define NUMREG 15
+//#define DIVINT 10
 #define DIVINDM 80
 #define FDIVINDM 80.0f
 
