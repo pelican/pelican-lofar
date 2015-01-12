@@ -58,8 +58,8 @@ void SigprocAdapter::deserialise(QIODevice* in)
     // Put all the samples in one time block, converting them to complex
     unsigned dataPtr = 0;
     for(unsigned s = 0; s < _nSamples; s++) {
-        //for(unsigned c = 0; c < _nChannels; c++) {
-        for(signed c = _nChannels - 1; c >= 0; c--) { // this has to be signed as we are checking for >= 0!
+        for(unsigned c = 0; c < _nChannels; c++) {
+        //for(signed c = _nChannels - 1; c >= 0; c--) { // this has to be signed as we are checking for >= 0!
             float* data = _stokesData -> spectrumData(s, c, 0);
             data[0] = dataTemp[dataPtr];
             dataPtr++;

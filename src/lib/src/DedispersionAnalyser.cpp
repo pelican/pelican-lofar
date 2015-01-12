@@ -109,7 +109,8 @@ int DedispersionAnalyser::analyse( DedispersionSpectra* data,
         currentPow2 = maxPow2;
         // fill the bin1 Vector first and check
         for (int j=0; j<maxPow2; ++j){
-          int index = i*32 + j;
+	  int index = i*maxPow2 + j;
+	  //          int index = i*32 + j;
           binnedOutput[0][j]= dataVector[dm_count*nsamp + index]; 
           float detection = _detectionThreshold * rms;// * sqrt((float)indexJ);
           if (binnedOutput[0][j] >= detection){
@@ -121,7 +122,7 @@ int DedispersionAnalyser::analyse( DedispersionSpectra* data,
           for (int j = 0; j < currentPow2; ++j){
             int binFactor = maxPow2/currentPow2;
             float detection = _detectionThreshold * rms * sqrt((float)binFactor);
-            int index = i*currentPow2 + binFactor * j;
+            int index = i*maxPow2 + binFactor * j;
             binnedOutput[n][j] = binnedOutput[n-1][2*j] + binnedOutput[n-1][2*j+1];
             if (binnedOutput[n][j] >= detection){
               result->addEvent( dm_count, index, binFactor, binnedOutput[n][j] );

@@ -1,6 +1,7 @@
 
 #include <QFile>
 #include <QTextStream>
+#include <QDataStream>
 #include "DedispersionBuffer.h"
 #include <algorithm>
 #include "SpectrumDataSet.h"
@@ -43,7 +44,21 @@ void DedispersionBuffer::dump( const QString& fileName ) const {
     QTextStream out(&file);
 
     for (int c = 0; c < _timedata.size(); ++c) {
-        out << QString::number(_timedata[c], 'g' ) << QString(((c+1)%_nsamp == 0)?"\n":" ");
+      out << QString::number(_timedata[c], 'g' ) << QString(((c+1)%_nsamp == 0)?"\n":" ");
+    }
+    file.close();
+}
+
+void DedispersionBuffer::dumpbin( const QString& fileName ) const {
+    QFile file(fileName);
+    if (QFile::exists(fileName)) QFile::remove(fileName);
+    if (!file.open(QIODevice::WriteOnly)) return;
+    QDataStream out(&file);
+    out.setFloatingPointPrecision(QDataStream::SinglePrecision);
+    out.setByteOrder(QDataStream::LittleEndian);
+    std::cout << "Buffer size: "<< _timedata.size() << std::endl;
+    for (int c = 0; c < _timedata.size(); ++c) {
+      out << _timedata[c];
     }
     file.close();
 }
@@ -65,7 +80,7 @@ void DedispersionBuffer::dump( const QString& fileName ) const {
         if( sampleNum <= s ) {
             // We have all the samples we need in the current blob
             buf->_sampleCount = 0; // offset position to write to
-            blobSample = s - sampleNum;
+            blobSample = s - sampleNum; // time samples not copied from this blob
         } else {
             // Take all the samples from this blob, we will need more
             buf->_sampleCount = sampleNum - s;// offset position to write to
@@ -117,7 +132,8 @@ void DedispersionBuffer::dump( const QString& fileName ) const {
         // Try varying x, from 6 down.  Also try it with this commented out.
         //        omp_set_num_threads(6);
         int s, c;
-        int localSampleCount = _sampleCount - start; // create a copy for omp to lock
+        int localSampleCount = _sampleCount - start; 
+	// create a copy for omp to lock
 #pragma omp parallel for private(s,c) schedule(dynamic)
         for(int t = start; t < (int)maxSamples; ++t ) {
             for (s = 0; s < (int)nSubbands; ++s ) {

@@ -83,6 +83,7 @@ __global__ void cache_dedisperse_loop(float *outbuff, float *buff, float mstartd
     #pragma unroll
     for(int i = 0; i < NUMREG; i++) {
         outbuff[((blockIdx.y * DIVINDM) + threadIdx.y)* (i_nsamp-i_maxshift) + (i * DIVINT) + (NUMREG * DIVINT * blockIdx.x) + threadIdx.x] = local_kernel_t[i];
+//        outbuff[((blockIdx.y * DIVINDM) + threadIdx.y)* (DIVINT*NUMREG*gridDim.x) + (i * DIVINT) + (NUMREG * DIVINT * blockIdx.x) + threadIdx.x] = local_kernel_t[i];
     }
 }
 
@@ -101,19 +102,19 @@ extern "C" void cacheDedisperseLoop( float *outbuff, long outbufSize, float *buf
     int num_blocks_t = (numSamples - maxshift)/(divisions_in_t * num_reg);
     int num_blocks_dm = tdms/divisions_in_dm;
 
-/*
-    std::cout << "\nnumSamples\t" << numSamples;
-    std::cout << "\ndivisions_in_t\t" << divisions_in_t;
-    std::cout << "\ndivisions_in_dm\t" << divisions_in_dm;
-    std::cout << "\nnum_reg\t" << num_reg;
-    std::cout << "\nnum_blocks_t\t" << num_blocks_t;
-    std::cout << "\nnum_blocks_dm\t" << num_blocks_dm;
+
+    std::cout << "\nnumSamples\t" << numSamples << std::endl;
+    std::cout << "\ndivisions_in_t\t" << divisions_in_t << std::endl;
+    std::cout << "\ndivisions_in_dm\t" << divisions_in_dm << std::endl;
+    std::cout << "\nnum_reg\t" << num_reg << std::endl;
+    std::cout << "\nnum_blocks_t\t" << num_blocks_t << std::endl;
+    std::cout << "\nnum_blocks_dm\t" << num_blocks_dm << std::endl;
     std::cout << "\ntdms\t" << tdms << std::endl;
     std::cout << "mdmstep\t" << mdmstep << std::endl;
     std::cout << "mstartdm\t" << mstartdm << std::endl;
     std::cout << "buff\t" << buff << std::endl;
     std::cout << "outbuff\t" << outbuff << std::endl;
-*/
+
 
     dim3 threads_per_block(divisions_in_t, divisions_in_dm);
     dim3 num_blocks(num_blocks_t,num_blocks_dm);

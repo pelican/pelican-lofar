@@ -78,6 +78,7 @@ DedispersionModule::DedispersionModule( const ConfigNode& config )
     _buffers.reset( &_buffersList );
     _dedispersionDataBuffer.reset( &_dedispersionData );
     _currentBuffer = _buffers.next();
+    _bufferCounter = 0;
 }
 
 /**
@@ -217,20 +218,20 @@ void DedispersionModule::dedisperse( WeightedSpectrumDataSet* weightedData )
     static_cast<SpectrumDataSetStokes*>(weightedData->dataSet());
   
   _blobs.push_back( streamData ); // keep a list of blobs to lock
-    std::cout << "abcdef" << std::endl;
   resize( streamData ); // ensure we have buffers scaled appropriately
-    std::cout << "ghijkl" << std::endl;
   
   unsigned int sampleNumber = 0; // marker to indicate the number of samples succesfully 
   // transferred to the buffer from the Datablob
   unsigned int maxSamples = streamData->nTimeBlocks();
+  QString tempString;
   do {
-    //        if( _currentBuffer->addSamples( streamData, &sampleNumber ) == 0 ) {
     if( _currentBuffer->addSamples( weightedData, _noiseTemplate, &sampleNumber ) == 0 ) {
-      //      std::cout << "buffer ready" << std::endl;
       timerStart(&_launchTimer);
       timerStart(&_bufferTimer);
-      //(*_currentBuffer)->dump("input.data");
+      QTextStream(&tempString) << "input" << _bufferCounter << ".dat" ;
+      std::cout << "Writing buffer " << _bufferCounter << " to file " << tempString.data(); 
+      _currentBuffer->dumpbin(tempString);
+      ++_bufferCounter;
       DedispersionBuffer* next = _buffers.next();
       next->clear();
       timerUpdate(&_bufferTimer);

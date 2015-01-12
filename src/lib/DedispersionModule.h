@@ -118,6 +118,7 @@ class DedispersionModule : public AsyncronousModule
         float _dmLow;
         double _fch1;
         double _foff;
+	unsigned int _bufferCounter;
         QList<DedispersionBuffer*> _buffersList;
         LockingPtrContainer<DedispersionBuffer> _buffers;
         QList<GPU_Job> _jobs;

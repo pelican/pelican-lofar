@@ -79,6 +79,7 @@ class DedispersionBuffer
         inline float mean() const { return _mean; };
 
         void dump( const QString& fileName ) const;
+        void dumpbin( const QString& fileName ) const;
 
     private:
         unsigned int _addSamples( WeightedSpectrumDataSet* data, QVector<float>& noiseTemplate, unsigned *sampleOffset, unsigned numSamples /* max number fo samples to insert */ );
