@@ -193,6 +193,8 @@ void RFI_Clipper::run( WeightedSpectrumDataSet* weightedStokes )
       float spectrumRMStolerance = _srFactor * _bandPass.rms()/sqrt(nBins); 
       float spectrumSum = 0.0;
       float spectrumSumSq = 0.0;
+      float spectrumSumAll = 0.0;
+      float spectrumSumSqAll = 0.0;
       float newSum = 0.0;
       float goodChannels = 0.0;
       float modelLevel = _bandPass.median();
@@ -243,16 +245,19 @@ void RFI_Clipper::run( WeightedSpectrumDataSet* weightedStokes )
             for(unsigned int pol = 0; pol < nPolarisations; ++pol ) {
               long index = stokesAll->index(s, nSubbands,
                                             pol, nPolarisations, t, nChannels );
+              spectrumSumAll += I[index+c];
+              spectrumSumSqAll += (I[index+c]*I[index+c]);
               I[index + c] = 0.0;
               W[index +c] = 0.0;
             }
           }
           else{
-            
             // Subtract the current model from the data 
             for(unsigned int pol = 0; pol < nPolarisations; ++pol ) {
               long index = stokesAll->index(s, nSubbands,
                                             pol, nPolarisations, t, nChannels );
+              spectrumSumAll += I[index+c];
+              spectrumSumSqAll += (I[index+c]*I[index+c]);
               I[index+c] -= bandPass[binLocal]; //+ _zeroDMing * median ;
             }
             //W[index+c] = 1.0;
@@ -280,6 +285,11 @@ void RFI_Clipper::run( WeightedSpectrumDataSet* weightedStokes )
         {
           double spectrumRMS = sqrt(spectrumSumSq/goodChannels - std::pow(spectrumSum,2));
         }
+      //      std::cout << spectrumSumSqAll << " " << spectrumSumAll << " " << nChannels<< std::endl;
+      double spectrumRMSAll = sqrt(spectrumSumSqAll/(nChannels*nSubbands) - std::pow(spectrumSumAll/(nChannels*nSubbands),2));
+      
+      
+
       // If goodChannels is substantially lower than the total number,
       // the rms of the spectrum will also be lower, so it needs to be
       // scaled by a factor sqrt(nBins/goodChannels) THIS IS WRONG
@@ -339,10 +349,10 @@ void RFI_Clipper::run( WeightedSpectrumDataSet* weightedStokes )
 
         if (_badSpectra == _history.size()){
           std::cout << "------ RFI_Clipper ----- Accepted a jump in the bandpass model to: " 
-                    << medianDelta << " " << spectrumRMS  << std::endl << std::endl;
+                    << medianDelta << " " << spectrumRMSAll  << std::endl << std::endl;
           _bandPass.setMedian(medianDelta);
           //_bandPass.setRMS(_bandPass.rms()); // RMS from file
-          _bandPass.setRMS(spectrumRMS); // RMS in incoming reference frame
+          _bandPass.setRMS(spectrumRMSAll); // RMS in incoming reference frame
           _badSpectra = 0;
           // reset _num for the history calculations
           _num = 0 ;

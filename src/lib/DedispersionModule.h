@@ -63,7 +63,8 @@ class DedispersionModule : public AsyncronousModule
               DedispersionKernel( float, float, float, float, unsigned, unsigned, unsigned );
               void setDMShift( QVector<float>& );
               void setOutputBuffer( QVector<float>& );
-              void setInputBuffer( QVector<float>&, GPU_MemoryMap::CallBackT );
+              //void setInputBuffer( QVector<float>&, GPU_MemoryMap::CallBackT );
+              void setInputBuffer( std::vector<float>&, GPU_MemoryMap::CallBackT );
               void run( GPU_NVidia& );
               void cleanUp();
         };
@@ -124,9 +125,12 @@ class DedispersionModule : public AsyncronousModule
         QList<GPU_Job> _jobs;
         LockingContainer<GPU_Job> _jobBuffer; // collection of job objects
         int _maxshift; // number of samples to overlap between processes
+	int _remainingSamples; // number of samples remaining between
+	//the ones dedispersed and nsamples-maxshift
         int _nChannels; // number of Channels per sample
         DedispersionBuffer* _currentBuffer;
-        QVector<float> _noiseTemplate;
+        //QVector<float> _noiseTemplate;
+        std::vector<float> _noiseTemplate;
         QVector<float> _dmshifts;
 
         QVector<SpectrumDataSetStokes*> _blobs;

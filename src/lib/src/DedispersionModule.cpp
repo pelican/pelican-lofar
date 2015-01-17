@@ -1,6 +1,7 @@
 #include <QDebug>
 #include <QList>
 #include "DedispersionModule.h"
+#include "DedispersionParameters.h"
 #include <boost/shared_ptr.hpp>
 #include <boost/bind.hpp>
 #include "GPU_MemoryMap.h"
@@ -153,9 +154,6 @@ void DedispersionModule::resize( const SpectrumDataSet<float>* streamData ) {
           } while (_noiseTemplate[i]>3.5) ;
           //          _noiseTemplate[i] = (x1*x1 - 4.0)/2.828427; 
         }
-        std::cout << "((((((((((((((((((((" << std::endl;
-        std::cout << "resize: nChannels = " << _nChannels << std::endl;
-        std::cout << "))))))))))))))))))))" << std::endl;
         // calculate dispersion measure shifts
         _dmshifts.clear();
         for ( int c = 0; c < _nChannels; ++c ) {
@@ -167,6 +165,9 @@ void DedispersionModule::resize( const SpectrumDataSet<float>* streamData ) {
         }
         _tsamp = streamData->getBlockRate();
         _maxshift = (_invert)? -((_dmLow + _dmStep * (_tdms - 1)) * _dmshifts[0])/_tsamp:((_dmLow + _dmStep * (_tdms - 1)) * _dmshifts[_nChannels - 1])/_tsamp; 
+        // Calculate the remaining number of samples between the full
+        // buffer minus maxshift and what is being dedispersed:
+        _remainingSamples = (_numSamplesBuffer-_maxshift)%(NUMREG*DIVINT);
         std::cout << "resize: maxSamples = " << maxSamples << std::endl;
         std::cout << "resize: dmLow = " << _dmLow << std::endl;
         //        std::cout << "resize: mshift = " << _dmLow + _dmStep * (_tdms - 1) * _dmshifts[_nChannels - 1] << std::endl;
@@ -175,6 +176,7 @@ void DedispersionModule::resize( const SpectrumDataSet<float>* streamData ) {
         std::cout << "resize: foff = " << _foff << std::endl;
         std::cout << "resize: fch1 = " << _fch1 << std::endl;
         std::cout << "resize: maxShift = " << _maxshift << std::endl;
+        std::cout << "resize: remainingSamples = " << _remainingSamples << std::endl;
         std::cout << "resize: tsamp = " << _tsamp << std::endl;
         std::cout << "resize: blob nChannels= " << nChannels << std::endl;
         std::cout << "resize: nTimeBlocks= " << streamData->nTimeBlocks() << std::endl;
@@ -187,6 +189,7 @@ void DedispersionModule::resize( const SpectrumDataSet<float>* streamData ) {
             DedispersionKernel* kernel = new DedispersionKernel( _dmLow, _dmStep,
                                 _tsamp, _tdms,
                                 _nChannels, _maxshift, _numSamplesBuffer );
+	    //                                _nChannels, _maxshift + _remainingSamples, _numSamplesBuffer );
             _kernelList.append( kernel ); 
             kernel->setDMShift( _dmshifts );
         }
@@ -229,6 +232,7 @@ void DedispersionModule::dedisperse( WeightedSpectrumDataSet* weightedData )
       timerStart(&_launchTimer);
       timerStart(&_bufferTimer);
       QTextStream(&tempString) << "input" << _bufferCounter << ".dat" ;
+      std::cout << _currentBuffer->inputDataBlobs().size() << " blobs gone into buffer" << std::endl;
       std::cout << "Writing buffer " << _bufferCounter << " to file " << tempString.data(); 
       _currentBuffer->dumpbin(tempString);
       ++_bufferCounter;
@@ -242,7 +246,9 @@ void DedispersionModule::dedisperse( WeightedSpectrumDataSet* weightedData )
         lockAllUnprotected( _blobs );
         timerStart(&_copyTimer);
         //        std::cout << "maxshift to be copied" << std::endl;
-        lockAllUnprotected( _currentBuffer->copy( next, _noiseTemplate, _maxshift ) );
+	//        lockAllUnprotected( _currentBuffer->copy( next, _noiseTemplate, _maxshift ) );
+	//        lockAllUnprotected( _currentBuffer->copy( next, _noiseTemplate, _maxshift + _remainingSamples, sampleNumber ) );
+        lockAllUnprotected( _currentBuffer->copy( next, _noiseTemplate, _maxshift, sampleNumber ) );
         //        std::cout << "maxshift copied" << std::endl;
         
         timerUpdate( &_copyTimer );
@@ -262,8 +268,6 @@ void DedispersionModule::dedisperse( WeightedSpectrumDataSet* weightedData )
       timerReport(&_bufferTimer,"bufferTimer");
       timerReport(&_copyTimer,"copyTimer");
     }
-    //jayanth
-    std::cout << "========" << sampleNumber << std::endl;
   }
     while( sampleNumber != maxSamples );
 }
@@ -279,6 +283,7 @@ void DedispersionModule::dedisperse( DedispersionBuffer* buffer, DedispersionSpe
     else
       dataOut->setLost(0);
   */
+  //    unsigned int nsamp = buffer->numSamples() - _maxshift - _remainingSamples;
     unsigned int nsamp = buffer->numSamples() - _maxshift;
     /*
     std::cout << nsamp << " " <<
@@ -288,9 +293,7 @@ void DedispersionModule::dedisperse( DedispersionBuffer* buffer, DedispersionSpe
       dataOut << " " << 
       std::endl;
     */
-    std::cout << "foo" << std::endl;
     dataOut->resize( nsamp, _tdms, _dmLow, _dmStep );
-    std::cout << "bar" << std::endl;
     // Set up a job for the GPU processing kernel
     GPU_Job* job = _jobBuffer.next();
     DedispersionKernel* kernelPtr = _kernels.next();
@@ -352,7 +355,8 @@ void DedispersionModule::DedispersionKernel::setOutputBuffer( QVector<float>& bu
     _outputBuffer = GPU_MemoryMap(buffer);
 }
 
-void DedispersionModule::DedispersionKernel::setInputBuffer( QVector<float>& buffer, GPU_MemoryMap::CallBackT callback ) {
+//void DedispersionModule::DedispersionKernel::setInputBuffer( QVector<float>& buffer, GPU_MemoryMap::CallBackT callback ) {
+void DedispersionModule::DedispersionKernel::setInputBuffer( std::vector<float>& buffer, GPU_MemoryMap::CallBackT callback ) {
     _inputBuffer = GPU_MemoryMap(buffer);
     _inputBuffer.addCallBack( callback );
 }

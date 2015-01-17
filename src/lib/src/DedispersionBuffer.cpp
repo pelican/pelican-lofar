@@ -63,7 +63,7 @@ void DedispersionBuffer::dumpbin( const QString& fileName ) const {
     file.close();
 }
 
-  const QList<SpectrumDataSetStokes*>& DedispersionBuffer::copy( DedispersionBuffer* buf, QVector<float>& noiseTemplate, unsigned int samples )
+  const QList<SpectrumDataSetStokes*>& DedispersionBuffer::copy( DedispersionBuffer* buf, std::vector<float>& noiseTemplate, unsigned int samples, unsigned int lastSample )
 {
     unsigned int count = 0;
     unsigned int blobIndex = _inputBlobs.size();
@@ -72,29 +72,35 @@ void DedispersionBuffer::dumpbin( const QString& fileName ) const {
     // copy the memory
     while( count < samples ) {
         Q_ASSERT( blobIndex > 0 );
-        SpectrumDataSetStokes* blob = _inputBlobs[--blobIndex];
+        SpectrumDataSetStokes* blob = _inputBlobs[--blobIndex]; // start copying data from the last blob in the previous buffer
         //        WeightedSpectrumDataSet* wblob;
         //        wblob->reset(blob);
         unsigned s = blob->nTimeBlocks();
         sampleNum = samples - count; // remaining samples
         if( sampleNum <= s ) {
-            // We have all the samples we need in the current blob
-            buf->_sampleCount = 0; // offset position to write to
-            blobSample = s - sampleNum; // time samples not copied from this blob
+	  // We have all the samples we need in the current blob
+	  buf->_sampleCount = 0; // offset position to write to
+	  blobSample = s - sampleNum; // time samples not copied from this blob
         } else {
-            // Take all the samples from this blob, we will need more
-            buf->_sampleCount = sampleNum - s;// offset position to write to
-            blobSample = 0;
+	  // Take all the samples from this blob, we will need more
+	  buf->_sampleCount = sampleNum - s + (s - lastSample);// offset position to write to
+	  blobSample = 0;
         }
-        buf->_addSamples( blob, noiseTemplate, &blobSample, s - blobSample );
+	//        buf->_addSamples( blob, noiseTemplate, &blobSample, s - blobSample );
+
+	// lastSample - blobSample is lastSample for the first
+	// iteration, then s - blobSample for all other iterations
+	std::cout << "lastsample: " << lastSample << " count, samples: " << count << " " << samples << " " << blobSample << std::endl;
+        count += (lastSample - blobSample); // count only the number of samples copied
+        buf->_addSamples( blob, noiseTemplate, &blobSample, lastSample - blobSample ); 
+	lastSample = s;
         buf->_inputBlobs.push_front( blob );
-        count += s;
     }
     buf->_sampleCount = samples;
     return buf->_inputBlobs;
 }
 
-  unsigned DedispersionBuffer::addSamples( WeightedSpectrumDataSet* weightedData, QVector<float>& noiseTemplate, unsigned *sampleNumber ) {
+  unsigned DedispersionBuffer::addSamples( WeightedSpectrumDataSet* weightedData, std::vector<float>& noiseTemplate, unsigned *sampleNumber) {
     SpectrumDataSetStokes* streamData =
       static_cast<SpectrumDataSetStokes*>(weightedData->dataSet());
     if( ! _inputBlobs.contains(streamData) )
@@ -103,7 +109,7 @@ void DedispersionBuffer::dumpbin( const QString& fileName ) const {
     return _addSamples( weightedData, noiseTemplate, sampleNumber, numSamples );
 }
 
-  unsigned DedispersionBuffer::_addSamples( WeightedSpectrumDataSet* weightedData, QVector<float>& noiseTemplate, unsigned *sampleNumber, unsigned numSamples ) {
+  unsigned DedispersionBuffer::_addSamples( WeightedSpectrumDataSet* weightedData, std::vector<float>& noiseTemplate, unsigned *sampleNumber, unsigned numSamples ) {
     SpectrumDataSetStokes* streamData =
       static_cast<SpectrumDataSetStokes*>(weightedData->dataSet());
     SpectrumDataSet<float>* weights = weightedData->weights();
@@ -178,7 +184,7 @@ void DedispersionBuffer::dumpbin( const QString& fileName ) const {
     return spaceRemaining();
 }
 
-  unsigned DedispersionBuffer::_addSamples( SpectrumDataSetStokes* streamData, QVector<float>& noiseTemplate, unsigned *sampleNumber, unsigned numSamples ) {
+  unsigned DedispersionBuffer::_addSamples( SpectrumDataSetStokes* streamData, std::vector<float>& noiseTemplate, unsigned *sampleNumber, unsigned numSamples ) {
     Q_ASSERT( streamData != 0 );
     unsigned int nChannels = streamData->nChannels();
     unsigned int nSubbands = streamData->nSubbands();

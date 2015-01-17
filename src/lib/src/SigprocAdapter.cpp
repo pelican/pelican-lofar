@@ -54,7 +54,6 @@ void SigprocAdapter::deserialise(QIODevice* in)
     _stokesData -> setLofarTimestamp(_tsamp * _iteration * _nSamples);
     _stokesData -> setBlockRate(_tsamp);
 
-    std::cout << "aasfasfasdfasd" << std::endl;
     // Put all the samples in one time block, converting them to complex
     unsigned dataPtr = 0;
     for(unsigned s = 0; s < _nSamples; s++) {
