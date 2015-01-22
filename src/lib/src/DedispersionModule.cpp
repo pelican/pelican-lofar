@@ -188,8 +188,8 @@ void DedispersionModule::resize( const SpectrumDataSet<float>* streamData ) {
         for( unsigned int i=0; i < maxBuffers; ++i ) {
             DedispersionKernel* kernel = new DedispersionKernel( _dmLow, _dmStep,
                                 _tsamp, _tdms,
-                                _nChannels, _maxshift, _numSamplesBuffer );
-	    //                                _nChannels, _maxshift + _remainingSamples, _numSamplesBuffer );
+//                                _nChannels, _maxshift, _numSamplesBuffer );
+                                _nChannels, _maxshift + _remainingSamples, _numSamplesBuffer );
             _kernelList.append( kernel ); 
             kernel->setDMShift( _dmshifts );
         }
@@ -250,8 +250,8 @@ void DedispersionModule::dedisperse( WeightedSpectrumDataSet* weightedData )
         timerStart(&_copyTimer);
         //        std::cout << "maxshift to be copied" << std::endl;
 	//        lockAllUnprotected( _currentBuffer->copy( next, _noiseTemplate, _maxshift ) );
-	//        lockAllUnprotected( _currentBuffer->copy( next, _noiseTemplate, _maxshift + _remainingSamples, sampleNumber ) );
-        lockAllUnprotected( _currentBuffer->copy( next, _noiseTemplate, _maxshift, sampleNumber ) );
+        lockAllUnprotected( _currentBuffer->copy( next, _noiseTemplate, _maxshift + _remainingSamples, sampleNumber ) );
+//        lockAllUnprotected( _currentBuffer->copy( next, _noiseTemplate, _maxshift, sampleNumber ) );
         //        std::cout << "maxshift copied" << std::endl;
         
         timerUpdate( &_copyTimer );
@@ -289,8 +289,8 @@ void DedispersionModule::dedisperse( DedispersionBuffer* buffer, DedispersionSpe
     else
       dataOut->setLost(0);
   */
-  //    unsigned int nsamp = buffer->numSamples() - _maxshift - _remainingSamples;
-    unsigned int nsamp = buffer->numSamples() - _maxshift;
+    unsigned int nsamp = buffer->numSamples() - _maxshift - _remainingSamples;
+//    unsigned int nsamp = buffer->numSamples() - _maxshift;
     /*
     std::cout << nsamp << " " <<
       _tdms << " " <<
