@@ -52,8 +52,6 @@ void SigprocPipeline::run(QHash<QString, DataBlob*>& remoteData)
     SpectrumDataSetStokes* stokes = (SpectrumDataSetStokes*)remoteData["SpectrumDataSetStokes"];
     if( ! stokes ) throw(QString("no STOKES!"));
 
-    std::cout << "iter = " << _iter << std::endl;
-
     /* to make sure the dedispersion module reads data from a lockable ring
        buffer, copy data to one */
     SpectrumDataSetStokes* stokesBuf = _stokesBuffer->next();
@@ -62,7 +60,6 @@ void SigprocPipeline::run(QHash<QString, DataBlob*>& remoteData)
     _weightedIntStokes->reset(stokesBuf);
     _rfiClipper->run(_weightedIntStokes);
     dataOutput(stokesBuf, "SigprocStokesWriter");
-    std::cout << "Running dedisperse()..." << std::endl;
     _dedispersionModule->dedisperse(_weightedIntStokes);
     ++_iter;
 }

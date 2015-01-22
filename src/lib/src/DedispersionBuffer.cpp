@@ -20,6 +20,8 @@ DedispersionBuffer::DedispersionBuffer( unsigned int size, unsigned int sampleSi
                                         bool invertChannels )
    : _sampleSize(sampleSize), _invertChannels(invertChannels)
 {
+    //jayanth
+    _lastIdx = 0;
     setSampleCapacity(size);
     clear();
 }
@@ -67,6 +69,7 @@ void DedispersionBuffer::dumpbin( const QString& fileName ) const {
 {
     unsigned int count = 0;
     unsigned int blobIndex = _inputBlobs.size();
+    std::cout << "blobIndex = " << blobIndex << std::endl;
     unsigned int sampleNum;
     unsigned int blobSample;
     // copy the memory
@@ -78,22 +81,23 @@ void DedispersionBuffer::dumpbin( const QString& fileName ) const {
         unsigned s = blob->nTimeBlocks();
         sampleNum = samples - count; // remaining samples
         if( sampleNum <= s ) {
-	  // We have all the samples we need in the current blob
-	  buf->_sampleCount = 0; // offset position to write to
-	  blobSample = s - sampleNum; // time samples not copied from this blob
+            // We have all the samples we need in the current blob
+            buf->_sampleCount = 0; // offset position to write to
+            blobSample = s - sampleNum; // time samples not copied from this blob
         } else {
-	  // Take all the samples from this blob, we will need more
-	  buf->_sampleCount = sampleNum - s + (s - lastSample);// offset position to write to
-	  blobSample = 0;
+            // Take all the samples from this blob, we will need more
+            buf->_sampleCount = sampleNum - s + (s - lastSample);// offset position to write to
+            blobSample = 0;
         }
 	//        buf->_addSamples( blob, noiseTemplate, &blobSample, s - blobSample );
 
 	// lastSample - blobSample is lastSample for the first
 	// iteration, then s - blobSample for all other iterations
-	std::cout << "lastsample: " << lastSample << " count, samples: " << count << " " << samples << " " << blobSample << std::endl;
+        std::cout << blobIndex << ": _sampleCount = " << buf->_sampleCount << ", lastSample = " << lastSample << ", copied = " << lastSample - blobSample << ", blobSample = " << blobSample << std::endl;
         count += (lastSample - blobSample); // count only the number of samples copied
+        std::cout << "DedispersionBuffer::copy: Calling _addSamples()" << std::endl;
         buf->_addSamples( blob, noiseTemplate, &blobSample, lastSample - blobSample ); 
-	lastSample = s;
+        lastSample = s;
         buf->_inputBlobs.push_front( blob );
     }
     buf->_sampleCount = samples;
@@ -106,6 +110,7 @@ void DedispersionBuffer::dumpbin( const QString& fileName ) const {
     if( ! _inputBlobs.contains(streamData) )
         _inputBlobs.append(streamData);
     unsigned int numSamples = weightedData->dataSet()->nTimeBlocks();
+    std::cout << "DedispersionBuffer::addSamples: Calling _addSamples()" << std::endl;
     return _addSamples( weightedData, noiseTemplate, sampleNumber, numSamples );
 }
 
@@ -114,10 +119,10 @@ void DedispersionBuffer::dumpbin( const QString& fileName ) const {
       static_cast<SpectrumDataSetStokes*>(weightedData->dataSet());
     SpectrumDataSet<float>* weights = weightedData->weights();
 
+    Q_ASSERT( streamData != 0 );
     unsigned int nChannels = streamData->nChannels();
     unsigned int nSubbands = streamData->nSubbands();
     unsigned int nPolarisations = streamData->nPolarisations();
-    Q_ASSERT( streamData != 0 );
     nPolarisations = 1; // dedispersion on total power only
     if( nSubbands * nChannels * nPolarisations != _sampleSize ) {
         std::cerr  << "DedispersionBuffer: input data sample size(" <<  nSubbands * nChannels * nPolarisations
@@ -132,14 +137,15 @@ void DedispersionBuffer::dumpbin( const QString& fileName ) const {
     unsigned maxSamples = std::min( numSamples, spaceRemaining() + *sampleNumber );
     timerStart(&_addSampleTimer);
     int start = *sampleNumber;
+    Q_ASSERT(maxSamples > start);
+    std::cout << "start = " << start << ", maxSamples = " << maxSamples << std::endl;
     if( _invertChannels ) {
         int nChannelsMinusOne = nChannels - 1;
         int nSubbandsMinusOne= nSubbands - 1;
         // Try varying x, from 6 down.  Also try it with this commented out.
         //        omp_set_num_threads(6);
         int s, c;
-        int localSampleCount = _sampleCount - start; 
-	// create a copy for omp to lock
+        int localSampleCount = _sampleCount - start;    // create a copy for omp to lock
 #pragma omp parallel for private(s,c) schedule(dynamic)
         for(int t = start; t < (int)maxSamples; ++t ) {
             for (s = 0; s < (int)nSubbands; ++s ) {
@@ -161,7 +167,7 @@ void DedispersionBuffer::dumpbin( const QString& fileName ) const {
         }
     } else {
         int s, c;
-        int localSampleCount = _sampleCount - start; // create a copy for omp to lock
+        int localSampleCount = _sampleCount - start;    // create a copy for omp to lock
 #pragma omp parallel for private(s,c) schedule(dynamic)
         for(int t = start; t < (int)maxSamples; ++t) {
             int sampleOffset = localSampleCount + t;
@@ -173,10 +179,12 @@ void DedispersionBuffer::dumpbin( const QString& fileName ) const {
                   //                    _timedata[ bsize + ( c * _nsamp ) ] = data[c];
                   data[c] = data[c] - (weightData[c] - 1) * noiseTemplate[bsize + (c * _nsamp)];
                   _timedata[ bsize + (c * _nsamp)] = data[c];
+                  _lastIdx = bsize + (c * _nsamp);
                     }
             }
         }
     }
+    std::cout << "_lastIdx = " << _lastIdx << std::endl;
     _sampleCount += (maxSamples - start);
     *sampleNumber = maxSamples;
     timerUpdate(&_addSampleTimer);
@@ -201,17 +209,19 @@ void DedispersionBuffer::dumpbin( const QString& fileName ) const {
         _firstSample = *sampleNumber;
     }
     unsigned maxSamples = std::min( numSamples, spaceRemaining() + *sampleNumber );
+    std::cout << "spacerem = " << spaceRemaining() << ", maxSamples = " << maxSamples << std::endl;
     timerStart(&_addSampleTimer);
     int start = *sampleNumber;
+    std::cout << "start = " << start << ", maxSamples = " << maxSamples << std::endl;
     if( _invertChannels ) {
         int nChannelsMinusOne = nChannels - 1;
         int nSubbandsMinusOne= nSubbands - 1;
         // Try varying x, from 6 down.  Also try it with this commented out.
         //        omp_set_num_threads(6);
         int s, c;
-        int localSampleCount = _sampleCount - start; // create a copy for omp to lock
+        int localSampleCount = _sampleCount - start;    // create a copy for omp to lock
 #pragma omp parallel for private(s,c) schedule(dynamic)
-        for(int t = start; t < (int)maxSamples; ++t ) {
+        for(int t = start; t < (int)(start + maxSamples); ++t ) {
             for (s = 0; s < (int)nSubbands; ++s ) {
                 int bsize = s*nChannels*_nsamp + localSampleCount + t;
                 float* data = streamData->spectrumData(t, nSubbandsMinusOne - s, 0);
@@ -229,19 +239,21 @@ void DedispersionBuffer::dumpbin( const QString& fileName ) const {
         }
     } else {
         int s, c;
-        int localSampleCount = _sampleCount - start; // create a copy for omp to lock
+        int localSampleCount = _sampleCount - start;    // create a copy for omp to lock
 #pragma omp parallel for private(s,c) schedule(dynamic)
-        for(int t = start; t < (int)maxSamples; ++t) {
+        for(int t = start; t < (int)(start + maxSamples); ++t) {
             int sampleOffset = localSampleCount + t;
             for ( s = 0; s < (int)nSubbands; ++s) {
                 float* data = streamData->spectrumData(t, s, 0);
                 int bsize = s*nChannels * _nsamp + sampleOffset;
                 for ( c = 0; c < (int)nChannels; ++c) {
                   _timedata[ bsize + (c * _nsamp)] = data[c];
+                  _lastIdx = bsize + (c * _nsamp);
                     }
             }
         }
     }
+    std::cout << "_lastIdx = " << _lastIdx << std::endl;
     _sampleCount += (maxSamples - start);
     *sampleNumber = maxSamples;
     timerUpdate(&_addSampleTimer);

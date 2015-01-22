@@ -95,6 +95,7 @@ class DedispersionBuffer
         float _rms;
         bool _invertChannels;
         unsigned int  _firstSample;
+        unsigned int _lastIdx;
         DEFINE_TIMER(_addSampleTimer)
 };
 

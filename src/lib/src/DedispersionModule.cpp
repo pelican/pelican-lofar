@@ -228,12 +228,15 @@ void DedispersionModule::dedisperse( WeightedSpectrumDataSet* weightedData )
   unsigned int maxSamples = streamData->nTimeBlocks();
   QString tempString;
   do {
-    if( _currentBuffer->addSamples( weightedData, _noiseTemplate, &sampleNumber ) == 0 ) {
+    unsigned ret = _currentBuffer->addSamples( weightedData, _noiseTemplate, &sampleNumber );
+    std::cout << "sampleNumber = " << sampleNumber << ", maxSamples = " << maxSamples << ", ret = " << ret << std::endl;
+    if (0 == ret) {
+    //if( _currentBuffer->addSamples( weightedData, _noiseTemplate, &sampleNumber ) == 0 ) {
       timerStart(&_launchTimer);
       timerStart(&_bufferTimer);
       QTextStream(&tempString) << "input" << _bufferCounter << ".dat" ;
       std::cout << _currentBuffer->inputDataBlobs().size() << " blobs gone into buffer" << std::endl;
-      std::cout << "Writing buffer " << _bufferCounter << " to file " << tempString.data(); 
+      std::cout << "Writing buffer " << _bufferCounter << " to file " << tempString.data();
       _currentBuffer->dumpbin(tempString);
       ++_bufferCounter;
       DedispersionBuffer* next = _buffers.next();
@@ -262,6 +265,9 @@ void DedispersionModule::dedisperse( WeightedSpectrumDataSet* weightedData )
       QtConcurrent::run( this, &DedispersionModule::dedisperse, _currentBuffer, _dedispersionDataBuffer.next() );
       timerUpdate( &_dedisperseTimer );
       _currentBuffer = next;
+      QTextStream(&tempString) << "inputint" << _bufferCounter << ".dat" ;
+      std::cout << "Writing buffer " << _bufferCounter << " to file " << tempString.data();
+      _currentBuffer->dumpbin(tempString);
       timerUpdate(&_launchTimer);
       timerReport(&_launchTimer, "Launch Total");
       timerReport(&_dedisperseTimer, "Dedispersing Time");

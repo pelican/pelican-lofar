@@ -34,7 +34,6 @@ void SigprocAdapter::deserialise(QIODevice* in)
     }
 
     float *dataTemp = (float *) malloc(_nSamples * _nChannels * _nBits / 8 * sizeof(float));
-    //std::cout << "nb = " << _nBits << "; s = " << _nSamples << "; c = " << _nChannels << std::endl;
     unsigned amountRead = read_block(_fp, _nBits, dataTemp, _nSamples * _nChannels);
 
     // If chunk size is 0, return empty blob (end of file)
