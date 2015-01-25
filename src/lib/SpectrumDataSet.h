@@ -45,15 +45,15 @@ class SpectrumDataSetBase : public DataBlob
         inline unsigned nPolarisations() const { return _nPolarisations; }
 
         /// Returns the number of polarisations in the data.
-        virtual inline unsigned nPolarisationComponents() const { 
-            return _nPolarisations; 
+        virtual inline unsigned nPolarisationComponents() const {
+            return _nPolarisations;
         }
 
         /// Return the number of channels for the spectrum specified by index @p i
         inline unsigned nChannels() const { return _nChannels; }
 
         /// Return the time (in seconds) of the corresponding timeSlice
-        double getTime( unsigned sampleNumber ) const { 
+        double getTime( unsigned sampleNumber ) const {
             return _startTimestamp + sampleNumber * _blockRate;
         }
 
@@ -295,7 +295,7 @@ class SpectrumDataSetC32 : public SpectrumDataSet<std::complex<float> >
  *
  * @brief Data blob to hold a buffer of sub-band spectra in stokes format.
  *
- * @details 
+ * @details
  */
 
 class SpectrumDataSetStokes : public SpectrumDataSet<float>
@@ -316,12 +316,12 @@ class SpectrumDataSetStokes : public SpectrumDataSet<float>
 
         /// Deserialises the data blob.
         void deserialise(QIODevice&, QSysInfo::Endian);
-	/// Methods to link to the associated raw data (spectrumDataSetC32)
-	void setRawData(const SpectrumDataSetC32* raw){ _raw = raw; }
-	const SpectrumDataSetC32* getRawData() const {return _raw;}
-        
+        /// Methods to link to the associated raw data (spectrumDataSetC32)
+        void setRawData(const SpectrumDataSetC32* raw){ _raw = raw; }
+        const SpectrumDataSetC32* getRawData() const {return _raw;}
+
     private:
-	const SpectrumDataSetC32* _raw;
+        const SpectrumDataSetC32* _raw;
 
 };
 

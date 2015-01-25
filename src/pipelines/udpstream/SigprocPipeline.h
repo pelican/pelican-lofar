@@ -20,17 +20,17 @@ namespace ampp {
 
 /**
  * @class SigprocPipeline
- *  
+ *
  * @brief
  *    Reads in sigproc files in to a pipeline
  * @details
- * 
+ *
  */
 
 class SigprocPipeline : public AbstractPipeline
 {
     public:
-        SigprocPipeline(  );
+        SigprocPipeline();
         ~SigprocPipeline();
 
         /// Initialises the pipeline.
@@ -56,11 +56,10 @@ class SigprocPipeline : public AbstractPipeline
         //SpectrumDataSetStokes* _intStokes;
         WeightedSpectrumDataSet* _weightedIntStokes;
 
-    unsigned int _iter;
-	unsigned int _minEventsFound;
-	unsigned int _maxEventsFound;
+        unsigned int _minEventsFound;
+        unsigned int _maxEventsFound;
 };
 
 } // namespace ampp
 } // namespace pelican
-#endif // SIGPROCPIPELINE_H 
+#endif // SIGPROCPIPELINE_H

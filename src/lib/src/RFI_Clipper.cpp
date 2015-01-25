@@ -264,6 +264,8 @@ void RFI_Clipper::run( WeightedSpectrumDataSet* weightedStokes )
             // if the condition doesn't hold build up the statistical
             // description;
             //            #pragma omp atomic
+            //NOTE: should probably move spectrumSum and spectrumSumSq
+            //statements below to within the pol loop above
             spectrumSum += I[index+c];
             // Use this for spectrum RMS calculation - This is the RMS
             // in the reference frame of the input

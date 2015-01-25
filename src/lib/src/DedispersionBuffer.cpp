@@ -20,8 +20,6 @@ DedispersionBuffer::DedispersionBuffer( unsigned int size, unsigned int sampleSi
                                         bool invertChannels )
    : _sampleSize(sampleSize), _invertChannels(invertChannels)
 {
-    //jayanth
-    _lastIdx = 0;
     setSampleCapacity(size);
     clear();
 }
@@ -89,14 +87,9 @@ void DedispersionBuffer::dumpbin( const QString& fileName ) const {
             buf->_sampleCount = sampleNum - s + (s - lastSample);// offset position to write to
             blobSample = 0;
         }
-	//        buf->_addSamples( blob, noiseTemplate, &blobSample, s - blobSample );
-
-	// lastSample - blobSample is lastSample for the first
-	// iteration, then s - blobSample for all other iterations
-        std::cout << blobIndex << ": _sampleCount = " << buf->_sampleCount << ", lastSample = " << lastSample << ", copied = " << lastSample - blobSample << ", blobSample = " << blobSample << std::endl;
+        // lastSample - blobSample is lastSample for the first iteration, then s - blobSample for all other iterations
         count += (lastSample - blobSample); // count only the number of samples copied
-        std::cout << "DedispersionBuffer::copy: Calling _addSamples()" << std::endl;
-        buf->_addSamples( blob, noiseTemplate, &blobSample, lastSample - blobSample ); 
+        buf->_addSamples( blob, noiseTemplate, &blobSample, lastSample - blobSample );
         lastSample = s;
         buf->_inputBlobs.push_front( blob );
     }
@@ -110,7 +103,6 @@ void DedispersionBuffer::dumpbin( const QString& fileName ) const {
     if( ! _inputBlobs.contains(streamData) )
         _inputBlobs.append(streamData);
     unsigned int numSamples = weightedData->dataSet()->nTimeBlocks();
-    std::cout << "DedispersionBuffer::addSamples: Calling _addSamples()" << std::endl;
     return _addSamples( weightedData, noiseTemplate, sampleNumber, numSamples );
 }
 
@@ -138,7 +130,6 @@ void DedispersionBuffer::dumpbin( const QString& fileName ) const {
     timerStart(&_addSampleTimer);
     int start = *sampleNumber;
     Q_ASSERT(maxSamples > start);
-    std::cout << "start = " << start << ", maxSamples = " << maxSamples << std::endl;
     if( _invertChannels ) {
         int nChannelsMinusOne = nChannels - 1;
         int nSubbandsMinusOne= nSubbands - 1;
@@ -179,12 +170,10 @@ void DedispersionBuffer::dumpbin( const QString& fileName ) const {
                   //                    _timedata[ bsize + ( c * _nsamp ) ] = data[c];
                   data[c] = data[c] - (weightData[c] - 1) * noiseTemplate[bsize + (c * _nsamp)];
                   _timedata[ bsize + (c * _nsamp)] = data[c];
-                  _lastIdx = bsize + (c * _nsamp);
                     }
             }
         }
     }
-    std::cout << "_lastIdx = " << _lastIdx << std::endl;
     _sampleCount += (maxSamples - start);
     *sampleNumber = maxSamples;
     timerUpdate(&_addSampleTimer);
@@ -209,10 +198,8 @@ void DedispersionBuffer::dumpbin( const QString& fileName ) const {
         _firstSample = *sampleNumber;
     }
     unsigned maxSamples = std::min( numSamples, spaceRemaining() + *sampleNumber );
-    std::cout << "spacerem = " << spaceRemaining() << ", maxSamples = " << maxSamples << std::endl;
     timerStart(&_addSampleTimer);
     int start = *sampleNumber;
-    std::cout << "start = " << start << ", maxSamples = " << maxSamples << std::endl;
     if( _invertChannels ) {
         int nChannelsMinusOne = nChannels - 1;
         int nSubbandsMinusOne= nSubbands - 1;
@@ -248,12 +235,10 @@ void DedispersionBuffer::dumpbin( const QString& fileName ) const {
                 int bsize = s*nChannels * _nsamp + sampleOffset;
                 for ( c = 0; c < (int)nChannels; ++c) {
                   _timedata[ bsize + (c * _nsamp)] = data[c];
-                  _lastIdx = bsize + (c * _nsamp);
                     }
             }
         }
     }
-    std::cout << "_lastIdx = " << _lastIdx << std::endl;
     _sampleCount += (maxSamples - start);
     *sampleNumber = maxSamples;
     timerUpdate(&_addSampleTimer);

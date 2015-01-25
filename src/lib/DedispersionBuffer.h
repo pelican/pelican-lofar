@@ -35,10 +35,8 @@ class DedispersionBuffer
 
         size_t size() const { return _timedata.size() * sizeof(float); };
         void setSampleCapacity(unsigned int maxSamples);
-        //unsigned int numZeros() const { return _timedata.count(0.0); };
         unsigned int numZeros() const { return std::count(_timedata.begin(), _timedata.end(), 0.0); };
         unsigned int elements() const { return _timedata.size(); };
-        //void fillWithZeros() { _timedata.fill(0.0); };
         void fillWithZeros() { _timedata.assign(_timedata.size(), 0.0); };
         /// return the max number of samples that can be fitted in the buffer
         //  set with setSampleCapacity
@@ -73,7 +71,7 @@ class DedispersionBuffer
 
         /// return the list of input data Blobs used to construct
         //  the data buffer
-        inline const QList< SpectrumDataSetStokes* >& inputDataBlobs() const { 
+        inline const QList< SpectrumDataSetStokes* >& inputDataBlobs() const {
                 return _inputBlobs; };
 
         std::vector<float>& getData() { return _timedata; };
@@ -95,10 +93,9 @@ class DedispersionBuffer
         float _rms;
         bool _invertChannels;
         unsigned int  _firstSample;
-        unsigned int _lastIdx;
         DEFINE_TIMER(_addSampleTimer)
 };
 
 } // namespace ampp
 } // namespace pelican
-#endif // DEDISPERSIONBUFFER_H 
+#endif // DEDISPERSIONBUFFER_H

@@ -28,7 +28,6 @@
 
 #define NUMREG 12
 #define DIVINT 6
-
 #define DIVINDM 80
 #define FDIVINDM 80.0f
 

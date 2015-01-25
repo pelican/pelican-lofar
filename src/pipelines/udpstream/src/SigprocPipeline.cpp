@@ -12,7 +12,7 @@ namespace ampp {
 
 
 /**
- *@details SigprocPipeline 
+ *@details SigprocPipeline
  */
 SigprocPipeline::SigprocPipeline()
     : AbstractPipeline()
@@ -41,8 +41,6 @@ void SigprocPipeline::init() {
     _stokesBuffer = new LockingPtrContainer<SpectrumDataSetStokes>(&_stokesData);
     _weightedIntStokes = (WeightedSpectrumDataSet*) createBlob("WeightedSpectrumDataSet");
 
-    _iter = 0;
-
     // Request remote data
     requestRemoteData("SpectrumDataSetStokes");
 }
@@ -61,12 +59,9 @@ void SigprocPipeline::run(QHash<QString, DataBlob*>& remoteData)
     _rfiClipper->run(_weightedIntStokes);
     dataOutput(stokesBuf, "SigprocStokesWriter");
     _dedispersionModule->dedisperse(_weightedIntStokes);
-    ++_iter;
 }
 
 void SigprocPipeline::dedispersionAnalysis( DataBlob* blob ) {
-//qDebug() << "analysis()";
-//  std::cout << "PIPELINE: in dd analysis" << std::endl;
     DedispersionDataAnalysis result;
     DedispersionSpectra* data = static_cast<DedispersionSpectra*>(blob);
     if ( _dedispersionAnalyser->analyse(data, &result) )
@@ -80,7 +75,6 @@ void SigprocPipeline::dedispersionAnalysis( DataBlob* blob ) {
               dataOutput( &result, "DedispersionDataAnalysis" );
               foreach( const SpectrumDataSetStokes* d, result.data()->inputDataBlobs()) {
                 dataOutput( d, "SignalFoundSpectrum" );
-                //                    dataOutput( d->getRawData(), "RawDataFoundSpectrum" );
               }
             }
         }
@@ -89,21 +83,14 @@ void SigprocPipeline::dedispersionAnalysis( DataBlob* blob ) {
             std::cout << "Writing out..." << std::endl;
             std::cout << "here!" << std::endl;
             dataOutput( &result, "DedispersionDataAnalysis" );
-       //     foreach( const SpectrumDataSetStokes* d, result.data()->inputDataBlobs()) {
-       //       dataOutput( d, "SignalFoundSpectrum" );
-       //       //                    dataOutput( d->getRawData(), "RawDataFoundSpectrum" );
-       //     }
           }
         }
       }
 }
 
 void SigprocPipeline::updateBufferLock( const QList<DataBlob*>& freeData ) {
-     // find WeightedDataBlobs that can be unlocked
      foreach( DataBlob* blob, freeData ) {
         Q_ASSERT( blob->type() == "SpectrumDataSetStokes" );
-        // unlock the pointers to the raw buffer
-        // _rawBuffer->unlock( static_cast<SpectrumDataSetStokes*>(blob)->getRawData() );
         _stokesBuffer->unlock( static_cast<SpectrumDataSetStokes*>(blob) );
      }
 }

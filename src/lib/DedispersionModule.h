@@ -44,9 +44,9 @@ class LockingBuffer;
 
 class DedispersionModule : public AsyncronousModule
 {
-   private: 
+   private:
         // the nvidia kernel description
-        class DedispersionKernel : public GPU_Kernel { 
+        class DedispersionKernel : public GPU_Kernel {
               float _startdm;
               float _dmstep;
               float _tsamp;
@@ -84,7 +84,7 @@ class DedispersionModule : public AsyncronousModule
         void dedisperse( WeightedSpectrumDataSet* incoming );
 
         /// clean up after gpu task is finished
-        void gpuJobFinished( GPU_Job* job,  
+        void gpuJobFinished( GPU_Job* job,
                              DedispersionKernel* kernel,
                              DedispersionSpectra* dataOut );
         /// return input buffers for reuse as soon as data uploaded to the GPU
@@ -119,14 +119,13 @@ class DedispersionModule : public AsyncronousModule
         float _dmLow;
         double _fch1;
         double _foff;
-	unsigned int _bufferCounter;
         QList<DedispersionBuffer*> _buffersList;
         LockingPtrContainer<DedispersionBuffer> _buffers;
         QList<GPU_Job> _jobs;
         LockingContainer<GPU_Job> _jobBuffer; // collection of job objects
         int _maxshift; // number of samples to overlap between processes
-	int _remainingSamples; // number of samples remaining between
-	//the ones dedispersed and nsamples-maxshift
+        // number of samples remaining between the ones dedispersed and nsamples-maxshift
+        int _remainingSamples;
         int _nChannels; // number of Channels per sample
         DedispersionBuffer* _currentBuffer;
         //QVector<float> _noiseTemplate;
@@ -153,4 +152,4 @@ PELICAN_DECLARE_MODULE(DedispersionModule)
 } // namespace ampp
 } // namespace pelican
 #endif // CUDA_FOUND
-#endif // DEDISPERSIONMODULE_H 
+#endif // DEDISPERSIONMODULE_H

@@ -11,13 +11,13 @@ namespace ampp {
 
 
 /**
- *@details DedispersionAnalyser 
+ *@details DedispersionAnalyser
  */
 DedispersionAnalyser::DedispersionAnalyser( const ConfigNode& config )
     : AbstractModule( config )
 {
-    // Get configuration options                                                                                                                      
-    //unsigned int nChannels = config.getOption("outputChannelsPerSubband", "value", "512").toUInt();                                                 
+    // Get configuration options
+    //unsigned int nChannels = config.getOption("outputChannelsPerSubband", "value", "512").toUInt();
     _detectionThreshold = config.getOption("detectionThreshold", "in_sigma", "6.0").toFloat();
     _binPow2 = config.getOption("power2ForBinning", "value", "6").toUInt();
     _useStokesStats = config.getOption("useStokesStats", "0_or_1").toUInt();
@@ -118,7 +118,7 @@ int DedispersionAnalyser::analyse( DedispersionSpectra* data,
           }
         }
         for (int n = 1 ; n < _binPow2 + 1; ++n){
-          currentPow2 /= 2; // 
+          currentPow2 /= 2;
           for (int j = 0; j < currentPow2; ++j){
             int binFactor = maxPow2/currentPow2;
             float detection = _detectionThreshold * rms * sqrt((float)binFactor);
