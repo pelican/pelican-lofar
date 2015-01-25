@@ -56,7 +56,6 @@ void DedispersionBuffer::dumpbin( const QString& fileName ) const {
     QDataStream out(&file);
     out.setFloatingPointPrecision(QDataStream::SinglePrecision);
     out.setByteOrder(QDataStream::LittleEndian);
-    std::cout << "Buffer size: "<< _timedata.size() << std::endl;
     for (int c = 0; c < _timedata.size(); ++c) {
       out << _timedata[c];
     }
@@ -67,7 +66,6 @@ void DedispersionBuffer::dumpbin( const QString& fileName ) const {
 {
     unsigned int count = 0;
     unsigned int blobIndex = _inputBlobs.size();
-    std::cout << "blobIndex = " << blobIndex << std::endl;
     unsigned int sampleNum;
     unsigned int blobSample;
     // copy the memory

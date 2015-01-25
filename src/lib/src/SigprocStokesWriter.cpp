@@ -282,7 +282,6 @@ void SigprocStokesWriter::_write(char* data, size_t size)
         _file.write(&_buffer[0], max);
         _cur = 0; size -= dsize; data += dsize * sizeof(char);
     }
-    std::cout << "max=" << max << " ptr=" << ptr << " cur=" << _cur << " size=" << size << "data=" << data << std::endl;
     std::memcpy( &_buffer[_cur], data, size);
     _cur=ptr;
 }
