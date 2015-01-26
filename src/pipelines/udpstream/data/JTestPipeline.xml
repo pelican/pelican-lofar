@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE pelican>
+
+<configuration version="1.0">
+    <pipeline>
+        <clients>
+            <JTestDataClient>
+                <data type="JTestData" adapter="JTestDataAdapter" />
+            </JTestDataClient>
+        </clients>
+
+        <buffers>
+            <JTestData>
+                <buffer maxSize="50000000" maxChunkSize="50000000" />
+            </JTestData>
+        </buffers>
+
+        <chunkers>
+            <JTestChunker>
+                <data type="JTestData" chunkSize="33792" />
+                <connection host="127.0.0.1" port="2001" />
+            </JTestChunker>
+        </chunkers>
+
+        <adapters>
+            <JTestDataAdapter>
+                <packet samples="256" />
+            </JTestDataAdapter>
+        </adapters>
+
+        <modules>
+            <JTestProc>
+                <gain value="2.5"/>
+            </JTestProc>
+        </modules>
+
+        <output>
+            <streamers>
+                <PelicanTCPBlobServer active="false">
+                     <connection port="1234" />
+                </PelicanTCPBlobServer>
+                <JTestOutputStream name="precsv" active="true">
+                     <file name="pre.csv" />
+                </JTestOutputStream>
+                <JTestOutputStream name="postcsv" active="true">
+                     <file name="post.csv" />
+                </JTestOutputStream>
+            </streamers>
+            <dataStreams>
+                <stream name="all" listeners="PelicanTCPBlobServer" />
+                <stream name="post" listeners="postcsv" />
+                <stream name="pre" listeners="precsv" />
+            </dataStreams>
+        </output>
+
+    </pipeline>
+</configuration>
+

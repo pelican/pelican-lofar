@@ -45,12 +45,22 @@ set(lib_src
     src/PPFChanneliser.cpp
     src/StokesGenerator.cpp
     src/StokesIntegrator.cpp
+    src/file_handler.cpp
+    src/SigprocAdapter.cpp
     src/SigprocStokesWriter.cpp
     src/TriggerOutput.cpp
     src/TimerData.cpp
     src/LofarDataSplittingChunker.cpp
     src/WeightedSpectrumDataSet.cpp
     src/GPU_MemoryMap.cpp
+    src/JTestChunker.cpp
+    src/JTestDataClient.cpp
+    src/JTestDataAdapter.cpp
+    src/JTestProc.cpp
+    src/JTestOutputStream.cpp
+    src/ABChunker.cpp
+    src/ABDataClient.cpp
+    src/ABDataAdapter.cpp
 )
 # Lofar DAL enables the H5_LofarBFDataWriter
 if(LOFAR_DAL_FOUND)
@@ -109,7 +119,7 @@ set_target_properties(pelican-lofar_static PROPERTIES CLEAN_DIRECT_OUTPUT 1)
 set_target_properties(pelican-lofar_static PROPERTIES OUTPUT_NAME pelican-lofar)
 set_target_properties(pelican-lofar_static PROPERTIES PREFIX lib)
 set_target_properties(pelican-lofar_static PROPERTIES
-    COMPILE_FLAGS "${OpenMP_CXX_FLAGS}"
+    COMPILE_FLAGS "${OpenMP_CXX_FLAGS} -fPIC"
     LINK_FLAGS "${OpenMP_CXX_FLAGS}"
 )
 install(TARGETS pelican-lofar_static DESTINATION ${LIBRARY_INSTALL_DIR})

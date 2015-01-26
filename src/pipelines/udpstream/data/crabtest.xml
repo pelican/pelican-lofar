@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE pelican>
+
+<configuration version="1.0">
+
+    <pipeline>
+        <buffers>
+           <SpectrumDataSetStokes>
+               <buffer maxSize="100000000" maxChunkSize="100000000"/>
+           </SpectrumDataSetStokes>
+        </buffers>
+
+        <adapters>
+            <SigprocAdapter>
+                <sampleSize bits="8"/>
+                <channels number="2048" />
+                <samplesPerRead number="1024" />
+            </SigprocAdapter>
+        </adapters>
+
+        <clients>
+            <FileDataClient>
+                <data type="SpectrumDataSetStokes" adapter="SigprocAdapter" file="/local_data/Alfaburst/crabtest.fil"/>
+            </FileDataClient>
+        </clients>
+
+        <pipelineConfig>
+            <SigprocPipeline>
+                <history value="2048" />
+                <events min="2" max="100000000"/>
+            </SigprocPipeline>
+        </pipelineConfig>
+
+        <modules>
+	  <RFI_Clipper active="true" channelRejectionRMS="3.5"
+                       spectrumRejectionRMS="6.0">
+            <zeroDMing active="true" />
+            <BandPassData file="/local_data/Alfaburst/gbt.bp" />
+            <Band matching="true" />
+            <History maximum="100" />
+	  </RFI_Clipper>
+          <DedispersionModule>
+            <timeBinsPerBufferPow2 value="16" />
+            <frequencyChannel1 MHz="400.0"/>
+            <sampleTime seconds="0.000081.92000"/>
+            <channelBandwidth MHz="0.048828125"/>
+            <dedispersionSamples value="3200" />
+            <dedispersionStepSize value="0.1" />
+            <dedispersionMinimum value="0.0" />
+            <numberOfBuffers value="3" />
+          </DedispersionModule>
+          <DedispersionAnalyser>
+            <detectionThreshold in_sigma="6.0" />
+          </DedispersionAnalyser>
+        </modules>
+
+        <output>
+	  <dataStreams>
+	    <stream name="DedispersionDataAnalysis" listeners="DedispersionDataAnalysisOutput" /> 
+	  </dataStreams>
+	  
+	  <streamers>
+	    <DedispersionDataAnalysisOutput active="true">
+              <file name="/local_data/Alfaburst/crab_dm" />
+	    </DedispersionDataAnalysisOutput>
+	    <!--SigprocStokesWriter active="true" writeHeader="true">
+              <import file="/data/Code/jayanth/alfaburst/pelican-lofar/run/mycommon.xml"/>
+              <dataBits value="16"/>
+              <scale max="50" min="-20"/>
+              <topSubbandIndex value="250"/>
+              <LBA_0_or_HBA_1 value="1" />
+              <subbandsPerPacket value="31"/>
+              <file filepath="/data/Code/jayanth/alfaburst/pelican-lofar/run/test" />
+              <params telescope="LOFAR" nPolsToWrite="1"/>
+              <RAJ value="211324.3" />
+              <DecJ value="464408.7"/>
+              <TelescopeID value="1"/>
+              <MachineID value="9"/>
+	    </SigprocStokesWriter-->
+	  </streamers>
+        </output>
+	
+    </pipeline>
+</configuration>

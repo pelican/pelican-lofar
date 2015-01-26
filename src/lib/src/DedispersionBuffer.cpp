@@ -1,6 +1,7 @@
 
 #include <QFile>
 #include <QTextStream>
+#include <QDataStream>
 #include "DedispersionBuffer.h"
 #include <algorithm>
 #include "SpectrumDataSet.h"
@@ -43,12 +44,25 @@ void DedispersionBuffer::dump( const QString& fileName ) const {
     QTextStream out(&file);
 
     for (int c = 0; c < _timedata.size(); ++c) {
-        out << QString::number(_timedata[c], 'g' ) << QString(((c+1)%_nsamp == 0)?"\n":" ");
+      out << QString::number(_timedata[c], 'g' ) << QString(((c+1)%_nsamp == 0)?"\n":" ");
     }
     file.close();
 }
 
-  const QList<SpectrumDataSetStokes*>& DedispersionBuffer::copy( DedispersionBuffer* buf, QVector<float>& noiseTemplate, unsigned int samples )
+void DedispersionBuffer::dumpbin( const QString& fileName ) const {
+    QFile file(fileName);
+    if (QFile::exists(fileName)) QFile::remove(fileName);
+    if (!file.open(QIODevice::WriteOnly)) return;
+    QDataStream out(&file);
+    out.setFloatingPointPrecision(QDataStream::SinglePrecision);
+    out.setByteOrder(QDataStream::LittleEndian);
+    for (int c = 0; c < _timedata.size(); ++c) {
+      out << _timedata[c];
+    }
+    file.close();
+}
+
+  const QList<SpectrumDataSetStokes*>& DedispersionBuffer::copy( DedispersionBuffer* buf, std::vector<float>& noiseTemplate, unsigned int samples, unsigned int lastSample )
 {
     unsigned int count = 0;
     unsigned int blobIndex = _inputBlobs.size();
@@ -57,7 +71,7 @@ void DedispersionBuffer::dump( const QString& fileName ) const {
     // copy the memory
     while( count < samples ) {
         Q_ASSERT( blobIndex > 0 );
-        SpectrumDataSetStokes* blob = _inputBlobs[--blobIndex];
+        SpectrumDataSetStokes* blob = _inputBlobs[--blobIndex]; // start copying data from the last blob in the previous buffer
         //        WeightedSpectrumDataSet* wblob;
         //        wblob->reset(blob);
         unsigned s = blob->nTimeBlocks();
@@ -65,21 +79,23 @@ void DedispersionBuffer::dump( const QString& fileName ) const {
         if( sampleNum <= s ) {
             // We have all the samples we need in the current blob
             buf->_sampleCount = 0; // offset position to write to
-            blobSample = s - sampleNum;
+            blobSample = s - sampleNum; // time samples not copied from this blob
         } else {
             // Take all the samples from this blob, we will need more
-            buf->_sampleCount = sampleNum - s;// offset position to write to
+            buf->_sampleCount = sampleNum - s + (s - lastSample);// offset position to write to
             blobSample = 0;
         }
-        buf->_addSamples( blob, noiseTemplate, &blobSample, s - blobSample );
+        // lastSample - blobSample is lastSample for the first iteration, then s - blobSample for all other iterations
+        count += (lastSample - blobSample); // count only the number of samples copied
+        buf->_addSamples( blob, noiseTemplate, &blobSample, lastSample - blobSample );
+        lastSample = s;
         buf->_inputBlobs.push_front( blob );
-        count += s;
     }
     buf->_sampleCount = samples;
     return buf->_inputBlobs;
 }
 
-  unsigned DedispersionBuffer::addSamples( WeightedSpectrumDataSet* weightedData, QVector<float>& noiseTemplate, unsigned *sampleNumber ) {
+  unsigned DedispersionBuffer::addSamples( WeightedSpectrumDataSet* weightedData, std::vector<float>& noiseTemplate, unsigned *sampleNumber) {
     SpectrumDataSetStokes* streamData =
       static_cast<SpectrumDataSetStokes*>(weightedData->dataSet());
     if( ! _inputBlobs.contains(streamData) )
@@ -88,15 +104,15 @@ void DedispersionBuffer::dump( const QString& fileName ) const {
     return _addSamples( weightedData, noiseTemplate, sampleNumber, numSamples );
 }
 
-  unsigned DedispersionBuffer::_addSamples( WeightedSpectrumDataSet* weightedData, QVector<float>& noiseTemplate, unsigned *sampleNumber, unsigned numSamples ) {
+  unsigned DedispersionBuffer::_addSamples( WeightedSpectrumDataSet* weightedData, std::vector<float>& noiseTemplate, unsigned *sampleNumber, unsigned numSamples ) {
     SpectrumDataSetStokes* streamData =
       static_cast<SpectrumDataSetStokes*>(weightedData->dataSet());
     SpectrumDataSet<float>* weights = weightedData->weights();
 
+    Q_ASSERT( streamData != 0 );
     unsigned int nChannels = streamData->nChannels();
     unsigned int nSubbands = streamData->nSubbands();
     unsigned int nPolarisations = streamData->nPolarisations();
-    Q_ASSERT( streamData != 0 );
     nPolarisations = 1; // dedispersion on total power only
     if( nSubbands * nChannels * nPolarisations != _sampleSize ) {
         std::cerr  << "DedispersionBuffer: input data sample size(" <<  nSubbands * nChannels * nPolarisations
@@ -111,13 +127,14 @@ void DedispersionBuffer::dump( const QString& fileName ) const {
     unsigned maxSamples = std::min( numSamples, spaceRemaining() + *sampleNumber );
     timerStart(&_addSampleTimer);
     int start = *sampleNumber;
+    Q_ASSERT(maxSamples > start);
     if( _invertChannels ) {
         int nChannelsMinusOne = nChannels - 1;
         int nSubbandsMinusOne= nSubbands - 1;
         // Try varying x, from 6 down.  Also try it with this commented out.
         //        omp_set_num_threads(6);
         int s, c;
-        int localSampleCount = _sampleCount - start; // create a copy for omp to lock
+        int localSampleCount = _sampleCount - start;    // create a copy for omp to lock
 #pragma omp parallel for private(s,c) schedule(dynamic)
         for(int t = start; t < (int)maxSamples; ++t ) {
             for (s = 0; s < (int)nSubbands; ++s ) {
@@ -139,7 +156,7 @@ void DedispersionBuffer::dump( const QString& fileName ) const {
         }
     } else {
         int s, c;
-        int localSampleCount = _sampleCount - start; // create a copy for omp to lock
+        int localSampleCount = _sampleCount - start;    // create a copy for omp to lock
 #pragma omp parallel for private(s,c) schedule(dynamic)
         for(int t = start; t < (int)maxSamples; ++t) {
             int sampleOffset = localSampleCount + t;
@@ -162,7 +179,7 @@ void DedispersionBuffer::dump( const QString& fileName ) const {
     return spaceRemaining();
 }
 
-  unsigned DedispersionBuffer::_addSamples( SpectrumDataSetStokes* streamData, QVector<float>& noiseTemplate, unsigned *sampleNumber, unsigned numSamples ) {
+  unsigned DedispersionBuffer::_addSamples( SpectrumDataSetStokes* streamData, std::vector<float>& noiseTemplate, unsigned *sampleNumber, unsigned numSamples ) {
     Q_ASSERT( streamData != 0 );
     unsigned int nChannels = streamData->nChannels();
     unsigned int nSubbands = streamData->nSubbands();
@@ -187,9 +204,9 @@ void DedispersionBuffer::dump( const QString& fileName ) const {
         // Try varying x, from 6 down.  Also try it with this commented out.
         //        omp_set_num_threads(6);
         int s, c;
-        int localSampleCount = _sampleCount - start; // create a copy for omp to lock
+        int localSampleCount = _sampleCount - start;    // create a copy for omp to lock
 #pragma omp parallel for private(s,c) schedule(dynamic)
-        for(int t = start; t < (int)maxSamples; ++t ) {
+        for(int t = start; t < (int)(start + maxSamples); ++t ) {
             for (s = 0; s < (int)nSubbands; ++s ) {
                 int bsize = s*nChannels*_nsamp + localSampleCount + t;
                 float* data = streamData->spectrumData(t, nSubbandsMinusOne - s, 0);
@@ -207,9 +224,9 @@ void DedispersionBuffer::dump( const QString& fileName ) const {
         }
     } else {
         int s, c;
-        int localSampleCount = _sampleCount - start; // create a copy for omp to lock
+        int localSampleCount = _sampleCount - start;    // create a copy for omp to lock
 #pragma omp parallel for private(s,c) schedule(dynamic)
-        for(int t = start; t < (int)maxSamples; ++t) {
+        for(int t = start; t < (int)(start + maxSamples); ++t) {
             int sampleOffset = localSampleCount + t;
             for ( s = 0; s < (int)nSubbands; ++s) {
                 float* data = streamData->spectrumData(t, s, 0);

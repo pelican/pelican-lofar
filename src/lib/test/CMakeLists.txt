@@ -14,6 +14,8 @@ set(lofarTestLib_src
     src/PipelineWrapper.cpp
     src/DedispersionDataGenerator.cpp
     src/TestDir.cpp
+    src/JTestEmulator.cpp
+    src/ABEmulator.cpp
 )
 
 # CUDA routines
@@ -55,23 +57,27 @@ set(lofarTest_src
     src/PPF_CoefficientsTest.cpp
     src/PumaOutputTest.cpp
     #src/RFI_ClipperTest.cpp
-    src/SpectrumDataSetTest.cpp
+    # test - commented by Jayanth
+    #src/SpectrumDataSetTest.cpp
 )
 if(CUDA_FOUND)
     list(APPEND lofarTest_src
             src/GPU_NVidiaTest.cpp
             src/GPU_ParamTest.cpp
-            src/DedispersionBufferTest.cpp
+            # test - commented by Jayanth
+            #src/DedispersionBufferTest.cpp
             src/DedispersionModuleTest.cpp
         #    src/DedispersionAnalyserTest.cpp
         )
 endif(CUDA_FOUND)
 if(HDF5_FOUND)
+if(LOFAR_DAL_FOUND)
     list(APPEND lofarTest_src
          src/H5_LofarBFDataWriterTest.cpp
          src/H5_LofarBFStokesWriterTest.cpp
          src/H5_LofarBFVoltageWriterTest.cpp
         )
+endif(LOFAR_DAL_FOUND)
 endif(HDF5_FOUND)
 add_executable(lofarTest ${lofarTest_src})
 set_target_properties(lofarTest PROPERTIES 
@@ -113,6 +119,30 @@ target_link_libraries(lofarEmulatorDataSim
     lofarTestLib
 )
 install(TARGETS "lofarEmulatorDataSim" DESTINATION ${BINARY_INSTALL_DIR})
+
+# ==== Create the JTest binary which sends simulated data.
+add_executable(JTestEmulator src/JTestEmulatorMain.cpp)
+target_link_libraries(JTestEmulator
+    ${PELICAN_LIBRARY}
+    pelican-lofar_static
+    ${QT_QTCORE_LIBRARY}
+    ${QT_QTNETWORK_LIBRARY}
+    ${QT_QTXML_LIBRARY}
+    lofarTestLib
+)
+install(TARGETS "JTestEmulator" DESTINATION ${BINARY_INSTALL_DIR})
+
+# ==== Create the ALFABURST binary which sends simulated data.
+add_executable(ABEmulator src/ABEmulatorMain.cpp)
+target_link_libraries(ABEmulator
+    ${PELICAN_LIBRARY}
+    pelican-lofar_static
+    ${QT_QTCORE_LIBRARY}
+    ${QT_QTNETWORK_LIBRARY}
+    ${QT_QTXML_LIBRARY}
+    lofarTestLib
+)
+install(TARGETS "ABEmulator" DESTINATION ${BINARY_INSTALL_DIR})
 
 # ==== Create a non cppunit PPF test binary
 add_executable(ppf_performance_test src/PPF_PerformanceTest.cpp)

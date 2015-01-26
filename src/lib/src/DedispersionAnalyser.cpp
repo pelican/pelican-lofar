@@ -11,13 +11,13 @@ namespace ampp {
 
 
 /**
- *@details DedispersionAnalyser 
+ *@details DedispersionAnalyser
  */
 DedispersionAnalyser::DedispersionAnalyser( const ConfigNode& config )
     : AbstractModule( config )
 {
-    // Get configuration options                                                                                                                      
-    //unsigned int nChannels = config.getOption("outputChannelsPerSubband", "value", "512").toUInt();                                                 
+    // Get configuration options
+    //unsigned int nChannels = config.getOption("outputChannelsPerSubband", "value", "512").toUInt();
     _detectionThreshold = config.getOption("detectionThreshold", "in_sigma", "6.0").toFloat();
     _binPow2 = config.getOption("power2ForBinning", "value", "6").toUInt();
     _useStokesStats = config.getOption("useStokesStats", "0_or_1").toUInt();
@@ -38,7 +38,6 @@ int DedispersionAnalyser::analyse( DedispersionSpectra* data,
     float rms = std::sqrt((float)nChannels*(float)nSubbands);
     result->setRMS(rms);
 
-    std::cout << "---------------" << nChannels << " " << nSubbands << std::endl;
     // Calculate the mean
     //double mean = 0.0, stddev = 0.0;
     double total = 0.0;
@@ -107,7 +106,8 @@ int DedispersionAnalyser::analyse( DedispersionSpectra* data,
         currentPow2 = maxPow2;
         // fill the bin1 Vector first and check
         for (int j=0; j<maxPow2; ++j){
-          int index = i*32 + j;
+	  int index = i*maxPow2 + j;
+	  //          int index = i*32 + j;
           binnedOutput[0][j]= dataVector[dm_count*nsamp + index]; 
           float detection = _detectionThreshold * rms;// * sqrt((float)indexJ);
           if (binnedOutput[0][j] >= detection){
@@ -115,11 +115,11 @@ int DedispersionAnalyser::analyse( DedispersionSpectra* data,
           }
         }
         for (int n = 1 ; n < _binPow2 + 1; ++n){
-          currentPow2 /= 2; // 
+          currentPow2 /= 2;
           for (int j = 0; j < currentPow2; ++j){
             int binFactor = maxPow2/currentPow2;
             float detection = _detectionThreshold * rms * sqrt((float)binFactor);
-            int index = i*currentPow2 + binFactor * j;
+            int index = i*maxPow2 + binFactor * j;
             binnedOutput[n][j] = binnedOutput[n-1][2*j] + binnedOutput[n-1][2*j+1];
             if (binnedOutput[n][j] >= detection){
               result->addEvent( dm_count, index, binFactor, binnedOutput[n][j] );

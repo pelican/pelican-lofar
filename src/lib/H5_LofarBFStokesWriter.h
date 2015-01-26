@@ -2,6 +2,7 @@
 #define H5_LOFARBFSTOKESWRITER_H
 
 #ifdef HDF5_FOUND
+#ifdef LOFAR_DAL_FOUND
 
 #include "H5_LofarBFDataWriter.h"
 
@@ -48,5 +49,6 @@ PELICAN_DECLARE(AbstractOutputStream, H5_LofarBFStokesWriter)
 } // namespace ampp
 } // namespace pelican
 
+#endif // LOFAR_DAL_FOUND
 #endif // HDF5_FOUND
 #endif // H5_LOFARBFSTOKESWRITER_H 

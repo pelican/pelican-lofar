@@ -82,6 +82,7 @@ SigprocStokesWriter::SigprocStokesWriter(const ConfigNode& configNode )
 
     _nPols    = configNode.getOption("params", "nPolsToWrite", "1").toUInt();
     _nchans   = _nChannels * _nSubbands;
+    printf("================ _nchans = %d, %d, %d\n", _nchans, _nChannels, _nSubbands);
     _buffSize = configNode.getOption("params", "bufferSize", "5120").toUInt();
     _cur = 0;
     _first = (configNode.hasAttribute("writeHeader") && configNode.getAttribute("writeHeader").toLower() == "true" );
@@ -107,7 +108,7 @@ SigprocStokesWriter::SigprocStokesWriter(const ConfigNode& configNode )
     tstruct = *localtime(&now);
     strftime(timestr, sizeof timestr, "D%Y%m%dT%H%M%S", &tstruct );
     QString fileName;
-    fileName = _filepath + QString("_") + timestr + QString(".dat");
+    fileName = _filepath + QString("_") + timestr + QString(".fil");
     //    _file.open(_filepath.toUtf8().data(), std::ios::out | std::ios::binary);
     _file.open(fileName.toUtf8().data(), std::ios::out | std::ios::binary);
 }
@@ -124,7 +125,6 @@ void SigprocStokesWriter::writeHeader(SpectrumDataSetStokes* stokes){
         throw( QString("SigprocStokesWriter: unable to set epoch.") );
     }
     double _mjdStamp = (_timeStamp-_epoch)/86400 + 55562.0;
-    std::cout << "MJD timestamp:" << std::fixed << _mjdStamp << std::endl;
 
     // Write header
     WriteString("HEADER_START");
@@ -282,7 +282,6 @@ void SigprocStokesWriter::_write(char* data, size_t size)
         _file.write(&_buffer[0], max);
         _cur = 0; size -= dsize; data += dsize * sizeof(char);
     }
-    std::cout << "max=" << max << " ptr=" << ptr << " cur=" << _cur << " size=" << size << "data=" << data << std::endl;
     std::memcpy( &_buffer[_cur], data, size);
     _cur=ptr;
 }

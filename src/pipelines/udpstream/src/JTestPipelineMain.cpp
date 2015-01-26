@@ -1,37 +1,38 @@
 #include "pelican/core/PipelineApplication.h"
-#include "pelican/core/FileDataClient.h"
-#include "SigprocPipeline.h"
-#include "SigprocAdapter.h"
-#include "SpectrumDataSet.h"
-#include "FilterBankAdapter.h"
+#include "JTestPipeline.h"
 #include <QtCore/QCoreApplication>
 
-#include <iostream>
+// Include any headers that are referenced by name.
+#include "JTestOutputStream.h"
+#include "JTestDataAdapter.h"
+#include "JTestDataClient.h"
 
 using namespace pelican;
-using namespace pelican::ampp;
+using namespace ampp;
 
 int main(int argc, char* argv[])
 {
     // Create a QCoreApplication.
     QCoreApplication app(argc, argv);
-
     try {
         // Create a PipelineApplication.
         PipelineApplication pApp(argc, argv);
 
         // Register the pipelines that can run.
-        pApp.registerPipeline(new SigprocPipeline);
+        pApp.registerPipeline(new JTestPipeline);
 
         // Set the data client.
-        pApp.setDataClient("FileDataClient");
+        pApp.setDataClient("JTestDataClient");
 
         // Start the pipeline driver.
         pApp.start();
     }
-    catch (const QString& error) {
-        std::cout << "Error: " << error.toStdString() << std::endl;
+
+    // Catch any error messages from Pelican.
+    catch (const QString& err) {
+        std::cerr << "Error: " << err.toStdString() << std::endl;
     }
 
     return 0;
 }
+

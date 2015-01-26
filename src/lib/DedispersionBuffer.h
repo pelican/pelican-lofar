@@ -1,8 +1,8 @@
 #ifndef DEDISPERSIONBUFFER_H
 #define DEDISPERSIONBUFFER_H
-#include <QVector>
+#include <vector>
 #include "timer.h"
-
+#include <algorithm>
 
 /**
  * @file DedispersionBuffer.h
@@ -35,9 +35,9 @@ class DedispersionBuffer
 
         size_t size() const { return _timedata.size() * sizeof(float); };
         void setSampleCapacity(unsigned int maxSamples);
-        unsigned int numZeros() const { return _timedata.count(0.0); };
+        unsigned int numZeros() const { return std::count(_timedata.begin(), _timedata.end(), 0.0); };
         unsigned int elements() const { return _timedata.size(); };
-        void fillWithZeros() { _timedata.fill(0.0); };
+        void fillWithZeros() { _timedata.assign(_timedata.size(), 0.0); };
         /// return the max number of samples that can be fitted in the buffer
         //  set with setSampleCapacity
         unsigned maxSamples() const { return _nsamp; }
@@ -53,7 +53,7 @@ class DedispersionBuffer
         // The space remaining in the buffer is provided in return value 
         // sampleNumber is updated to the last sample number from
         // the dataset that was included
-        unsigned int addSamples( WeightedSpectrumDataSet* weightedData, QVector<float>& noiseTemplate, unsigned *sampleNumber );
+        unsigned int addSamples( WeightedSpectrumDataSet* weightedData, std::vector<float>& noiseTemplate, unsigned *sampleNumber );
 
         /// return the amount of empty space in the buffer (in samples)
         inline unsigned int spaceRemaining() const {
@@ -67,24 +67,25 @@ class DedispersionBuffer
         /// copy data from this object to the supplied DataBuffer object
         //  data is taken from the last offset samples in the 
         //  buffer
-        const QList<SpectrumDataSetStokes*>& copy( DedispersionBuffer* buf, QVector<float>& noiseTemplate, unsigned int samples = 0 );
+        const QList<SpectrumDataSetStokes*>& copy( DedispersionBuffer* buf, std::vector<float>& noiseTemplate, unsigned int samples = 0, unsigned int lastSample = 0);
 
         /// return the list of input data Blobs used to construct
         //  the data buffer
-        inline const QList< SpectrumDataSetStokes* >& inputDataBlobs() const { 
+        inline const QList< SpectrumDataSetStokes* >& inputDataBlobs() const {
                 return _inputBlobs; };
 
-        QVector<float>& getData() { return _timedata; };
+        std::vector<float>& getData() { return _timedata; };
         inline float rms() const { return _rms; };
         inline float mean() const { return _mean; };
 
         void dump( const QString& fileName ) const;
+        void dumpbin( const QString& fileName ) const;
 
     private:
-        unsigned int _addSamples( WeightedSpectrumDataSet* data, QVector<float>& noiseTemplate, unsigned *sampleOffset, unsigned numSamples /* max number fo samples to insert */ );
-        unsigned int _addSamples( SpectrumDataSetStokes* data, QVector<float>& noiseTemplate, unsigned *sampleOffset, unsigned numSamples /* max number fo samples to insert */ );
+        unsigned int _addSamples( WeightedSpectrumDataSet* data, std::vector<float>& noiseTemplate, unsigned *sampleOffset, unsigned numSamples /* max number fo samples to insert */ );
+        unsigned int _addSamples( SpectrumDataSetStokes* data, std::vector<float>& noiseTemplate, unsigned *sampleOffset, unsigned numSamples /* max number fo samples to insert */ );
         QList<SpectrumDataSetStokes* > _inputBlobs;
-        QVector<float> _timedata;
+        std::vector<float> _timedata;
         unsigned int _nsamp;
         unsigned int _sampleCount;
         unsigned int _sampleSize;
@@ -97,4 +98,4 @@ class DedispersionBuffer
 
 } // namespace ampp
 } // namespace pelican
-#endif // DEDISPERSIONBUFFER_H 
+#endif // DEDISPERSIONBUFFER_H

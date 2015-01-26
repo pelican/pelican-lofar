@@ -86,7 +86,7 @@ void DedispersionDataAnalysisOutput::sendStream(const QString& /*streamName*/, c
       float SNRmax, DMthis;
       SNRmax = 0.0;
       //        foreach( const DedispersionEvent& e, data->events() ) {
-      // Avoid printing the first event, which is only used for the timestamp
+      // Avoid printing the first event, which is only used for the timestampi
       for (unsigned i=1; i<data->eventsFound(); ++i){
 	const DedispersionEvent& e = data->events()[i];
 	double mjdStamp = (e.getTime()-_epoch)/86400 + 55562.0;

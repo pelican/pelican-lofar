@@ -1,42 +1,9 @@
 #ifndef DEDISPERSE_KERNEL_H_
 #define DEDISPERSE_KERNEL_H_
 #include <assert.h>
-
-
-// Shared memory 
-//#define NUMREG 10
-//#define DIVINT 10
-//#define DIVINDM 19
-
-// L1 cache
-#ifndef __CUDA_ARCH__
-#warning "__CUDA_ARCH__ is not defined"
-#define NUMREG 15
-#define DIVINT 10
-#define DIVINDM 20
-#else
-#if __CUDA_ARCH__ >= 200
-#define NUMREG 12
-#define DIVINT 6
-#define DIVINDM 80
-#define FDIVINDM 80.0f
-#endif
-#if (__CUDA_ARCH__ == 100 )
-#define NUMREG 15
-#define DIVINT 10
-#define DIVINDM 20
-#endif
-#endif
-
-#define NUMREG 12
-#define DIVINT 6
-#define DIVINDM 80
-#define FDIVINDM 80.0f
-
-#define ARRAYSIZE DIVINT * DIVINDM
-
 #include <iostream>
 #include "stdio.h"
+#include "DedispersionParameters.h"
 
 // Stores temporary shift values
 //__device__ __constant__ float dm_shifts[8192];
@@ -51,20 +18,18 @@ __global__ void cache_dedisperse_loop(float *outbuff, float *buff, float mstartd
                                       const int i_nchans )
 {
 
-    int   shift;    
+    int   shift;
     float local_kernel_t[NUMREG];
 
     int t  = blockIdx.x * NUMREG * DIVINT  + threadIdx.x;
-    
+
     // Initialise the time accumulators
     for(int i = 0; i < NUMREG; i++) local_kernel_t[i] = 0.0f;
 
     float shift_temp = mstartdm + ((blockIdx.y * DIVINDM + threadIdx.y) * mdmstep);
-    
+
     // Loop over the frequency channels.
     for(int c = 0; c < i_nchans; c++) {
-
-
         // Calculate the initial shift for this given frequency
         // channel (c) at the current despersion measure (dm) 
         // ** dm is constant for this thread!!**
@@ -85,9 +50,9 @@ __global__ void cache_dedisperse_loop(float *outbuff, float *buff, float mstartd
 
 /// C Wrapper for brute-force algo
 extern "C" void cacheDedisperseLoop( float *outbuff, long outbufSize, float *buff, float mstartdm,
-                                     float mdmstep, int tdms, int numSamples, 
+                                     float mdmstep, int tdms, int numSamples,
                                      const float* dmShift,
-                                     const int maxshift, 
+                                     const int maxshift,
                                      const int i_nchans ) {
 
     cudaMemset(outbuff, 0, outbufSize );
@@ -99,12 +64,12 @@ extern "C" void cacheDedisperseLoop( float *outbuff, long outbufSize, float *buf
     int num_blocks_dm = tdms/divisions_in_dm;
 
 /*
-    std::cout << "\nnumSamples\t" << numSamples;
-    std::cout << "\ndivisions_in_t\t" << divisions_in_t;
-    std::cout << "\ndivisions_in_dm\t" << divisions_in_dm;
-    std::cout << "\nnum_reg\t" << num_reg;
-    std::cout << "\nnum_blocks_t\t" << num_blocks_t;
-    std::cout << "\nnum_blocks_dm\t" << num_blocks_dm;
+    std::cout << "\nnumSamples\t" << numSamples << std::endl;
+    std::cout << "\ndivisions_in_t\t" << divisions_in_t << std::endl;
+    std::cout << "\ndivisions_in_dm\t" << divisions_in_dm << std::endl;
+    std::cout << "\nnum_reg\t" << num_reg << std::endl;
+    std::cout << "\nnum_blocks_t\t" << num_blocks_t << std::endl;
+    std::cout << "\nnum_blocks_dm\t" << num_blocks_dm << std::endl;
     std::cout << "\ntdms\t" << tdms << std::endl;
     std::cout << "mdmstep\t" << mdmstep << std::endl;
     std::cout << "mstartdm\t" << mstartdm << std::endl;

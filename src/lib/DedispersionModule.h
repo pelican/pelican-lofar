@@ -44,9 +44,9 @@ class LockingBuffer;
 
 class DedispersionModule : public AsyncronousModule
 {
-   private: 
+   private:
         // the nvidia kernel description
-        class DedispersionKernel : public GPU_Kernel { 
+        class DedispersionKernel : public GPU_Kernel {
               float _startdm;
               float _dmstep;
               float _tsamp;
@@ -63,7 +63,8 @@ class DedispersionModule : public AsyncronousModule
               DedispersionKernel( float, float, float, float, unsigned, unsigned, unsigned );
               void setDMShift( QVector<float>& );
               void setOutputBuffer( QVector<float>& );
-              void setInputBuffer( QVector<float>&, GPU_MemoryMap::CallBackT );
+              //void setInputBuffer( QVector<float>&, GPU_MemoryMap::CallBackT );
+              void setInputBuffer( std::vector<float>&, GPU_MemoryMap::CallBackT );
               void run( GPU_NVidia& );
               void cleanUp();
         };
@@ -83,7 +84,7 @@ class DedispersionModule : public AsyncronousModule
         void dedisperse( WeightedSpectrumDataSet* incoming );
 
         /// clean up after gpu task is finished
-        void gpuJobFinished( GPU_Job* job,  
+        void gpuJobFinished( GPU_Job* job,
                              DedispersionKernel* kernel,
                              DedispersionSpectra* dataOut );
         /// return input buffers for reuse as soon as data uploaded to the GPU
@@ -123,9 +124,12 @@ class DedispersionModule : public AsyncronousModule
         QList<GPU_Job> _jobs;
         LockingContainer<GPU_Job> _jobBuffer; // collection of job objects
         int _maxshift; // number of samples to overlap between processes
+        // number of samples remaining between the ones dedispersed and nsamples-maxshift
+        int _remainingSamples;
         int _nChannels; // number of Channels per sample
         DedispersionBuffer* _currentBuffer;
-        QVector<float> _noiseTemplate;
+        //QVector<float> _noiseTemplate;
+        std::vector<float> _noiseTemplate;
         QVector<float> _dmshifts;
 
         QVector<SpectrumDataSetStokes*> _blobs;
@@ -148,4 +152,4 @@ PELICAN_DECLARE_MODULE(DedispersionModule)
 } // namespace ampp
 } // namespace pelican
 #endif // CUDA_FOUND
-#endif // DEDISPERSIONMODULE_H 
+#endif // DEDISPERSIONMODULE_H
