@@ -4,7 +4,7 @@
 
 #include "pelican/data/DataBlob.h"
 #include "BinMap.h"
-#include <QVector>
+#include <vector>
 #include <QList>
 
 /**
@@ -42,7 +42,7 @@ class DedispersionSpectra : public DataBlob
         //  represented as a series of vectors for each time stamp. The vector 
         //  represents the summed power for
         //  each dedispersion value.
-        inline QVector<float>& data() { return _data; }
+        inline std::vector<float>& data() { return _data; }
 
         /// the inegrated power for the specified dm and timeslice
         /// range of timeslice is 0->(timeSamples()-1)
@@ -71,7 +71,7 @@ class DedispersionSpectra : public DataBlob
         /// Return the rms of the data if it has been set;
         float getRMS() const { return _rms; }
 
-        /// Set the rms of the data;                                                                                           
+        /// Set the rms of the data;
         void setRMS(float rms) { _rms = rms; }
 
         /// Set flag for lost data;
@@ -85,11 +85,11 @@ class DedispersionSpectra : public DataBlob
         unsigned _firstSampleNumber;
         float _rms;
         unsigned int _lost;
-        QVector<float> _data;
+        std::vector<float> _data;
         QList<SpectrumDataSetStokes* > _inputBlobs;
 };
 PELICAN_DECLARE_DATABLOB( DedispersionSpectra )
 
 } // namespace ampp
 } // namespace pelican
-#endif // DEDISPERSIONSPECTRA_H 
+#endif // DEDISPERSIONSPECTRA_H

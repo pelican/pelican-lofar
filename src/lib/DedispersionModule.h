@@ -62,8 +62,7 @@ class DedispersionModule : public AsyncronousModule
            public:
               DedispersionKernel( float, float, float, float, unsigned, unsigned, unsigned );
               void setDMShift( QVector<float>& );
-              void setOutputBuffer( QVector<float>& );
-              //void setInputBuffer( QVector<float>&, GPU_MemoryMap::CallBackT );
+              void setOutputBuffer( std::vector<float>& );
               void setInputBuffer( std::vector<float>&, GPU_MemoryMap::CallBackT );
               void run( GPU_NVidia& );
               void cleanUp();
@@ -128,7 +127,6 @@ class DedispersionModule : public AsyncronousModule
         int _remainingSamples;
         int _nChannels; // number of Channels per sample
         DedispersionBuffer* _currentBuffer;
-        //QVector<float> _noiseTemplate;
         std::vector<float> _noiseTemplate;
         QVector<float> _dmshifts;
 
