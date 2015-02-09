@@ -30,7 +30,7 @@ if(CMAKE_COMPILER_IS_GNUCXX)
     add_definitions(-Wno-deprecated -Wno-unknown-pragmas)
     list(APPEND CPP_PLATFORM_LIBS util dl)
 elseif(CMAKE_CXX_COMPILER MATCHES icpc)
-    set(CMAKE_CXX_FLAGS_RELEASE "-O3 -DNDEBUG -DQT_NO_DEBUG -DQT_NO_DEBUG_OUTPUT")
+    set(CMAKE_CXX_FLAGS_RELEASE "-O3 -parallel -openmp -xSSSE3")
     add_definitions(-Wall -std=c99)
     add_definitions(-Wcheck)
     add_definitions(-wd1125) # virtual override intended warning
