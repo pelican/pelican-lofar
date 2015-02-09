@@ -385,7 +385,8 @@ void DedispersionModuleTest::test_method()
           while( ! _connectCount ) { sleep(1); };
           CPPUNIT_ASSERT_EQUAL( 1, _connectCount );
           int outputSampleSize = (int)(((nSamples - ddm.maxshift() )));
-          CPPUNIT_ASSERT_EQUAL( (int)(outputSampleSize*ddSamples), _connectData->data().size() );
+          //CPPUNIT_ASSERT_EQUAL( (int)(outputSampleSize*ddSamples), _connectData->data().size() );
+          CPPUNIT_ASSERT_EQUAL( (size_t)(outputSampleSize*ddSamples), _connectData->data().size() );
 // Print out the resulting data
 //          std::ofstream file("output.data");
 //          for( int i=0; i < buffer->current()->data().size(); ++i ) {

@@ -341,7 +341,8 @@ void DedispersionModule::DedispersionKernel::cleanUp() {
     _inputBuffer.runCallBacks();
 }
 
-void DedispersionModule::DedispersionKernel::setOutputBuffer( QVector<float>& buffer )
+//void DedispersionModule::DedispersionKernel::setOutputBuffer( QVector<float>& buffer )
+void DedispersionModule::DedispersionKernel::setOutputBuffer( std::vector<float>& buffer )
 {
     _outputBuffer = GPU_MemoryMap(buffer);
 }

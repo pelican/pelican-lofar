@@ -30,7 +30,8 @@ void SigprocAdapter::deserialise(QIODevice* in)
     if (_iteration == 0) {
         _fp = fopen( ((QFile *) in) -> fileName().toUtf8().data(),  "rb");
         _header = read_header(_fp);
-        _tsamp = _header -> tsamp;
+        _tSamp = _header->tsamp;
+        _tStart = _header->tstart;
     }
 
     float *dataTemp = (float *) malloc(_nSamples * _nChannels * _nBits / 8 * sizeof(float));
@@ -50,8 +51,9 @@ void SigprocAdapter::deserialise(QIODevice* in)
     }
 
     // Set timing
-    _stokesData -> setLofarTimestamp(_tsamp * _iteration * _nSamples);
-    _stokesData -> setBlockRate(_tsamp);
+    //_stokesData -> setLofarTimestamp(_tSamp * _iteration * _nSamples);
+    _stokesData -> setLofarTimestamp((_tStart * 86400.0) + (_tSamp * _iteration * _nSamples));
+    _stokesData -> setBlockRate(_tSamp);
 
     // Put all the samples in one time block, converting them to complex
     unsigned dataPtr = 0;
