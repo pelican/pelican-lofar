@@ -1,5 +1,6 @@
 # CMAKE for Viewer module.
-find_package(Qwt5 REQUIRED)
+find_package(Qwt5)
+if(Qwt5_FOUND)
 
 include_directories(
     ${CMAKE_CURRENT_SOURCE_DIR}/..
@@ -67,4 +68,5 @@ add_subdirectory(test)
 
 include(CopyFiles)
 copy_files(${CMAKE_CURRENT_SOURCE_DIR}/data/*.* . viewerDataFiles)
+endif(Qwt5_FOUND)
 
