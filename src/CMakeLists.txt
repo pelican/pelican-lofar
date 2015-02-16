@@ -87,6 +87,7 @@ target_link_libraries(lofarClient
     ${QT_QTNETWORK_LIBRARY}
     ${QT_QTXML_LIBRARY}
     ${PELICAN_LIBRARY}
+    ${Boost_PROGRAM_OPTIONS_LIBRARY}
     ${FFTW3_LIBRARIES}
     ${CBLAS_LIBS}
 )

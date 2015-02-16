@@ -155,6 +155,7 @@ add_executable(blobClient blobClientMain.cpp)
 target_link_libraries(blobClient
     pelican-lofar_static
     ${PELICAN_LIBRARY}
+    ${Boost_PROGRAM_OPTIONS_LIBRARY}
     ${QT_QTNETWORK_LIBRARY}
     ${QT_QTXML_LIBRARY}
     ${QT_QTCORE_LIBRARY}
