@@ -125,7 +125,6 @@ install(TARGETS pelican-lofar_static DESTINATION ${LIBRARY_INSTALL_DIR})
 target_link_libraries(pelican-lofar_static cuda_libs)
 
 add_library(pelican-lofar SHARED ${moc_src} ${lib_src})
-se
 target_link_libraries(pelican-lofar cuda_libs)
 set_target_properties(pelican-lofar PROPERTIES CLEAN_DIRECT_OUTPUT 1)
 set_target_properties(pelican-lofar PROPERTIES
