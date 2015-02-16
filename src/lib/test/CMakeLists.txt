@@ -98,7 +98,7 @@ set_target_properties(lofarTest PROPERTIES
     LINK_FLAGS "${OpenMP_CXX_FLAGS}")
 target_link_libraries(lofarTest
     lofarTestLib
-    ${TEST_EXE_LIBS}
+    ${TEST_EXE_LIBS})
 add_test(lofarTest lofarTest)
 
 
