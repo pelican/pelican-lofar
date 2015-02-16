@@ -2,7 +2,7 @@
 # pelican-lofar/lib/test/CMakeLists.txt
 #
 
-include_directories(${CMAKE_CURRENT_SOURCE_DIR})
+include_directories(${CMAKE_CURRENT_SOURCE_DIR} ${CPPUNIT_INCLUDE_DIR})
 
 # ==== Create test utility library.
 set(lofarTestLib_src
