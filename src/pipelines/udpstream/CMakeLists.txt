@@ -30,6 +30,7 @@ target_link_libraries(emptyPipeline
     pelicanMdsm
     pelican-lofar_static
     ${PELICAN_LIBRARY}
+    ${Boost_PROGRAM_OPTIONS_LIBRARY}
     ${QT_QTNETWORK_LIBRARY}
     ${QT_QTXML_LIBRARY}
     ${QT_QTCORE_LIBRARY}
@@ -46,6 +47,7 @@ target_link_libraries(dedispersionStream1
     pelicanMdsm
     pelican-lofar_static
     ${PELICAN_LIBRARY}
+    ${Boost_PROGRAM_OPTIONS_LIBRARY}
     ${FFTW3_FFTW_LIBRARY}
     ${FFTW3_FFTWF_LIBRARY}
     ${QT_QTNETWORK_LIBRARY}
@@ -61,6 +63,7 @@ target_link_libraries(dedispersionStream2
     pelicanMdsm
     pelican-lofar_static
     ${PELICAN_LIBRARY}
+    ${Boost_PROGRAM_OPTIONS_LIBRARY}
     ${FFTW3_FFTW_LIBRARY}
     ${FFTW3_FFTWF_LIBRARY}
     ${QT_QTNETWORK_LIBRARY}
@@ -81,6 +84,7 @@ target_link_libraries(udpBFPipeline
     pelicanMdsm
     pelican-lofar_static
     ${PELICAN_LIBRARY}
+    ${Boost_PROGRAM_OPTIONS_LIBRARY}
     ${FFTW3_FFTW_LIBRARY}
     ${FFTW3_FFTWF_LIBRARY}
     ${QT_QTNETWORK_LIBRARY}
@@ -98,6 +102,7 @@ target_link_libraries(udpBFPipelineStream1
     pelicanMdsm
     pelican-lofar_static
     ${PELICAN_LIBRARY}
+    ${Boost_PROGRAM_OPTIONS_LIBRARY}
     ${FFTW3_FFTW_LIBRARY}
     ${FFTW3_FFTWF_LIBRARY}
     ${QT_QTNETWORK_LIBRARY}
@@ -115,6 +120,7 @@ target_link_libraries(udpBFPipelineStream2
     pelicanMdsm
     pelican-lofar_static
     ${PELICAN_LIBRARY}
+    ${Boost_PROGRAM_OPTIONS_LIBRARY}
     ${FFTW3_FFTW_LIBRARY}
     ${FFTW3_FFTWF_LIBRARY}
     ${QT_QTNETWORK_LIBRARY}
@@ -131,6 +137,7 @@ target_link_libraries(embraceBFPipeline
     pelicanMdsm
     pelican-lofar_static
     ${PELICAN_LIBRARY}
+    ${Boost_PROGRAM_OPTIONS_LIBRARY}
     ${FFTW3_FFTW_LIBRARY}
     ${FFTW3_FFTWF_LIBRARY}
     ${QT_QTNETWORK_LIBRARY}
@@ -148,6 +155,7 @@ target_link_libraries(embraceBFPipelineStream1
     pelicanMdsm
     pelican-lofar_static
     ${PELICAN_LIBRARY}
+    ${Boost_PROGRAM_OPTIONS_LIBRARY}
     ${FFTW3_FFTW_LIBRARY}
     ${FFTW3_FFTWF_LIBRARY}
     ${QT_QTNETWORK_LIBRARY}
@@ -165,6 +173,7 @@ target_link_libraries(embraceBFPipelineStream2
     pelicanMdsm
     pelican-lofar_static
     ${PELICAN_LIBRARY}
+    ${Boost_PROGRAM_OPTIONS_LIBRARY}
     ${FFTW3_FFTW_LIBRARY}
     ${FFTW3_FFTWF_LIBRARY}
     ${QT_QTNETWORK_LIBRARY}
@@ -181,6 +190,7 @@ target_link_libraries(h5CVPipeline
     pelicanMdsm
     pelican-lofar_static
     ${PELICAN_LIBRARY}
+    ${Boost_PROGRAM_OPTIONS_LIBRARY}
     ${FFTW3_FFTW_LIBRARY}
     ${FFTW3_FFTWF_LIBRARY}
     ${QT_QTNETWORK_LIBRARY}
@@ -198,6 +208,7 @@ target_link_libraries(h5CVPipelineStream1
     pelicanMdsm
     pelican-lofar_static
     ${PELICAN_LIBRARY}
+    ${Boost_PROGRAM_OPTIONS_LIBRARY}
     ${FFTW3_FFTW_LIBRARY}
     ${FFTW3_FFTWF_LIBRARY}
     ${QT_QTNETWORK_LIBRARY}
@@ -215,6 +226,7 @@ target_link_libraries(h5CVPipelineStream2
     pelicanMdsm
     pelican-lofar_static
     ${PELICAN_LIBRARY}
+    ${Boost_PROGRAM_OPTIONS_LIBRARY}
     ${FFTW3_FFTW_LIBRARY}
     ${FFTW3_FFTWF_LIBRARY}
     ${QT_QTNETWORK_LIBRARY}
@@ -233,6 +245,7 @@ target_link_libraries(JTestPipelineStream
     pelicanMdsm
     pelican-lofar_static
     ${PELICAN_LIBRARY}
+    ${Boost_PROGRAM_OPTIONS_LIBRARY}
     ${FFTW3_FFTW_LIBRARY}
     ${FFTW3_FFTWF_LIBRARY}
     ${QT_QTNETWORK_LIBRARY}
@@ -251,6 +264,7 @@ target_link_libraries(ABPipelineStream
     pelicanMdsm
     pelican-lofar_static
     ${PELICAN_LIBRARY}
+    ${Boost_PROGRAM_OPTIONS_LIBRARY}
     ${FFTW3_FFTW_LIBRARY}
     ${FFTW3_FFTWF_LIBRARY}
     ${QT_QTNETWORK_LIBRARY}
@@ -269,6 +283,7 @@ target_link_libraries(sigprocPipeline
     pelicanMdsm
     pelican-lofar_static
     ${PELICAN_LIBRARY}
+    ${Boost_PROGRAM_OPTIONS_LIBRARY}
     ${FFTW3_FFTW_LIBRARY}
     ${FFTW3_FFTWF_LIBRARY}
     ${QT_QTNETWORK_LIBRARY}
@@ -286,6 +301,7 @@ target_link_libraries(timingPipeline
     pelicanMdsm
     pelican-lofar_static
     ${PELICAN_LIBRARY}
+    ${Boost_PROGRAM_OPTIONS_LIBRARY}
     ${FFTW3_FFTW_LIBRARY}
     ${FFTW3_FFTWF_LIBRARY}
     ${QT_QTNETWORK_LIBRARY}
