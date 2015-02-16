@@ -108,7 +108,6 @@ if(CUDA_FOUND)
     include_directories(${CUDA_INCLUDE_DIRS})
     CUDA_ADD_LIBRARY(ampp-cuda STATIC ${lib_cuda_src})
    set(cuda_libs ampp-cuda ${CUDA_LIBRARIES} )
-#    set(cuda_libs ${CUDA_LIBRARIES} )
 else(CUDA_FOUND)
     set(cuda_libs)
 endif(CUDA_FOUND)
@@ -123,8 +122,11 @@ set_target_properties(pelican-lofar_static PROPERTIES
     LINK_FLAGS "${OpenMP_CXX_FLAGS}"
 )
 install(TARGETS pelican-lofar_static DESTINATION ${LIBRARY_INSTALL_DIR})
+target_link_libraries(pelican-lofar_static cuda_libs)
 
 add_library(pelican-lofar SHARED ${moc_src} ${lib_src})
+se
+target_link_libraries(pelican-lofar cuda_libs)
 set_target_properties(pelican-lofar PROPERTIES CLEAN_DIRECT_OUTPUT 1)
 set_target_properties(pelican-lofar PROPERTIES
     COMPILE_FLAGS "${OpenMP_CXX_FLAGS}"
