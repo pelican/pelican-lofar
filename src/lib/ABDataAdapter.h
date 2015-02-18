@@ -21,12 +21,15 @@ class ABDataAdapter : public AbstractStreamAdapter
     private:
         static const unsigned _headerSize = 8;
         static const unsigned _footerSize = 8;
-        unsigned _packetsPerSpectrum;
+        unsigned _pktsPerSpec;
         unsigned _channelsPerPacket;
         unsigned _packetSize;
         unsigned int _nPolarisations;
         unsigned int _nSubbands;
         unsigned int _nChannels;
+        unsigned int _first;
+        unsigned int _numMissInst;
+        unsigned int _numMissPkts;
 };
 
 PELICAN_DECLARE_ADAPTER(ABDataAdapter)

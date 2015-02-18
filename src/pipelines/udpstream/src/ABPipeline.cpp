@@ -31,13 +31,19 @@ ABPipeline::~ABPipeline()
 // and requesting remote data.
 void ABPipeline::init()
 {
+    ConfigNode c = config(QString("ABPipeline"));
+    unsigned int history = c.getOption("history", "value", "10").toUInt();
+    _minEventsFound = c.getOption("events", "min", "5").toUInt();
+    _maxEventsFound = c.getOption("events", "max", "5").toUInt();
+
     // Create the pipeline modules and any local data blobs.
     _rfiClipper = (RFI_Clipper *) createModule("RFI_Clipper");
     _dedispersionModule = (DedispersionModule*) createModule("DedispersionModule");
     _dedispersionAnalyser = (DedispersionAnalyser*) createModule("DedispersionAnalyser");
     _dedispersionModule->connect( boost::bind( &ABPipeline::dedispersionAnalysis, this, _1 ) );
     _dedispersionModule->unlockCallback( boost::bind( &ABPipeline::updateBufferLock, this, _1 ) );
-
+    _stokesData = createBlobs<SpectrumDataSetStokes>("SpectrumDataSetStokes", history);
+    _stokesBuffer = new LockingPtrContainer<SpectrumDataSetStokes>(&_stokesData);
     _weightedIntStokes = (WeightedSpectrumDataSet*) createBlob("WeightedSpectrumDataSet");
 
     // Request remote data.
@@ -49,20 +55,26 @@ void ABPipeline::run(QHash<QString, DataBlob*>& remoteData)
 {
     // Get pointers to the remote data blob(s) from the supplied hash.
     SpectrumDataSetStokes* stokes = (SpectrumDataSetStokes*) remoteData["SpectrumDataSetStokes"];
+    if( !stokes ) throw(QString("No stokes!"));
 
-    _weightedIntStokes->reset(stokes);
+    /* to make sure the dedispersion module reads data from a lockable ring
+       buffer, copy data to one */
+    SpectrumDataSetStokes* stokesBuf = _stokesBuffer->next();
+    *stokesBuf = *stokes;
+
+    _weightedIntStokes->reset(stokesBuf);
     _rfiClipper->run(_weightedIntStokes);
     _dedispersionModule->dedisperse(_weightedIntStokes);
 
-    if (counter%10 == 0)
+    if (0 == counter % 10)
+    {
         std::cout << counter << " Chunks processed." << std::endl;
+    }
 
     counter++;
 }
 
 void ABPipeline::dedispersionAnalysis( DataBlob* blob ) {
-//qDebug() << "analysis()";
-//  std::cout << "PIPELINE: in dd analysis" << std::endl;
     DedispersionDataAnalysis result;
     DedispersionSpectra* data = static_cast<DedispersionSpectra*>(blob);
     if ( _dedispersionAnalyser->analyse(data, &result) )
@@ -76,7 +88,6 @@ void ABPipeline::dedispersionAnalysis( DataBlob* blob ) {
               dataOutput( &result, "DedispersionDataAnalysis" );
               foreach( const SpectrumDataSetStokes* d, result.data()->inputDataBlobs()) {
                 dataOutput( d, "SignalFoundSpectrum" );
-                //                    dataOutput( d->getRawData(), "RawDataFoundSpectrum" );
               }
             }
         }
@@ -86,7 +97,6 @@ void ABPipeline::dedispersionAnalysis( DataBlob* blob ) {
             dataOutput( &result, "DedispersionDataAnalysis" );
             foreach( const SpectrumDataSetStokes* d, result.data()->inputDataBlobs()) {
               dataOutput( d, "SignalFoundSpectrum" );
-              //                    dataOutput( d->getRawData(), "RawDataFoundSpectrum" );
             }
           }
         }
@@ -94,14 +104,11 @@ void ABPipeline::dedispersionAnalysis( DataBlob* blob ) {
 }
 
 void ABPipeline::updateBufferLock( const QList<DataBlob*>& freeData ) {
-#if 0
      // find WeightedDataBlobs that can be unlocked
      foreach( DataBlob* blob, freeData ) {
         Q_ASSERT( blob->type() == "SpectrumDataSetStokes" );
         // unlock the pointers to the raw buffer
-        // _rawBuffer->unlock( static_cast<SpectrumDataSetStokes*>(blob)->getRawData() );
         _stokesBuffer->unlock( static_cast<SpectrumDataSetStokes*>(blob) );
      }
-#endif
 }
 

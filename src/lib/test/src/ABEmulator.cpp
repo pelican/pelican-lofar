@@ -1,6 +1,7 @@
 #include "ABEmulator.h"
 #include "pelican/utility/ConfigNode.h"
 #include <cmath>
+#include <iostream>
 
 namespace pelican {
 namespace ampp {
@@ -53,6 +54,7 @@ void ABEmulator::getPacketData(char*& ptr, unsigned long& size)
     *(ptr + 6) = _specQuart; // Spectral quarter.
     *(ptr + 7) = _beam; // Beam number.
 
+    std::cout << _counter << std::endl;
     // Fill the packet data.
     char* data = ptr + 8; // Add offset for header.
     for (unsigned i = 0; i < _samples; ++i) {
@@ -69,9 +71,12 @@ void ABEmulator::getPacketData(char*& ptr, unsigned long& size)
     }
 
     // Increment counters for next time.
-    _counter++;
     _totalSamples += _samples;
     _specQuart = (_specQuart + 1) % 4;
+    if (0 == _specQuart)
+    {
+        _counter++;
+    }
 }
 
 } // namespace ampp

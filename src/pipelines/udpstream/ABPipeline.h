@@ -42,12 +42,14 @@ class ABPipeline : public AbstractPipeline
         DedispersionAnalyser* _dedispersionAnalyser;
 
         // Local data blob pointers.
+        QList<SpectrumDataSetStokes*> _stokesData;
+        LockingPtrContainer<SpectrumDataSetStokes>* _stokesBuffer;
         WeightedSpectrumDataSet* _weightedIntStokes;
 
         unsigned long counter;
         unsigned _iteration;
-	unsigned int _minEventsFound;
-	unsigned int _maxEventsFound;
+        unsigned int _minEventsFound;
+        unsigned int _maxEventsFound;
 };
 
 } // namespace ampp

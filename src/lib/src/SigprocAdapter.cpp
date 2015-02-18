@@ -1,7 +1,6 @@
 #include "SigprocAdapter.h"
 #include "LofarTypes.h"
 #include <QtCore/QFile>
-#include <stdio.h>
 
 namespace pelican {
 namespace ampp {
