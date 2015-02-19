@@ -310,11 +310,12 @@ target_link_libraries(timingPipeline
 )
 install(TARGETS emptyPipeline udpBFPipeline 
                 udpBFPipelineStream1 udpBFPipelineStream2
-		embraceBFPipeline 
+                embraceBFPipeline 
                 embraceBFPipelineStream1 embraceBFPipelineStream2 
-		h5CVPipeline h5CVPipelineStream1
-		h5CVPipelineStream2
-                DESTINATION ${BINARY_INSTALL_DIR})
+                h5CVPipeline h5CVPipelineStream1
+                h5CVPipelineStream2
+                sigprocPipeline
+        DESTINATION ${BINARY_INSTALL_DIR})
 
 #install(TARGETS udpBFPipeline embraceBFPipeline DESTINATION ${BINARY_INSTALL_DIR})
 
