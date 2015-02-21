@@ -31,8 +31,12 @@ ABEmulator::ABEmulator(const ConfigNode& configNode)
     // Set constant parts of packet header data.
     char* ptr = _packet.data();
     // Packet counter.
-    *(((unsigned int *) ptr) + 0) = (unsigned int) (_counter & 0x00000000FFFFFFFF);
-    *(((short int *) ptr) + 2) = (unsigned short int) ((_counter & 0x0000FFFF00000000) >> 32);
+    *(ptr + 5) = (unsigned char) (_counter & 0x00000000000000FF);
+    *(ptr + 4) = (unsigned char) ((_counter & 0x000000000000FF00) >> 8);
+    *(ptr + 3) = (unsigned char) ((_counter & 0x0000000000FF0000) >> 16);
+    *(ptr + 2) = (unsigned char) ((_counter & 0x00000000FF000000) >> 24);
+    *(ptr + 1) = (unsigned char) ((_counter & 0x000000FF00000000) >> 32);
+    *(ptr + 0) = (unsigned char) ((_counter & 0x0000FF0000000000) >> 40);
     *(ptr + 6) = _specQuart; // Spectral quarter.
     *(ptr + 7) = _beam; // Beam number.
 }
@@ -49,12 +53,22 @@ void ABEmulator::getPacketData(char*& ptr, unsigned long& size)
     size = _packet.size();
 
     // Set the packet header.
-    *(((unsigned int *) ptr) + 0) = (unsigned int) (_counter & 0x00000000FFFFFFFF);
-    *(((short int *) ptr) + 2) = (unsigned short int) ((_counter & 0x0000FFFF00000000) >> 32);
+    *(ptr + 5) = (unsigned char) (_counter & 0x00000000000000FF);
+    *(ptr + 4) = (unsigned char) ((_counter & 0x000000000000FF00) >> 8);
+    *(ptr + 3) = (unsigned char) ((_counter & 0x0000000000FF0000) >> 16);
+    *(ptr + 2) = (unsigned char) ((_counter & 0x00000000FF000000) >> 24);
+    *(ptr + 1) = (unsigned char) ((_counter & 0x000000FF00000000) >> 32);
+    *(ptr + 0) = (unsigned char) ((_counter & 0x0000FF0000000000) >> 40);
     *(ptr + 6) = _specQuart; // Spectral quarter.
     *(ptr + 7) = _beam; // Beam number.
 
-    std::cout << _counter << std::endl;
+    for (unsigned i = 0; i < 8; ++i)
+    {
+        unsigned int x = (unsigned char) ptr[i];
+        std::cout << x << " ";
+    }
+    std::cout << std::endl;
+
     // Fill the packet data.
     char* data = ptr + 8; // Add offset for header.
     for (unsigned i = 0; i < _samples; ++i) {
@@ -64,10 +78,14 @@ void ABEmulator::getPacketData(char*& ptr, unsigned long& size)
         short int YYre = i * 4 + 1;
         short int XYre = i * 4 + 2;
         short int XYim = i * 4 + 3;
-        reinterpret_cast<short int*>(data)[i * 4 + 0] = XXre;
+        /*reinterpret_cast<short int*>(data)[i * 4 + 0] = XXre;
         reinterpret_cast<short int*>(data)[i * 4 + 1] = YYre;
         reinterpret_cast<short int*>(data)[i * 4 + 2] = XYre;
-        reinterpret_cast<short int*>(data)[i * 4 + 3] = XYim;
+        reinterpret_cast<short int*>(data)[i * 4 + 3] = XYim;*/
+        reinterpret_cast<short int*>(data)[i * 4 + 0] = 42;
+        reinterpret_cast<short int*>(data)[i * 4 + 1] = 43;
+        reinterpret_cast<short int*>(data)[i * 4 + 2] = 44;
+        reinterpret_cast<short int*>(data)[i * 4 + 3] = 45;
     }
 
     // Increment counters for next time.

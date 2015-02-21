@@ -1,5 +1,6 @@
 #include "DedispersionModule.h"
 #include "DedispersionDataAnalysis.h"
+#include "DedispersionDataAnalysisOutput.h"
 #include "WeightedSpectrumDataSet.h"
 #include "ABPipeline.h"
 #include <boost/bind.hpp>

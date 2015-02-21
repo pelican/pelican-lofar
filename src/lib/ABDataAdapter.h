@@ -30,6 +30,9 @@ class ABDataAdapter : public AbstractStreamAdapter
         unsigned int _first;
         unsigned int _numMissInst;
         unsigned int _numMissPkts;
+        float _tStart;
+        float _tSamp;
+        unsigned long int _integCountStart;
 };
 
 PELICAN_DECLARE_ADAPTER(ABDataAdapter)
