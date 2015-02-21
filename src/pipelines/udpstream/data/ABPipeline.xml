@@ -17,7 +17,7 @@
 
         <chunkers>
             <ABChunker>
-                <connection host="127.0.0.1" port="2001" />
+                <connection host="127.0.0.1" port="9999" />
                 <data type="SpectrumDataSetStokes" chunkSize="8404992" />
             </ABChunker>
         </chunkers>
@@ -32,24 +32,24 @@
         <pipelineConfig>
             <ABPipeline>
                 <history value="2048" />
-                <events min="5" max="1000"/>
+                <events min="2" max="100000000"/>
             </ABPipeline>
         </pipelineConfig>
 
         <modules>
             <RFI_Clipper active="true" channelRejectionRMS="3.5" spectrumRejectionRMS="6.0">
                 <zeroDMing active="true" />
-                <BandPassData file="/data/Commissioning/Useful/BandPass/band220-250.bp" />
+                <BandPassData file="/local_data/Alfaburst/alfaburst.bp" />
                 <Band matching="true" />
-                <History maximum="50000" />
+                <History maximum="100" />
             </RFI_Clipper>
 
             <DedispersionModule>
-                <sampleNumber value="8192" />
-                <frequencyChannel1 MHz="142.96875"/>
-                <!--sampleTime seconds="0.00032768"/-->
-                <channelBandwidth MHz="0.003051757812"/>
-                <dedispersionSamples value="1500" />
+            	<timeBinsPerBufferPow2 value="17" />
+                <frequencyChannel1 MHz="1599.0"/>
+                <sampleTime seconds="0.000128"/>
+                <channelBandwidth MHz="0.109375"/>
+                <dedispersionSamples value="3200" />
                 <dedispersionStepSize value="0.1" />
                 <dedispersionMinimum value="0.0" />
                 <numberOfBuffers value="3" />
@@ -57,18 +57,40 @@
 
             <DedispersionAnalyser>
                 <detectionThreshold in_sigma="6.0" />
+	    	<power2ForBinning value="6"/>
             </DedispersionAnalyser>
         </modules>
 
         <output>
-            <streamers>
-                <PelicanTCPBlobServer active="false">
-                     <connection port="1234" />
-                </PelicanTCPBlobServer>
-            </streamers>
             <dataStreams>
-                <stream name="all" listeners="PelicanTCPBlobServer" />
+	        <stream name="DedispersionDataAnalysis" listeners="DedispersionDataAnalysisOutput" /> 
+	        <!--stream name="SignalFoundSpectrum" listeners="SigprocStokesWriter" /-->
             </dataStreams>
+            <streamers>
+	    	<DedispersionDataAnalysisOutput active="true">
+                    <file name="/local_data/Alfaburst/ab_dm" />
+	        </DedispersionDataAnalysisOutput>
+		    <!--SigprocStokesWriter active="true" writeHeader="true">
+		      <import file="/data/Code/jayanth/alfaburst/pelican-lofar/run/mycommon.xml"/>
+		      <dataBits value="16"/>
+		      <scale max="50" min="-20"/>
+		      <topSubbandIndex value="250"/>
+		      <LBA_0_or_HBA_1 value="1" />
+		      <subbandsPerPacket value="31"/>
+		      <file filepath="/data/Code/jayanth/alfaburst/pelican-lofar/run/test" />
+		      <params telescope="LOFAR" nPolsToWrite="1"/>
+		      <RAJ value="211324.3" />
+		      <DecJ value="464408.7"/>
+		      <TelescopeID value="1"/>
+		      <MachineID value="9"/>
+		    </SigprocStokesWriter-->
+                <!--PelicanTCPBlobServer active="false">
+                     <connection port="1234" />
+                </PelicanTCPBlobServer-->
+            </streamers>
+            <!--dataStreams>
+                <stream name="all" listeners="PelicanTCPBlobServer" />
+            </dataStreams-->
         </output>
 
     </pipeline>
