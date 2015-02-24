@@ -158,7 +158,7 @@ void DedispersionModule::resize( const SpectrumDataSet<float>* streamData ) {
             //                   (_fch1 + (_foff * c))) - (1.0 / _fch1 / _fch1)) );
         }
         _tsamp = streamData->getBlockRate();
-        _maxshift = (_invert)? -((_dmLow + _dmStep * (_tdms - 1)) * _dmshifts[0])/_tsamp:((_dmLow + _dmStep * (_tdms - 1)) * _dmshifts[_nChannels - 1])/_tsamp; 
+        _maxshift = (_invert)? -((_dmLow + _dmStep * (_tdms - 1)) * _dmshifts[0])/_tsamp:((_dmLow + _dmStep * (_tdms - 1)) * _dmshifts[_nChannels - 1])/_tsamp;
         // Calculate the remaining number of samples between the full
         // buffer minus maxshift and what is being dedispersed:
         _remainingSamples = (_numSamplesBuffer-_maxshift)%(NUMREG*DIVINT);

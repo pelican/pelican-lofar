@@ -11,6 +11,7 @@ ABChunker::ABChunker(const ConfigNode& config) : AbstractChunker(config)
     // Set chunk size from the configuration.
     // The host, port and data type are set in the base class.
     _chunkSize = config.getOption("data", "chunkSize").toInt();
+    std::cout << _chunkSize << std::endl;
 }
 
 // Creates a suitable device ready for reading.
@@ -52,9 +53,13 @@ void ABChunker::next(QIODevice* device)
                 _bytesRead += length;
         }
     }
-
     // Must discard the datagram if there is no available space.
     else {
+        ++_x;
+        if (_x % 100 == 0)
+        {
+            std::cout << "100x no available space!" << std::endl;
+        }
         udpSocket->readDatagram(0, 0);
     }
 }

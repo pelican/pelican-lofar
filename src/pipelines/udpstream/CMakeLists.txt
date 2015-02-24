@@ -241,6 +241,23 @@ target_link_libraries(JTestPipelineStream
 )
 
 
+# === Build the ALFABURST server binary
+add_executable(ABServer src/ABServerMain.cpp)
+set_target_properties(ABServer PROPERTIES
+    COMPILE_FLAGS "${OpenMP_CXX_FLAGS}"
+    LINK_FLAGS "${OpenMP_CXX_FLAGS}"
+)
+target_link_libraries(ABServer
+    pelicanMdsm
+    pelican-lofar_static
+    ${PELICAN_LIBRARY}
+    ${FFTW3_FFTW_LIBRARY}
+    ${FFTW3_FFTWF_LIBRARY}
+    ${QT_QTNETWORK_LIBRARY}
+    ${QT_QTXML_LIBRARY}
+    ${QT_QTCORE_LIBRARY}
+)
+
 # === Build the ALFABURST pipeline binary
 add_executable(ABPipelineStream src/ABPipelineMain.cpp)
 set_target_properties(ABPipelineStream PROPERTIES

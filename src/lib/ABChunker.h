@@ -23,6 +23,7 @@ class ABChunker : public AbstractChunker
     private:
         qint64 _chunkSize;
         qint64 _bytesRead;
+        unsigned int _x;
 };
 
 PELICAN_DECLARE_CHUNKER(ABChunker)

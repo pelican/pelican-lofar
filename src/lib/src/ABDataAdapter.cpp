@@ -11,6 +11,8 @@ ABDataAdapter::ABDataAdapter(const ConfigNode& config)
     // Read the configuration using configuration node utility methods.
     _pktsPerSpec = config.getOption("spectrum", "packets").toUInt();
     _channelsPerPacket = config.getOption("packet", "channels").toUInt();
+    _samplesPerPacket = config.getOption("packet", "samples").toUInt();
+    _tSamp = config.getOption("samplingTime", "seconds").toFloat();
 
     // Set up the packet data.
     _packetSize = _headerSize + _channelsPerPacket * 8 + _footerSize;
@@ -39,7 +41,7 @@ void ABDataAdapter::deserialise(QIODevice* device)
     unsigned packets = chunkSize() / _packetSize;
     // Number of time samples; Each channel contains 4 pseudo-Stokes values,
     // each of size sizeof(short int)
-    unsigned nBlocks = packets / _pktsPerSpec;
+    unsigned nBlocks = (packets / _pktsPerSpec) * _samplesPerPacket;
     _nPolarisations = 4;
     blob->resize(nBlocks, 1, _nPolarisations, _nChannels);
 
@@ -81,7 +83,6 @@ void ABDataAdapter::deserialise(QIODevice* device)
 
         // Get the spectral quarter number
         specQuart = (unsigned char) headerData[6];
-        std::cout << specQuart << ", " << integCount << std::endl;
         if (_first)
         {
             if (specQuart != 0)
@@ -183,6 +184,7 @@ void ABDataAdapter::deserialise(QIODevice* device)
         device->read(footerData, _footerSize);
     }
 
+    std::cout << packets << " packets processed." << std::endl;
     // Set timing
     float timeProcedThisBlock = 0.0;
     if (_pktsPerSpec - 1 == specQuart)

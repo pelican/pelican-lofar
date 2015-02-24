@@ -46,7 +46,7 @@ class ABPipeline : public AbstractPipeline
         LockingPtrContainer<SpectrumDataSetStokes>* _stokesBuffer;
         WeightedSpectrumDataSet* _weightedIntStokes;
 
-        unsigned long counter;
+        unsigned long _counter;
         unsigned _iteration;
         unsigned int _minEventsFound;
         unsigned int _maxEventsFound;

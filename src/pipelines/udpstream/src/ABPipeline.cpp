@@ -5,6 +5,10 @@
 #include "ABPipeline.h"
 #include <boost/bind.hpp>
 #include <iostream>
+#include <sys/time.h>
+#include <sys/resource.h>
+#include <sched.h>
+#include <stdio.h>
 
 using namespace pelican;
 using namespace ampp;
@@ -17,6 +21,23 @@ ABPipeline::ABPipeline(const QString& streamIdentifier)
     _dedispersionModule = 0;
     _dedispersionAnalyser = 0;
     _rfiClipper = 0;
+    _counter = 0;
+
+#if 0
+    /* set the CPU affinity of the main thread that reads data off the NIC */
+    cpu_set_t cpuset;
+    CPU_ZERO(&cpuset);
+    CPU_SET(5, &cpuset);
+    if (sched_setaffinity(0, sizeof(cpu_set_t), &cpuset) > 0)
+    {
+        std::cerr << "ERROR: Setting affinity failed!" << std::endl;
+    }
+    if (setpriority(PRIO_PROCESS, 0, -20) < 0)
+    {
+        std::cerr << "ERROR: Setting priority failed!" << std::endl;
+        perror("setpriority");
+    }
+#endif
 }
 
 // The destructor must clean up and created modules and
@@ -67,12 +88,12 @@ void ABPipeline::run(QHash<QString, DataBlob*>& remoteData)
     _rfiClipper->run(_weightedIntStokes);
     _dedispersionModule->dedisperse(_weightedIntStokes);
 
-    if (0 == counter % 10)
+    if (0 == _counter % 10)
     {
-        std::cout << counter << " Chunks processed." << std::endl;
+        std::cout << _counter << " chunks processed." << std::endl;
     }
 
-    counter++;
+    _counter++;
 }
 
 void ABPipeline::dedispersionAnalysis( DataBlob* blob ) {

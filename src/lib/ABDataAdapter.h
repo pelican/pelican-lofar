@@ -23,6 +23,7 @@ class ABDataAdapter : public AbstractStreamAdapter
         static const unsigned _footerSize = 8;
         unsigned _pktsPerSpec;
         unsigned _channelsPerPacket;
+        unsigned _samplesPerPacket;
         unsigned _packetSize;
         unsigned int _nPolarisations;
         unsigned int _nSubbands;
