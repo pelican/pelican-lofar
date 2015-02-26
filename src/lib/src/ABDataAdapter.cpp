@@ -17,15 +17,17 @@ ABDataAdapter::ABDataAdapter(const ConfigNode& config)
     // Set up the packet data.
     _packetSize = _headerSize + _channelsPerPacket * 8 + _footerSize;
 
-   // Calculate the total number of channels.
-   _nChannels = _pktsPerSpec * _channelsPerPacket;
+    // Calculate the total number of channels.
+    _nChannels = _pktsPerSpec * _channelsPerPacket;
 
-   // Set the first flag.
-   _first = 1;
+    // Set the first flag.
+    _first = 2;
 
-   // Set missing packet stats.
-   _numMissInst = 0;
-   _numMissPkts = 0;
+    // Set missing packet stats.
+    _numMissInst = 0;
+    _numMissPkts = 0;
+
+    _integCountStart = 0;
 }
 
 // Called to de-serialise a chunk of data from the input device.
@@ -38,6 +40,7 @@ void ABDataAdapter::deserialise(QIODevice* device)
 
     // Set the size of the data blob to fill.
     // The chunk size is obtained by calling the chunkSize() inherited method.
+    std::cout << "chunksize = " << chunkSize() << std::endl;
     unsigned packets = chunkSize() / _packetSize;
     // Number of time samples; Each channel contains 4 pseudo-Stokes values,
     // each of size sizeof(short int)
@@ -73,7 +76,7 @@ void ABDataAdapter::deserialise(QIODevice* device)
 
         // Get the packet integration count
         unsigned long int counter = (*((unsigned long int *) headerData)) & 0x0000FFFFFFFFFFFF;
-        integCount = (unsigned long int)        // Casting require.
+        integCount = (unsigned long int)        // Casting required.
                       (((counter & 0x0000FF0000000000) >> 40)
                      + ((counter & 0x000000FF00000000) >> 24)
                      + ((counter & 0x00000000FF000000) >> 8)
@@ -81,38 +84,32 @@ void ABDataAdapter::deserialise(QIODevice* device)
                      + ((counter & 0x000000000000FF00) << 24)
                      + ((counter & 0x00000000000000FF) << 40));
 
+        std::cout << specQuart << ", " << integCount << std::endl;
         // Get the spectral quarter number
         specQuart = (unsigned char) headerData[6];
         if (_first)
         {
-            if (specQuart != 0)
+            // Ignore the first <= 7 packets
+            // Read the packet data from the input device and discard it.
+            bytesRead += device->read(d + bytesRead,
+                                      _packetSize - _headerSize - _footerSize);
+            // Read the packet footer from the input device and discard it.
+            device->read(footerData, _footerSize);
+            if (0 == specQuart)
             {
-                // Ignore the first <= 3 packets
-                prevSpecQuart = specQuart;
-                prevIntegCount = integCount;
-                std::cout << "Spectral quarter = " << specQuart << ". Skipping..." << std::endl;
-                // Read the packet data from the input device and discard it.
-                bytesRead += device->read(d + bytesRead,
-                                          _packetSize - _headerSize - _footerSize);
-                // Read the packet footer from the input device and discard it.
-                device->read(footerData, _footerSize);
-                continue;
-            }
-            else
-            {
-                // Reset first flag.
-                _first = 0;
+                _first--;
                 // Reset bytesRead.
                 bytesRead = 0;
                 // Set the start time of the observation.
                 _tStart = 57074.0;      // temp
-            }
-        }
-        else
-        {
-            if (0 == _integCountStart)
-            {
                 _integCountStart = integCount;
+            }
+            if (_first)
+            {
+                prevSpecQuart = specQuart;
+                prevIntegCount = integCount;
+                std::cout << "Spectral quarter = " << specQuart << ". Skipping..." << std::endl;
+                continue;
             }
         }
 
@@ -133,7 +130,7 @@ void ABDataAdapter::deserialise(QIODevice* device)
                 _numMissPkts = ((_pktsPerSpec - 1 - prevSpecQuart)
                                 + _pktsPerSpec * (icDiff - 1)
                                 + specQuart);
-                std::cerr << _numMissPkts << " packets dropped!" << std::endl;
+                std::cerr << _numMissPkts << " packets dropped!" << sqDiff << ", " << icDiff << std::endl;
             }
         }
         if (0 == specQuart)
@@ -145,7 +142,7 @@ void ABDataAdapter::deserialise(QIODevice* device)
                 _numMissPkts = ((_pktsPerSpec - 1 - prevSpecQuart)
                                 + _pktsPerSpec * (icDiff - 1)
                                 + specQuart);
-                std::cerr << _numMissPkts << " packets dropped!" << std::endl;
+                std::cerr << _numMissPkts << " packets dropped!" << icDiff << std::endl;
             }
         }
         prevSpecQuart = specQuart;
@@ -183,8 +180,8 @@ void ABDataAdapter::deserialise(QIODevice* device)
         // Read the packet footer from the input device and discard it.
         device->read(footerData, _footerSize);
     }
-
     std::cout << packets << " packets processed." << std::endl;
+
     // Set timing
     float timeProcedThisBlock = 0.0;
     if (_pktsPerSpec - 1 == specQuart)

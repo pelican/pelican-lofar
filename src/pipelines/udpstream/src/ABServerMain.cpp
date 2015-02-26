@@ -31,9 +31,9 @@ int main(int argc, char ** argv)
         server.addStreamChunker("ABChunker");
 
         // Create a communication protocol object and attach it to the server
-        // on port 17000.
+        // on port 15000.
         AbstractProtocol *protocol =  new PelicanProtocol;
-        server.addProtocol(protocol, 17000);
+        server.addProtocol(protocol, 15000);
 
         // Start the server.
         server.start();

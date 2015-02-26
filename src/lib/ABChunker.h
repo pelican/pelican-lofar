@@ -21,9 +21,19 @@ class ABChunker : public AbstractChunker
         // Obtains a chunk of data from the device when data is available.
         virtual void next(QIODevice*);
     private:
-        qint64 _chunkSize;
-        qint64 _bytesRead;
+        unsigned long int _chunksProced;
+        unsigned int _chunkSize;
+        unsigned int _pktSize;
+        unsigned int _hdrSize;
+        unsigned int _ftrSize;
+        unsigned int _payloadSize;
+        unsigned int _pktsPerSpec;
+        unsigned int _nPackets;
+        unsigned int _first;
+        unsigned int _numMissInst;
+        unsigned int _numMissPkts;
         unsigned int _x;
+        unsigned int _y;
 };
 
 PELICAN_DECLARE_CHUNKER(ABChunker)
