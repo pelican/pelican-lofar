@@ -2,7 +2,9 @@
 #include "DedispersionDataAnalysis.h"
 #include "DedispersionDataAnalysisOutput.h"
 #include "WeightedSpectrumDataSet.h"
+#include "ABDataAdapter.h"
 #include "ABPipeline.h"
+#include "SigprocStokesWriter.h"
 #include <boost/bind.hpp>
 #include <iostream>
 #include <sys/time.h>
@@ -66,6 +68,7 @@ void ABPipeline::init()
     _dedispersionModule->unlockCallback( boost::bind( &ABPipeline::updateBufferLock, this, _1 ) );
     _stokesData = createBlobs<SpectrumDataSetStokes>("SpectrumDataSetStokes", history);
     _stokesBuffer = new LockingPtrContainer<SpectrumDataSetStokes>(&_stokesData);
+    //_stokes = (SpectrumDataSetStokes *) createBlob("SpectrumDataSetStokes");
     _weightedIntStokes = (WeightedSpectrumDataSet*) createBlob("WeightedSpectrumDataSet");
 
     // Request remote data.
@@ -75,23 +78,59 @@ void ABPipeline::init()
 // Defines a single iteration of the pipeline.
 void ABPipeline::run(QHash<QString, DataBlob*>& remoteData)
 {
+#ifdef TIMING_ENABLED
+    timerStart(&_totalTime);
+#endif
     // Get pointers to the remote data blob(s) from the supplied hash.
     SpectrumDataSetStokes* stokes = (SpectrumDataSetStokes*) remoteData["SpectrumDataSetStokes"];
     if( !stokes ) throw(QString("No stokes!"));
-
+    //dataOutput((SpectrumDataSetStokes*) remoteData["SpectrumDataSetStokes"], "AdapterOutput");
+    //_stokes = (SpectrumDataSetStokes*) remoteData["SpectrumDataSetStokes"];
     /* to make sure the dedispersion module reads data from a lockable ring
        buffer, copy data to one */
     SpectrumDataSetStokes* stokesBuf = _stokesBuffer->next();
     *stokesBuf = *stokes;
 
+    //_weightedIntStokes->reset(_stokes);
+    //dataOutput(_stokes, "AdapterOutput");
     _weightedIntStokes->reset(stokesBuf);
+#ifdef TIMING_ENABLED
+    timerStart(&_rfiClipperTime);
+#endif
     _rfiClipper->run(_weightedIntStokes);
+#ifdef TIMING_ENABLED
+    timerUpdate(&_rfiClipperTime);
+#endif
+    //dataOutput(_stokes, "AdapterOutput");
+#ifdef TIMING_ENABLED
+    timerStart(&_dedispersionTime);
+#endif
     _dedispersionModule->dedisperse(_weightedIntStokes);
-
-    if (0 == _counter % 10)
+#ifdef TIMING_ENABLED
+    timerUpdate(&_dedispersionTime);
+#endif
+    if (0 == _counter % 100)
     {
         std::cout << _counter << " chunks processed." << std::endl;
     }
+#ifdef TIMING_ENABLED
+    timerUpdate(&_totalTime);
+    if (0 == _counter % 10000)
+    {
+        timerReport(&ABDataAdapter::_adapterTime, "Adapter Time");
+        timerReport(&_rfiClipperTime, "RFI_Clipper");
+        timerReport(&_dedispersionTime, "DedispersionModule");
+
+        timerReport(&_totalTime, "Pipeline Time (excluding adapter)");
+        std::cout << endl;
+        //std::cout << "Total (average) allowed time per iteration = " << _stokes->getBlockRate() * _stokes->nTimeBlocks() << " sec" << "\n";
+        std::cout << "Total (average) allowed time per iteration = " << stokesBuf->getBlockRate() * stokesBuf->nTimeBlocks() << " sec" << "\n";
+        std::cout << "Total (average) actual time per iteration = "
+                  << ABDataAdapter::_adapterTime.timeAverage +
+                  _totalTime.timeAverage << " sec" << "\n";
+        std::cout << std::endl;
+    }
+#endif
 
     _counter++;
 }

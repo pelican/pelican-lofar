@@ -15,6 +15,9 @@ class ABChunker : public AbstractChunker
         // Constructs the chunker.
         ABChunker(const ConfigNode& config);
 
+        // Destructor.
+        ~ABChunker();
+
         // Creates the input device (usually a socket).
         virtual QIODevice* newDevice();
 
@@ -31,7 +34,14 @@ class ABChunker : public AbstractChunker
         unsigned int _nPackets;
         unsigned int _first;
         unsigned int _numMissInst;
-        unsigned int _numMissPkts;
+        unsigned int _lostPackets;
+        unsigned int _prevSpecQuart;
+        unsigned long int _prevIntegCount;
+        unsigned int _savedPktAvailable;
+        unsigned int _savedSpecQuart;
+        unsigned long int _savedIntegCount;
+        unsigned long int _prevPktCount;
+        char *_pktSaved;
         unsigned int _x;
         unsigned int _y;
 };

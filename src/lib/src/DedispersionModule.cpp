@@ -136,6 +136,7 @@ void DedispersionModule::resize( const SpectrumDataSet<float>* streamData ) {
         DIST dist(0,1);
         GEN  gen(eng,dist);
 
+        std::cout << "nsb = " << _numSamplesBuffer << ", nc = " << _nChannels << std::endl;
         for (int i=0; i< _numSamplesBuffer * _nChannels; ++i) {
           // chi-squared distribution with 4 degrees of freedom, like raw sampled total power
           // set the mean to zero and rms to 1 (mean=4 and variance=8 -> rms = 2sqrt(2))
@@ -148,14 +149,14 @@ void DedispersionModule::resize( const SpectrumDataSet<float>* streamData ) {
           } while (_noiseTemplate[i]>3.5) ;
           //          _noiseTemplate[i] = (x1*x1 - 4.0)/2.828427; 
         }
+        std::cout << "here." << std::endl;
         // calculate dispersion measure shifts
         _dmshifts.clear();
         for ( int c = 0; c < _nChannels; ++c ) {
             float val= 4148.741601 * ((1.0 / (_fch1 + (_foff * c)) / 
                                (_fch1 + (_foff * c))) - (1.0 / _fch1 / _fch1));
-            (_invert)?_dmshifts.push_front(val):_dmshifts.push_back(val);
-            //_dmshifts.append(  4148.741601 * ((1.0 / (_fch1 + (_foff * c)) / 
-            //                   (_fch1 + (_foff * c))) - (1.0 / _fch1 / _fch1)) );
+            //(_invert)?_dmshifts.push_front(val):_dmshifts.push_back(val);
+            (_invert)?_dmshifts.insert(_dmshifts.begin(), 1, val):_dmshifts.push_back(val);
         }
         _tsamp = streamData->getBlockRate();
         _maxshift = (_invert)? -((_dmLow + _dmStep * (_tdms - 1)) * _dmshifts[0])/_tsamp:((_dmLow + _dmStep * (_tdms - 1)) * _dmshifts[_nChannels - 1])/_tsamp;
@@ -224,7 +225,6 @@ void DedispersionModule::dedisperse( WeightedSpectrumDataSet* weightedData )
   do {
     unsigned ret = _currentBuffer->addSamples( weightedData, _noiseTemplate, &sampleNumber );
     if (0 == ret) {
-    //if( _currentBuffer->addSamples( weightedData, _noiseTemplate, &sampleNumber ) == 0 ) {
       timerStart(&_launchTimer);
       timerStart(&_bufferTimer);
       DedispersionBuffer* next = _buffers.next();
@@ -254,10 +254,10 @@ void DedispersionModule::dedisperse( WeightedSpectrumDataSet* weightedData )
       timerUpdate( &_dedisperseTimer );
       _currentBuffer = next;
       timerUpdate(&_launchTimer);
-      timerReport(&_launchTimer, "Launch Total");
-      timerReport(&_dedisperseTimer, "Dedispersing Time");
-      timerReport(&_bufferTimer,"bufferTimer");
-      timerReport(&_copyTimer,"copyTimer");
+      //timerReport(&_launchTimer, "Launch Total");
+      //timerReport(&_dedisperseTimer, "Dedispersing Time");
+      //timerReport(&_bufferTimer,"bufferTimer");
+      //timerReport(&_copyTimer,"copyTimer");
     }
   }
     while( sampleNumber != maxSamples );
@@ -333,7 +333,8 @@ DedispersionModule::DedispersionKernel::DedispersionKernel( float start, float s
 {
 }
 
-void DedispersionModule::DedispersionKernel::setDMShift( QVector<float>& buffer ) {
+//void DedispersionModule::DedispersionKernel::setDMShift( QVector<float>& buffer ) {
+void DedispersionModule::DedispersionKernel::setDMShift( std::vector<float>& buffer ) {
     _dmShift = GPU_MemoryMap(buffer);
 }
 

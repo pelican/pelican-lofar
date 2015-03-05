@@ -160,18 +160,18 @@ target_link_libraries(ppf_performance_test
 )
 
 # ==== Test the channel profile of the PPF channeliser.
-add_executable(ppf_profile_test src/PPF_ProfileTest.cpp)
-set_target_properties(ppf_profile_test PROPERTIES
-    COMPILE_FLAGS "${OpenMP_CXX_FLAGS}"
-    LINK_FLAGS "${OpenMP_CXX_FLAGS}"
-)
-target_link_libraries(ppf_profile_test
-    pelican-lofar_static
-    ${PELICAN_LIBRARY}
-    ${QT_QTCORE_LIBRARY}
-    ${QT_QTNETWORK_LIBRARY}
-    ${QT_QTXML_LIBRARY}
-)
+#add_executable(ppf_profile_test src/PPF_ProfileTest.cpp)
+#set_target_properties(ppf_profile_test PROPERTIES
+#    COMPILE_FLAGS "${OpenMP_CXX_FLAGS}"
+#    LINK_FLAGS "${OpenMP_CXX_FLAGS}"
+#)
+#target_link_libraries(ppf_profile_test
+#    pelican-lofar_static
+#    ${PELICAN_LIBRARY}
+#    ${QT_QTCORE_LIBRARY}
+#    ${QT_QTNETWORK_LIBRARY}
+#    ${QT_QTXML_LIBRARY}
+#)
 
 # ==== Copy files required for testing to the build directory.
 include(${CMAKE_SOURCE_DIR}/cmake/CopyFiles.cmake)

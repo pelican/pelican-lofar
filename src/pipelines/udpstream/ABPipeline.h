@@ -6,6 +6,7 @@
 #include "DedispersionModule.h"
 #include "DedispersionAnalyser.h"
 #include "WeightedSpectrumDataSet.h"
+#include "timer.h"
 
 namespace pelican {
 namespace ampp {
@@ -46,10 +47,17 @@ class ABPipeline : public AbstractPipeline
         LockingPtrContainer<SpectrumDataSetStokes>* _stokesBuffer;
         WeightedSpectrumDataSet* _weightedIntStokes;
 
+        SpectrumDataSetStokes *_stokes;
+
         unsigned long _counter;
         unsigned _iteration;
         unsigned int _minEventsFound;
         unsigned int _maxEventsFound;
+
+        TimerData _rfiClipperTime;
+        TimerData _dedispersionTime;
+        TimerData _totalTime;
+
 };
 
 } // namespace ampp

@@ -11,7 +11,6 @@ int main(int argc, char* argv[])
     // Create a QCoreApplication
     QCoreApplication app(argc, argv);
 
-    printf("interval = 0\n");
     try {
         ConfigNode emulatorConfig("<ABEmulator>"
                                   "<packet samples=\"1024\" interval=\"100\" />"

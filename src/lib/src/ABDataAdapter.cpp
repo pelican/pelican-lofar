@@ -1,8 +1,11 @@
 #include "ABDataAdapter.h"
 #include "SpectrumDataSet.h"
-
+#include <arpa/inet.h>
+#include <iomanip>
 using namespace pelican;
 using namespace pelican::ampp;
+
+TimerData ABDataAdapter::_adapterTime;
 
 // Construct the signal data adapter.
 ABDataAdapter::ABDataAdapter(const ConfigNode& config)
@@ -18,21 +21,29 @@ ABDataAdapter::ABDataAdapter(const ConfigNode& config)
     _packetSize = _headerSize + _channelsPerPacket * 8 + _footerSize;
 
     // Calculate the total number of channels.
-    _nChannels = _pktsPerSpec * _channelsPerPacket;
-
-    // Set the first flag.
-    _first = 2;
+    //_nChannels = _pktsPerSpec * _channelsPerPacket;
+    _nChannels = _channelsPerPacket;
 
     // Set missing packet stats.
     _numMissInst = 0;
     _numMissPkts = 0;
 
+    // Set the previous counts.
+    _prevSpecQuart = 0;
+    _prevIntegCount = 0;
+
     _integCountStart = 0;
+    _tStart = 0.0;
+    _first = 1;
+    _timestampFirst = 1;
+
+    _x = 0;
 }
 
 // Called to de-serialise a chunk of data from the input device.
 void ABDataAdapter::deserialise(QIODevice* device)
 {
+    timerStart(&_adapterTime);
     // A pointer to the data blob to fill should be obtained by calling the
     // dataBlob() inherited method. This returns a pointer to an
     // abstract DataBlob, which should be cast to the appropriate type.
@@ -40,18 +51,18 @@ void ABDataAdapter::deserialise(QIODevice* device)
 
     // Set the size of the data blob to fill.
     // The chunk size is obtained by calling the chunkSize() inherited method.
-    std::cout << "chunksize = " << chunkSize() << std::endl;
     unsigned packets = chunkSize() / _packetSize;
     // Number of time samples; Each channel contains 4 pseudo-Stokes values,
     // each of size sizeof(short int)
     unsigned nBlocks = (packets / _pktsPerSpec) * _samplesPerPacket;
-    _nPolarisations = 4;
+    _nPolarisations = 1;
     blob->resize(nBlocks, 1, _nPolarisations, _nChannels);
 
     // Create a temporary buffer to read out the packet headers, and
     // get the pointer to the data array in the data blob being filled.
     char headerData[_headerSize];
-    char d[_pktsPerSpec * (_packetSize - _headerSize - _footerSize)];
+    //char d[_pktsPerSpec * (_packetSize - _headerSize - _footerSize)];
+    char d[_packetSize - _headerSize - _footerSize];
     char footerData[_footerSize];
 
     // Loop over the UDP packets in the chunk.
@@ -59,11 +70,11 @@ void ABDataAdapter::deserialise(QIODevice* device)
     unsigned bytesRead = 0;
     unsigned block = 0;
     signed int specQuart = 0;
-    static signed int prevSpecQuart = 0;
     unsigned long int integCount = 0;
-    static unsigned long int prevIntegCount = 0;
     unsigned int icDiff = 0;
     unsigned int sqDiff = 0;
+    double timestamp = 0.0;
+
     for (unsigned p = 0; p < packets; p++)
     {
         // Ensure there is enough data to read from the device.
@@ -71,6 +82,7 @@ void ABDataAdapter::deserialise(QIODevice* device)
         {
             device->waitForReadyRead(-1);
         }
+
         // Read the packet header from the input device.
         device->read(headerData, _headerSize);
 
@@ -84,74 +96,35 @@ void ABDataAdapter::deserialise(QIODevice* device)
                      + ((counter & 0x000000000000FF00) << 24)
                      + ((counter & 0x00000000000000FF) << 40));
 
-        std::cout << specQuart << ", " << integCount << std::endl;
+        //std::cout << integCount << std::endl;
+        timestamp = ((double) (integCount - _integCountStart) * _tSamp);
+        if (!_first)
+        {
+            if (timestamp - _lastTimestamp > _tSamp)
+            {
+                std::cerr << "FATAL! " << integCount << ", " << _prevIntegCount << ", " << _integCountStart
+                    << std::fixed << std::setprecision(10)
+                    << ", " << timestamp << ", " << _lastTimestamp
+                    << std::endl;
+            }
+        }
+        else
+        {
+            //temp: set it to 2015-03-03 midnight
+            _tStart = 57084.0;
+            _integCountStart = integCount;
+            _first = 0;
+        }
+
         // Get the spectral quarter number
         specQuart = (unsigned char) headerData[6];
-        if (_first)
-        {
-            // Ignore the first <= 7 packets
-            // Read the packet data from the input device and discard it.
-            bytesRead += device->read(d + bytesRead,
-                                      _packetSize - _headerSize - _footerSize);
-            // Read the packet footer from the input device and discard it.
-            device->read(footerData, _footerSize);
-            if (0 == specQuart)
-            {
-                _first--;
-                // Reset bytesRead.
-                bytesRead = 0;
-                // Set the start time of the observation.
-                _tStart = 57074.0;      // temp
-                _integCountStart = integCount;
-            }
-            if (_first)
-            {
-                prevSpecQuart = specQuart;
-                prevIntegCount = integCount;
-                std::cout << "Spectral quarter = " << specQuart << ". Skipping..." << std::endl;
-                continue;
-            }
-        }
+        //std::cout << specQuart << ", " << integCount << std::endl;
 
-        // Check for missed packets
-        if (((prevSpecQuart + 1) % 4) != specQuart)
-        {
-            icDiff = integCount - prevIntegCount;
-            if (0 == icDiff)    // same integration, different spectral quarter
-            {
-                sqDiff = specQuart - prevSpecQuart;
-                _numMissInst++;
-                _numMissPkts = (sqDiff - 1);
-                std::cerr << _numMissPkts << " packets dropped!" << std::endl;
-            }
-            else                // different integration
-            {
-                _numMissInst++;
-                _numMissPkts = ((_pktsPerSpec - 1 - prevSpecQuart)
-                                + _pktsPerSpec * (icDiff - 1)
-                                + specQuart);
-                std::cerr << _numMissPkts << " packets dropped!" << sqDiff << ", " << icDiff << std::endl;
-            }
-        }
-        if (0 == specQuart)
-        {
-            icDiff = integCount - prevIntegCount;
-            if (icDiff != 1)
-            {
-                _numMissInst++;
-                _numMissPkts = ((_pktsPerSpec - 1 - prevSpecQuart)
-                                + _pktsPerSpec * (icDiff - 1)
-                                + specQuart);
-                std::cerr << _numMissPkts << " packets dropped!" << icDiff << std::endl;
-            }
-        }
-        prevSpecQuart = specQuart;
-        prevIntegCount = integCount;
-
-        bytesRead += device->read(d + bytesRead,
-                                  _packetSize - _headerSize - _footerSize);
+        //bytesRead += device->read(d + bytesRead,
+        //                          _packetSize - _headerSize - _footerSize);
+        device->read(d, _packetSize - _headerSize - _footerSize);
         // Write out spectrum to blob if this is the last spectral quarter.
-        signed short int* dd = (signed short int*) d;
+        unsigned short int* dd = (unsigned short int*) d;
         if (_pktsPerSpec - 1 == specQuart)
         {
 #if 0
@@ -164,36 +137,29 @@ void ABDataAdapter::deserialise(QIODevice* device)
                 }
             }
 #else
+
             // Compute Stokes I and ignore the rest.
             data = (float*) blob->spectrumData(block, 0, 0);
             for (unsigned chan = 0; chan < _nChannels; chan++)
             {
-                data[chan] = (float) (dd[chan * 4 + 0]          // XX*
-                                      + dd[chan * 4 + 1]);      // YY*
+                data[chan] = (float) (ntohs(dd[chan * 4 + 0])          // XX*
+                                      + ntohs(dd[chan * 4 + 1]));      // YY*
             }
 #endif
-            memset(d, '\0', _pktsPerSpec * (_packetSize - _headerSize - _footerSize));
-            bytesRead = 0;
+            //memset(d, '\0', _pktsPerSpec * (_packetSize - _headerSize - _footerSize));
+            //memset(d, '\0', _packetSize - _headerSize - _footerSize);
+            //bytesRead = 0;
             block++;
-            Q_ASSERT(block <= nBlocks);
         }
         // Read the packet footer from the input device and discard it.
         device->read(footerData, _footerSize);
-    }
-    std::cout << packets << " packets processed." << std::endl;
 
-    // Set timing
-    float timeProcedThisBlock = 0.0;
-    if (_pktsPerSpec - 1 == specQuart)
-    {
-        timeProcedThisBlock = (integCount - _integCountStart) * _pktsPerSpec * _tSamp;
+        _lastTimestamp = timestamp;
+        _prevIntegCount = integCount;
     }
-    else
-    {
-        timeProcedThisBlock = ((integCount - 1 - _integCountStart) * _pktsPerSpec * _tSamp)
-                              + (specQuart * _tSamp);
-    }
-    blob->setLofarTimestamp((_tStart * 86400.0) + timeProcedThisBlock);
+
+    blob->setLofarTimestamp(timestamp);
     blob->setBlockRate(_tSamp);
+    timerUpdate(&_adapterTime);
 }
 

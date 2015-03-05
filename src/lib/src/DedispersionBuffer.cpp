@@ -127,6 +127,7 @@ void DedispersionBuffer::dumpbin( const QString& fileName ) const {
     unsigned maxSamples = std::min( numSamples, spaceRemaining() + *sampleNumber );
     timerStart(&_addSampleTimer);
     int start = *sampleNumber;
+    //Q_ASSERT(maxSamples >= start);
     Q_ASSERT(maxSamples > start);
     if( _invertChannels ) {
         int nChannelsMinusOne = nChannels - 1;
@@ -175,7 +176,7 @@ void DedispersionBuffer::dumpbin( const QString& fileName ) const {
     _sampleCount += (maxSamples - start);
     *sampleNumber = maxSamples;
     timerUpdate(&_addSampleTimer);
-    timerReport(&_addSampleTimer, "DedispersionBuffer::addSamples");
+    //timerReport(&_addSampleTimer, "DedispersionBuffer::addSamples");
     return spaceRemaining();
 }
 
@@ -240,7 +241,7 @@ void DedispersionBuffer::dumpbin( const QString& fileName ) const {
     _sampleCount += (maxSamples - start);
     *sampleNumber = maxSamples;
     timerUpdate(&_addSampleTimer);
-    timerReport(&_addSampleTimer, "DedispersionBuffer::addSamples");
+    //timerReport(&_addSampleTimer, "DedispersionBuffer::addSamples");
     return spaceRemaining();
 }
 
