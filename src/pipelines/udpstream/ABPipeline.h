@@ -6,6 +6,7 @@
 #include "DedispersionModule.h"
 #include "DedispersionAnalyser.h"
 #include "WeightedSpectrumDataSet.h"
+#include "StokesIntegrator.h"
 #include "timer.h"
 
 namespace pelican {
@@ -41,6 +42,7 @@ class ABPipeline : public AbstractPipeline
         RFI_Clipper* _rfiClipper;
         DedispersionModule* _dedispersionModule;
         DedispersionAnalyser* _dedispersionAnalyser;
+        StokesIntegrator* _stokesIntegrator;
 
         // Local data blob pointers.
         QList<SpectrumDataSetStokes*> _stokesData;
@@ -48,6 +50,7 @@ class ABPipeline : public AbstractPipeline
         WeightedSpectrumDataSet* _weightedIntStokes;
 
         SpectrumDataSetStokes *_stokes;
+        SpectrumDataSetStokes *_intStokes;
 
         unsigned long _counter;
         unsigned _iteration;

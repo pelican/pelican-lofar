@@ -82,7 +82,6 @@ SigprocStokesWriter::SigprocStokesWriter(const ConfigNode& configNode )
 
     _nPols    = configNode.getOption("params", "nPolsToWrite", "1").toUInt();
     _nchans   = _nChannels * _nSubbands;
-    printf("================ _nchans = %d, %d, %d\n", _nchans, _nChannels, _nSubbands);
     _buffSize = configNode.getOption("params", "bufferSize", "5120").toUInt();
     _cur = 0;
     _first = (configNode.hasAttribute("writeHeader") && configNode.getAttribute("writeHeader").toLower() == "true" );

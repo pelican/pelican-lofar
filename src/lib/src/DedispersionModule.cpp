@@ -136,7 +136,6 @@ void DedispersionModule::resize( const SpectrumDataSet<float>* streamData ) {
         DIST dist(0,1);
         GEN  gen(eng,dist);
 
-        std::cout << "nsb = " << _numSamplesBuffer << ", nc = " << _nChannels << std::endl;
         for (int i=0; i< _numSamplesBuffer * _nChannels; ++i) {
           // chi-squared distribution with 4 degrees of freedom, like raw sampled total power
           // set the mean to zero and rms to 1 (mean=4 and variance=8 -> rms = 2sqrt(2))

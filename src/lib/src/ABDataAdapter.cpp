@@ -2,6 +2,8 @@
 #include "SpectrumDataSet.h"
 #include <arpa/inet.h>
 #include <iomanip>
+//#include <sys/time.h>
+#include <omp.h>
 using namespace pelican;
 using namespace pelican::ampp;
 
@@ -18,7 +20,7 @@ ABDataAdapter::ABDataAdapter(const ConfigNode& config)
     _tSamp = config.getOption("samplingTime", "seconds").toFloat();
 
     // Set up the packet data.
-    _packetSize = _headerSize + _channelsPerPacket * 8 + _footerSize;
+    _packetSize = _headerSize + _channelsPerPacket * 8;// + _footerSize;
 
     // Calculate the total number of channels.
     //_nChannels = _pktsPerSpec * _channelsPerPacket;
@@ -44,6 +46,10 @@ ABDataAdapter::ABDataAdapter(const ConfigNode& config)
 void ABDataAdapter::deserialise(QIODevice* device)
 {
     timerStart(&_adapterTime);
+    /*struct timeval stTime = {0};
+    (void) gettimeofday(&stTime, NULL);
+    double t = (stTime.tv_sec - 1425601680) + (stTime.tv_usec * 0.000001);
+    std::cout << std::fixed << std::setprecision(6) << t << std::endl;*/
     // A pointer to the data blob to fill should be obtained by calling the
     // dataBlob() inherited method. This returns a pointer to an
     // abstract DataBlob, which should be cast to the appropriate type.
@@ -62,7 +68,7 @@ void ABDataAdapter::deserialise(QIODevice* device)
     // get the pointer to the data array in the data blob being filled.
     char headerData[_headerSize];
     //char d[_pktsPerSpec * (_packetSize - _headerSize - _footerSize)];
-    char d[_packetSize - _headerSize - _footerSize];
+    char d[_packetSize - _headerSize];// - _footerSize];
     char footerData[_footerSize];
 
     // Loop over the UDP packets in the chunk.
@@ -86,6 +92,7 @@ void ABDataAdapter::deserialise(QIODevice* device)
         // Read the packet header from the input device.
         device->read(headerData, _headerSize);
 
+#if 1
         // Get the packet integration count
         unsigned long int counter = (*((unsigned long int *) headerData)) & 0x0000FFFFFFFFFFFF;
         integCount = (unsigned long int)        // Casting required.
@@ -122,10 +129,10 @@ void ABDataAdapter::deserialise(QIODevice* device)
 
         //bytesRead += device->read(d + bytesRead,
         //                          _packetSize - _headerSize - _footerSize);
-        device->read(d, _packetSize - _headerSize - _footerSize);
+        device->read(d, _packetSize - _headerSize);// - _footerSize);
         // Write out spectrum to blob if this is the last spectral quarter.
         unsigned short int* dd = (unsigned short int*) d;
-        if (_pktsPerSpec - 1 == specQuart)
+        if (_pktsPerSpec - 3 == specQuart)
         {
 #if 0
             for (unsigned pol = 0; pol < _nPolarisations; pol++)
@@ -152,10 +159,11 @@ void ABDataAdapter::deserialise(QIODevice* device)
             block++;
         }
         // Read the packet footer from the input device and discard it.
-        device->read(footerData, _footerSize);
+        //device->read(footerData, _footerSize);
 
         _lastTimestamp = timestamp;
         _prevIntegCount = integCount;
+#endif
     }
 
     blob->setLofarTimestamp(timestamp);

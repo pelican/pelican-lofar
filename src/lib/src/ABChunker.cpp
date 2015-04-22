@@ -132,7 +132,7 @@ void ABChunker::next(QIODevice* device)
                 *(fakeHdr + 0) = (unsigned char) ((missedIntegCount & 0x0000FF0000000000) >> 40);
                 (void) memcpy(pktMissed, fakeHdr, _hdrSize);
                 // Fill in zeros in place of data and footer.
-                (void) memset(pktMissed + _hdrSize, '\0', _payloadSize + _ftrSize);
+                (void) memset(pktMissed + _hdrSize, '\0', _payloadSize);// + _ftrSize);
                 //std::cout << missedIntegCount << std::endl;
                 writableData.write(pktMissed, _pktSize, bytesRead);
                 bytesRead += _pktSize;
@@ -307,7 +307,7 @@ void ABChunker::next(QIODevice* device)
                 *(fakeHdr + 0) = (unsigned char) ((missedIntegCount & 0x0000FF0000000000) >> 40);
                 (void) memcpy(pktMissed, fakeHdr, _hdrSize);
                 // Fill in zeros in place of data and footer.
-                (void) memset(pktMissed + _hdrSize, '\0', _payloadSize + _ftrSize);
+                (void) memset(pktMissed + _hdrSize, '\0', _payloadSize);// + _ftrSize);
                 //std::cout << missedIntegCount << std::endl;
                 writableData.write(pktMissed, _pktSize, bytesRead);
                 bytesRead += _pktSize;

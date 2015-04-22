@@ -62,6 +62,7 @@ void ABPipeline::init()
 
     // Create the pipeline modules and any local data blobs.
     _rfiClipper = (RFI_Clipper *) createModule("RFI_Clipper");
+    _stokesIntegrator = (StokesIntegrator *) createModule("StokesIntegrator");
     _dedispersionModule = (DedispersionModule*) createModule("DedispersionModule");
     _dedispersionAnalyser = (DedispersionAnalyser*) createModule("DedispersionAnalyser");
     _dedispersionModule->connect( boost::bind( &ABPipeline::dedispersionAnalysis, this, _1 ) );
@@ -69,6 +70,7 @@ void ABPipeline::init()
     _stokesData = createBlobs<SpectrumDataSetStokes>("SpectrumDataSetStokes", history);
     _stokesBuffer = new LockingPtrContainer<SpectrumDataSetStokes>(&_stokesData);
     //_stokes = (SpectrumDataSetStokes *) createBlob("SpectrumDataSetStokes");
+    _intStokes = (SpectrumDataSetStokes *) createBlob("SpectrumDataSetStokes");
     _weightedIntStokes = (WeightedSpectrumDataSet*) createBlob("WeightedSpectrumDataSet");
 
     // Request remote data.
@@ -89,10 +91,13 @@ void ABPipeline::run(QHash<QString, DataBlob*>& remoteData)
     /* to make sure the dedispersion module reads data from a lockable ring
        buffer, copy data to one */
     SpectrumDataSetStokes* stokesBuf = _stokesBuffer->next();
-    *stokesBuf = *stokes;
+    //*stokesBuf = *stokes;
 
-    //_weightedIntStokes->reset(_stokes);
     //dataOutput(_stokes, "AdapterOutput");
+    //_weightedIntStokes->reset(_stokes);
+    //_stokesIntegrator->run(_stokes, _intStokes);
+    _stokesIntegrator->run(stokes, _intStokes);
+    *stokesBuf = *_intStokes;
     _weightedIntStokes->reset(stokesBuf);
 #ifdef TIMING_ENABLED
     timerStart(&_rfiClipperTime);
@@ -101,7 +106,6 @@ void ABPipeline::run(QHash<QString, DataBlob*>& remoteData)
 #ifdef TIMING_ENABLED
     timerUpdate(&_rfiClipperTime);
 #endif
-    //dataOutput(_stokes, "AdapterOutput");
 #ifdef TIMING_ENABLED
     timerStart(&_dedispersionTime);
 #endif
@@ -115,7 +119,7 @@ void ABPipeline::run(QHash<QString, DataBlob*>& remoteData)
     }
 #ifdef TIMING_ENABLED
     timerUpdate(&_totalTime);
-    if (0 == _counter % 10000)
+    if (0 == _counter % 1000)
     {
         timerReport(&ABDataAdapter::_adapterTime, "Adapter Time");
         timerReport(&_rfiClipperTime, "RFI_Clipper");
