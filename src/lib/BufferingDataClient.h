@@ -29,7 +29,6 @@ class BufferingDataClient : public DataClientType
 
     private:
         BufferingAgent _agent;
-        DataClientType& _client;
 };
 
 } // namespace lofar

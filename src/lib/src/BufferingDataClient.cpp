@@ -7,7 +7,7 @@ namespace lofar {
 
 template<class DataClientType>
 BufferingDataClient<DataClientType>::BufferingDataClient(DataClientType& client)
-    , _agent(this)
+    , _agent(client)
 {
     // start the thread running
     _agent.start();
