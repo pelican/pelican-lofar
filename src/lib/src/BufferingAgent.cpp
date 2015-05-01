@@ -10,6 +10,12 @@ BufferingAgent::BufferingAgent(AbstractDataClient& client)
     , _halt(false)
     , _client(client)
 {
+    // create some objects to fill
+    for(int i=0; i < max_queue_length; ++i ) {
+        _buffer_objects.push_back(DataBlobHash);
+    }
+    // assign then to the buffer locking manager
+    _buffer.reset(&_buffer_objects);
 }
 
 BufferingAgent::~BufferingAgent()
@@ -20,12 +26,11 @@ BufferingAgent::~BufferingAgent()
 void BufferingAgent::run() {
     _halt = false;
     while(1) {
-        while(_queue.size < _max_queue_length) {
-            if(_halt) return;
-            DataBlobHash hash; // TODO check how this is done in the history mechanism and copy that (recycling)
-            DataClientType::getData(hash);
-            _queue.push_back(hash);
-        } 
+        if(_halt) return;
+        DataBlobHash& hash = *(_buffer->next()); // blocks until ready
+        if(_halt) return;
+        _client.getData(hash);
+        _queue.push_back(hash);
     }
 }
 
@@ -34,7 +39,8 @@ void BufferingAgent::getData(DataBlobHash& hash) {
     do{}
     while(_queue.empty());
 
-    hash =  _queue.front();
+    hash.swap(_queue.front()); // TODO verify this is doing what we think its doing
+    _buffer.unlock(&(_queue.front()));
     _queue.pop_front();
 }
 

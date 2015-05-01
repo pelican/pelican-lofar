@@ -3,7 +3,9 @@
 
 
 #include "pelican/core/AbstractDataClient.h"
-#include "QThread.h"
+#include "LockingContainer.hpp"
+#include <QList.h>
+#include <QThread.h>
 
 /**
  * @file BufferingAgent.h
@@ -31,10 +33,15 @@ class BufferingAgent : public QThread
         void run();
 
     private:
+        typedef pelican::AbstractDataClient::DataBlobHash DataBlobHash;
+
+    private:
         unsinged int _max_queue_length;
         bool _halt;
         pelican::AbstractDataClient& _client;
-        std::deque<pelican::AbstractDataClient::DataBlobHash> _queue;
+        std::deque<DataBlobHash&> _queue; // objects ready for serving
+        QList<DataBlobHash> _buffer_objects;
+        LockingContainer<DataBlobHash> _buffer;
 };
 
 } // namespace lofar
