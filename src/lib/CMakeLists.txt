@@ -9,6 +9,8 @@ set(lib_src
     src/BandPassOutput.cpp
     src/BandPassRecorder.cpp
     src/BlobStatistics.cpp
+    src/BufferingAgent.cpp
+    src/BufferingDataClient.cpp
     src/DedispersionAnalyser.cpp
     src/DedispersionDataAnalysis.cpp
     src/DedispersionDataAnalysisOutput.cpp
