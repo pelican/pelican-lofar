@@ -20,7 +20,8 @@ BufferingAgent::BufferingAgent(AbstractDataClient& client)
 
 BufferingAgent::~BufferingAgent()
 {
-    _halt = false;
+    _halt = true;
+    if(_!queue.empty()) _buffer.unlock(_queue.front()); // ensure to remove any block 
 }
 
 void BufferingAgent::run() {
@@ -30,7 +31,7 @@ void BufferingAgent::run() {
         DataBlobHash& hash = *(_buffer->next()); // blocks until ready
         if(_halt) return;
         _client.getData(hash);
-        _queue.push_back(hash);
+        _queue.push_back(&hash);
     }
 }
 
@@ -39,8 +40,8 @@ void BufferingAgent::getData(DataBlobHash& hash) {
     do{}
     while(_queue.empty());
 
-    hash.swap(_queue.front()); // TODO verify this is doing what we think its doing
-    _buffer.unlock(&(_queue.front()));
+    hash.swap(*_queue.front()); // TODO verify this is doing what we think its doing
+    _buffer.unlock(_queue.front());
     _queue.pop_front();
 }
 

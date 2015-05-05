@@ -39,7 +39,7 @@ class BufferingAgent : public QThread
         unsinged int _max_queue_length;
         bool _halt;
         pelican::AbstractDataClient& _client;
-        std::deque<DataBlobHash&> _queue; // objects ready for serving
+        std::deque<DataBlobHash*> _queue; // objects ready for serving
         QList<DataBlobHash> _buffer_objects;
         LockingContainer<DataBlobHash> _buffer;
 };
