@@ -6,6 +6,7 @@
 #include "LockingContainer.hpp"
 #include <QList>
 #include <QThread>
+#include <QHash>
 #include <deque>
 
 /**
