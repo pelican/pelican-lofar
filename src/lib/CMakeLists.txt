@@ -9,6 +9,7 @@ set(lib_src
     src/BandPassOutput.cpp
     src/BandPassRecorder.cpp
     src/BlobStatistics.cpp
+    src/BufferingAgent.cpp
     src/DedispersionAnalyser.cpp
     src/DedispersionDataAnalysis.cpp
     src/DedispersionDataAnalysisOutput.cpp
@@ -62,6 +63,7 @@ set(lib_src
     src/ABDataClient.cpp
     src/ABDataAdapter.cpp
 )
+
 # Lofar DAL enables the H5_LofarBFDataWriter
 if(LOFAR_DAL_FOUND)
     list(APPEND lib_src

@@ -2,7 +2,7 @@
 
 
 namespace pelican {
-namespace lofar {
+namespace ampp {
 
 BufferingAgent::BufferingAgent(AbstractDataClient& client)
     : QThread()
@@ -11,8 +11,8 @@ BufferingAgent::BufferingAgent(AbstractDataClient& client)
     , _client(client)
 {
     // create some objects to fill
-    for(int i=0; i < max_queue_length; ++i ) {
-        _buffer_objects.push_back(DataBlobHash);
+    for(unsigned int i=0; i < _max_queue_length; ++i ) {
+        _buffer_objects.push_back(DataBlobHash());
     }
     // assign then to the buffer locking manager
     _buffer.reset(&_buffer_objects);
@@ -21,21 +21,21 @@ BufferingAgent::BufferingAgent(AbstractDataClient& client)
 BufferingAgent::~BufferingAgent()
 {
     _halt = true;
-    if(_!queue.empty()) _buffer.unlock(_queue.front()); // ensure to remove any block 
+    if(!_queue.empty()) _buffer.unlock(_queue.front()); // ensure to remove any block 
 }
 
 void BufferingAgent::run() {
     _halt = false;
     while(1) {
         if(_halt) return;
-        DataBlobHash& hash = *(_buffer->next()); // blocks until ready
+        DataBlobHash& hash = *(_buffer.next()); // blocks until ready
         if(_halt) return;
         _client.getData(hash);
         _queue.push_back(&hash);
     }
 }
 
-void BufferingAgent::getData(DataBlobHash& hash) {
+void BufferingAgent::getData(BufferingAgent::DataBlobHash& hash) {
     // spin until we have data
     do{}
     while(_queue.empty());
@@ -45,5 +45,5 @@ void BufferingAgent::getData(DataBlobHash& hash) {
     _queue.pop_front();
 }
 
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican

@@ -6,6 +6,7 @@
 #include "LockingContainer.hpp"
 #include <QList.h>
 #include <QThread.h>
+#include <deque>
 
 /**
  * @file BufferingAgent.h
@@ -13,7 +14,7 @@
 
 namespace pelican {
 
-namespace lofar {
+namespace ampp {
 
 /**
  * @class BufferingAgent
@@ -27,16 +28,18 @@ namespace lofar {
 class BufferingAgent : public QThread
 {
     public:
+        typedef pelican::AbstractDataClient::DataBlobHash DataBlobHash;
+
+    public:
         BufferingAgent(pelican::AbstractDataClient&);
         ~BufferingAgent();
 
         void run();
 
-    private:
-        typedef pelican::AbstractDataClient::DataBlobHash DataBlobHash;
+        void getData(DataBlobHash& hash);
 
     private:
-        unsinged int _max_queue_length;
+        unsigned int _max_queue_length;
         bool _halt;
         pelican::AbstractDataClient& _client;
         std::deque<DataBlobHash*> _queue; // objects ready for serving
@@ -44,6 +47,6 @@ class BufferingAgent : public QThread
         LockingContainer<DataBlobHash> _buffer;
 };
 
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican
 #endif // BUFFERINGAGENT_H 
