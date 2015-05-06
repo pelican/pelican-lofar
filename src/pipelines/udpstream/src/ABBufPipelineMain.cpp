@@ -1,5 +1,5 @@
 #include "pelican/core/PipelineApplication.h"
-#include "ABPipeline.h"
+#include "ABBufPipeline.h"
 #include <QtCore/QCoreApplication>
 
 // Include any headers that are referenced by name.
@@ -18,7 +18,7 @@ int main(int argc, char* argv[], const QString& stream)
         PipelineApplication pApp(argc, argv);
 
         // Register the pipelines that can run.
-        pApp.registerPipeline(new ABPipeline(stream));
+        pApp.registerPipeline(new ABBufPipeline(stream));
 
         // Set the data client.
         pApp.setDataClient("ABBufDataClient");

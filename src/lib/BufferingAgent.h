@@ -6,7 +6,6 @@
 #include "LockingContainer.hpp"
 #include <QList>
 #include <QThread>
-#include <QHash>
 #include <deque>
 
 /**
@@ -29,20 +28,21 @@ namespace ampp {
 class BufferingAgent : public QThread
 {
     public:
+        typedef pelican::AbstractDataClient::DataBlobHash DataBlobHash;
+
+    public:
         BufferingAgent(pelican::AbstractDataClient&);
         ~BufferingAgent();
 
         void run();
-        void getData(pelican::AbstractDataClient::DataBlobHash& hash);
 
-    private:
-        typedef pelican::AbstractDataClient::DataBlobHash DataBlobHash;
+        void getData(DataBlobHash& hash);
 
     private:
         unsigned int _max_queue_length;
         bool _halt;
         pelican::AbstractDataClient& _client;
-        std::deque<DataBlobHash&> _queue; // objects ready for serving
+        std::deque<DataBlobHash*> _queue; // objects ready for serving
         QList<DataBlobHash> _buffer_objects;
         LockingContainer<DataBlobHash> _buffer;
 };
