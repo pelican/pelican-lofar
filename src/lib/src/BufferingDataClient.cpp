@@ -10,6 +10,7 @@ BufferingDataClient<DataClientType>::BufferingDataClient(DataClientType& client)
     , _agent(client)
 {
     // start the thread running
+    std::cout << "-------in bdc!=======" << std::endl;
     _agent.start();
 }
 

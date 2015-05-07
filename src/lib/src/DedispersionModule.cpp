@@ -148,7 +148,6 @@ void DedispersionModule::resize( const SpectrumDataSet<float>* streamData ) {
           } while (_noiseTemplate[i]>3.5) ;
           //          _noiseTemplate[i] = (x1*x1 - 4.0)/2.828427; 
         }
-        std::cout << "here." << std::endl;
         // calculate dispersion measure shifts
         _dmshifts.clear();
         for ( int c = 0; c < _nChannels; ++c ) {
