@@ -4,7 +4,6 @@
 
 #include "pelican/core/AbstractDataClient.h"
 #include "BufferingAgent.h"
-#include <deque>
 
 namespace pelican {
 namespace lofar {
@@ -21,11 +20,11 @@ template<class DataClientType>
 class BufferingDataClient : public DataClientType
 {
     public:
-        BufferingDataClient(DataClientType& client);
+        BufferingDataClient(const ConfigNode& configNode, const DataTypes& types, const Config* config);
         ~BufferingDataClient();
         
-        // override the getData method only
-        virtual DataBlobHash getData(DataBlobHash&);
+        // overriden methods here
+        virtual DataBlobHash getData(pelican::AbstractDataClient::DataBlobHash&);
 
     private:
         BufferingAgent _agent;
