@@ -25,7 +25,7 @@ class BufferingDataClient : public DataClientType
         ~BufferingDataClient();
         
         // override the getData method only
-        virtual DataBlobHash getData(DataBlobHash&);
+        virtual BufferingAgent::DataBlobHash getData(BufferingAgent::DataBlobHash&);
 
     private:
         BufferingAgent _agent;

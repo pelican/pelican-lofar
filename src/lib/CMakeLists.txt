@@ -61,6 +61,7 @@ set(lib_src
     src/JTestOutputStream.cpp
     src/ABChunker.cpp
     src/ABDataClient.cpp
+    src/ABBufDataClient.cpp
     src/ABDataAdapter.cpp
 )
 

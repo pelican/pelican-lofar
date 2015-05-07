@@ -21,7 +21,7 @@ BufferingDataClient<DataClientType>::~BufferingDataClient()
 }
 
 template<class DataClientType>
-DataBlobHash BufferingDataClient<DataClientType>::getData(DataBlobHash& hash)
+BufferingAgent::DataBlobHash BufferingDataClient<DataClientType>::getData(BufferingAgent::DataBlobHash& hash)
 {
     _agent.getData(hash);
     return hash;
