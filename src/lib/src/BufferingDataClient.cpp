@@ -1,4 +1,5 @@
 #include "BufferingDataClient.h"
+#include <boost/bind.hpp>
 
 
 namespace pelican {
@@ -6,8 +7,9 @@ namespace ampp {
 
 
 template<class DataClientType>
-BufferingDataClient<DataClientType>::BufferingDataClient(DataClientType& client)
-    , _agent(client)
+BufferingDataClient<DataClientType>::BufferingDataClient(const ConfigNode& configNode, const DataTypes& types, const Config* config)
+    : DataClientType(configNode, types, config)
+    , _agent(boost::bind(&DataClientType::getNext, this))
 {
     // start the thread running
     std::cout << "-------in bdc!=======" << std::endl;
@@ -22,7 +24,7 @@ BufferingDataClient<DataClientType>::~BufferingDataClient()
 }
 
 template<class DataClientType>
-BufferingAgent::DataBlobHash BufferingDataClient<DataClientType>::getData(BufferingAgent::DataBlobHash& hash)
+pelican::AbstractDataClient::DataBlobHash BufferingDataClient<DataClientType>::getData(pelican::AbstractDataClient::DataBlobHash& hash)
 {
     _agent.getData(hash);
     return hash;

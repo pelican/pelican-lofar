@@ -6,6 +6,7 @@
 #include "LockingContainer.hpp"
 #include <QList>
 #include <QThread>
+#include <boost/function.hpp>
 #include <deque>
 
 /**
@@ -29,9 +30,10 @@ class BufferingAgent : public QThread
 {
     public:
         typedef pelican::AbstractDataClient::DataBlobHash DataBlobHash;
+        typedef boost::function1<void, DataBlobHash&> DataFetchFunction;
 
     public:
-        BufferingAgent(pelican::AbstractDataClient&);
+        BufferingAgent( const DataFetchFunction& fn );
         ~BufferingAgent();
 
         void run();
@@ -41,7 +43,7 @@ class BufferingAgent : public QThread
     private:
         unsigned int _max_queue_length;
         bool _halt;
-        pelican::AbstractDataClient& _client;
+        DataFetchFunction _fn;
         std::deque<DataBlobHash*> _queue; // objects ready for serving
         QList<DataBlobHash> _buffer_objects;
         LockingContainer<DataBlobHash> _buffer;

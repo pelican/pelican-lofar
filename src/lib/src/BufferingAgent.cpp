@@ -5,11 +5,11 @@
 namespace pelican {
 namespace ampp {
 
-BufferingAgent::BufferingAgent(AbstractDataClient& client)
+BufferingAgent::BufferingAgent(const DataFetchFunction& fn)
     : QThread()
     , _max_queue_length(3)
     , _halt(false)
-    , _client(client)
+    , _fn(fn)
 {
     // create some objects to fill
     for(unsigned int i=0; i < _max_queue_length; ++i ) {
@@ -32,7 +32,7 @@ void BufferingAgent::run() {
         if(_halt) return;
         DataBlobHash& hash = *(_buffer.next()); // blocks until ready
         if(_halt) return;
-        _client.getData(hash);
+        _fn(hash);
         _queue.push_back(&hash);
     }
 }
