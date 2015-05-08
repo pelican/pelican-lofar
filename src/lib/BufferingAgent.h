@@ -21,7 +21,7 @@ namespace ampp {
  * @class BufferingAgent
  *  
  * @brief
- *    A dedicated thread for running 
+ *    A dedicated thread for buffering data 
  * @details
  * 
  */

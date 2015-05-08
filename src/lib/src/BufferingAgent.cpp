@@ -43,12 +43,13 @@ void BufferingAgent::stop()
 
 void BufferingAgent::getData(BufferingAgent::DataBlobHash& hash) {
     // spin until we have data
-    do{}
+    do{} // TODO verify empty() is thread safe (and _queue.pop_front() call later on particularly when the _buffer is still filling slots)
     while(_queue.empty());
 
-    hash.swap(*_queue.front()); // TODO verify this is doing what we think its doing
-    _buffer.unlock(_queue.front());
-    _queue.pop_front();
+    DataBlobHash* tmp = _queue.front();
+    hash.swap(*tmp); // TODO verify this is doing what we think its doing
+    _queue.pop_front(); // remove from queue before unblocking the other thread to reduce conflicts
+    _buffer.unlock(tmp);
 }
 
 } // namespace ampp
