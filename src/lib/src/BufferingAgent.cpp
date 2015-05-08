@@ -35,6 +35,12 @@ void BufferingAgent::run() {
     }
 }
 
+void BufferingAgent::stop()
+{
+    _halt = true;
+    quit();
+}
+
 void BufferingAgent::getData(BufferingAgent::DataBlobHash& hash) {
     // spin until we have data
     do{}

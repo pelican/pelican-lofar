@@ -37,6 +37,7 @@ class BufferingAgent : public QThread
         ~BufferingAgent();
 
         void run();
+        void stop();
 
         void getData(DataBlobHash& hash);
 
