@@ -21,7 +21,7 @@ namespace ampp {
  * @class BufferingAgent
  *  
  * @brief
- *    A dedicated thread for running 
+ *    A dedicated thread for buffering data 
  * @details
  * 
  */
@@ -37,6 +37,7 @@ class BufferingAgent : public QThread
         ~BufferingAgent();
 
         void run();
+        void stop();
 
         void getData(DataBlobHash& hash);
 
