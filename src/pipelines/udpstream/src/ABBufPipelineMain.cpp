@@ -9,7 +9,7 @@
 using namespace pelican;
 using namespace ampp;
 
-int main(int argc, char* argv[], const QString& stream)
+int main(int argc, char* argv[])
 {
     // Create a QCoreApplication.
     QCoreApplication app(argc, argv);
@@ -18,6 +18,7 @@ int main(int argc, char* argv[], const QString& stream)
         PipelineApplication pApp(argc, argv);
 
         // Register the pipelines that can run.
+        QString stream;
         pApp.registerPipeline(new ABBufPipeline(stream));
 
         // Set the data client.

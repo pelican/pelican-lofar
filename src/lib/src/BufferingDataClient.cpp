@@ -9,7 +9,7 @@ namespace ampp {
 template<class DataClientType>
 BufferingDataClient<DataClientType>::BufferingDataClient(const ConfigNode& configNode, const DataTypes& types, const Config* config)
     : DataClientType(configNode, types, config)
-    , _agent(boost::bind(&DataClientType::getData, this))
+    , _agent(boost::bind(&DataClientType::getData, this, _1))
 {
     // start the thread running
     std::cout << "-------in bdc!=======" << std::endl;
