@@ -1,5 +1,4 @@
 #include "BufferingAgent.h"
-#include <iostream>
 
 
 namespace pelican {
@@ -27,7 +26,6 @@ BufferingAgent::~BufferingAgent()
 
 void BufferingAgent::run() {
     _halt = false;
-    std::cout << "---------------here!--------------" << std::endl;
     while(1) {
         if(_halt) return;
         DataBlobHash& hash = *(_buffer.next()); // blocks until ready

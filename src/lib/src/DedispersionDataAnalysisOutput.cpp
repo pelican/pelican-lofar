@@ -79,7 +79,6 @@ void DedispersionDataAnalysisOutput::addFile(const QString& filename)
 
 void DedispersionDataAnalysisOutput::sendStream(const QString& /*streamName*/, const DataBlob* dataBlob)
 {
-    std::cout << "called output" << std::endl;
   if( dataBlob->type() == "DedispersionDataAnalysis" ) {
     const DedispersionDataAnalysis* data = static_cast<const DedispersionDataAnalysis*>(dataBlob);
     float rms = data->getRMS();

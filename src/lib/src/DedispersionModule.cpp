@@ -153,7 +153,6 @@ void DedispersionModule::resize( const SpectrumDataSet<float>* streamData ) {
         for ( int c = 0; c < _nChannels; ++c ) {
             float val= 4148.741601 * ((1.0 / (_fch1 + (_foff * c)) / 
                                (_fch1 + (_foff * c))) - (1.0 / _fch1 / _fch1));
-            //(_invert)?_dmshifts.push_front(val):_dmshifts.push_back(val);
             (_invert)?_dmshifts.insert(_dmshifts.begin(), 1, val):_dmshifts.push_back(val);
         }
         _tsamp = streamData->getBlockRate();
@@ -331,7 +330,6 @@ DedispersionModule::DedispersionKernel::DedispersionKernel( float start, float s
 {
 }
 
-//void DedispersionModule::DedispersionKernel::setDMShift( QVector<float>& buffer ) {
 void DedispersionModule::DedispersionKernel::setDMShift( std::vector<float>& buffer ) {
     _dmShift = GPU_MemoryMap(buffer);
 }

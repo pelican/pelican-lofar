@@ -12,7 +12,6 @@ BufferingDataClient<DataClientType>::BufferingDataClient(const ConfigNode& confi
     , _agent(boost::bind(&DataClientType::getData, this, _1))
 {
     // start the thread running
-    std::cout << "-------in bdc!=======" << std::endl;
     _agent.start();
 }
 

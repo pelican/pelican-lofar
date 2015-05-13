@@ -78,19 +78,11 @@ extern "C" void cacheDedisperseLoop( float *outbuff, long outbufSize, float *buf
     std::cout << "outbuff\t" << outbuff << std::endl;
 */
 
-/*    std::cout << "arch is: " << __CUDA_ARCH__ << "!" << std::endl;
-#if __CUDA_ARCH__ >= 350
-    std::cout << "yay!" << std::endl;
-#else
-    std::cout << "nay!" << std::endl;
-#endif*/
     dim3 threads_per_block(divisions_in_t, divisions_in_dm);
     dim3 num_blocks(num_blocks_t,num_blocks_dm);
 
-    std::cout << "Calling dedispersion kernel..." << std::endl;
     cache_dedisperse_loop<<< num_blocks, threads_per_block >>>( outbuff, buff, 
                 mstartdm, mdmstep, dmShift, numSamples, maxshift, i_nchans );
-    std::cout << "DONE" << std::endl;
 }
 
 #endif

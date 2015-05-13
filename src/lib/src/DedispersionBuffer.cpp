@@ -127,7 +127,6 @@ void DedispersionBuffer::dumpbin( const QString& fileName ) const {
     unsigned maxSamples = std::min( numSamples, spaceRemaining() + *sampleNumber );
     timerStart(&_addSampleTimer);
     int start = *sampleNumber;
-    //Q_ASSERT(maxSamples >= start);
     Q_ASSERT(maxSamples > start);
     if( _invertChannels ) {
         int nChannelsMinusOne = nChannels - 1;
