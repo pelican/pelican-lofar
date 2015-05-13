@@ -34,7 +34,7 @@ sub usage {
 }
 
 # parse options
-my @namespaces=qw(pelican lofar);
+my @namespaces=qw(pelican ampp);
 my $baseclass="";
 my $headtext="";
 my $cpptext="";
