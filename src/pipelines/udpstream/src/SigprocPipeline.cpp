@@ -57,7 +57,6 @@ void SigprocPipeline::run(QHash<QString, DataBlob*>& remoteData)
 
     _weightedIntStokes->reset(stokesBuf);
     _rfiClipper->run(_weightedIntStokes);
-    dataOutput(stokesBuf, "SigprocStokesWriter");
     _dedispersionModule->dedisperse(_weightedIntStokes);
 }
 

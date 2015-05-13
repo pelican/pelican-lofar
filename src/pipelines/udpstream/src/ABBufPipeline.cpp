@@ -3,7 +3,7 @@
 #include "DedispersionDataAnalysisOutput.h"
 #include "WeightedSpectrumDataSet.h"
 #include "ABDataAdapter.h"
-#include "ABPipeline.h"
+#include "ABBufPipeline.h"
 #include "SigprocStokesWriter.h"
 #include <boost/bind.hpp>
 #include <iostream>
@@ -17,7 +17,7 @@ using namespace ampp;
 
 // The constructor. It is good practice to initialise any pointer
 // members to zero.
-ABPipeline::ABPipeline(const QString& streamIdentifier)
+ABBufPipeline::ABBufPipeline(const QString& streamIdentifier)
     : AbstractPipeline(), _streamIdentifier(streamIdentifier)
 {
     _dedispersionModule = 0;
@@ -44,7 +44,7 @@ ABPipeline::ABPipeline(const QString& streamIdentifier)
 
 // The destructor must clean up and created modules and
 // any local DataBlob's created.
-ABPipeline::~ABPipeline()
+ABBufPipeline::~ABBufPipeline()
 {
     //delete _dedispersionModule;
     delete _dedispersionAnalyser;
@@ -53,9 +53,9 @@ ABPipeline::~ABPipeline()
 
 // Initialises the pipeline, creating required modules and data blobs,
 // and requesting remote data.
-void ABPipeline::init()
+void ABBufPipeline::init()
 {
-    ConfigNode c = config(QString("ABPipeline"));
+    ConfigNode c = config(QString("ABBufPipeline"));
     unsigned int history = c.getOption("history", "value", "10").toUInt();
     _minEventsFound = c.getOption("events", "min", "5").toUInt();
     _maxEventsFound = c.getOption("events", "max", "5").toUInt();
@@ -65,8 +65,8 @@ void ABPipeline::init()
     _stokesIntegrator = (StokesIntegrator *) createModule("StokesIntegrator");
     _dedispersionModule = (DedispersionModule*) createModule("DedispersionModule");
     _dedispersionAnalyser = (DedispersionAnalyser*) createModule("DedispersionAnalyser");
-    _dedispersionModule->connect( boost::bind( &ABPipeline::dedispersionAnalysis, this, _1 ) );
-    _dedispersionModule->unlockCallback( boost::bind( &ABPipeline::updateBufferLock, this, _1 ) );
+    _dedispersionModule->connect( boost::bind( &ABBufPipeline::dedispersionAnalysis, this, _1 ) );
+    _dedispersionModule->unlockCallback( boost::bind( &ABBufPipeline::updateBufferLock, this, _1 ) );
     _stokesData = createBlobs<SpectrumDataSetStokes>("SpectrumDataSetStokes", history);
     _stokesBuffer = new LockingPtrContainer<SpectrumDataSetStokes>(&_stokesData);
     //_stokes = (SpectrumDataSetStokes *) createBlob("SpectrumDataSetStokes");
@@ -78,7 +78,7 @@ void ABPipeline::init()
 }
 
 // Defines a single iteration of the pipeline.
-void ABPipeline::run(QHash<QString, DataBlob*>& remoteData)
+void ABBufPipeline::run(QHash<QString, DataBlob*>& remoteData)
 {
 #ifdef TIMING_ENABLED
     timerStart(&_totalTime);
@@ -139,7 +139,7 @@ void ABPipeline::run(QHash<QString, DataBlob*>& remoteData)
     _counter++;
 }
 
-void ABPipeline::dedispersionAnalysis( DataBlob* blob ) {
+void ABBufPipeline::dedispersionAnalysis( DataBlob* blob ) {
     DedispersionDataAnalysis result;
     DedispersionSpectra* data = static_cast<DedispersionSpectra*>(blob);
     if ( _dedispersionAnalyser->analyse(data, &result) )
@@ -168,7 +168,7 @@ void ABPipeline::dedispersionAnalysis( DataBlob* blob ) {
       }
 }
 
-void ABPipeline::updateBufferLock( const QList<DataBlob*>& freeData ) {
+void ABBufPipeline::updateBufferLock( const QList<DataBlob*>& freeData ) {
      // find WeightedDataBlobs that can be unlocked
      foreach( DataBlob* blob, freeData ) {
         Q_ASSERT( blob->type() == "SpectrumDataSetStokes" );

@@ -6,13 +6,13 @@
 #include "BufferingAgent.h"
 
 namespace pelican {
-namespace lofar {
+namespace ampp {
 
 /**
  * @class BufferingDataClient
  *  
  * @brief
- *     Wraps anouther DataClient in the background, running it in its own thread
+ *     Wraps another DataClient in the background, running it in its own thread
  * 
  */
 
@@ -24,13 +24,13 @@ class BufferingDataClient : public DataClientType
         ~BufferingDataClient();
         
         // overriden methods here
-        virtual DataBlobHash getData(pelican::AbstractDataClient::DataBlobHash&);
+        virtual pelican::AbstractDataClient::DataBlobHash getData(pelican::AbstractDataClient::DataBlobHash&);
 
     private:
         BufferingAgent _agent;
 };
 
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican
 #include "src/BufferingDataClient.cpp"
 #endif // BUFFERINGDATACLIENT_H 

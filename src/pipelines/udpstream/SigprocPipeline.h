@@ -47,13 +47,11 @@ class SigprocPipeline : public AbstractPipeline
 
     private:
         RFI_Clipper* _rfiClipper;
-        //StokesIntegrator* _stokesIntegrator;
         DedispersionModule* _dedispersionModule;
         DedispersionAnalyser* _dedispersionAnalyser;
 
         QList<SpectrumDataSetStokes*> _stokesData;
         LockingPtrContainer<SpectrumDataSetStokes>* _stokesBuffer;
-        //SpectrumDataSetStokes* _intStokes;
         WeightedSpectrumDataSet* _weightedIntStokes;
 
         unsigned int _minEventsFound;

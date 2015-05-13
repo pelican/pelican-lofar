@@ -7,7 +7,7 @@
 //#define DIVINDM 19
 
 // L1 cache
-#ifndef __CUDA_ARCH__
+/*#ifndef __CUDA_ARCH__
 #warning "__CUDA_ARCH__ is not defined"
 #define NUMREG 15
 #define DIVINT 10
@@ -28,8 +28,12 @@
 
 #define NUMREG 12
 #define DIVINT 6
-#define DIVINDM 80
-#define FDIVINDM 80.0f
+#define DIVINDM 80*/
+
+#define NUMREG      14
+#define DIVINT      16
+#define DIVINDM     40
+#define FDIVINDM    80.0f
 
 #define ARRAYSIZE DIVINT * DIVINDM
 

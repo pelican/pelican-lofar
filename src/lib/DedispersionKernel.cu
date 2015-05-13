@@ -38,6 +38,7 @@ __global__ void cache_dedisperse_loop(float *outbuff, float *buff, float mstartd
         #pragma unroll
         for(int i = 0; i < NUMREG; i++) {
             local_kernel_t[i] += buff[shift + (i * DIVINT) ];
+            //local_kernel_t[i] += __ldg(&buff[shift + (i * DIVINT) ]);
         }
     }
 

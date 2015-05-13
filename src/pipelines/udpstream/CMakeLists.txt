@@ -15,6 +15,7 @@ set(pipeline_lib_src
     src/BandPassPipeline.cpp
     src/JTestPipeline.cpp
     src/ABPipeline.cpp
+    src/ABBufPipeline.cpp
 )
 if(CUDA_FOUND)
     list(APPEND pipeline_lib_src
@@ -254,6 +255,23 @@ target_link_libraries(JTestPipelineStream
 )
 
 
+# === Build the ALFABURST server binary
+add_executable(ABServer src/ABServerMain.cpp)
+set_target_properties(ABServer PROPERTIES
+    COMPILE_FLAGS "${OpenMP_CXX_FLAGS}"
+    LINK_FLAGS "${OpenMP_CXX_FLAGS}"
+)
+target_link_libraries(ABServer
+    pelicanMdsm
+    pelican-lofar_static
+    ${PELICAN_LIBRARY}
+    ${FFTW3_FFTW_LIBRARY}
+    ${FFTW3_FFTWF_LIBRARY}
+    ${QT_QTNETWORK_LIBRARY}
+    ${QT_QTXML_LIBRARY}
+    ${QT_QTCORE_LIBRARY}
+)
+
 # === Build the ALFABURST pipeline binary
 add_executable(ABPipelineStream src/ABPipelineMain.cpp)
 set_target_properties(ABPipelineStream PROPERTIES
@@ -272,6 +290,22 @@ target_link_libraries(ABPipelineStream
     ${QT_QTCORE_LIBRARY}
 )
 
+# === Build the ALFABURST buffered pipeline binary
+add_executable(ABBufPipelineStream src/ABBufPipelineMain.cpp)
+set_target_properties(ABBufPipelineStream PROPERTIES
+    COMPILE_FLAGS "${OpenMP_CXX_FLAGS}"
+    LINK_FLAGS "${OpenMP_CXX_FLAGS}"
+)
+target_link_libraries(ABBufPipelineStream
+    pelicanMdsm
+    pelican-lofar_static
+    ${PELICAN_LIBRARY}
+    ${FFTW3_FFTW_LIBRARY}
+    ${FFTW3_FFTWF_LIBRARY}
+    ${QT_QTNETWORK_LIBRARY}
+    ${QT_QTXML_LIBRARY}
+    ${QT_QTCORE_LIBRARY}
+)
 
 # === Build the sigprocPipeline
 add_executable(sigprocPipeline src/sigprocPipelineMain.cpp)

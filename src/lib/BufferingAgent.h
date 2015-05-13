@@ -4,8 +4,8 @@
 
 #include "pelican/core/AbstractDataClient.h"
 #include "LockingContainer.hpp"
-#include <QList.h>
-#include <QThread.h>
+#include <QList>
+#include <QThread>
 #include <boost/function.hpp>
 #include <deque>
 
@@ -14,7 +14,6 @@
  */
 
 namespace pelican {
-
 namespace ampp {
 
 /**

@@ -3,8 +3,7 @@
 
 
 namespace pelican {
-namespace lofar {
-
+namespace ampp {
 
 template<class DataClientType>
 BufferingDataClient<DataClientType>::BufferingDataClient(const ConfigNode& configNode, const DataTypes& types, const Config* config)
@@ -29,5 +28,5 @@ pelican::AbstractDataClient::DataBlobHash BufferingDataClient<DataClientType>::g
     return hash;
 }
 
-} // namespace lofar
+} // namespace ampp
 } // namespace pelican

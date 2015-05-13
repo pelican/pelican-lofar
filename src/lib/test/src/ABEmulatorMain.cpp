@@ -11,12 +11,11 @@ int main(int argc, char* argv[])
     // Create a QCoreApplication
     QCoreApplication app(argc, argv);
 
-    printf("interval = 0\n");
     try {
         ConfigNode emulatorConfig("<ABEmulator>"
-                                  "<packet samples=\"1024\" interval=\"10000\" />"
+                                  "<packet samples=\"1024\" interval=\"100\" />"
                                   "<signal period=\"20\" />"
-                                  "<connection host=\"127.0.0.1\" port=\"2001\" />"
+                                  "<connection host=\"127.0.0.1\" port=\"9999\" />"
                                   "</ABEmulator>");
         EmulatorDriver emulator(new ABEmulator(emulatorConfig));
         return app.exec();

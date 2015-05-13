@@ -175,7 +175,7 @@ void DedispersionBuffer::dumpbin( const QString& fileName ) const {
     _sampleCount += (maxSamples - start);
     *sampleNumber = maxSamples;
     timerUpdate(&_addSampleTimer);
-    timerReport(&_addSampleTimer, "DedispersionBuffer::addSamples");
+    //timerReport(&_addSampleTimer, "DedispersionBuffer::addSamples");
     return spaceRemaining();
 }
 
@@ -240,7 +240,7 @@ void DedispersionBuffer::dumpbin( const QString& fileName ) const {
     _sampleCount += (maxSamples - start);
     *sampleNumber = maxSamples;
     timerUpdate(&_addSampleTimer);
-    timerReport(&_addSampleTimer, "DedispersionBuffer::addSamples");
+    //timerReport(&_addSampleTimer, "DedispersionBuffer::addSamples");
     return spaceRemaining();
 }
 
