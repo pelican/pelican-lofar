@@ -25,6 +25,8 @@ struct K7PacketHeader {
     uint_32 _number_of_integrations; // per spectrum
 
     friend QIOStream& operator>>(K7PacketHeader&, QIOStream&);
+    
+    inline std::size_t payload_size() const { return _integration_counter/_number_of_integrations; }
 };
 
 class K7Packet
