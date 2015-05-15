@@ -27,6 +27,10 @@ class BufferingDataClient : public DataClientType
         virtual pelican::AbstractDataClient::DataBlobHash getData(pelican::AbstractDataClient::DataBlobHash&);
 
     private:
+        // fn to execute the event loop
+        void exec();
+
+    private:
         BufferingAgent _agent;
 };
 
