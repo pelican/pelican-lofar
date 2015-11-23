@@ -284,7 +284,7 @@ void RFI_Clipper::run( WeightedSpectrumDataSet* weightedStokes )
       double spectrumRMS = _bandPass.rms();
       if (goodChannels != 0)
         {
-          double spectrumRMS = sqrt(spectrumSumSq/goodChannels - std::pow(spectrumSum,2));
+          spectrumRMS = sqrt(spectrumSumSq/goodChannels - std::pow(spectrumSum,2));
         }
       //      std::cout << spectrumSumSqAll << " " << spectrumSumAll << " " << nChannels<< std::endl;
       double spectrumRMSAll = sqrt(spectrumSumSqAll/(nChannels*nSubbands) - std::pow(spectrumSumAll/(nChannels*nSubbands),2));
