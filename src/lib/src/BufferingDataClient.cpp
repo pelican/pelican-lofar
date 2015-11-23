@@ -1,5 +1,6 @@
 #include "BufferingDataClient.h"
 #include <QtCore>
+#include <QCoreApplication>
 #include <boost/bind.hpp>
 
 namespace pelican {
@@ -15,7 +16,7 @@ BufferingDataClient<DataClientType>::BufferingDataClient(const ConfigNode& confi
     _agent.start();
 
     // dedicate a thread to running the event loop of the agent to ensure messages are delivered to the agent
-    QtConcurrent::run(boost::bind(BufferingDataClient<DataClientType>::exec, this));   
+    QtConcurrent::run(boost::bind(&BufferingDataClient<DataClientType>::exec, this));   
 }
 
 template<class DataClientType>
@@ -30,7 +31,7 @@ template<class DataClientType>
 void BufferingDataClient<DataClientType>::exec() 
 {
     while(!_halt) {
-        QtCoreApplication::processEvents();
+        QCoreApplication::processEvents();
     }
 }
 

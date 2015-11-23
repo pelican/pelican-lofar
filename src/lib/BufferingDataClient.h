@@ -32,6 +32,7 @@ class BufferingDataClient : public DataClientType
 
     private:
         BufferingAgent _agent;
+	bool _halt;
 };
 
 } // namespace ampp

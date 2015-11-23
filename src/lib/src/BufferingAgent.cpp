@@ -47,7 +47,7 @@ void BufferingAgent::getData(BufferingAgent::DataBlobHash& hash) {
     while(_queue.empty());
 
     DataBlobHash* tmp = _queue.front();
-    hash.swap(*tmp); // TODO verify this is doing what we think its doing
+    //    hash.swap(*tmp); // TODO verify this is doing what we think its doing
     _queue.pop_front(); // remove from queue before unblocking the other thread to reduce conflicts
     _buffer.unlock(tmp);
 }
