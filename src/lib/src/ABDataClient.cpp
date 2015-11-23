@@ -6,12 +6,10 @@ using namespace pelican::ampp;
 
 ABDataClient::ABDataClient(const ConfigNode& configNode,
                 const DataTypes& types, const Config* config)
-    : DirectStreamDataClient(configNode, types, config)
+    : PelicanServerClient(configNode, types, config)
 {
-    addStreamChunker("ABChunker");
 }
 
 ABDataClient::~ABDataClient()
 {
 }
-

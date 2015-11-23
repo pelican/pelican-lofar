@@ -1,5 +1,5 @@
-#ifndef ABPIPELINE_H
-#define ABPIPELINE_H
+#ifndef ABBUFPIPELINE_H
+#define ABBUFPIPELINE_H
 
 #include "pelican/core/AbstractPipeline.h"
 #include "RFI_Clipper.h"
@@ -14,14 +14,14 @@ namespace ampp {
 
 //class DedispersionModule;
 
-class ABPipeline : public AbstractPipeline
+class ABBufPipeline : public AbstractPipeline
 {
     public:
         // Constructor.
-        ABPipeline(const QString& streamIdentifier);
+        ABBufPipeline(const QString& streamIdentifier);
 
         // Destructor
-        ~ABPipeline();
+        ~ABBufPipeline();
 
         // Initialises the pipeline.
         void init();
@@ -66,5 +66,5 @@ class ABPipeline : public AbstractPipeline
 } // namespace ampp
 } // namespace pelican
 
-#endif // ABPIPELINE_H
+#endif // ABBUFPIPELINE_H
 

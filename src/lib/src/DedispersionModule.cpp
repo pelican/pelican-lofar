@@ -153,12 +153,10 @@ void DedispersionModule::resize( const SpectrumDataSet<float>* streamData ) {
         for ( int c = 0; c < _nChannels; ++c ) {
             float val= 4148.741601 * ((1.0 / (_fch1 + (_foff * c)) / 
                                (_fch1 + (_foff * c))) - (1.0 / _fch1 / _fch1));
-            (_invert)?_dmshifts.push_front(val):_dmshifts.push_back(val);
-            //_dmshifts.append(  4148.741601 * ((1.0 / (_fch1 + (_foff * c)) / 
-            //                   (_fch1 + (_foff * c))) - (1.0 / _fch1 / _fch1)) );
+            (_invert)?_dmshifts.insert(_dmshifts.begin(), 1, val):_dmshifts.push_back(val);
         }
         _tsamp = streamData->getBlockRate();
-        _maxshift = (_invert)? -((_dmLow + _dmStep * (_tdms - 1)) * _dmshifts[0])/_tsamp:((_dmLow + _dmStep * (_tdms - 1)) * _dmshifts[_nChannels - 1])/_tsamp; 
+        _maxshift = (_invert)? -((_dmLow + _dmStep * (_tdms - 1)) * _dmshifts[0])/_tsamp:((_dmLow + _dmStep * (_tdms - 1)) * _dmshifts[_nChannels - 1])/_tsamp;
         // Calculate the remaining number of samples between the full
         // buffer minus maxshift and what is being dedispersed:
         _remainingSamples = (_numSamplesBuffer-_maxshift)%(NUMREG*DIVINT);
@@ -224,7 +222,6 @@ void DedispersionModule::dedisperse( WeightedSpectrumDataSet* weightedData )
   do {
     unsigned ret = _currentBuffer->addSamples( weightedData, _noiseTemplate, &sampleNumber );
     if (0 == ret) {
-    //if( _currentBuffer->addSamples( weightedData, _noiseTemplate, &sampleNumber ) == 0 ) {
       timerStart(&_launchTimer);
       timerStart(&_bufferTimer);
       DedispersionBuffer* next = _buffers.next();
@@ -254,10 +251,10 @@ void DedispersionModule::dedisperse( WeightedSpectrumDataSet* weightedData )
       timerUpdate( &_dedisperseTimer );
       _currentBuffer = next;
       timerUpdate(&_launchTimer);
-      timerReport(&_launchTimer, "Launch Total");
-      timerReport(&_dedisperseTimer, "Dedispersing Time");
-      timerReport(&_bufferTimer,"bufferTimer");
-      timerReport(&_copyTimer,"copyTimer");
+      //timerReport(&_launchTimer, "Launch Total");
+      //timerReport(&_dedisperseTimer, "Dedispersing Time");
+      //timerReport(&_bufferTimer,"bufferTimer");
+      //timerReport(&_copyTimer,"copyTimer");
     }
   }
     while( sampleNumber != maxSamples );
@@ -333,7 +330,7 @@ DedispersionModule::DedispersionKernel::DedispersionKernel( float start, float s
 {
 }
 
-void DedispersionModule::DedispersionKernel::setDMShift( QVector<float>& buffer ) {
+void DedispersionModule::DedispersionKernel::setDMShift( std::vector<float>& buffer ) {
     _dmShift = GPU_MemoryMap(buffer);
 }
 
@@ -341,7 +338,8 @@ void DedispersionModule::DedispersionKernel::cleanUp() {
     _inputBuffer.runCallBacks();
 }
 
-void DedispersionModule::DedispersionKernel::setOutputBuffer( QVector<float>& buffer )
+//void DedispersionModule::DedispersionKernel::setOutputBuffer( QVector<float>& buffer )
+void DedispersionModule::DedispersionKernel::setOutputBuffer( std::vector<float>& buffer )
 {
     _outputBuffer = GPU_MemoryMap(buffer);
 }

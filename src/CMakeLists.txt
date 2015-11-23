@@ -55,18 +55,6 @@ endif(CUDA_FOUND)
 if(LOFAR_DAL_FOUND)
     add_definitions(-DLOFAR_DAL_FOUND)
 endif(LOFAR_DAL_FOUND)
-#find_package(MKL QUIET)
-#if(MKL_FOUND)
-#    add_definitions(-DUSING_MKL)
-#    set(CBLAS_LIBS ${MKL_LIBRARIES})
-#    include_directories(${MKL_INCLUDE_DIR})
-#    message(STATUS "Using MKL CBLAS ${MKL_LIBRARIES}")
-#else(MKL_FOUND)
-#    find_package(CBLAS REQUIRED)
-#    set(CBLAS_LIBS ${CBLAS_LIBRARIES})
-#    message(STATUS "Using CBLAS ${CBLAS_LIBRARIES}")
-#endif(MKL_FOUND)
-
 
 # === Add directories to the include path (i.e. -I<directory> ...)
 include_directories(${PELICAN_INCLUDES})
@@ -87,6 +75,7 @@ target_link_libraries(lofarClient
     ${QT_QTNETWORK_LIBRARY}
     ${QT_QTXML_LIBRARY}
     ${PELICAN_LIBRARY}
+    ${Boost_PROGRAM_OPTIONS_LIBRARY}
     ${FFTW3_LIBRARIES}
     ${CBLAS_LIBS}
 )

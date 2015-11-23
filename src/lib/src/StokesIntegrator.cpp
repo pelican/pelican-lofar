@@ -39,6 +39,7 @@ void StokesIntegrator::run(const SpectrumDataSetStokes* stokesGeneratorOutput,
     //std::cout << "nSamples= " << nSamples << std::endl;
     //std::cout << "nSubbands= " << nSubbands << std::endl;
     //std::cout << "nChannels= " << nChannels << std::endl;
+    //std::cout << "nPols= " << nPols << std::endl;
 
     //TIMER_ENABLE
 
@@ -114,6 +115,7 @@ void StokesIntegrator::run(const SpectrumDataSetStokes* stokesGeneratorOutput,
 
     // Set the timestamp of the first time sample
     intStokes->setLofarTimestamp(stokesGeneratorOutput->getLofarTimestamp());
+    intStokes->setBlockRate(stokesGeneratorOutput->getBlockRate() * _windowSize);
 
     //std::cout << "timestamp in integrator:" << intStokes->getLofarTimestamp() << std::endl;
     //TIMER_STOP(ts);

@@ -15,6 +15,7 @@ set(pipeline_lib_src
     src/BandPassPipeline.cpp
     src/JTestPipeline.cpp
     src/ABPipeline.cpp
+    src/ABBufPipeline.cpp
 )
 if(CUDA_FOUND)
     list(APPEND pipeline_lib_src
@@ -30,6 +31,7 @@ target_link_libraries(emptyPipeline
     pelicanMdsm
     pelican-lofar_static
     ${PELICAN_LIBRARY}
+    ${Boost_PROGRAM_OPTIONS_LIBRARY}
     ${QT_QTNETWORK_LIBRARY}
     ${QT_QTXML_LIBRARY}
     ${QT_QTCORE_LIBRARY}
@@ -46,6 +48,7 @@ target_link_libraries(dedispersionStream1
     pelicanMdsm
     pelican-lofar_static
     ${PELICAN_LIBRARY}
+    ${Boost_PROGRAM_OPTIONS_LIBRARY}
     ${FFTW3_FFTW_LIBRARY}
     ${FFTW3_FFTWF_LIBRARY}
     ${QT_QTNETWORK_LIBRARY}
@@ -61,6 +64,7 @@ target_link_libraries(dedispersionStream2
     pelicanMdsm
     pelican-lofar_static
     ${PELICAN_LIBRARY}
+    ${Boost_PROGRAM_OPTIONS_LIBRARY}
     ${FFTW3_FFTW_LIBRARY}
     ${FFTW3_FFTWF_LIBRARY}
     ${QT_QTNETWORK_LIBRARY}
@@ -81,6 +85,7 @@ target_link_libraries(udpBFPipeline
     pelicanMdsm
     pelican-lofar_static
     ${PELICAN_LIBRARY}
+    ${Boost_PROGRAM_OPTIONS_LIBRARY}
     ${FFTW3_FFTW_LIBRARY}
     ${FFTW3_FFTWF_LIBRARY}
     ${QT_QTNETWORK_LIBRARY}
@@ -98,6 +103,7 @@ target_link_libraries(udpBFPipelineStream1
     pelicanMdsm
     pelican-lofar_static
     ${PELICAN_LIBRARY}
+    ${Boost_PROGRAM_OPTIONS_LIBRARY}
     ${FFTW3_FFTW_LIBRARY}
     ${FFTW3_FFTWF_LIBRARY}
     ${QT_QTNETWORK_LIBRARY}
@@ -115,6 +121,7 @@ target_link_libraries(udpBFPipelineStream2
     pelicanMdsm
     pelican-lofar_static
     ${PELICAN_LIBRARY}
+    ${Boost_PROGRAM_OPTIONS_LIBRARY}
     ${FFTW3_FFTW_LIBRARY}
     ${FFTW3_FFTWF_LIBRARY}
     ${QT_QTNETWORK_LIBRARY}
@@ -131,6 +138,7 @@ target_link_libraries(embraceBFPipeline
     pelicanMdsm
     pelican-lofar_static
     ${PELICAN_LIBRARY}
+    ${Boost_PROGRAM_OPTIONS_LIBRARY}
     ${FFTW3_FFTW_LIBRARY}
     ${FFTW3_FFTWF_LIBRARY}
     ${QT_QTNETWORK_LIBRARY}
@@ -148,6 +156,7 @@ target_link_libraries(embraceBFPipelineStream1
     pelicanMdsm
     pelican-lofar_static
     ${PELICAN_LIBRARY}
+    ${Boost_PROGRAM_OPTIONS_LIBRARY}
     ${FFTW3_FFTW_LIBRARY}
     ${FFTW3_FFTWF_LIBRARY}
     ${QT_QTNETWORK_LIBRARY}
@@ -165,6 +174,7 @@ target_link_libraries(embraceBFPipelineStream2
     pelicanMdsm
     pelican-lofar_static
     ${PELICAN_LIBRARY}
+    ${Boost_PROGRAM_OPTIONS_LIBRARY}
     ${FFTW3_FFTW_LIBRARY}
     ${FFTW3_FFTWF_LIBRARY}
     ${QT_QTNETWORK_LIBRARY}
@@ -181,6 +191,7 @@ target_link_libraries(h5CVPipeline
     pelicanMdsm
     pelican-lofar_static
     ${PELICAN_LIBRARY}
+    ${Boost_PROGRAM_OPTIONS_LIBRARY}
     ${FFTW3_FFTW_LIBRARY}
     ${FFTW3_FFTWF_LIBRARY}
     ${QT_QTNETWORK_LIBRARY}
@@ -198,6 +209,7 @@ target_link_libraries(h5CVPipelineStream1
     pelicanMdsm
     pelican-lofar_static
     ${PELICAN_LIBRARY}
+    ${Boost_PROGRAM_OPTIONS_LIBRARY}
     ${FFTW3_FFTW_LIBRARY}
     ${FFTW3_FFTWF_LIBRARY}
     ${QT_QTNETWORK_LIBRARY}
@@ -215,6 +227,7 @@ target_link_libraries(h5CVPipelineStream2
     pelicanMdsm
     pelican-lofar_static
     ${PELICAN_LIBRARY}
+    ${Boost_PROGRAM_OPTIONS_LIBRARY}
     ${FFTW3_FFTW_LIBRARY}
     ${FFTW3_FFTWF_LIBRARY}
     ${QT_QTNETWORK_LIBRARY}
@@ -233,6 +246,7 @@ target_link_libraries(JTestPipelineStream
     pelicanMdsm
     pelican-lofar_static
     ${PELICAN_LIBRARY}
+    ${Boost_PROGRAM_OPTIONS_LIBRARY}
     ${FFTW3_FFTW_LIBRARY}
     ${FFTW3_FFTWF_LIBRARY}
     ${QT_QTNETWORK_LIBRARY}
@@ -240,6 +254,23 @@ target_link_libraries(JTestPipelineStream
     ${QT_QTCORE_LIBRARY}
 )
 
+
+# === Build the ALFABURST server binary
+add_executable(ABServer src/ABServerMain.cpp)
+set_target_properties(ABServer PROPERTIES
+    COMPILE_FLAGS "${OpenMP_CXX_FLAGS}"
+    LINK_FLAGS "${OpenMP_CXX_FLAGS}"
+)
+target_link_libraries(ABServer
+    pelicanMdsm
+    pelican-lofar_static
+    ${PELICAN_LIBRARY}
+    ${FFTW3_FFTW_LIBRARY}
+    ${FFTW3_FFTWF_LIBRARY}
+    ${QT_QTNETWORK_LIBRARY}
+    ${QT_QTXML_LIBRARY}
+    ${QT_QTCORE_LIBRARY}
+)
 
 # === Build the ALFABURST pipeline binary
 add_executable(ABPipelineStream src/ABPipelineMain.cpp)
@@ -251,6 +282,7 @@ target_link_libraries(ABPipelineStream
     pelicanMdsm
     pelican-lofar_static
     ${PELICAN_LIBRARY}
+    ${Boost_PROGRAM_OPTIONS_LIBRARY}
     ${FFTW3_FFTW_LIBRARY}
     ${FFTW3_FFTWF_LIBRARY}
     ${QT_QTNETWORK_LIBRARY}
@@ -258,6 +290,22 @@ target_link_libraries(ABPipelineStream
     ${QT_QTCORE_LIBRARY}
 )
 
+# === Build the ALFABURST buffered pipeline binary
+add_executable(ABBufPipelineStream src/ABBufPipelineMain.cpp)
+set_target_properties(ABBufPipelineStream PROPERTIES
+    COMPILE_FLAGS "${OpenMP_CXX_FLAGS}"
+    LINK_FLAGS "${OpenMP_CXX_FLAGS}"
+)
+target_link_libraries(ABBufPipelineStream
+    pelicanMdsm
+    pelican-lofar_static
+    ${PELICAN_LIBRARY}
+    ${FFTW3_FFTW_LIBRARY}
+    ${FFTW3_FFTWF_LIBRARY}
+    ${QT_QTNETWORK_LIBRARY}
+    ${QT_QTXML_LIBRARY}
+    ${QT_QTCORE_LIBRARY}
+)
 
 # === Build the sigprocPipeline
 add_executable(sigprocPipeline src/sigprocPipelineMain.cpp)
@@ -269,6 +317,7 @@ target_link_libraries(sigprocPipeline
     pelicanMdsm
     pelican-lofar_static
     ${PELICAN_LIBRARY}
+    ${Boost_PROGRAM_OPTIONS_LIBRARY}
     ${FFTW3_FFTW_LIBRARY}
     ${FFTW3_FFTWF_LIBRARY}
     ${QT_QTNETWORK_LIBRARY}
@@ -286,6 +335,7 @@ target_link_libraries(timingPipeline
     pelicanMdsm
     pelican-lofar_static
     ${PELICAN_LIBRARY}
+    ${Boost_PROGRAM_OPTIONS_LIBRARY}
     ${FFTW3_FFTW_LIBRARY}
     ${FFTW3_FFTWF_LIBRARY}
     ${QT_QTNETWORK_LIBRARY}
@@ -294,11 +344,12 @@ target_link_libraries(timingPipeline
 )
 install(TARGETS emptyPipeline udpBFPipeline 
                 udpBFPipelineStream1 udpBFPipelineStream2
-		embraceBFPipeline 
+                embraceBFPipeline 
                 embraceBFPipelineStream1 embraceBFPipelineStream2 
-		h5CVPipeline h5CVPipelineStream1
-		h5CVPipelineStream2
-                DESTINATION ${BINARY_INSTALL_DIR})
+                h5CVPipeline h5CVPipelineStream1
+                h5CVPipelineStream2
+                sigprocPipeline
+        DESTINATION ${BINARY_INSTALL_DIR})
 
 #install(TARGETS udpBFPipeline embraceBFPipeline DESTINATION ${BINARY_INSTALL_DIR})
 

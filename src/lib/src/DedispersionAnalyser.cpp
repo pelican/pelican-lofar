@@ -2,7 +2,7 @@
 #include "DedispersionSpectra.h"
 #include "DedispersionDataAnalysis.h"
 #include "SpectrumDataSet.h"
-#include <QVector>
+#include <vector>
 
 
 namespace pelican {
@@ -42,7 +42,7 @@ int DedispersionAnalyser::analyse( DedispersionSpectra* data,
     //double mean = 0.0, stddev = 0.0;
     double total = 0.0;
 
-    QVector<float> dataVector = data->data();
+    std::vector<float> dataVector = data->data();
     /*
     int vals=dataVector.size();
     for( int j = 0; j < vals; ++j ) {
@@ -67,7 +67,7 @@ int DedispersionAnalyser::analyse( DedispersionSpectra* data,
 
     // Add a dummy event to get the timestamp of the first bin in the blob
     result->addEvent( 0, 0, 1, 0.0 );
-    
+
     // Compute 2^_binPowerOf2
     unsigned int maxPow2 = pow(2,_binPow2);
     unsigned int numberOfwidestBins = nsamp/maxPow2;

@@ -10,18 +10,39 @@ IF (CPPUNIT_INCLUDE_DIR)
     SET(CPPUNIT_FIND_QUIETLY TRUE)
 ENDIF (CPPUNIT_INCLUDE_DIR)
 
-FIND_PATH(CPPUNIT_INCLUDE_DIR TestSuite.h PATHS /usr/include/cppunit /usr/include/libcppunit )
+FIND_PATH(CPPUNIT_INCLUDE_DIR TestSuite.h
+    HINTS
+        ${CPPUNIT_ROOT}
+    PATHS
+        /usr
+        /usr/local
+    PATH_SUFFIXES
+        include
+        include/cppunit
+)
 
 SET(CPPUNIT_NAMES cppunit)
-FOREACH( lib ${CPPUNIT_NAMES} )
-    FIND_LIBRARY(CPPUNIT_LIBRARY_${lib} NAMES ${lib} )
+FOREACH(lib ${CPPUNIT_NAMES} )
+    FIND_LIBRARY(CPPUNIT_LIBRARY_${lib}
+        NAMES ${lib}
+        HINTS
+            ${CPPUNIT_ROOT}
+        PATHS
+            /usr
+            /usr/local
+        PATH_SUFFIXES
+            lib
+            lib64
+    )
     LIST(APPEND CPPUNIT_LIBRARIES ${CPPUNIT_LIBRARY_${lib}})
+    #message(STATUS "===== ${CPPUNIT_LIBRARY_${lib}}")
 ENDFOREACH(lib)
+
 
 # handle the QUIETLY and REQUIRED arguments and set CPPUNIT_FOUND to TRUE if.
 # all listed variables are TRUE
 INCLUDE(FindPackageHandleCompat)
-FIND_PACKAGE_HANDLE_STANDARD_ARGS(CPPUNIT DEFAULT_MSG CPPUNIT_LIBRARIES CPPUNIT_INCLUDE_DIR)
+FIND_PACKAGE_HANDLE_STANDARD_ARGS(CppUnit DEFAULT_MSG CPPUNIT_LIBRARIES CPPUNIT_INCLUDE_DIR)
 
 IF(NOT CPPUNIT_FOUND)
     SET( CPPUNIT_LIBRARIES )

@@ -1,4 +1,4 @@
-include_directories(${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR} ..)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR} .. ${CPPUNIT_INCLUDE_DIR})
 
 # Create test utility library.
 # ------------------------------------------------------------------------------
@@ -33,6 +33,17 @@ set( pipelineTest_moc_headers
      LofarTestClient.h
 )
 
+set(TEST_EXE_LIBS
+    ${PELICAN_TESTUTILS_LIBRARY}
+    ${PELICAN_LIBRARY}
+    ${Boost_PROGRAM_OPTIONS_LIBRARY}
+    ${FFTW3_FFTW_LIBRARY}
+    ${FFTW3_FFTWF_LIBRARY}
+    ${CPPUNIT_LIBRARIES}
+    ${QT_QTCORE_LIBRARY}
+    ${QT_QTNETWORK_LIBRARY}
+    ${QT_QTXML_LIBRARY})
+
 QT4_WRAP_CPP(pipelineTest_src ${pipelineTest_moc_headers})
 
 add_executable(pipelineTest ${pipelineTest_src})
@@ -41,19 +52,11 @@ set_target_properties(pipelineTest PROPERTIES
     LINK_FLAGS "${OpenMP_CXX_FLAGS}"
 )
 target_link_libraries(pipelineTest
-#    pelican-lofar_static
     pelican-lofar
     pelicanMdsm
 #    pipelineTestLib
     lofarTestLib
-    ${PELICAN_TESTUTILS_LIBRARY}
-    ${PELICAN_LIBRARY}
-    ${FFTW3_FFTW_LIBRARY}
-    ${FFTW3_FFTWF_LIBRARY}
-    ${CPPUNIT_LIBRARIES}
-    ${QT_QTCORE_LIBRARY}
-    ${QT_QTNETWORK_LIBRARY}
-    ${QT_QTXML_LIBRARY}
+    ${TEST_EXE_LIBS}
 )
 
 CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/testInfo.in ${CMAKE_CURRENT_BINARY_DIR}/testInfo.h)

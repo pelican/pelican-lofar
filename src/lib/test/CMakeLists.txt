@@ -2,7 +2,7 @@
 # pelican-lofar/lib/test/CMakeLists.txt
 #
 
-include_directories(${CMAKE_CURRENT_SOURCE_DIR})
+include_directories(${CMAKE_CURRENT_SOURCE_DIR} ${CPPUNIT_INCLUDE_DIR})
 
 # ==== Create test utility library.
 set(lofarTestLib_src
@@ -36,6 +36,19 @@ target_link_libraries(lofarTestLib
     ${QT_QTCORE_LIBRARY}
     ${Boost_PROGRAM_OPTIONS_LIBRARY}
 )
+
+set(TEST_EXE_LIBS
+    pelican-lofar_static
+    ${PELICAN_TESTUTILS_LIBRARY}
+    ${PELICAN_LIBRARY}
+    ${Boost_PROGRAM_OPTIONS_LIBRARY}
+    ${FFTW3_FFTW_LIBRARY}
+    ${FFTW3_FFTWF_LIBRARY}
+    ${CPPUNIT_LIBRARIES}
+    ${QT_QTCORE_LIBRARY}
+    ${QT_QTNETWORK_LIBRARY}
+    ${QT_QTXML_LIBRARY})
+
 
 # ==== Create test binary and add it to the cmake test framework.
 set(lofarTest_src
@@ -84,38 +97,22 @@ set_target_properties(lofarTest PROPERTIES
     COMPILE_FLAGS "${OpenMP_CXX_FLAGS}"
     LINK_FLAGS "${OpenMP_CXX_FLAGS}")
 target_link_libraries(lofarTest
-    pelican-lofar_static
     lofarTestLib
-    ${PELICAN_TESTUTILS_LIBRARY}
-    ${PELICAN_LIBRARY}
-    ${FFTW3_FFTW_LIBRARY}
-    ${FFTW3_FFTWF_LIBRARY}
-    ${CPPUNIT_LIBRARIES}
-    ${QT_QTCORE_LIBRARY}
-    ${QT_QTNETWORK_LIBRARY}
-    ${QT_QTXML_LIBRARY})
+    ${TEST_EXE_LIBS})
 add_test(lofarTest lofarTest)
 
 
 # ==== Create the lofar udp emulator binary.
 add_executable(lofarEmulator src/lofarEmulatorMain.cpp)
 target_link_libraries(lofarEmulator
-    ${PELICAN_LIBRARY}
-    pelican-lofar_static
-    ${QT_QTNETWORK_LIBRARY}
-    ${QT_QTCORE_LIBRARY}
-    ${QT_QTXML_LIBRARY}
+    ${TEST_EXE_LIBS}
     lofarTestLib
 )
 
 # ==== Create the lofar binary which sends simulated data.
 add_executable(lofarEmulatorDataSim src/lofarEmulatorDataSimMain.cpp)
 target_link_libraries(lofarEmulatorDataSim
-    ${PELICAN_LIBRARY}
-    pelican-lofar_static
-    ${QT_QTCORE_LIBRARY}
-    ${QT_QTNETWORK_LIBRARY}
-    ${QT_QTXML_LIBRARY}
+    ${TEST_EXE_LIBS}
     lofarTestLib
 )
 install(TARGETS "lofarEmulatorDataSim" DESTINATION ${BINARY_INSTALL_DIR})
@@ -123,11 +120,7 @@ install(TARGETS "lofarEmulatorDataSim" DESTINATION ${BINARY_INSTALL_DIR})
 # ==== Create the JTest binary which sends simulated data.
 add_executable(JTestEmulator src/JTestEmulatorMain.cpp)
 target_link_libraries(JTestEmulator
-    ${PELICAN_LIBRARY}
-    pelican-lofar_static
-    ${QT_QTCORE_LIBRARY}
-    ${QT_QTNETWORK_LIBRARY}
-    ${QT_QTXML_LIBRARY}
+    ${TEST_EXE_LIBS}
     lofarTestLib
 )
 install(TARGETS "JTestEmulator" DESTINATION ${BINARY_INSTALL_DIR})
@@ -135,11 +128,7 @@ install(TARGETS "JTestEmulator" DESTINATION ${BINARY_INSTALL_DIR})
 # ==== Create the ALFABURST binary which sends simulated data.
 add_executable(ABEmulator src/ABEmulatorMain.cpp)
 target_link_libraries(ABEmulator
-    ${PELICAN_LIBRARY}
-    pelican-lofar_static
-    ${QT_QTCORE_LIBRARY}
-    ${QT_QTNETWORK_LIBRARY}
-    ${QT_QTXML_LIBRARY}
+    ${TEST_EXE_LIBS}
     lofarTestLib
 )
 install(TARGETS "ABEmulator" DESTINATION ${BINARY_INSTALL_DIR})
@@ -152,11 +141,7 @@ set_target_properties(ppf_performance_test PROPERTIES
 )
 
 target_link_libraries(ppf_performance_test
-    pelican-lofar_static
-    ${PELICAN_LIBRARY}
-    ${QT_QTCORE_LIBRARY}
-    ${QT_QTNETWORK_LIBRARY}
-    ${QT_QTXML_LIBRARY}
+    ${TEST_EXE_LIBS}
 )
 
 # ==== Test the channel profile of the PPF channeliser.
@@ -166,11 +151,7 @@ target_link_libraries(ppf_performance_test
 #    LINK_FLAGS "${OpenMP_CXX_FLAGS}"
 #)
 #target_link_libraries(ppf_profile_test
-#    pelican-lofar_static
-#    ${PELICAN_LIBRARY}
-#    ${QT_QTCORE_LIBRARY}
-#    ${QT_QTNETWORK_LIBRARY}
-#    ${QT_QTXML_LIBRARY}
+#   ${TEST_EXE_LIBS}
 #)
 
 # ==== Copy files required for testing to the build directory.

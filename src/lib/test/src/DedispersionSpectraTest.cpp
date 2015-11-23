@@ -37,7 +37,7 @@ void DedispersionSpectraTest::test_dmIndex()
     float dedispersionBinStart = 0.1;
     float dedispersionBinWidth = 0.2;
     float maxDmAmplitude = 1001.1;
-    int dataSize = timebins * dedispersionBins;
+    size_t dataSize = timebins * dedispersionBins;
     DedispersionSpectra spectra;
     spectra.resize( timebins, dedispersionBins, dedispersionBinStart,
                     dedispersionBinWidth );
