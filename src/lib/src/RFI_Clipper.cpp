@@ -57,38 +57,47 @@ RFI_Clipper::RFI_Clipper( const ConfigNode& config )
         _srFactor = config.getAttribute("spectrumRejectionRMS").toFloat();
 
     _maxHistory = config.getOption("History", "maximum", "10" ).toInt();
-    _history.resize(_maxHistory);
-    _historyNewSum.resize(_maxHistory);
-    _historyMean.resize(_maxHistory);
-    _historyRMS.resize(_maxHistory);
+    // Set the capacity of my running average circular buffers
+    _meanBuffer.set_capacity(_maxHistory);
+    _rmsBuffer.set_capacity(_maxHistory);
+    _num = 0; // keep track of position in buffer for practical
+	      // purposes
     _medianFromFile = _bandPass.median();
     _rmsFromFile = _bandPass.rms();
     _zeroDMing = 0;
-    _num = 0; // _num is the number of points in the history
-    _runningMedian = 0; // initialise the running median
-    _runningRMS = 0; // initialise the running median
-    _integratedNewSum = 0;
-    _integratedNewSumSq = 0;
     if( config.getOption("zeroDMing", "active" ) == "true" ) {
       _zeroDMing = 1;
     }
+    _startFrequency = 0.0;
+    _endFrequency = 0.0;
     if( config.getOption("Band", "matching" ) == "true" ) {
         _startFrequency = _bandPass.startFrequency();
         _endFrequency = _bandPass.endFrequency();
     }
+    /*
     else {
         if( _active ) {
-            if( config.getOption("Band", "startFrequency" ) == "" ) {
-                throw(QString("RFI_Clipper: <Band startFrequency=?> not defined"));
+            if( config.getOption("Band", "startFrequency" ) != "" ) {
+                _startFrequency = config.getOption("Band","startFrequency" ).toFloat();
             }
-            _startFrequency = config.getOption("Band","startFrequency" ).toFloat();
 
-            QString efreq = config.getOption("Band", "endFrequency" );
-            if( efreq == "" )
-                throw(QString("RFI_Clipper: <Band endFrequency=?> not defined"));
-            _endFrequency= efreq.toFloat();
+            if( config.getOption("Band", "endFrequency") != "" ) {
+                _endFrequency = config.getOption("Band","endFrequency" ).toFloat();
+            }
+
+            if ((0.0 == _startFrequency) || (0.0 == _endFrequency))
+            {
+                // This is ALFABURST pipeline
+                // calculate _startFrequency from LO frequency and number of channels used
+                getLOFreqFromRedis();
+                //TODO: do this properly, based on number of channels, which spectral
+                //quarter, channel bandwidth, etc.
+                _startFrequency = _LOFreq - (448.0 / 4);
+                _endFrequency = _startFrequency - (448.0 / 8) + 0.109375;
+            }
         }
     }
+    */
 }
 
 /**
@@ -101,29 +110,6 @@ RFI_Clipper::~RFI_Clipper()
   /**
    * @details The following if statement from RFI_Clipper.cpp tests the channels for abnormal intensity spikes.
    * @verbatim
-   if (I[index + c] - medianDelta > margin ) {
-            I[index + c] = 0.0;
-            W[index +c] = 0.0;
-            for(unsigned int pol = 1; pol < nPolarisations; ++pol ) {
-              long index = stokesAll->index(s, nSubbands,
-                                          pol, nPolarisations, t, nChannels );
-              I[index + c] = 0.0;
-              W[index +c] = 0.0;
-            }
-          }
-          else{
-            // Subtract the current model from the data
-            I[index+c] -= bandPass[bin] + _zeroDMing * medianDelta ;
-            // if the condition doesn't hold build up the statistical
-            // description.
-            spectrumSum += I[index+c];
-
-            // Use this for RMS calculation - This is the RMS in the reference frame of the input
-            spectrumSumSq += pow(I[index+c],2);
-            // Scale the data by the RMS
-            I[index+c] /= modelRMS;
-            ++goodChannels;
-          }
 
    * @endverbatim
    *
@@ -135,7 +121,7 @@ RFI_Clipper::~RFI_Clipper()
    *
    */
 
-static inline void clipSample( SpectrumDataSetStokes* stokesAll, float* W, unsigned t ) {
+static inline void clipSample( SpectrumDataSetStokes* stokesAll, float* W, unsigned t, std::vector<float> lastGoodSpectrum ) {
 
     float* I = stokesAll->data();
     unsigned nSubbands = stokesAll->nSubbands();
@@ -150,13 +136,13 @@ static inline void clipSample( SpectrumDataSetStokes* stokesAll, float* W, unsig
                 pol, nPolarisations,
                 t, nChannels );
         for (unsigned c = 0; c < nChannels; ++c) {
-            I[index + c] = 0.0;
-            W[index + c] = 0.0;
+	  //            I[index + c] = 0.0;
+            W[index + c] = 1.0;
+            I[index + c] = lastGoodSpectrum[s*nChannels + c];
         }
       }
     }
 }
-
 
 // RFI clipper to be used with Stokes-I out of Stokes Generator
 //void RFI_Clipper::run(SpectrumDataSetStokes* stokesAll)
@@ -177,6 +163,8 @@ void RFI_Clipper::run( WeightedSpectrumDataSet* weightedStokes )
     unsigned nBins = nChannels * nSubbands;
     unsigned goodSamples = 0;
 
+    if (_lastGoodSpectrum.size() != nBins) _lastGoodSpectrum.resize(nBins);
+
     //float modelRMS = _bandPass.rms();
     // This has all been tested..
     _map.reset( nBins );
@@ -186,300 +174,251 @@ void RFI_Clipper::run( WeightedSpectrumDataSet* weightedStokes )
     // -------------------------------------------------------------
     // Processing next chunk 
     for (unsigned t = 0; t < nSamples; ++t) {
-      float margin = std::fabs(_crFactor * _bandPass.rms()); 
+      //      std::cout << "Next spectrum " << _num << std::endl;
+
       const QVector<float>& bandPass = _bandPass.currentSet();
       // The following is the amount of tolerance to changes in the average value of the spectrum
-      float spectrumRMStolerance = _srFactor * _bandPass.rms()/sqrt(nBins); 
       float spectrumSum = 0.0;
       float spectrumSumSq = 0.0;
-      float spectrumSumAll = 0.0;
-      float spectrumSumSqAll = 0.0;
-      float newSum = 0.0;
-      float goodChannels = 0.0;
-      float modelLevel = _bandPass.median();
-      std::vector<float> copyI;
-      copyI.resize(nBins);
+      //      float goodChannels = 0.0;
+      std::vector<float> goodChannels(8,0.0);
+      // Split the spectrum into 8 bands for the purpose of matching the spectrum to the model
+      unsigned channelsPerBand = nBins / 8;
+      // find the minima of I in each band, and the minima of the model and compare
+      std::vector<float> miniData(8,1e6);
+      std::vector<float> miniModel(8,1e6);
+      std::vector<float> dataMinusModel(8);
+      std::vector<float> bandSigma(8);
+      std::vector<float> bandMean(8,0.0);
+      std::vector<float> bandMeanSquare(8,0.0);
 
-      // create a copy of the data minus the model in order
-      // to compute the median. The median is used as a single number
-      // to characterise the offset of the data and the model.
-#pragma omp parallel for num_threads(6) shared(copyI, bandPass, nSubbands, nPolarisations, t, nChannels)
+      // Find the data minima and model minima in each band
+      // Let us also estimate sigma in each band
       for (unsigned s = 0; s < nSubbands; ++s) {
         long index = stokesAll->index(s, nSubbands,
-                                    0, nPolarisations,
-                                    t, nChannels );
+				      0, nPolarisations,
+				      t, nChannels );
         for (unsigned c = 0; c < nChannels ; ++c) {
           int binLocal = s*nChannels +c; 
-          copyI[binLocal]=I[index + c] - bandPass[binLocal];
-        }
-      }
+	  unsigned band = (int)binLocal / channelsPerBand;
 
-      // Compute the median of the flattened, model subtracted spectrum
-      std::nth_element(copyI.begin(), copyI.begin()+copyI.size()/2, copyI.end());
-      float median = (float)*(copyI.begin()+copyI.size()/2);
+	  //	  std::cout << "----------------" << std::endl;
+	  //	  std:: cout << band << " " << binLocal << " " << I[index+c] << std::endl;
 
-      // Perform first test: look for individual very bright
-      // channels in Stokes-I compared to the model and clip accordingly
-      ////#pragma omp parallel for schedule(dynamic)
-      //#pragma omp parallel for num_threads(4) shared(t, nSubbands, nPolarisations, nChannels, I, W, spectrumSum, spectrumSumSq, goodChannels, bandPass)
-      for (unsigned s = 0; s < nSubbands; ++s) {
-        long index = stokesAll->index(s, nSubbands,
-                                    0, nPolarisations,
-                                    t, nChannels );
-        for (unsigned c = 0; c < nChannels; ++c) {
-          int binLocal = s*nChannels +c; 
-
-          // If (StokesI_of_channel_c -
-          // bandPass_value_for_channel_bin) is greater than the
-          // chosen margin blank that channel, if not add it to the
-          // population of used channels for diagnostic purposes and
-          // monitoring
-          
-          if (fabs(I[index + c] - bandPass[binLocal] - median)> margin ) {
-            // The following is for polarization
-            for(unsigned int pol = 0; pol < nPolarisations; ++pol ) {
-              long index = stokesAll->index(s, nSubbands,
-                                            pol, nPolarisations, t, nChannels );
-              spectrumSumAll += I[index+c];
-              spectrumSumSqAll += (I[index+c]*I[index+c]);
-              I[index + c] = 0.0;
-              W[index +c] = 0.0;
-            }
-          }
-          else{
-            // Subtract the current model from the data 
-            for(unsigned int pol = 0; pol < nPolarisations; ++pol ) {
-              long index = stokesAll->index(s, nSubbands,
-                                            pol, nPolarisations, t, nChannels );
-              spectrumSumAll += I[index+c];
-              spectrumSumSqAll += (I[index+c]*I[index+c]);
-              I[index+c] -= bandPass[binLocal]; //+ _zeroDMing * median ;
-            }
-            //W[index+c] = 1.0;
-            // if the condition doesn't hold build up the statistical
-            // description;
-            //            #pragma omp atomic
-            //NOTE: should probably move spectrumSum and spectrumSumSq
-            //statements below to within the pol loop above
-            spectrumSum += I[index+c];
-            // Use this for spectrum RMS calculation - This is the RMS
-            // in the reference frame of the input
-            //            #pragma omp atomic
-            spectrumSumSq += (I[index+c]*I[index+c]);
-            //            #pragma omp atomic
-            ++goodChannels;
-          }
+	  if (I[index+c] < miniData[band]) miniData[band] = I[index+c];
+	  if (bandPass[binLocal] < miniModel[band]) miniModel[band] = bandPass[binLocal];
+	  bandMean[band] += I[index+c];
+	  bandMeanSquare[band] += (I[index+c]*I[index+c]);
         }
       }
       
-      if (goodChannels != 0)
-      spectrumSum /= goodChannels;
-      
-      // This is the RMS of the model subtracted data, in the
-      // reference frame of the input
-      double spectrumRMS = _bandPass.rms();
-      if (goodChannels != 0)
-        {
-          spectrumRMS = sqrt(spectrumSumSq/goodChannels - std::pow(spectrumSum,2));
-        }
-      //      std::cout << spectrumSumSqAll << " " << spectrumSumAll << " " << nChannels<< std::endl;
-      double spectrumRMSAll = sqrt(spectrumSumSqAll/(nChannels*nSubbands) - std::pow(spectrumSumAll/(nChannels*nSubbands),2));
-      
-      
+      // Now find the distances between data and model and the RMSs in
+      // each band
 
-      // If goodChannels is substantially lower than the total number,
-      // the rms of the spectrum will also be lower, so it needs to be
-      // scaled by a factor sqrt(nBins/goodChannels) THIS IS WRONG
-
-      // Perform second test: Take a look at whether the median of the
-      // spectrum is close to the model. If it isn't, it is likely
-      // that the current spectrum has jumped in level compared to the
-      // model, so something isn't right. If it is, then use the
-      // median value to update the model
-
-      // At this stage modelLevel is the bandPass.median()
-      // spectrumRMStolerance is the estimated varience of
-      // spectrumSum. 
-      
-      // This comparison is based on the values of the incoming data, i.e. before any scaling 
-      //      if (fabs(medianDelta) > spectrumRMStolerance) {
-
-      // Re compute the median of the model subtracted data now that
-      // we know the highest (by definition) values may have been
-      // chopped off
-
-      // But the lowest ALSO!!! ARGH
-      // so here, the new mean is more reliable
-      /*
-      if (goodChannels != nSubbands * nChannels){
-        std::nth_element(copyI.begin(), copyI.begin()+goodChannels/2, copyI.begin()+goodChannels);
-        median = (float)*(copyI.begin()+goodChannels/2);
+      for (unsigned b = 0; b < 8; ++b){
+	dataMinusModel[b] = miniData[b] - miniModel[b];
+	bandSigma[b] = sqrt(bandMeanSquare[b]/channelsPerBand - std::pow(bandMean[b]/channelsPerBand,2));
+	//std::cout << bandSigma[b] << " " << bandMean[b] << " " << bandMeanSquare[b] << std::endl;
       }
-      */
-      median = spectrumSum; // spectrumSum is the mean after removing
-                            // extreme values, so a good starting
-                            // poing.
-      // medianDelta is the level of the incoming data
-      float medianDelta = median + _bandPass.median();
+      // Assume the minimum bandSigma to be the best estimate of this spectrum RMS
+      float spectrumRMS = *std::min_element(bandSigma.begin(), bandSigma.end());
 
+      // Take the median of dataMinusModel to determine the distance from the model
+      std::nth_element(dataMinusModel.begin(), dataMinusModel.begin()+dataMinusModel.size()/2, dataMinusModel.end());
+      float dataModel = (float)*(dataMinusModel.begin()+dataMinusModel.size()/2);
+      //      std::cout << "data minus model " << dataModel << " " << std::endl;
+      // since we have used the minima to determine this distance, we
+      // assume that dataModel is actually ~1.5 sigma away from the
+      // real value
+      //      std::cout << "dataModel " << dataModel << std::endl;
+      // Let us now build up a running average of spectrumRMS values
+      // (_maxHistory of them)
 
-      if (fabs(median) > spectrumRMStolerance || goodChannels < 0.5*nChannels) {
-      //      if (fabs(spectrumSum) > spectrumRMStolerance) {
-        /*if (_badSpectra == 0) {
-          std::cout 
-            << "-------- RFI_Clipper----- Spectrum Average: " << spectrumSum << std::endl
-            << " Median DataLevel: " << medianDelta 
-            << " Median ModelLevel: " << modelLevel << std::endl
-            << " Difference:  " << median 
-            << " Tolerance: " << spectrumRMStolerance  << std::endl
-            << " Good Channels: " << goodChannels 
-            << " History Size: " << _history.size() << std::endl 
-            << " SpectrumRMS: " << spectrumRMS 
-            << " ModelRMS: " <<  _bandPass.rms() << std::endl
-            << " _num:" << _num 
-            << std::endl << std::endl;
-            }*/
+      // if the buffer is not full, compute the new rmsRunAve like this
+      if (!_rmsBuffer.full()) {
 
-        //  Count how many bad spectra in a row. If number exceeds
-        //  history, then reset model to parameters from bandpass file
-        _badSpectra ++; // the line above ensures each thread locks _badSpectra before updating it
-
-        if (_badSpectra == _history.size()){
-          std::cout << "------ RFI_Clipper ----- Accepted a jump in the bandpass model to: " 
-                    << medianDelta << " " << spectrumRMSAll  << std::endl << std::endl;
-          _bandPass.setMedian(medianDelta);
-          //_bandPass.setRMS(_bandPass.rms()); // RMS from file
-          _bandPass.setRMS(spectrumRMSAll); // RMS in incoming reference frame
-          _badSpectra = 0;
-          // reset _num for the history calculations
-          _num = 0 ;
-          _current = 0;
-        }
-
-        // Clip entire spectrum
-        //        std::cout << "Clipping sample" << std::endl;
-        clipSample( stokesAll, W, t );
-/*
-        for (unsigned s = 0; s < nSubbands; ++s) {
-          long index = stokesAll->index(s, nSubbands,
-                                      0, nPolarisations,
-                                      t, nChannels );
-          for (unsigned c = 0; c < nChannels; ++c) {
-            I[index + c] = 0.0;
-            W[index + c] = 0.0;
-            for(unsigned int pol = 1; pol < nPolarisations; ++pol ) {
-              long index = stokesAll->index(s, nSubbands,
-                                          pol, nPolarisations, t, nChannels );
-              I[index + c] = 0.0;
-              W[index +c] = 0.0;
-            }
-          }
-        }
-*/
-
+      _rmsBuffer.push_back(spectrumRMS);
+      _rmsRunAve = std::accumulate(_rmsBuffer.begin(), _rmsBuffer.end(), 0.0)/_rmsBuffer.size();
+      
       }
       else {
-        // First take care of zero DM-ing, i.e. subtract the mean from
-        // the data. Problem is, the data have been scaled by the
-        // modelRMS, so spectrumSum needs to be scaled too, and a new
-        // sum is computed
-//#pragma omp parallel for num_threads(4)
-        for (unsigned s = 0; s < nSubbands; ++s) {
-          for(unsigned int pol = 0; pol < nPolarisations; ++pol ) {
-            long index = stokesAll->index(s, nSubbands,
-                                          pol, nPolarisations, t, nChannels );
-            for (unsigned c = 0; c < nChannels; ++c) {
-              // if the channel hasn't been clipped already, remove the spectrum average
-              I[index+c] -= (float)_zeroDMing * W[index+c] * spectrumSum;
-              I[index+c] /= spectrumRMS;//spectrumRMS;//modelRMS;
-              //#pragma omp atomic
-              newSum += I[index+c];
-            }
-          }
-        }
-        // newSum contains the scaled and integrated spectrum, as a
-        // diagnostic Yey! This spectrum has made it out of the
-        // clipper so consider it in the noise statistics
-        _badSpectra = 0;
-        ++goodSamples;
-        blobSum += spectrumSum;
-        blobRMS += spectrumRMS;
-        // update historical data to the median value of the
-        // current spectrum, since it has passed all the tests
-        // and is good for comparison to the next spectrum
-
-        // We will compute the running medianDelta, to keep track of
-        // where the incoming data level is
-
-        // We will also store a history of the integrated value of the
-        // spectrum in order to compute its RMS, which is useful for
-        // dedispersion.
-
-        // medianDelta is in the reference frame of the incoming data so ok!
-        // Store the median value
-        _history[_current] = medianDelta;
-        // Store the RMS value
-        _historyRMS[_current] = spectrumRMS;
-        _historyNewSum[_current] = newSum;
-        // update the history index (ring buffer) 
-        _current = ++_current%_maxHistory;
-        
-        // if the buffer isn't full, update the average properly
-        if (_num != _maxHistory ) {
-          //          _runningMedian = (_runningMedian * (float) _num + median)/(float) (_num+1);
-          //          std::cout << _num << std::endl;
-          clipSample( stokesAll, W, t );
-          _runningMedian = (_runningMedian * (float) _num + medianDelta)/(float) (_num+1);
-          _runningRMS = (_runningRMS * (float) _num + spectrumRMS)/(float) (_num+1);
-          // store the integral of _historyNewSum and _historyNewSum^2 from the buffer
-          _integratedNewSum += newSum;
-          _integratedNewSumSq += pow(newSum,2);
-          ++_num;
-        }
-        // Now the whole buffer is full. So I want to add the new
-        // value and remove the first value from the running median
-        else {
-            _runningMedian = (_runningMedian * (float) _num - _history[_current] + medianDelta) / (float) _num;
-            _runningRMS = (_runningRMS * (float) _num - _historyRMS[_current] + spectrumRMS) / (float) _num;
-            // store the integral of _historyNewSum and _historyNewSum^2 from the buffer
-            _integratedNewSum += newSum - _historyNewSum[_current];
-            _integratedNewSumSq += pow(newSum,2) - pow(_historyNewSum[_current],2);
-        }
-        //        Update the model to the current running median and RMS
-        _bandPass.setMedian(_runningMedian);
-        _bandPass.setRMS(_runningRMS);
+	//just update the running average with the new value, and take the oldest off the end
+	//	std::cout << "History buffer now full " << _num << std::endl;
+	_rmsRunAve -= (_rmsBuffer.front()/_rmsBuffer.size());
+	_rmsBuffer.push_back(spectrumRMS);
+	_rmsRunAve += (_rmsBuffer.back()/_rmsBuffer.capacity());
       }
-    }
-    
-    // Now the chunk has finished. All that remains is to pass on the stats of the chunk
-    // 1. update the model RMS first
-    // This is now done above for every time slice, so not important
-    if (goodSamples !=0){
-        blobRMS /= goodSamples;
-        // _bandPass.setRMS(blobRMS);
-    }
-    // 2. Use the history of NewSum to compute a running blobSum and
-    // blobRMS; blobSum is the value of the running mean of newSum, in
-    // the output reference frame
-    // Re-use the variable blobRMS to send out the integrated RMS value
-    blobSum = _integratedNewSum / _num;
-    blobRMS = sqrt( _integratedNewSumSq / _num - pow(blobSum,2));
+      
 
-    // The dedisperser sums nChannels * nSubbands channels. The noise
-    // rms of the sum is very close to sqrt(N) if the noise in each
-    // spectrum is 1. The following only works if the data have been
-    // scaled to RMS=1
-    if (_zeroDMing == 1){
-        blobRMS = sqrt(nChannels * nSubbands);
+      // and update the model
+      dataModel = dataModel + 1.5 * _rmsRunAve;
+      // now use this rms to define a margin of tolerance for bright
+      // channels
+      float margin = _crFactor * _rmsRunAve;
+      
+      // Now loop around all the channels: if you find a channel where
+      // (I - bandpass) - datamodel > margin, then replace it 
+      for (unsigned s = 0; s < nSubbands; ++s) {
+	long index = stokesAll->index(s, nSubbands,
+				      0, nPolarisations,
+				      t, nChannels );
+	for (unsigned c = 0; c < nChannels; ++c) {
+	  int binLocal = s*nChannels +c;
+	  if (I[index+c] - dataModel - bandPass[binLocal] > margin) {
+	    // clipping this channel to values from the last good
+	    // spectrum 
+
+	    //The following is for polarization
+	    for(unsigned int pol = 0; pol < nPolarisations; ++pol ) {
+	      long index = stokesAll->index(s, nSubbands,
+					    pol, nPolarisations, t, nChannels );
+	      I[index + c] = _lastGoodSpectrum[binLocal];
+	      W[index +c] = 1.0;
+	    }
+	  }
+	  else{
+	    unsigned band = (int)binLocal / channelsPerBand;
+	    ++goodChannels[band];
+	    spectrumSum += I[index+c];
+	  }
+	}
+      }
+      // So now we have the mean of the incoming data, in a reliable
+      // form after channel clipping
+      unsigned totalGoodChannels=std::accumulate(goodChannels.begin(), goodChannels.end(), 0);
+      spectrumSum /= totalGoodChannels;
+
+      // Check if more than 20% of of the channels in each band were
+      // bad. If so in more than half of the bands, set a flag to
+      // true.
+      unsigned badBands = 0; 
+      for (unsigned b = 0; b < 8; ++b){
+	if (goodChannels[b] < 0.8 * channelsPerBand) {
+	  if (++badBands == 4 ) break;
+	}
+      }
+
+      //      std::cout << "Current model, mean and rms: " << _bandPass.mean() << " " << _bandPass.rms() << std::endl;
+      //      std::cout << "Current data, mean and rms: " << spectrumSum << " " << spectrumRMS << std::endl;
+      //      std::cout << "new dataModel: " << dataModel << std::endl;
+
+      //      std::cout << "good channels " << goodChannels << std::endl;
+      
+      // Let us now build up the running average of spectrumSum values
+      // (_maxHistory of them)
+      // if the buffer is not full, compute the new meanRunAve like this
+
+
+      if (!_meanBuffer.full()) {
+	_meanBuffer.push_back(spectrumSum);
+	_meanRunAve = std::accumulate(_meanBuffer.begin(), _meanBuffer.end(), 0.0)/_meanBuffer.size();
+      }
+      else {
+	//   just update the running average with the new value, and take the oldest off the end
+	//	std::cout << "History buffer now full " << _num << std::endl;
+	_meanRunAve -= _meanBuffer.front()/_meanBuffer.size();
+      	_meanBuffer.push_back(spectrumSum);
+      	_meanRunAve += _meanBuffer.back()/_meanBuffer.size();
+      }
+
+      // Now we can check if this spectrum has an abnormally high mean
+      // compared to the running average
+      
+      // Let us define the tolerance first, and remember, we are
+      // summing across nBins, hence sqrt(nBins), strictly only valid
+      // for Gaussian stats
+      float spectrumRMStolerance = _srFactor * _bandPass.rms()/sqrt(nBins); 
+
+      //Now check, if spectrumSum - model > tolerance, declare this
+      //time sample useless, replace its data and take care of the
+      //running averages, also cut the first 10 spectra, also cut
+      //spectra where badBands == 4, see above
+
+      if (spectrumSum - _meanRunAve > spectrumRMStolerance || _meanBuffer.size() < 10 || badBands == 4) {
+
+	// we need to remove this entire spectrum
+	clipSample( stokesAll, W, t, _lastGoodSpectrum );
+	// now remove the last samples from the running averages
+	//	_meanBuffer.pop_back();
+	//	_rmsBuffer.pop_back();
+      }
+      // else keep a copy of the original spectrum, as it is good!
+      else {
+	for (unsigned s = 0; s < nSubbands; ++s) {
+	  long index = stokesAll->index(s, nSubbands,
+					0, nPolarisations,
+					t, nChannels );
+	  for (unsigned c = 0; c < nChannels; ++c) {
+	    int binLocal = s*nChannels +c;
+	    _lastGoodSpectrum[binLocal] = I[index+c];
+	  }
+	}
+      }
+      
+      
+      // Now we have a valid spectrum, either the original or
+      // replaced; this spectrum is good, so let us do the final
+      // bits of post processing reset the spectrumSum, and SumSq,
+      // and flatten subtract the bandpass from the data.
+      // 
+      spectrumSum = 0.0; // SumSq is still zero
+      for (unsigned s = 0; s < nSubbands; ++s) {
+	long index = stokesAll->index(s, nSubbands,
+				      0, nPolarisations,
+				      t, nChannels );
+	for (unsigned c = 0; c < nChannels; ++c) {
+	  int binLocal = s*nChannels +c;
+	  //std::cout << "here1 " << bandPass[binLocal] << " " << dataModel << std::endl;
+	  // flat bandpass with near zero mean
+	  I[index+c] -= (bandPass[binLocal] + dataModel); 
+	  //std::cout << "here2" << std::endl;
+	  spectrumSum += I[index+c];
+	  //std::cout << "here3" << std::endl;
+	    spectrumSumSq += I[index+c]*I[index+c];
+	}
+      }
+
+      // and normalize: bring to zero mean if zerodm is specified or
+      // use the running mean if not
+      spectrumSum /= nBins; // New meaning of these two variables
+      spectrumRMS = sqrt(spectrumSumSq/nBins - std::pow(spectrumSum,2));
+      //std::cout << "Values used for normalization" << std::endl;
+      //std::cout << spectrumSum << " " << spectrumRMS << std::endl;
+
+      // Avoid nastiness in those first 10 spectra by avoiding divisions by zero
+      if (spectrumRMS == 0.0) spectrumRMS = 1.0;
+      
+      
+      for (unsigned s = 0; s < nSubbands; ++s) {
+	long index = stokesAll->index(s, nSubbands,
+				      0, nPolarisations,
+				      t, nChannels );
+	for (unsigned c = 0; c < nChannels; ++c) {
+	  I[index+c] -= _zeroDMing * spectrumSum;
+	  I[index+c] /= spectrumRMS;
+	}
+      }
+      // The bandpass is flat and the spectrum clean and normalized,
+      // so move to the next spectrum
+      // write out some stats:
+      if (_num == 0) {
+	std::cout << "RFI report ###############################" << std::endl;
+	std::cout << "Running average of mean is at: " << _meanRunAve << std::endl;
+	std::cout << "Running average of rms is at: " << _rmsRunAve << std::endl;
+	std::cout << "###############################" << std::endl;
+	std::cout << "#" << std::endl;
+	std::cout << "#" << std::endl;
+      }    
+      // and update the model
+      _bandPass.setMean(_meanRunAve);
+      _bandPass.setRMS(_rmsRunAve);
+      ++_num;
+      _num = _num % _maxHistory;
+      
     }
-    if (goodSamples !=0){
-        weightedStokes->setRMS( blobRMS ); 
-        weightedStokes->setMean( blobSum);
-    }
-    else {
-        weightedStokes->setRMS( 1e+6 ); 
-        weightedStokes->setMean( 0.0);
-    }      
+    // set the stats of the chunk
+    weightedStokes->setRMS( _rmsRunAve );
+    weightedStokes->setMean( _meanRunAve);
   }
 }
 } // namespace ampp

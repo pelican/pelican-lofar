@@ -4,8 +4,11 @@
 
 #include "pelican/modules/AbstractModule.h"
 #include <vector>
+#include <numeric>
+#include <functional>
+#include <vector>
 #include "BandPass.h"
-
+#include <boost/circular_buffer.hpp>
 /**
  * @file RFI_Clipper.h
  */
@@ -30,6 +33,7 @@ class RFI_Clipper : public AbstractModule
         RFI_Clipper( const ConfigNode& config );
         ~RFI_Clipper();
 
+        void getLOFreqFromRedis();
         void run( WeightedSpectrumDataSet* weightedStokes );
         const BandPass& bandPass() const { return _bandPass; }; // return the BandPass Filter in use
 
@@ -38,22 +42,21 @@ class RFI_Clipper : public AbstractModule
         //        std::vector<float> _copyI;
         BandPass  _bandPass;
         bool _active;
+        float _LOFreq;
         float _startFrequency;
         float _endFrequency;
         float _medianFromFile;
         float _rmsFromFile;
         float _crFactor, _srFactor; // scale factor for rejection (multiples of RMS)
-        QVector<float> _history, _historyMean, _historyRMS, _historyNewSum;
+	boost::circular_buffer<float> _meanBuffer, _rmsBuffer;
+	float _rmsRunAve, _meanRunAve;
         int _current; // history pointer
         int _badSpectra;
         int _num, _numChunks;// number of values in history
         int _maxHistory; // max size of history buffer
 // flag for removing median from each spectrum, equivalent to the zero-DMing technique
         int _zeroDMing; 
-        float _runningMedian; // the running average of the median
-        float _runningRMS; // the running average of the median
-        float _integratedNewSum; // the integrated value of the sum of the spectrum
-        float _integratedNewSumSq; // the integrated value of the sum of the spectrum
+        std::vector<float> _lastGoodSpectrum;
 };
 
 PELICAN_DECLARE_MODULE(RFI_Clipper)
