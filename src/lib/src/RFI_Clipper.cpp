@@ -226,11 +226,16 @@ void RFI_Clipper::run( WeightedSpectrumDataSet* weightedStokes )
       // Take the median of dataMinusModel to determine the distance from the model
       std::nth_element(dataMinusModel.begin(), dataMinusModel.begin()+dataMinusModel.size()/2, dataMinusModel.end());
       float dataModel = (float)*(dataMinusModel.begin()+dataMinusModel.size()/2);
-      //      std::cout << "data minus model " << dataModel << " " << std::endl;
-      // since we have used the minima to determine this distance, we
-      // assume that dataModel is actually ~1.5 sigma away from the
-      // real value
+      //      std::cout << "data minus model " << dataModel << " " <<
+      // std::endl; since we have used the minima to determine this
+      // distance, we assume that dataModel is actually k/sqrt(k)
+      // sigma away from the real value, where k is the number of the
+      // degrees of freedom of the chi-squared distribution of the
+      // incoming data. For no integration, k will be 4 (2 powers per
+      // poln)
+
       //      std::cout << "dataModel " << dataModel << std::endl;
+
       // Let us now build up a running average of spectrumRMS values
       // (_maxHistory of them)
 
@@ -251,7 +256,10 @@ void RFI_Clipper::run( WeightedSpectrumDataSet* weightedStokes )
       
 
       // and update the model
-      dataModel = dataModel + 1.5 * _rmsRunAve;
+      float k = 4;
+      float meanMinusMinimum = k / sqrt(2.0*k); 
+	
+      dataModel = dataModel + meanMinusMinimum * _rmsRunAve;
       // now use this rms to define a margin of tolerance for bright
       // channels
       float margin = _crFactor * _rmsRunAve;
