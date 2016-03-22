@@ -124,7 +124,7 @@ RFI_Clipper::~RFI_Clipper()
    *
    */
 
-static inline void clipSample( SpectrumDataSetStokes* stokesAll, float* W, unsigned t, std::vector<float> lastGoodSpectrum ) {
+  static inline void clipSample( SpectrumDataSetStokes* stokesAll, float* W, unsigned t, boost::circular_buffer<float> lastGoodSpectrum ) {
 
     float* I = stokesAll->data();
     unsigned nSubbands = stokesAll->nSubbands();
@@ -416,35 +416,37 @@ void RFI_Clipper::run( WeightedSpectrumDataSet* weightedStokes )
 	++_badSpectra;
 
 	// now remove the last samples from the running average
-	// buffers and replace them with the values of the
-	// lastgoodspectrum
+	// buffers and replace them with the last good values.
+	// 
 	_meanBuffer.pop_back();	
 	_rmsBuffer.pop_back();
-	_meanBuffer.push_back(_lastGoodMean);
-	_rmsBuffer.push_back(_lastGoodRMS);
+	//	_meanBuffer.push_back(_lastGoodMean);
+	//	_rmsBuffer.push_back(_lastGoodRMS);
+	_meanBuffer.push_back(_meanBuffer.back());
+	_rmsBuffer.push_back(_rmsBuffer.back());
       }
       // else keep a copy of the original spectrum, as it is good, but
       // clip everything down to 1 sigma
       else {
 	spectrumSum = 0.0; // SumSq is still zero
-	for (unsigned s = 0; s < nSubbands; ++s) {
-	  long index = stokesAll->index(s, nSubbands,
-					0, nPolarisations,
-					t, nChannels );
-	  for (unsigned c = 0; c < nChannels; ++c) {
-	    int binLocal = s*nChannels +c;
-	    if (I[index+c] - dataModel - bandPass[binLocal] 
-		< 3.0 * _rmsRunAve) {
-	      _lastGoodSpectrum[binLocal] = I[index+c];	    
+	if (!_lastGoodSpectrum.full())
+	  {
+	    for (unsigned s = 0; s < nSubbands; ++s) {
+	      long index = stokesAll->index(s, nSubbands,
+					    0, nPolarisations,
+					    t, nChannels );
+	      for (unsigned c = 0; c < nChannels; ++c) {
+		int binLocal = s*nChannels +c;
+		_lastGoodSpectrum[binLocal] = I[index+c];	    
+		spectrumSum += _lastGoodSpectrum[binLocal];
+		spectrumSumSq += _lastGoodSpectrum[binLocal] * 
+		  _lastGoodSpectrum[binLocal];
+	      }
 	    }
-	    spectrumSum += _lastGoodSpectrum[binLocal];
-	    spectrumSumSq += _lastGoodSpectrum[binLocal] * 
-	      _lastGoodSpectrum[binLocal];
+	    // and keep the mean and rms values as computed
+	    _lastGoodMean = spectrumSum / nBins;
+	    _lastGoodRMS = sqrt(spectrumSumSq/nBins - std::pow(_lastGoodMean,2));
 	  }
-	}
-	// and keep the mean and rms values as computed
-	_lastGoodMean = spectrumSum / nBins;
-	_lastGoodRMS = sqrt(spectrumSumSq/nBins - std::pow(_lastGoodMean,2));
       }
       
       
@@ -453,7 +455,8 @@ void RFI_Clipper::run( WeightedSpectrumDataSet* weightedStokes )
       // bits of post processing reset the spectrumSum, and SumSq,
       // and flatten subtract the bandpass from the data.
       // 
-      spectrumSum = 0.0; // SumSq is still zero
+      spectrumSum = 0.0;
+      spectrumSumSq = 0.0;
       for (unsigned s = 0; s < nSubbands; ++s) {
 	long index = stokesAll->index(s, nSubbands,
 				      0, nPolarisations,
@@ -487,7 +490,14 @@ void RFI_Clipper::run( WeightedSpectrumDataSet* weightedStokes )
 				      0, nPolarisations,
 				      t, nChannels );
 	for (unsigned c = 0; c < nChannels; ++c) {
-	  I[index+c] -= _zeroDMing * spectrumSum;
+	  if (_zeroDMing == 1)
+	    {
+	      I[index+c] -= _zeroDMing * spectrumSum;
+	    }
+	  else
+	    {
+	      I[index+c] -= _meanRunAve;
+	    }
 	  // it may be better to normalize by the running average RMS,
 	  // given this is a sensitive operation. For example, an
 	  // artificially low rms may scale things up
