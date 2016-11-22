@@ -142,7 +142,8 @@ RFI_Clipper::~RFI_Clipper()
 	  //            I[index + c] = 0.0;
 	  W[index + c] = 1.0;
           //  W[index + c] = 0.0;
-	  I[index + c] = lastGoodSpectrum[s*nChannels + c];
+	  I[index + c] = -0.2;
+	  //	  I[index + c] = lastGoodSpectrum[s*nChannels + c];
         }
       }
     }
@@ -191,6 +192,7 @@ void RFI_Clipper::run( WeightedSpectrumDataSet* weightedStokes )
 
       const QVector<float>& bandPass = _bandPass.currentSet();
       float spectrumSum = 0.0;
+      bool goodSpectrum = true;
       float spectrumSumSq = 0.0;
       // Split the spectrum into 8 bands for the purpose of matching
       // the spectrum to the model
@@ -300,7 +302,8 @@ void RFI_Clipper::run( WeightedSpectrumDataSet* weightedStokes )
 	// use the mean running average as a model of the mean of the
 	// data; remember that the running average is updated with a
 	// mean after channel clipping, below.
-	dataModel = _meanRunAve;
+	//	dataModel = _meanRunAve;
+	dataModel = 0.0;
       }
       
       // now use this rms to define a margin of tolerance for bright
@@ -413,11 +416,13 @@ void RFI_Clipper::run( WeightedSpectrumDataSet* weightedStokes )
 	// clip the sample, but continue to build the stats; this
 	// helps the stats converge
 	clipSample( stokesAll, W, t, _lastGoodSpectrum );
+	goodSpectrum = false;
       }
       else if (spectrumSum - _meanRunAve > spectrumRMStolerance || badBands >= 4) {
 
 	// we need to remove this entire spectrum
 	clipSample( stokesAll, W, t, _lastGoodSpectrum );
+	goodSpectrum = false;
 	// keep a record of bad spectra
 	++_badSpectra;
 
@@ -499,28 +504,29 @@ void RFI_Clipper::run( WeightedSpectrumDataSet* weightedStokes )
       // by zero
       if (spectrumRMS == 0.0) spectrumRMS = 1.0;
       
-      
-      for (unsigned s = 0; s < nSubbands; ++s) {
-	long index = stokesAll->index(s, nSubbands,
-				      0, nPolarisations,
-				      t, nChannels );
-	for (unsigned c = 0; c < nChannels; ++c) {
-	  if (_zeroDMing == 1)
-	    {
-	      I[index+c] -= _zeroDMing * spectrumSum;
-	    }
-	  else
-	    {
-	      I[index+c] -= _meanRunAve;
-	    }
-	  // it may be better to normalize by the running average RMS,
-	  // given this is a sensitive operation. For example, an
-	  // artificially low rms may scale things up
-	  I[index+c] /= spectrumRMS;
-	  //	  I[index+c] /= _rmsRunAve;
-	  // make sure this division is not introducing signals that
-	  // you would have clipped
-	  if (I[index+c] > _crFactor) I[index+c] = 0.0; 
+      if (goodSpectrum){
+	for (unsigned s = 0; s < nSubbands; ++s) {
+	  long index = stokesAll->index(s, nSubbands,
+					0, nPolarisations,
+					t, nChannels );
+	  for (unsigned c = 0; c < nChannels; ++c) {
+	    if (_zeroDMing == 1)
+	      {
+		I[index+c] -= _zeroDMing * spectrumSum;
+	      }
+	    else
+	      {
+		I[index+c] -= _meanRunAve;
+	      }
+	    // it may be better to normalize by the running average RMS,
+	    // given this is a sensitive operation. For example, an
+	    // artificially low rms may scale things up
+	    I[index+c] /= spectrumRMS;
+	    //	  I[index+c] /= _rmsRunAve;
+	    // make sure this division is not introducing signals that
+	    // you would have clipped
+	    if (I[index+c] > _crFactor) I[index+c] = 0.0; 
+	  }
 	}
       }
       // The bandpass is flat and the spectrum clean and normalized,
