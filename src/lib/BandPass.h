@@ -42,6 +42,7 @@ class BandPass : public DataBlob
 
         void setData(const BinMap&,const QVector<float>& params );
         void setRMS(float);
+        void setMean(float);
 
         /// Set a new median and rescale the polynomial appropriately. Does not rebin the hash
         void setMedian(float);
@@ -67,6 +68,9 @@ class BandPass : public DataBlob
         };
         /// Return the median for the current bin mapping
         inline float median() const { return _median[_currentMapId]; }
+
+        /// Return the mean for the current bin mapping
+        inline float mean() const { return _mean[_currentMapId]; }
 
         /// Return the median for the primary bin mapping
         inline float primaryMedian() const { return _median[_primaryMapId]; }

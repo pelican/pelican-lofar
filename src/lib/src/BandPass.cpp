@@ -60,6 +60,19 @@ void BandPass::setMedian(float median) {
     }
 }
 
+void BandPass::setMean(float mean) {
+    float delta = mean - _mean[_currentMapId];
+    if( std::fabs(delta) > 0.0f ) {
+        // set the new median and rescale the polynomial
+        float scale = _currentMap.width()/_primaryMap.width();
+        _params[0] += delta/scale;
+        _mean[_currentMapId] = mean;
+        _mean[_primaryMapId] = mean / scale;
+        _dataSets.clear();
+        _buildData(_currentMap, scale, delta);
+    }
+}
+
 void BandPass::resetMap()
 {
     reBin(_primaryMap);
