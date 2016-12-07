@@ -49,14 +49,19 @@ class RFI_Clipper : public AbstractModule
         float _rmsFromFile;
         float _crFactor, _srFactor; // scale factor for rejection (multiples of RMS)
 	boost::circular_buffer<float> _meanBuffer, _rmsBuffer;
+	float _lastGoodMean, _lastGoodRMS;
 	float _rmsRunAve, _meanRunAve;
+	float _meanOverRMS;
+	float _fractionBadChannels;
         int _current; // history pointer
         int _badSpectra;
         int _num, _numChunks;// number of values in history
         int _maxHistory; // max size of history buffer
 // flag for removing median from each spectrum, equivalent to the zero-DMing technique
         int _zeroDMing; 
-        std::vector<float> _lastGoodSpectrum;
+	int _useMeanOverRMS;
+	int _remainingZeros;
+	std::vector<float> _lastGoodSpectrum;
 };
 
 PELICAN_DECLARE_MODULE(RFI_Clipper)
