@@ -62,6 +62,8 @@ class RFI_Clipper : public AbstractModule
 	int _useMeanOverRMS;
 	int _remainingZeros;
 	std::vector<float> _lastGoodSpectrum;
+	std::vector<float> _dataBandPass;
+	float _dataBandPassLevel;
 };
 
 PELICAN_DECLARE_MODULE(RFI_Clipper)

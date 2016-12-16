@@ -9,6 +9,7 @@
 #include "pelican/utility/ConfigNode.h"
 #include "pelican/utility/pelicanTimer.h"
 #include "omp.h"
+#include <fstream>
 #include <boost/random/mersenne_twister.hpp>
 #include <boost/random/normal_distribution.hpp>
 #include <boost/random/variate_generator.hpp>
@@ -171,10 +172,13 @@ void RFI_Clipper::run( WeightedSpectrumDataSet* weightedStokes )
     float meanMinusMinimum = k / sqrt(2.0*k); 
     float spectrumRMS;
     float dataModel;
+    // Introduce another bandpass global vector, call it _dataBandPass
+
 
     if (_lastGoodSpectrum.size() != nBins) 
       {
 	_lastGoodSpectrum.resize(nBins,0.0);
+	_dataBandPass.resize(nBins,0.0);
 	_remainingZeros = nBins;
 	std::cout << "RFI_Clipper: resizing _lastGoodSpectrum" << std::endl;
       }
@@ -210,6 +214,7 @@ void RFI_Clipper::run( WeightedSpectrumDataSet* weightedStokes )
       // Find the data minima and model minima in each band
       // Let us also estimate sigma in each band
       
+      // This is the training stage
       // Try this over an adapting stage, lasting as long as the running average buffers
       if (!_rmsBuffer.full()){
 	for (unsigned s = 0; s < nSubbands; ++s) {
@@ -235,11 +240,25 @@ void RFI_Clipper::run( WeightedSpectrumDataSet* weightedStokes )
 	// each band
 	
 	for (unsigned b = 0; b < 8; ++b){
+	  bandMean[b] /= channelsPerBand;
 	  dataMinusModel[b] = miniData[b] - miniModel[b];
-	  bandSigma[b] = sqrt(bandMeanSquare[b]/channelsPerBand - std::pow(bandMean[b]/channelsPerBand,2));
+	  bandSigma[b] = sqrt(bandMeanSquare[b]/channelsPerBand - std::pow(bandMean[b],2));
 	  //std::cout << bandSigma[b] << " " << bandMean[b] << " " <<
 	  //bandMeanSquare[b] << std::endl;
 	}
+
+	// Recompute _dataBandPass as a sequence of flat segments,
+	// based on the average total power per band, also averaged
+	// over the training samples
+	for (unsigned s = 0; s < nSubbands; ++s) {
+	  for (unsigned c = 0; c < nChannels ; ++c) {
+	    int binLocal = s*nChannels +c; 
+	    unsigned band = (int)binLocal / channelsPerBand;
+	    _dataBandPass[binLocal] = (_dataBandPass[binLocal] * _rmsBuffer.size() 
+				       + bandMean[band])/(_rmsBuffer.size()+1);
+	  }
+	}
+
 	// Assume the minimum bandSigma to be the best estimate of this
 	// spectrum RMS
 	spectrumRMS = *std::min_element(bandSigma.begin(), bandSigma.end());
@@ -319,6 +338,7 @@ void RFI_Clipper::run( WeightedSpectrumDataSet* weightedStokes )
 	for (unsigned c = 0; c < nChannels; ++c) {
 	  int binLocal = s*nChannels +c;
 	  if (I[index+c] - dataModel - bandPass[binLocal] > margin) {
+	    //	  if (I[index+c] - dataModel - _dataBandPass[binLocal] > margin) {
 	    // clipping this channel to values from the last good
 	    // spectrum 
 	    /*std::cout << "clipping channel " << I[index+c]
@@ -413,6 +433,7 @@ void RFI_Clipper::run( WeightedSpectrumDataSet* weightedStokes )
       //spectra where badBands >= 4, see above
 
       if (_meanBuffer.size() < 1000) {
+	//      if (!_meanBuffer.full) {
 	// clip the sample, but continue to build the stats; this
 	// helps the stats converge
 	clipSample( stokesAll, W, t, _lastGoodSpectrum );
@@ -437,8 +458,58 @@ void RFI_Clipper::run( WeightedSpectrumDataSet* weightedStokes )
 	_rmsBuffer.push_back(_rmsBuffer.back());
       }
       // else keep a copy of the original spectrum, as it is good
-
+      // if you are here, it means the running buffers are full
       else {
+	// use the first _maxHistory good spectra to obtain a good bandpass
+	if (_current < _maxHistory)
+	  {
+	    float dataBandPassMean;
+	    float offset;
+	    ++_current;
+	    for (unsigned s = 0; s < nSubbands; ++s) {
+	      long index = stokesAll->index(s, nSubbands,
+					    0, nPolarisations,
+					    t, nChannels );
+	      for (unsigned c = 0; c < nChannels; ++c) {
+		int binLocal = s*nChannels +c;
+		_dataBandPass[binLocal] = (_dataBandPass[binLocal] * (_current - 1) 
+					   + I[index+c]) / _current;
+		dataBandPassMean += _dataBandPass[binLocal];
+	      }
+	    }
+
+	    // Now place the band pass at the right level,
+	    // i.e. subtract its mean and add the running average of
+	    // the data
+	    offset = _meanRunAve - dataBandPassMean/nBins;
+	    transform(_dataBandPass.begin(), _dataBandPass.end(), _dataBandPass.begin(),
+		      bind2nd(std::plus<float>(), offset));
+	    
+	    // on the last iteration, write out the bandpass and keep the mean
+	    if (_current == _maxHistory - 1)
+	      {
+		// Copy the level of the data bandpass into a global
+		_dataBandPassLevel = _meanRunAve;;
+		// Write out the bandpass to a file
+		std::stringstream BandPassOutputName;
+		BandPassOutputName << "bandpass_" << nSubbands << ".dat";;
+		std::ofstream output_file(BandPassOutputName.str().c_str());
+		std::ostream_iterator<float> output_iterator(output_file, "\n");
+		std::copy(_dataBandPass.begin(), _dataBandPass.end(), output_iterator);
+	      }
+	  }
+	else
+	  {
+	    float offset;
+	    // Now place the band pass at the right level,
+	    // i.e. subtract its mean and add the running average of
+	    // the data
+	    offset = _meanRunAve - _dataBandPassLevel;;
+	    transform(_dataBandPass.begin(), _dataBandPass.end(), _dataBandPass.begin(),
+		      bind2nd(std::plus<float>(), offset));
+	  }
+	// At this stage I have a bandpass from the data: TEST
+
 	spectrumSum = 0.0;
 	spectrumSumSq = 0.0;
 	//	if (!_lastGoodSpectrum.full())
@@ -486,6 +557,7 @@ void RFI_Clipper::run( WeightedSpectrumDataSet* weightedStokes )
 	  //std::cout << "here1 " << bandPass[binLocal] << " " << dataModel << std::endl;
 	  // flat bandpass with near zero mean
 	  I[index+c] -= (bandPass[binLocal] + dataModel); 
+	  //	  I[index+c] -= (_dataBandPass[binLocal] + dataModel); 
 	  //std::cout << "here2" << std::endl;
 	  spectrumSum += I[index+c];
 	  //std::cout << "here3" << std::endl;
